@@ -59,7 +59,7 @@ File Converter Pro is a **free, fully offline Windows desktop application** that
 
 It is built with Python and PySide6 and designed to feel like a real product: animated startup, system-aware dark/light theme, statistics dashboard, gamified achievements, multi-language support.
 
-Most importantly, RAM consumption matters, especially as prices continue to rise. My app is lightweight, using around 250 MB in the executable version and about 125 MB when run from source.
+Most importantly, RAM consumption matters, especially as prices continue to rise. My app is lightweight, using around 250 MB in the executable version and around 125 MB when run from source.
 
 Core philosophy: **ship nothing until it runs perfectly on a clean machine, with zero preinstalled dependencies.**
 
@@ -243,7 +243,7 @@ All image conversions use Pillow at maximum quality with EXIF metadata preserved
 | MKV | MP4 |
 | MOV | MP4 |
 
-All audio and video conversions are powered by a bundled `ffmpeg` binary located automatically at runtime, with quality presets per format.
+All audio and video conversions are powered by a bundled `ffmpeg` binary located automatically at runtime, with quality presets per format. (you have to install it yourself)
 
 ---
 
