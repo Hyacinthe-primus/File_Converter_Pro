@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 
-  <!-- ── Identity ─────────────────────────────────────────────────────────── -->
-  <!-- Uniquely identifies this assembly to Windows.                           -->
-  <!-- version must be kept in sync with the PyInstaller build number.        -->
   <assemblyIdentity
     type="win32"
     name="FileConverterPro"
@@ -11,12 +8,9 @@
     processorArchitecture="amd64"
   />
 
-  <!-- Application description shown in Task Manager and Event Viewer.        -->
   <description>File Converter Pro - Professional File Converter</description>
 
-  <!-- ── Dependencies ─────────────────────────────────────────────────────── -->
-  <!-- Common Controls v6: required for modern Windows visual styles (XP+).   -->
-  <!-- Without this, buttons and controls fall back to the classic Win95 look.-->
+  <!-- Common Controls v6: modern Windows visual styles -->
   <dependency>
     <dependentAssembly>
       <assemblyIdentity
@@ -30,62 +24,37 @@
     </dependentAssembly>
   </dependency>
 
-  <!-- ── Windows Settings ─────────────────────────────────────────────────── -->
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
-
-      <!-- Per-Monitor DPI Awareness V2: required for crisp rendering on       -->
-      <!-- high-DPI and multi-monitor setups. PySide6/Qt relies on this.       -->
-      <!-- "true/pm" is the legacy value; dpiAwareness takes precedence on     -->
-      <!-- Windows 10 1703+ and should be the effective setting in production. -->
+      <!-- Per-Monitor DPI V2: crisp rendering on high-DPI / multi-monitor -->
       <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware>
       <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2, PerMonitor</dpiAwareness>
 
-      <!-- Long path support (paths > 260 characters).                         -->
-      <!-- Also requires the registry key                                       -->
-      <!-- HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled=1 -->
-      <!-- or the matching Group Policy to be enabled on the target machine.   -->
+      <!-- Requires LongPathsEnabled=1 in registry or Group Policy -->
       <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
 
-      <!-- Forces the process code page to UTF-8 (Windows 1903+).             -->
-      <!-- Ensures consistent filename and text handling regardless of the     -->
-      <!-- system locale — important for non-ASCII paths and file names.       -->
+      <!-- UTF-8 code page: consistent handling of non-ASCII paths (Win 1903+) -->
       <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">UTF-8</activeCodePage>
 
-      <!-- Segment Heap: reduces memory footprint for allocation-heavy apps.   -->
-      <!-- Effective on Windows 10 2004+ (build 19041). Safe to include on    -->
-      <!-- older builds — the key is silently ignored if unsupported.          -->
+      <!-- Reduced memory footprint (Win 10 2004+, silently ignored otherwise) -->
       <heapType xmlns="http://schemas.microsoft.com/SMI/2020/WindowsSettings">SegmentHeap</heapType>
-
     </windowsSettings>
   </application>
 
-  <!-- ── Execution Level ──────────────────────────────────────────────────── -->
-  <!-- asInvoker: the app runs with the same privileges as the parent process. -->
-  <!-- This is correct — no admin rights needed, and winotify/toast            -->
-  <!-- notifications work without elevation.                                   -->
-  <!-- uiAccess="false": no need to interact with higher-privilege UI.         -->
+  <!-- No admin rights required -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
       <requestedPrivileges>
-        <requestedExecutionLevel
-          level="asInvoker"
-          uiAccess="false"
-        />
+        <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
       </requestedPrivileges>
     </security>
   </trustInfo>
 
-  <!-- ── OS Compatibility ─────────────────────────────────────────────────── -->
-  <!-- Tells Windows which OS versions this app was tested on.                 -->
-  <!-- Without this block, Windows runs the app in a compatibility shim that  -->
-  <!-- may hide newer APIs (e.g. correct version numbers, DPI, theming).      -->
+  <!-- Opt out of compatibility shims for accurate APIs and theming -->
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
-      <!-- Windows 11 (10.0.22000+) -->
-      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/>
-      <!-- Windows 10 (10.0.10240+) — minimum required by PySide6 / Qt 6.x   -->
-      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/> <!-- Windows 11 -->
+      <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/> <!-- Windows 10 -->
     </application>
   </compatibility>
 
