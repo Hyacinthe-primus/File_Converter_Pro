@@ -55,7 +55,7 @@
 
 ## What is File Converter Pro?
 
-File Converter Pro is a **free, fully offline Windows desktop application** that converts documents, images, audio, and video — all from a single polished tool, without needing a browser or sending your files anywhere online.
+File Converter Pro is a **free, fully offline Windows desktop application** that converts documents, images, audio, and video all from a single polished tool, without needing a browser or sending your files anywhere online.
 
 It is built with Python and PySide6 and designed to feel like a real product: animated startup, system-aware dark/light theme, statistics dashboard, gamified achievements, multi-language support.
 
@@ -74,7 +74,7 @@ Batch conversions supported
 ### 🔒 100% Offline & Private
 Your files never leave your machine. No telemetry, no uploads, no internet required for any conversion.
 
-### 🎨 Polished UI
+### Polished UI
 - Automatic Dark / Light mode, read directly from the Windows registry
 - Animated splash screen with a smooth crossfade into the main window
 - Glassmorphism stat cards, hover effects, and fluid transitions throughout
@@ -100,7 +100,7 @@ A full Matplotlib-powered analytics panel showing your conversion history at a g
 <br/>
 
 
-### 🏆 Achievements & Rank Progression
+### Achievements & Rank Progression
 A complete gamification system backed by SQLite:
 - Achievements unlock based on conversion counts, format diversity, streaks, and special events
 - Animated pop-ups appear in real time when an achievement is earned
@@ -116,7 +116,7 @@ A complete gamification system backed by SQLite:
 ### 🌐 Community i18n
 Built-in **French** and **English**. Anyone can contribute a translation by dropping a `.lang` JSON file into the `languages/` folder — no source code changes needed. See [Internationalization](#-internationalization).
 
-### 🎉 Special Events
+### Special Events
 Date-aware special event overlays (birthdays, new year) with animated Perlin-noise liquid borders, particle confetti/sparkle systems, and per-event color theming. More events will be supported in future versions.
 
 <br/>
@@ -135,20 +135,20 @@ You can even add notes to the project so you know exactly what a project is abou
 
 <br/>
 
-### 🖱️ Drag & Drop onto the Exe
+### Drag & Drop onto the Exe
 Drag one or more files directly onto `File Converter Pro.exe` — they'll be pre-loaded when the window opens.
 
-### 🔁 Single Instance
+### Single Instance
 Launching a second instance focuses the already-running window instead of opening a duplicate.
 
-### 🔐 Encrypted Settings
+### Encrypted Settings
 User preferences are stored on disk using Fernet encryption (`cryptography` library) — no sensitive settings sit as plain text.
 
-### 🔔 Native Windows Notifications
+### Native Windows Notifications
 Optional desktop notifications when a conversion finishes, using Windows' native notification system. 
 NOTE: This is just for basic conversions, will support more conversions later.
 
-### 🛠️ Quick Check Utility
+### Quick Check Utility
 A lightweight companion tool (`Quick Check.exe`) built with Tkinter — categorized scrollable tabs to verify that critical expected files are present in the installed build.
 
 ### 💻 CLI Mode *(development only)*
@@ -499,7 +499,7 @@ This runs PyInstaller with `build.spec` and produces a `dist/File Converter Pro/
 .\build_installer.ps1
 ```
 
-This calls **Inno Setup** with `setup.iss` and produces `Output/FileConverterPro_Setup_v1.0.0.exe`.
+This calls **Inno Setup** with `setup.iss` and produces `Output/FileConverterPro_Setup_v1.0.1.exe`.
 
 > Make sure **Inno Setup** is installed and on your PATH before running step 4. Download it at [jrsoftware.org/isinfo.php](https://jrsoftware.org/isinfo.php).
 
@@ -614,7 +614,7 @@ main.py --lang "my custom language"
 | **`.ppt` legacy format** | Requires Microsoft Office or LibreOffice. python-pptx cannot open old binary `.ppt` files natively. |
 | **Donation Thank-You** | The thank-you dialog requires a relaunch after donating. If the app is never relaunched, the flag remains pending. |
 | **No cloud / sync** | History, settings, and achievements are stored locally only — no backup, no multi-device profiles. |
-| **Manual distribution** | Not on the Microsoft Store. Distributed via Inno Setup installer. |
+| **Manual distribution** | Not on the Microsoft Store. Distributed via GitHub or Itch.io. |
 | **Solo development** | Progression on the application depends on availability outside of studies. |
 
 ---
@@ -762,5 +762,5 @@ This project uses a **dual licensing model**:
 ---
 
 <div align="center">
-<sub>Built by Hyacinthe — <em>because file conversion should actually feel good.</em></sub>
+<sub>Built by Hyacinthe <em>because file conversion should actually feel good.</em></sub>
 </div>
