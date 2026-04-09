@@ -770,6 +770,7 @@
     "bday_hint_age": "❗ Devi avere almeno 3 anni.",
     "bday_btn_cancel": "Annulla",
     "bday_btn_save": "✅ Salva",
+    "dont_ask": "Non chiedere più",
     "bday_err_title": "Data non valida",
     "bday_err_old": "Non puoi avere più di 120 anni.",
     "bday_err_young": "Devi avere almeno 3 anni.",

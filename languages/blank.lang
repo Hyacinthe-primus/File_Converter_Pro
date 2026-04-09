@@ -770,6 +770,7 @@
     "bday_hint_age": "",
     "bday_btn_cancel": "",
     "bday_btn_save": "",
+    "dont_ask": "",
     "bday_err_title": "",
     "bday_err_old": "",
     "bday_err_young": "",

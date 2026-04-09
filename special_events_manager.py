@@ -1,6 +1,5 @@
 """
 Special Events Manager for File Converter Pro
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 • True 3D Perlin FBM — seamless, artifact-free liquid border
 • Particle system — event-themed floating confetti / sparkles
 • Perceptual color cycling (Oklab-inspired smooth hue shifts)
@@ -37,6 +36,7 @@ from PySide6.QtGui import (
     QTransform, QGuiApplication)
 
 from translations import TranslationManager
+from widgets import AnimatedCheckBox
 
 def _make_tm(language: str) -> TranslationManager:
     tm = TranslationManager()
@@ -839,9 +839,9 @@ class BirthdayInputDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.custom_font = self._load_font()
-        self.setWindowTitle(self._t("🎂 Votre Date de Naissance"))
+        self.setWindowTitle(self._t("bday_title_win"))
         self.setModal(True)
-        self.setFixedSize(390, 255)
+        self.setFixedSize(390, 285)
         self._build_ui()
         self._apply_style()
 
@@ -905,6 +905,8 @@ class BirthdayInputDialog(QDialog):
         self.hint_label.setVisible(False)
         layout.addWidget(self.hint_label)
 
+
+
         btns = QHBoxLayout()
         self.cancel_btn = QPushButton(self._t("btn_cancel"))
         self.cancel_btn.setFont(QFont(self.custom_font.family(), 10, QFont.Bold))
@@ -919,6 +921,10 @@ class BirthdayInputDialog(QDialog):
         btns.addWidget(self.cancel_btn)
         btns.addWidget(self.submit_btn)
         layout.addLayout(btns)
+
+        self.dont_ask_checkbox = AnimatedCheckBox(self._t("dont_ask"))
+        self.dont_ask_checkbox.setChecked(False)
+        layout.addWidget(self.dont_ask_checkbox, alignment=Qt.AlignCenter)
 
         self.cancel_btn.clicked.connect(self.reject)
         self.submit_btn.clicked.connect(self._validate)
@@ -1121,14 +1127,30 @@ class SpecialEventsManager:
                          (bd.isoformat(),))
         self.birthdate = bd
 
+    def _save_user_info(self, key: str, value: str):
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("INSERT OR REPLACE INTO user_info VALUES (?,?)", (key, value))
+
+    def _get_user_info(self, key: str):
+        with sqlite3.connect(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT value FROM user_info WHERE key=?", (key,)).fetchone()
+        return row[0] if row else None
+
     def _check_and_prompt(self):
         bd = self._get_birthdate()
         if bd is None:
+            if self._get_user_info("birthday_declined") == "1":
+                self._check_new_year()
+                return
             dlg = BirthdayInputDialog(self.app)
             if dlg.exec() == QDialog.Accepted:
                 bd = dlg.date_edit.date().toPython()
                 self._save_birthdate(bd)
                 self._check_birthday()
+            else:
+                if dlg.dont_ask_checkbox.isChecked():
+                    self._save_user_info("birthday_declined", "1")
         else:
             self.birthdate = bd
             self._check_birthday()
