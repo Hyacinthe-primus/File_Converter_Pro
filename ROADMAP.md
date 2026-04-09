@@ -24,7 +24,7 @@ Support for multiple independent profiles on the same machine, each with their o
 - Conversion history
 
 ### Disable achievements
-Give the possibility to user to disable achievements if they prefer a more minimal converter
+Give the possibility to users to disable achievements if they prefer a more minimal converter
 
 ### System Notifications (Extended)
 Windows toast notifications are already supported for certain events. The next step is extending them to **long-running conversions** — so users can switch to another app while a heavy batch runs and still get notified the moment it's done.
