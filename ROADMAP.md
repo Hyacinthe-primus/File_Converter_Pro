@@ -11,6 +11,12 @@ This is a solo project developed alongside studies, so timelines are intentional
 
 ## 👤 User Features
 
+### 👤 Linux Support
+Revisit the main code to add linux support such as: 
+- Appimage
+- Flatpack
+- Specific Linux Distributions support (may come really late)
+
 ### 👥 User Profiles
 Support for multiple independent profiles on the same machine, each with their own:
 - Achievement progress and stats
