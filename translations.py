@@ -2626,9 +2626,9 @@ class TranslationManager:
         """
         result = [
             {"code": "fr", "name": "Français",  "builtin": True,
-             "author": "Hyacinthe", "version": "3.0", "description": "Langue par défaut"},
+             "author": "Hyacinthe", "version": "1.0", "description": "Langue par défaut"},
             {"code": "en", "name": "English",   "builtin": True,
-             "author": "Hyacinthe", "version": "3.0", "description": "Default language"},
+             "author": "Hyacinthe", "version": "1.0", "description": "Default language"},
         ]
         for code, meta in self._external_meta.items():
             result.append({
