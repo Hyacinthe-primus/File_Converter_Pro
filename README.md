@@ -376,8 +376,8 @@ Make sure the following are installed on your machine before cloning:
 ### Clone & Install
 
 ```bash
-git clone https://github.com/Hyacinthe-primus/file-converter-pro.git
-cd file-converter-pro
+git clone https://github.com/Hyacinthe-primus/File_Converter_Pro.git
+cd File_Converter_Pro
 pip install -r requirements.txt
 ```
 
