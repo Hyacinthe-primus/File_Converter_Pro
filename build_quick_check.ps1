@@ -1,5 +1,4 @@
 # Build Script - File Converter Pro Quick Check
-# Compiles quick_check.py into a standalone exe using PyInstaller
 
 # UPX configuration
 $UPX_PATH = "C:\....\.....\Your_path\....\upx.exe" # <-- SET THIS TO YOUR UPX PATH
