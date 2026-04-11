@@ -277,7 +277,7 @@ This section is for anyone who just wants to **download and use** the app. No Py
 
 #### Option A — Installer *(recommended)*
 
-Download the latest **`FileConverterPro_Setup_v1.0.1.exe`** from the [Releases](../../releases) page and run it.
+Download the latest **`FileConverterPro_Setup_v1.0.2.exe`** from the [Releases](../../releases) page and run it.
 
 The installer:
 - Supports both **English** and **French** during setup
@@ -499,7 +499,7 @@ This runs PyInstaller with `build.spec` and produces a `dist/File Converter Pro/
 .\build_installer.ps1
 ```
 
-This calls **Inno Setup** with `setup.iss` and produces `Output/FileConverterPro_Setup_v1.0.1.exe`.
+This calls **Inno Setup** with `setup.iss` and produces `Output/FileConverterPro_Setup_v1.0.2.exe`.
 
 > Make sure **Inno Setup** is installed and on your PATH before running step 4. Download it at [jrsoftware.org/isinfo.php](https://jrsoftware.org/isinfo.php).
 

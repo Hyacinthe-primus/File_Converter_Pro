@@ -4,7 +4,7 @@
 ; Complete uninstallation support
 
 #define MyAppName "File Converter Pro"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "Prime Enterprises"
 #define MyAppURL "https://github.com/Hyacinthe-primus/File-Converter-Pro"
 #define MyAppExeName "File Converter Pro.exe"

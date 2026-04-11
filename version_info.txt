@@ -1,7 +1,7 @@
 # UTF-8
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(1, 0, 1, 0),
+    filevers=(1, 0, 2, 0),
     prodvers=(1, 0, 0, 0),
     mask=0x3f,
     flags=0x0,
@@ -19,7 +19,7 @@ VSVersionInfo(
         [
           StringStruct(u'CompanyName', u'Prime Enterprises'),
           StringStruct(u'FileDescription', u'File Converter Pro (64-bit)'),
-          StringStruct(u'FileVersion', u'1.0.1'),
+          StringStruct(u'FileVersion', u'1.0.2'),
           StringStruct(u'InternalName', u'FileConverterPro'),
           StringStruct(u'LegalCopyright', u'© 2026 Prime Enterprises. All rights reserved.'),
           StringStruct(u'OriginalFilename', u'File Converter Pro x64.exe'),
@@ -34,7 +34,7 @@ VSVersionInfo(
         [
           StringStruct(u'CompanyName', u'Prime Enterprises'),
           StringStruct(u'FileDescription', u'Convertisseur de fichiers Pro (64 bits)'),
-          StringStruct(u'FileVersion', u'1.0.1'),
+          StringStruct(u'FileVersion', u'1.0.2'),
           StringStruct(u'InternalName', u'FileConverterPro'),
           StringStruct(u'LegalCopyright', u'© 2026 Prime Enterprises. Tous droits réservés.'),
           StringStruct(u'OriginalFilename', u'File Converter Pro x64.exe'),
