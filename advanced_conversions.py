@@ -50,6 +50,7 @@ class _ConversionWorker(QObject):
         dst_dir: str,
         achievement_system=None,
         tm=None,
+        config=None
     ) -> None:
         super().__init__()
         self.engine              = engine
@@ -60,6 +61,7 @@ class _ConversionWorker(QObject):
         self._cancelled          = False
         self.achievement_system  = achievement_system
         self._tm                 = tm
+        self._config = config or {}
 
     def cancel(self) -> None:
         self._cancelled = True
@@ -73,11 +75,12 @@ class _ConversionWorker(QObject):
         return tpl.format(**kwargs) if kwargs else tpl
 
     def run(self) -> None:
+        _achievements_on = self._config.get("achievements_enabled", True)
         ok = fail = 0
         total = len(self.sources)
         _batch_start = time.time()
 
-        if self.achievement_system is not None:
+        if self.achievement_system is not None and _achievements_on:
             try:
                 self.achievement_system.update_stat("recent_batch_files", 0)
             except Exception:
@@ -116,7 +119,7 @@ class _ConversionWorker(QObject):
                 self.log.emit(self._t("adv_log_success",
                                       target=Path(result.target).name,
                                       elapsed=result.elapsed))
-                if self.achievement_system is not None:
+                if self.achievement_system is not None and _achievements_on:
                     try:
                         self.achievement_system.record_advanced_conversion(
                             self.conversion_type, success=True
@@ -130,7 +133,7 @@ class _ConversionWorker(QObject):
                     self.log.emit(self._t("adv_log_no_audio", error=err_msg))
                 else:
                     self.log.emit(self._t("adv_log_error", error=err_msg))
-                if self.achievement_system is not None:
+                if self.achievement_system is not None and _achievements_on:
                     try:
                         self.achievement_system.record_advanced_conversion(
                             self.conversion_type, success=False

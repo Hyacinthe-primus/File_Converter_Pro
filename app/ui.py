@@ -352,11 +352,15 @@ class AppUIMixin(AppLogicMixin):
 
     def show_rank_popup(self, rank_data):
         """Queue the rank popup (will be displayed after achievements)"""
+        if not self.config.get("achievements_enabled", True):
+            return
         self.rank_queue.append(rank_data)
         self.process_rank_queue()
 
     def queue_achievement(self, achievement):
         """Add an achievement to the queue"""
+        if not self.config.get("achievements_enabled", True):
+            return
         self.achievement_queue.append(achievement)
         self.process_achievement_queue()
 
@@ -1763,6 +1767,7 @@ class AppUIMixin(AppLogicMixin):
         self.history_btn      = self.nav_history_btn
         self.templates_btn    = self.nav_templates_btn
         self.achievements_btn = self.nav_achievements_btn
+        self._apply_achievements_btn_state()
 
         parent_layout.addWidget(right_panel, 0)
 
@@ -2190,9 +2195,21 @@ class AppUIMixin(AppLogicMixin):
         if dialog.exec() == QDialog.Accepted:
             new_settings = dialog.get_settings()
             self.config.update(new_settings)
+            self._apply_achievements_btn_state()
             self.config_manager.save_config(self.config)
             
             QMessageBox.information(self, self.translate_text("Succès"), self.translate_text("Paramètres sauvegardés avec succès!"))
+
+    def _apply_achievements_btn_state(self):
+        enabled = self.config.get("achievements_enabled", True)
+        btn = getattr(self, "nav_achievements_btn", None)
+        if btn is None:
+            return
+        btn.setVisible(enabled)
+        btn.setToolTip(
+            self.translate_text("Succès et réalisations") if enabled
+            else ""
+        )
 
     def new_project(self):
         if self.files_list:

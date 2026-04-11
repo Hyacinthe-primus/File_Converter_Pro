@@ -1685,7 +1685,10 @@ class EnhancedTemplatesDialog(QDialog):
         return self._tm.translate_text(text)
 
     def _ach(self):
-        """Return the achievement_system from parent_window, or None."""
+        """Return the achievement_system from parent_window, or None if disabled."""
+        cfg = getattr(self.parent_window, 'config', {})
+        if not cfg.get("achievements_enabled", True):
+            return None
         return getattr(self.parent_window, 'achievement_system', None)
 
 class CreateTemplateDialog(QDialog):
@@ -2158,7 +2161,8 @@ class CreateTemplateDialog(QDialog):
             self.parent_dialog.translate_text("template_created").format(name)
         )
 
-        ach = getattr(self.parent_app, 'achievement_system', None)
+        _cfg = getattr(self.parent_app, 'config', {})
+        ach = getattr(self.parent_app, 'achievement_system', None) if _cfg.get("achievements_enabled", True) else None
         if ach:
             try: ach.record_template_created(template_type)
             except Exception: pass

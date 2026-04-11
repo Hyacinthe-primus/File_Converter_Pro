@@ -2108,6 +2108,9 @@ class SettingsDialog(QDialog):
         self.system_notifications_checkbox = AnimatedCheckBox(self.translate_text("Activer les notifications système"))
         self.system_notifications_checkbox.setChecked(self.config.get("enable_system_notifications", True))
 
+        self.achievements_checkbox = AnimatedCheckBox(self.translate_text("Activer les succès et réalisations"))
+        self.achievements_checkbox.setChecked(self.config.get("achievements_enabled", True))
+
         self.show_previews_checkbox = AnimatedCheckBox(self.translate_text("Afficher les aperçus des fichiers"))
         self.show_previews_checkbox.setChecked(self.config.get("show_file_previews", True))
 
@@ -2120,6 +2123,7 @@ class SettingsDialog(QDialog):
         interface_layout.addRow(self.auto_open_checkbox)
         interface_layout.addRow(self.notifications_checkbox)
         interface_layout.addRow(self.system_notifications_checkbox)
+        interface_layout.addRow(self.achievements_checkbox)
         interface_layout.addRow(self.show_previews_checkbox)
         interface_layout.addRow(self.show_dashboard_checkbox)
         interface_layout.addRow(self.separate_image_pdfs_checkbox)
@@ -2786,6 +2790,7 @@ class SettingsDialog(QDialog):
             "auto_open_last_project": self.auto_open_checkbox.isChecked(),
             "enable_notifications": self.notifications_checkbox.isChecked(),
             "enable_system_notifications": self.system_notifications_checkbox.isChecked(),
+            "achievements_enabled": self.achievements_checkbox.isChecked(),
             "show_file_previews": self.show_previews_checkbox.isChecked(),
             "show_dashboard_on_startup": self.show_dashboard_checkbox.isChecked(),
             "conversion_quality": quality_map[self.quality_combo.currentIndex()],
