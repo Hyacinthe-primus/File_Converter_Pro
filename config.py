@@ -15,13 +15,10 @@ Version: 1.0
 
 import os
 import json
-try:
-    import winreg
-except ImportError:
-    winreg = None
 from cryptography.fernet import Fernet
 import subprocess
 import sys
+from PySide6.QtWidgets import QApplication
 
 # Constants
 
@@ -52,8 +49,6 @@ DEFAULT_CONFIG: dict = {
     "use_system_theme":           True,
 }
 
-from PySide6.QtWidgets import QApplication
-
 def is_dark_mode_qt():
     app = QApplication.instance()
     if not app:
@@ -61,51 +56,6 @@ def is_dark_mode_qt():
 
     palette = app.palette()
     return palette.color(palette.Window).lightness() < 128
-
-def is_dark_mode():
-    """
-    Detect whether OS is currently using dark mode.
-    Returns False if the registry key is unavailable.
-    """
-    if sys.platform == "win32":
-        return is_windows_dark_mode()
-    elif sys.platform.startswith("linux"):
-        return is_linux_dark_mode()
-    return False
-
-# System utilities (Linux-only)
-
-def is_linux_dark_mode():
-    try:
-        result = subprocess.check_output([
-            "gsettings",
-            "get",
-            "org.gnome.desktop.interface",
-            "color-scheme"
-        ]).decode().strip()
-
-        return result == "'prefer-dark'"
-    except Exception:
-        return False
-
-# System utilities (Windows-only)
-
-def is_windows_dark_mode() -> bool:
-    """
-    Detect whether Windows is currently using dark mode.
-    Returns False on non-Windows systems or if the registry key is unavailable.
-    """
-    try:
-        registry = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
-        key = winreg.OpenKey(
-            registry,
-            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize"
-        )
-        value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
-        winreg.CloseKey(key)
-        return value == 0
-    except Exception:
-        return False
 
 def _load_or_create_key(key_file: str) -> bytes | None:
     """Load an existing Fernet key or generate and persist a new one."""
@@ -219,5 +169,5 @@ class ConfigManager:
         Language is NOT set here — AppBootstrap applies it after parsing
         the CLI flag (--fr / --en / --lang <code> from installer)."""
         defaults = self.default_config.copy()
-        defaults["dark_mode"] = is_windows_dark_mode()
+        defaults["dark_mode"] = is_dark_mode_qt()
         return defaults

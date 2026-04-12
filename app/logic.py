@@ -106,7 +106,7 @@ except ImportError as _e:
     OCR_AVAILABLE = False
     print(f"[IMPORT] Pillow not available: {_e}")
 
-from config import is_windows_dark_mode
+from config import is_dark_mode_qt
 from database import DatabaseManager
 from translations import TranslationManager
 from widgets import AnimatedCheckBox
@@ -133,7 +133,7 @@ class AppLogicMixin:
         self.config = config_manager.load_config()
         self.current_language = self.config.get("language", "fr")
         if self.config.get("use_system_theme", True):
-            self.dark_mode = is_windows_dark_mode()
+            self.dark_mode = is_dark_mode_qt()
         else:
             self.dark_mode = self.config.get("dark_mode", False)
         
