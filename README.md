@@ -340,6 +340,21 @@ Add-MpPreference -ExclusionPath "C:\Your\Folder\File Converter Pro"
 ```
 Or add it manually in Windows Defender.
 
+If you get this error: **Unhandled exception in script** (precisely: *"an application control policy blocked this file"*):
+
+> ![Unhandled error](previews/unhandled_exception.png)
+
+Run this command in a **PowerShell terminal as Administrator**, replacing the path with your actual installation folder:
+
+```powershell
+Get-ChildItem -Path "C:\Your\path\to\File Converter Pro" -Recurse | Unblock-File
+```
+
+**Why does this happen?**  
+When you download a file from the internet, Windows automatically tags it with a hidden mark called `Zone.Identifier`. This causes Windows to block certain DLLs from loading, even if your antivirus has no issue with them. Running the command above removes that mark from all files in the folder.
+
+> **Note:** Just adding the folder to Windows Defender exclusions will **not** fix this, they are two separate mechanisms.
+
 ---
 
 ### ⚡ Terminal Flash on Launch — It's Safe
