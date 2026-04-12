@@ -15,8 +15,13 @@ Version: 1.0
 
 import os
 import json
-import winreg
+try:
+    import winreg
+except ImportError:
+    winreg = None
 from cryptography.fernet import Fernet
+import subprocess
+import sys
 
 # Constants
 
@@ -46,6 +51,42 @@ DEFAULT_CONFIG: dict = {
     "separate_image_pdfs":        False,
     "use_system_theme":           True,
 }
+
+from PySide6.QtWidgets import QApplication
+
+def is_dark_mode_qt():
+    app = QApplication.instance()
+    if not app:
+        return False
+
+    palette = app.palette()
+    return palette.color(palette.Window).lightness() < 128
+
+def is_dark_mode():
+    """
+    Detect whether OS is currently using dark mode.
+    Returns False if the registry key is unavailable.
+    """
+    if sys.platform == "win32":
+        return is_windows_dark_mode()
+    elif sys.platform.startswith("linux"):
+        return is_linux_dark_mode()
+    return False
+
+# System utilities (Linux-only)
+
+def is_linux_dark_mode():
+    try:
+        result = subprocess.check_output([
+            "gsettings",
+            "get",
+            "org.gnome.desktop.interface",
+            "color-scheme"
+        ]).decode().strip()
+
+        return result == "'prefer-dark'"
+    except Exception:
+        return False
 
 # System utilities (Windows-only)
 
