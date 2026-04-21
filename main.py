@@ -37,7 +37,7 @@ from PySide6.QtWidgets import QApplication, QDialog
 from PySide6.QtCore    import Qt, QTimer
 from PySide6.QtGui     import QIcon
 
-from config  import ConfigManager, is_windows_dark_mode
+from config  import ConfigManager, is_dark_mode_qt
 from app     import FadingMainWindow
 from dialogs import ModernSplashScreen, TermsAndPrivacyDialog
 
@@ -355,7 +355,7 @@ class AppBootstrap:
             self.config_manager.save_config(config)
             print(f"[THEME] Theme forced to: {self.forced_theme!r}")
         elif config.get("use_system_theme", True):
-            config["dark_mode"] = is_windows_dark_mode()
+            config["dark_mode"] = is_dark_mode_qt()
             self.config_manager.save_config(config)
 
         return config

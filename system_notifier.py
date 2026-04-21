@@ -18,7 +18,35 @@ Version: 1.0
 import os
 import sys
 from pathlib import Path
-from winotify import Notification
+from PySide6.QtWidgets import QSystemTrayIcon, QMenu
+from PySide6.QtGui import QAction, QIcon
+import webbrowser
+
+def open_url(url: str):
+    webbrowser.open(url)
+
+class QtNotifier:
+    def __init__(self):
+        self.tray = QSystemTrayIcon()
+        self.tray.setIcon(QIcon("icon.png"))
+        self.tray.show()
+
+    def notify(self, title, message):
+        self.tray.showMessage(title, message)
+
+    def notify_with_actions(self, title, message, actions):
+        # 1. Show notification (title + message go HERE)
+        self.tray.showMessage(title, message)
+
+        # 2. Build tray menu (actions go HERE)
+        menu = QMenu()
+
+        for label, callback in actions:
+            action = QAction(label)
+            action.triggered.connect(callback)
+            menu.addAction(action)
+
+        self.tray.setContextMenu(menu)
 
 try:
     from playsound3 import playsound
@@ -66,6 +94,8 @@ class SystemNotifier:
         
         self.toast_icon_path = self.icon_path if os.path.exists(self.icon_path) else ""
         
+        self.notifier = QtNotifier()
+
         print(f"[NOTIFIER] ✅ Initialized - Icon: {os.path.exists(self.toast_icon_path) if self.toast_icon_path else 'None'}")
     
     def set_translator(self, tm) -> None:
@@ -178,7 +208,16 @@ class SystemNotifier:
                 print(f"[NOTIFIER] 🖼️ Icon used: {icon_to_use}")
             else:
                 print("[NOTIFIER] ⚠️ No icon available")
+
+            self.notifier.notify_with_actions(
+                title=self.app_name,
+                message=message,
+                actions=[
+                    ("📂 Open GitHub Repository" if self.language != "fr" else "📂 Ouvrir le dépôt GitHub", lambda: open_url(self.REPO_URL)),
+                ]
+            )
             
+            '''
             toast = Notification(
                 app_id=self.app_id,
                 title=self.app_name,
@@ -186,13 +225,14 @@ class SystemNotifier:
                 duration="short",
                 icon=icon_to_use,
             )
-            
+
             toast.add_actions(
                 label=self._repo_button_label(),
                 launch=self.REPO_URL,
             )
             
             toast.show()
+            '''
             print(f"[NOTIFIER] ✅ Notification displayed successfully")
             
             if PLAY_SOUND_AVAILABLE and self.sound_path and os.path.exists(self.sound_path):
