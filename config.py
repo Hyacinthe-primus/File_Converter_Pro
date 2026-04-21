@@ -55,7 +55,7 @@ def is_dark_mode_qt():
         return False
 
     palette = app.palette()
-    return palette.color(palette.Window).lightness() < 128
+    return palette.color(palette.ColorRole.Window).lightness() < 128
 
 def _load_or_create_key(key_file: str) -> bytes | None:
     """Load an existing Fernet key or generate and persist a new one."""

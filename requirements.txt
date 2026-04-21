@@ -47,6 +47,3 @@ matplotlib==3.10.7
 
 # Exe Packager
 pyinstaller==6.16.0
-
-# Linux Only
-Appimage==1.0.0
