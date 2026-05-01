@@ -9,6 +9,7 @@
 [![Version](https://img.shields.io/badge/version-1.0.0-4dabf7?style=flat-square)](#) [![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=flat-square&logo=windows)](#)
 [![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=flat-square&logo=qt&logoColor=white)](#) [![License](https://img.shields.io/badge/license-GPLv3%20%2F%20Commercial-blue?style=flat-square)](#license)
 [![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)](#) [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.13-3776AB?style=flat-square&logo=python&logoColor=white)](#)
+[![oosmetrics](https://api.oosmetrics.com/api/v1/badge/achievement/3f3dc845-d27b-4254-a7ac-1bca4e2e3ba0.svg)](https://oosmetrics.com/repo/Hyacinthe-primus/File_Converter_Pro)
 
 <br/>
 
