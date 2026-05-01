@@ -1080,7 +1080,6 @@
     "Créé :": "创建于：",
     "Modifié :": "修改于：",
     "confirm_delete_all": "确定要删除所有文件（{count} 个文件）吗？",
-    "Mon projet": "我的项目",
     "Notes (optionnel) :": "备注（可选）：",
     "Description, contexte…": "描述、背景...",
     "project_opened_status": "项目已打开：{proj_name}（{n} 个文件）",
