@@ -47,3 +47,11 @@ matplotlib==3.10.7
 
 # Exe Packager
 pyinstaller==6.16.0
+
+# Linux Only
+Appimage==1.0.0
+
+# Windows Only
+winotify==1.1.0
+comtypes==1.4.13
+pywin32==311
