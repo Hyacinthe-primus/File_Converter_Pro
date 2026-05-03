@@ -2539,7 +2539,7 @@ class AppUIMixin(AppLogicMixin):
 
     def format_size(self, size_bytes):
         """Format size in human-readable units"""
-        for unit in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
@@ -2632,16 +2632,44 @@ class AppUIMixin(AppLogicMixin):
 
             item.setData(Qt.UserRole, file_path)
             item.setData(Qt.UserRole + 1, file_type)
-            # Store size string for delegate (right-aligned display)
             if file_type == "file" and os.path.isfile(file_path):
                 item.setData(Qt.UserRole + 4, self.format_size(os.path.getsize(file_path)))
             self.files_list_widget.addItem(item)
+            self._attach_preview_btn(item, file_path)
         
         self.update_file_counter()
 
+    def _attach_preview_btn(self, item, file_path):
+        """Attach a real 👁 preview button as item widget, aligned right with margin for size label."""
+        btn = QPushButton("👁")
+        btn.setFixedSize(24, 22)
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setToolTip(self.translate_text("Aperçu"))
+        btn.setStyleSheet("""
+            QPushButton {
+                background: rgba(110,190,255,0.12);
+                color: rgb(110,190,255);
+                border: 1px solid rgba(110,190,255,0.25);
+                border-radius: 5px;
+                font-size: 13px;
+            }
+            QPushButton:hover { background: rgba(110,190,255,0.30); }
+            QPushButton:pressed { background: rgba(110,190,255,0.45); }
+        """)
+        btn.clicked.connect(lambda: (self.files_list_widget.setCurrentItem(item), self.show_file_preview(item)))
+
+        container = QWidget()
+        container.setStyleSheet("background: transparent;")
+        layout = QHBoxLayout(container)
+        layout.setContentsMargins(0, 0, 38, 0)
+        layout.addStretch()
+        layout.addWidget(btn)
+
+        self.files_list_widget.setItemWidget(item, container)
+
     def get_file_icon(self, file_path):
         """Return the appropriate icon for a file or folder with custom icon support"""
-
+        
         icons_dir = self.get_resource_path("icons")
         
         if os.path.isdir(file_path):
