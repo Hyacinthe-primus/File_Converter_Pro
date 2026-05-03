@@ -6,17 +6,17 @@ labels: enhancement
 assignees: Hyacinthe-primus
 ---
 
-## What problem does this solve?
+## What's the problem or limitation?
 
 <!-- Describe the situation where you felt something was missing or frustrating. -->
 
-## What would you like to see?
+## What do you have in mind?
 
-<!-- Describe the feature as clearly as possible. What should it do? How should it behave? -->
+<!-- Describe what you'd like as clearly as possible. What should it do? How should it behave? -->
 
 ## Have you checked the roadmap?
 
-<!-- Take a quick look at ROADMAP.md before submitting — the feature may already be planned. -->
+<!-- Take a quick look at ROADMAP.md before submitting, the feature may already be planned. -->
 - [ ] Yes, I checked [ROADMAP.md](../../ROADMAP.md) and this isn't listed
 
 ## Would you be willing to contribute this?
@@ -25,6 +25,6 @@ assignees: Hyacinthe-primus
 - [ ] I can help test it
 - [ ] No, just a suggestion
 
-## Additional context
+## Anything else?
 
-<!-- Mockups, examples from other tools, links, screenshots — anything that helps illustrate the idea. -->
+<!-- Mockups, examples from other tools, screenshots, anything that helps -->
