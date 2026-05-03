@@ -8,7 +8,7 @@ assignees: Hyacinthe-primus
 
 ## What happened?
 
-<!-- Describe the problem clearly. What did you expect vs what actually happened? -->
+<!-- Describe the problem. What did you expect vs what actually happened? -->
 
 ## Steps to reproduce
 
@@ -46,6 +46,6 @@ assignees: Hyacinthe-primus
 (paste error here)
 ```
 
-## Additional context
+## Anything else?
 
-<!-- Anything else that might help — specific file type, file contents, antivirus software, etc. -->
+<!-- Specific file type, antivirus software, anything that might help -->
