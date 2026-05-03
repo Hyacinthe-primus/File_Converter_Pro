@@ -101,7 +101,7 @@ A full Matplotlib-powered analytics panel showing your conversion history at a g
 <br/>
 
 
-### Achievements & Rank Progression
+### Achievements & Rank Progression (Can Be Disabled)
 A complete gamification system backed by SQLite:
 - Achievements unlock based on conversion counts, format diversity, streaks, and special events
 - Animated pop-ups appear in real time when an achievement is earned
@@ -115,7 +115,7 @@ A complete gamification system backed by SQLite:
 <br/>
 
 ### 🌐 Community i18n
-Built-in **French** and **English**. Anyone can contribute a translation by dropping a `.lang` JSON file into the `languages/` folder — no source code changes needed. See [Internationalization](#-internationalization).
+Built-in **French** and **English**. Anyone can contribute a translation by dropping a `.lang` JSON file into the `languages/` folder, no source code changes needed. See [Internationalization](#-internationalization).
 
 ### Special Events
 Date-aware special event overlays (birthdays, new year) with animated Perlin-noise liquid borders, particle confetti/sparkle systems, and per-event color theming. More events will be supported in future versions.
@@ -143,14 +143,14 @@ Drag one or more files directly onto `File Converter Pro.exe` — they'll be pre
 Launching a second instance focuses the already-running window instead of opening a duplicate.
 
 ### Encrypted Settings
-User preferences are stored on disk using Fernet encryption (`cryptography` library) — no sensitive settings sit as plain text.
+User preferences are stored on disk using Fernet encryption (`cryptography` library), no sensitive settings sit as plain text.
 
 ### Native Windows Notifications
 Optional desktop notifications when a conversion finishes, using Windows' native notification system. 
 NOTE: This is just for basic conversions, will support more conversions later.
 
 ### Quick Check Utility
-A lightweight companion tool (`Quick Check.exe`) built with Tkinter — categorized scrollable tabs to verify that critical expected files are present in the installed build.
+A lightweight companion tool (`Quick Check.exe`) built with Tkinter, categorized scrollable tabs to verify that critical expected files are present in the installed build.
 
 ### 💻 CLI Mode *(development only)*
 
@@ -201,7 +201,7 @@ python main.py help                # Show CLI usage
 | PDF | HTML | PyMuPDF dict-mode (flow layout, base64-embedded images) |
 | EPUB | PDF | pypandoc → spine-order native (images embedded) |
 
-> **PDF → DOCX** has its own dedicated pipeline: `pdf2docx` (layout-preserving) → text-only fallback → image+text hybrid. Quality depends on the source PDF — scanned PDFs without embedded text are only partially recoverable.
+> **PDF → DOCX** has its own dedicated pipeline: `pdf2docx` (layout-preserving) → text-only fallback → image+text hybrid. Quality depends on the source PDF - scanned PDFs without embedded text are only partially recoverable.
 
 > **`.ppt` (legacy binary format)**: requires Microsoft Office or LibreOffice to be installed. python-pptx cannot open old `.ppt` files natively.
 
@@ -267,10 +267,10 @@ This section is for anyone who just wants to **download and use** the app. No Py
 | Component | Requirement |
 |-----------|------------|
 | **OS** | Windows 10 or Windows 11 (64-bit) |
-| **RAM** | 4 GB minimum — 8 GB recommended |
+| **RAM** | 4 GB minimum / 8 GB recommended |
 | **Disk** | ~500 MB free (~435 MB compiled, inherent to the Python / PySide6 / Matplotlib ecosystem) |
 | **Display** | 1280 × 720 or higher |
-| **Dependencies** | None — fully self-contained |
+| **Dependencies** | None, fully self-contained |
 
 ---
 
@@ -286,7 +286,7 @@ The installer:
 - Targets **64-bit Windows only** (Windows 10 / 11)
 - Optionally creates a **Desktop shortcut**
 - Optionally associates **`.fcproj`** project files with the app
-- Offers to add a **Windows Defender exclusion** for the install folder (recommended — see [below](#️-windows-defender--antivirus))
+- Offers to add a **Windows Defender exclusion** for the install folder (recommended, see [below](#️-windows-defender--antivirus))
 
 Once installed, launch **File Converter Pro** from the Start Menu or Desktop shortcut. That's it.
 
@@ -294,7 +294,7 @@ Once installed, launch **File Converter Pro** from the Start Menu or Desktop sho
 
 If you'd rather not run an installer, download the portable `.zip` from the [Releases](../../releases) page, extract it anywhere, and run `File Converter Pro.exe` directly.
 
-All settings, history, and achievements are stored in the same folder as the executable — move the folder, everything moves with it.
+All settings, history, and achievements are stored in the same folder as the executable, move the folder, everything moves with it.
 
 > ⚠️ The portable version does not create automatic file associations for `.fcproj` files. You can still open project files via **File → Open Project** inside the app or **open with → Select the File Converter Pro exe**
 
@@ -436,7 +436,7 @@ Some conversion pipelines rely on external binaries that must be installed separ
 
 | Binary | Used for | Install |
 |--------|---------|---------|
-| `ffmpeg` | All audio and video conversions | Bundled in the compiled exe — for dev, install via [ffmpeg.org](https://ffmpeg.org/download.html) or `winget install ffmpeg` |
+| `ffmpeg` | All audio and video conversions | Bundled in the compiled exe, for dev, install via [ffmpeg.org](https://ffmpeg.org/download.html) or `winget install ffmpeg` |
 | `pandoc` | High-quality TXT/RTF/EPUB → PDF/DOCX | [pandoc.org](https://pandoc.org/installing.html) |
 | `MiKTeX` / `pdflatex` | LaTeX-based PDF rendering via Pandoc | [miktex.org](https://miktex.org/download) |
 | `wkhtmltopdf` | HTML → PDF (pdfkit Strategy 1) | [wkhtmltopdf.org](https://wkhtmltopdf.org/downloads.html) |
@@ -624,13 +624,13 @@ main.py --lang "my custom language"
 
 | Area | Details |
 |------|---------|
-| **Windows only** | Word/Excel/PowerPoint COM automation, registry-based dark mode detection, and PyInstaller packaging are all Windows-first. macOS / Linux are not currently supported. (will come later) |
+| **Windows only** | Word/Excel/PowerPoint COM automation, registry-based dark mode detection, and PyInstaller packaging are all Windows-first. macOS / Linux are not currently supported (will come later) |
 | **Build size** | ~435 MB compiled — inherent to Python + PySide6 + Matplotlib + pdf2docx and other libraries |
 | **PDF → DOCX quality** | Depends on the source PDF. Scanned PDFs with no embedded text layer are only partially recoverable without an OCR tool. |
 | **`.ppt` legacy format** | Requires Microsoft Office or LibreOffice. python-pptx cannot open old binary `.ppt` files natively. |
 | **Donation Thank-You** | The thank-you dialog requires a relaunch after donating. If the app is never relaunched, the flag remains pending. |
 | **No cloud / sync** | History, settings, and achievements are stored locally only — no backup, no multi-device profiles. |
-| **Manual distribution** | Not on the Microsoft Store. Distributed via GitHub or Itch.io. |
+| **Manual distribution** | Not on the Microsoft Store. Distributed via GitHub or [Itch.io](https://hyacinthe-primus.itch.io/file-converter-pro) |
 | **Solo development** | Progression on the application depends on availability outside of studies. |
 
 ---
@@ -662,14 +662,14 @@ There are plenty of ways to convert files. Here's where File Converter Pro fits 
 See [ROADMAP.md](ROADMAP.md) for the full list of planned features and future directions.
 
 **Highlights:**
-- User profiles — multiple independent profiles on the same machine
-- Extended system notifications — covering long-running batch conversions
-- Watch folder — auto-convert anything dropped into a monitored folder
-- Batch scheduling — run conversions at a set time or on a recurring schedule
-- Dashboard upgrades — period comparison, achievement timeline, PDF export
-- Plugin system — add custom converters via external Python scripts
-- Local REST API — integrate conversions into scripts and automation workflows
-- Automated test suite — regression coverage for all conversion engines
+- User profiles - multiple independent profiles on the same machine
+- Extended system notifications - covering long-running batch conversions
+- Watch folder - auto-convert anything dropped into a monitored folder
+- Batch scheduling - run conversions at a set time or on a recurring schedule
+- Dashboard upgrades - period comparison, achievement timeline, PDF export
+- Plugin system - add custom converters via external Python scripts
+- Local REST API - integrate conversions into scripts and automation workflows
+- Automated test suite - regression coverage for all conversion engines
 
 ---
 
