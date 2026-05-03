@@ -44,7 +44,7 @@
 - [💙 Support the Project](#-support-the-project)
 - [🤝 Contributing](#-contributing)
 - [🙏 Credits](#-credits)
-- [🔧 Modifications & Contributions](#-modifications--contributions)
+- [🔧 Forks & Modifications](#-forks--modifications)
 - [📋 Legal](#-legal)
 - [📄 License](#-license)
 
@@ -690,17 +690,13 @@ The donation dialog is also accessible anytime from **Left Tab → Support the p
 
 ## 🤝 Contributing
 
-The project is being prepared for open-sourcing. All source comments and docstrings have been translated from French to English for this purpose.
+Contributions are welcome — from translations to bug fixes to larger features.
 
-**Translations** are the easiest way to contribute right now — follow the `.lang` format above, open an issue, and attach your file or submit a pull request.
-
-For **bug reports**, please include:
-- Your Windows version
-- The input and output format you were trying to convert
-- Any error message or unexpected behavior
-- Whether Microsoft Office, LibreOffice, Pandoc, or MiKTeX are installed on your machine
-
-***Report here:*** [Signal a Bug or Malfunction](mailto:hyacintheatho91@gmail.com)
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full guide, including:
+- How to add a translation (`.lang` file, no code needed)
+- How to report bugs with the right information
+- How to submit a simple code fix
+- How to propose a complex change (Linux port, new formats, etc.) - **open an issue first**
 
 ---
 
@@ -737,20 +733,12 @@ A huge thanks to everyone who has supported the project whether by testing the a
 
 ---
 
-## 🔧 Modifications & Contributions
+## 🔧 Forks & Modifications
 
-This project is **Open Source**. You are free to **fork, modify, and adapt** the code for your own projects, provided that you comply with the terms of the GPLv3 License.
-
-If you use or adapt this project, please include:
-- A link to the original repository: [github.com/Hyacinthe-primus/File_Converter_Pro](https://github.com/Hyacinthe-primus/File_Converter_Pro)
+This project is **Open Source**. You are free to **fork, modify, and adapt** the code under the terms of the GPLv3 License. If you use or adapt it, please include a link back to the original repository.
 
 > [!TIP]
-> While the GPLv3 allows for many uses, keeping your modifications open-source is a requirement. For any inquiries regarding use cases not covered by this license, feel free to reach out.
-
-> [!IMPORTANT]
-> **Dual Licensing:** This project is available under the GPLv3 for open-source use.
-> For integration into proprietary or commercial products without sharing your code, a separate commercial license
-> is available. Read it down in LICENSE section.
+> GPLv3 requires keeping your modifications open-source. For commercial or proprietary use, see the [Commercial License](COMMERCIAL_LICENSE.md).
 
 ---
 
