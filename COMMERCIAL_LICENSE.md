@@ -40,8 +40,8 @@ Commercial licensing is handled on a case-by-case basis depending on the intende
 
 To request a commercial license, contact:
 
-**Hyacinthe — Prime Enterprises**
-📧 [hyacintheatho91@gmail.com](mailto:hyacintheatho91@gmail.com)
+**Hyacinthe / Prime Enterprises**
+📧 [write a mail](mailto:hyacintheatho91@gmail.com)
 
 Please include in your message:
 - A description of your intended use
