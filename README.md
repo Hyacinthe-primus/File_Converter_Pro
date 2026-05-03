@@ -588,27 +588,7 @@ QMainWindow
 
 File Converter Pro ships with built-in **French** and **English**.
 
-Anyone can add a new language without touching the source code. Create a `.lang` file (UTF-8 JSON) and place it in the `languages/` folder next to the executable — it will be detected and listed in Settings automatically on next launch.
-
-**`.lang` file format:**
-
-```json
-{
-  "meta": {
-    "code":        "EN",
-    "name":        "English",
-    "author":      "Your Name",
-    "version":     "1.0",
-    "created":     "2026-02-06",
-    "description": "English translation"
-  },
-  "strings": {
-    "Paramètres": "Settings",
-    "Fermer": "Close",
-    "Gestion des Fichiers": "File Management",
-  }
-}
-```
+Anyone can add a new language without touching the source code. Create a `.lang` file (UTF-8 JSON) and place it in the `languages/` folder next to the executable, it will be detected and listed in Settings automatically on next launch. See [CONTRIBUTING.md](CONTRIBUTING.md) for a step-by-step guide.
 
 You can also force a language from the command line *(development only)* :
 
