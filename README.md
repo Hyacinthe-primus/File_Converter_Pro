@@ -371,7 +371,7 @@ When you download a file from the internet, Windows automatically tags it with a
 
 ---
 
-### ⚡ Terminal Flash on Launch — It's Safe
+### ⚡ Terminal Flash on Launch. Is it Safe ?
 
 When you first launch `File Converter Pro.exe`, a **black terminal window may flash briefly** before disappearing.
 
