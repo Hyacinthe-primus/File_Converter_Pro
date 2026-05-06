@@ -9,6 +9,15 @@ This is a solo project developed alongside studies, so timelines are intentional
 
 ---
 
+## ✅ Completed
+
+These features have been implemented and shipped.
+
+### Disable Achievements
+Users can now disable the achievements system entirely from Settings, for a more minimal experience.
+
+---
+
 ## User Features
 
 ### Linux Support
@@ -22,9 +31,6 @@ Support for multiple independent profiles on the same machine, each with their o
 - Achievement progress and stats
 - Saved templates
 - Conversion history
-
-### Disable achievements
-Give the possibility to users to disable achievements if they prefer a more minimal converter
 
 ### System Notifications (Extended)
 Windows toast notifications are already supported for certain events. The next step is extending them to **long-running conversions** — so users can switch to another app while a heavy batch runs and still get notified the moment it's done.
