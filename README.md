@@ -276,7 +276,7 @@ This section is for anyone who just wants to **download and use** the app. No Py
 
 ### Download & Install
 
-#### Option A — Installer *(recommended)*
+#### Option A -- Installer *(recommended)*
 
 Download the latest **`FileConverterPro_Setup_v1.0.2.exe`** from the [Releases](../../releases) page and run it.
 
@@ -290,7 +290,7 @@ The installer:
 
 Once installed, launch **File Converter Pro** from the Start Menu or Desktop shortcut. That's it.
 
-#### Option B — Portable *(no install)*
+#### Option B -- Portable *(no install)*
 
 If you'd rather not run an installer, download the portable `.zip` from the [Releases](../../releases) page, extract it anywhere, and run `File Converter Pro.exe` directly.
 
@@ -298,6 +298,19 @@ All settings, history, and achievements are stored in the same folder as the exe
 
 > ⚠️ The portable version does not create automatic file associations for `.fcproj` files. You can still open project files via **File → Open Project** inside the app or **open with → Select the File Converter Pro exe**
 
+####  Option C -- One-line install from PowerShell
+
+**Installer (recommended):**
+```powershell
+$f="$env:TEMP\fcp.exe"; Invoke-WebRequest "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest/download/FileConverterPro_Setup_v1.0.2.exe" -OutFile $f; Start-Process $f "/SILENT" -Wait; Remove-Item $f
+```
+
+**Portable (zip):**
+```powershell
+$z="$env:TEMP\fcp.zip"; $d="$env:USERPROFILE\Downloads\FileConverterPro"; Invoke-WebRequest "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest/download/File_Converter_Pro_v1.0.2.zip" -OutFile $z; Expand-Archive $z -DestinationPath $d -Force; Remove-Item $z; Start-Process explorer.exe $d
+```
+
+> Run PowerShell as a regular user (no admin needed). The installer version auto-installs silently and cleans up after itself. The portable version extracts to your Downloads folder and opens it automatically.
 ---
 
 ### Optional Tools — Unlock Better Quality
