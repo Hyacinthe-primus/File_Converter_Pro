@@ -22,7 +22,7 @@ Modes of Execution:
         --lang fr --theme dark    Force both language and theme
 
 Author: Hyacinthe
-Version: 1.0
+Version: 1.2
 """
 
 import sys
@@ -32,7 +32,6 @@ from datetime import datetime
 if getattr(sys, 'frozen', False):
     os.chdir(os.path.dirname(sys.executable))
 
-# Third-Party
 from PySide6.QtWidgets import QApplication, QDialog
 from PySide6.QtCore    import Qt, QTimer
 from PySide6.QtGui     import QIcon
@@ -432,6 +431,12 @@ class WindowTransition:
         win.show()
         win.raise_()
         win.activateWindow()
+
+        from threading import Thread
+        from system_notifier import SystemNotifier
+        notifier = SystemNotifier()
+        Thread(target=notifier.check_and_notify_update, daemon=True).start()
+
         return win
 
     def _schedule(self, win: FadingMainWindow) -> None:
@@ -480,6 +485,32 @@ class WindowTransition:
 
 
 def main() -> None:
+    if "--context-menu" in sys.argv:
+        files, collecting = [], False
+        conversion_type = None
+        for arg in sys.argv[1:]:
+            if arg == "--files":
+                collecting = True
+                continue
+            if arg == "--conversion-type":
+                collecting = False
+                continue
+            if arg.startswith("--conversion-type="):
+                conversion_type = arg.split("=", 1)[1]
+                continue
+            prev = sys.argv[sys.argv.index(arg) - 1] if sys.argv.index(arg) > 0 else ""
+            if prev == "--conversion-type":
+                conversion_type = arg
+                continue
+            if collecting and os.path.exists(arg):
+                files.append(arg)
+        if files:
+            from PySide6.QtWidgets import QApplication
+            _app = QApplication(sys.argv)
+            from context_menu.window import run_context_menu
+            run_context_menu(files, conversion_type=conversion_type)
+            return
+
     cli = CLIHandler(sys.argv)
     if cli.is_cli_mode():
         cli.run()
