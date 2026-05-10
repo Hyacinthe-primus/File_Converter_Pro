@@ -17,6 +17,7 @@ Author: Hyacinthe
 Version: 1.0
 """
 
+__version__ = "1.0.3"
 from PySide6.QtWidgets import QMainWindow
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QTimer
 
