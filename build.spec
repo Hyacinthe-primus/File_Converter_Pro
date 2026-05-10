@@ -238,6 +238,7 @@ a = Analysis(
         'achievements.rank_popup',
         'achievements.achievements_manager',
         'special_events_manager', 'system_notifier',
+        'context_menu', 'context_menu.window',
     ],
     hookspath=[],
     hooksconfig={
