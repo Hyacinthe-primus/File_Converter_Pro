@@ -317,12 +317,12 @@ All settings, history, and achievements are stored in the same folder as the exe
 
 **Installer (recommended):**
 ```powershell
-$f="$env:TEMP\fcp.exe"; Invoke-WebRequest "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest/download/FileConverterPro_Setup_v1.0.2.exe" -OutFile $f; Start-Process $f "/SILENT" -Wait; Remove-Item $f
+$f="$env:TEMP\fcp.exe"; Invoke-WebRequest "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest/download/FileConverterPro_Setup_v1.0.3.exe" -OutFile $f; Start-Process $f "/SILENT" -Wait; Remove-Item $f
 ```
 
 **Portable (zip):**
 ```powershell
-$z="$env:TEMP\fcp.zip"; $d="$env:USERPROFILE\Downloads\FileConverterPro"; Invoke-WebRequest "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest/download/File_Converter_Pro_v1.0.2.zip" -OutFile $z; Expand-Archive $z -DestinationPath $d -Force; Remove-Item $z; Start-Process explorer.exe $d
+$z="$env:TEMP\fcp.zip"; $d="$env:USERPROFILE\Downloads\FileConverterPro"; Invoke-WebRequest "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest/download/File_Converter_Pro_v1.0.3.zip" -OutFile $z; Expand-Archive $z -DestinationPath $d -Force; Remove-Item $z; Start-Process explorer.exe $d
 ```
 
 > Run PowerShell as a regular user (no admin needed). The installer version auto-installs silently and cleans up after itself. The portable version extracts to your Downloads folder and opens it automatically.
