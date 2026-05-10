@@ -38,6 +38,7 @@ else:
 
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu
 from PySide6.QtGui import QAction, QIcon
+from app import __version__
 
 def open_url(url: str) -> None:
     webbrowser.open(url)
@@ -295,4 +296,50 @@ class SystemNotifier:
 
         except Exception as e:
             print(f"[NOTIFIER] Custom notification error: {e}")
+            return False
+    
+    def check_and_notify_update(self) -> bool:
+        """Check GitHub releases and notify if a newer version is available."""
+        try:
+            import requests
+
+            resp = requests.get(
+                "https://api.github.com/repos/Hyacinthe-primus/File_Converter_Pro/releases/latest",
+                timeout=5,
+            )
+            latest = resp.json()["tag_name"].lstrip("v")
+            current = __version__.lstrip("v")
+
+            if latest == current:
+                print(f"[NOTIFIER] ✅ Up to date ({current})")
+                return False
+
+            print(f"[NOTIFIER] 🆕 Update available: {current} → {latest}")
+
+            release_url = f"https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest"
+            title   = "File Converter Pro — Update Available"
+            message = f"Version {latest} is available. You're on {current}"
+
+            if IS_WINDOWS and WINOTIFY_AVAILABLE:
+                toast = WinotifyNotification(
+                    app_id=self.app_id,
+                    title=title,
+                    msg=message,
+                    duration="long",
+                    icon=self.toast_icon_path if os.path.exists(self.toast_icon_path) else "",
+                )
+                toast.add_actions(label="⬇️ Download", launch=release_url)
+                toast.show()
+            else:
+                self._qt_notifier.notify_with_actions(
+                    title=title,
+                    message=message,
+                    actions=[("⬇️ Download", lambda: open_url(release_url))],
+                )
+
+            self._play_sound()
+            return True
+
+        except Exception as e:
+            print(f"[NOTIFIER] ❌ Update check failed: {e}")
             return False
