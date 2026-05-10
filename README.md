@@ -6,7 +6,7 @@
 
 <p><em>A free, offline, all-in-one file converter for Windows built to feel premium.</em></p>
 
-[![Version](https://img.shields.io/badge/version-1.0.2-4dabf7?style=flat-square)](#) [![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=flat-square&logo=windows)](#)
+[![Version](https://img.shields.io/badge/version-1.0.3-4dabf7?style=flat-square)](#) [![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=flat-square&logo=windows)](#)
 [![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=flat-square&logo=qt&logoColor=white)](#) [![License](https://img.shields.io/badge/license-GPLv3%20%2F%20Commercial-blue?style=flat-square)](#license)
 [![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)](#) [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.13-3776AB?style=flat-square&logo=python&logoColor=white)](#)
 [![oosmetrics](https://api.oosmetrics.com/api/v1/badge/achievement/3f3dc845-d27b-4254-a7ac-1bca4e2e3ba0.svg)](https://oosmetrics.com/repo/Hyacinthe-primus/File_Converter_Pro)
@@ -30,7 +30,6 @@
   - [🛡️ Windows Defender & Antivirus](#️-windows-defender--antivirus)
   - [⚡ Terminal Flash on Launch](#-terminal-flash-on-launch--its-safe)
 - [👨‍💻 For Developers](#-for-developers)
-  - [Prerequisites](#prerequisites)
   - [Clone & Install](#clone--install)
   - [Key Python Dependencies](#key-python-dependencies)
   - [Optional External Binaries](#optional-external-binaries)
@@ -138,6 +137,22 @@ You can even add notes to the project so you know exactly what a project is abou
 
 ### Drag & Drop onto the Exe
 Drag one or more files directly onto `File Converter Pro.exe` — they'll be pre-loaded when the window opens.
+
+### 🖱️ Windows Context Menu Integration
+Right-click any supported file directly in File Explorer, no need to open the app first.
+
+File Converter Pro adds a **Convert with FCP** entry to the context menu, with a sub-menu that lists only the conversions relevant to that file type. Click the one you want and a lightweight Quick Convert window opens, runs the conversion, and closes automatically.
+
+<br/>
+
+> ![Context menu — right-click a file, choose conversion, Quick Convert closes after](previews/preview_context_menu.gif)
+
+<br/>
+
+- Works on all supported formats (images, documents, audio, video)
+- Enabled by default during installation, it can be unchecked in the installer
+- Each file type shows only its relevant conversions (e.g. `.docx` shows **Word → PDF**, `.jpg` shows **Image → PDF**, **JPG → PNG**, **Image → ICO**)
+- The Quick Convert window closes automatically after a successful conversion
 
 ### Single Instance
 Launching a second instance focuses the already-running window instead of opening a duplicate.
