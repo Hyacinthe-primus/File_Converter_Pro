@@ -46,6 +46,7 @@
 - [🔧 Forks & Modifications](#-forks--modifications)
 - [📋 Legal](#-legal)
 - [📄 License](#-license)
+- [🤝 Contributors](#-contributors)
 
 </details>
 
