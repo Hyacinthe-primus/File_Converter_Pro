@@ -293,7 +293,7 @@ This section is for anyone who just wants to **download and use** the app. No Py
 
 #### Option A -- Installer *(recommended)*
 
-Download the latest **`FileConverterPro_Setup_v1.0.2.exe`** from the [Releases](../../releases) page and run it.
+Download the latest **`FileConverterPro_Setup_v1.0.3.exe`** from the [Releases](../../releases) page and run it.
 
 The installer:
 - Supports both **English** and **French** during setup
