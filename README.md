@@ -773,6 +773,13 @@ This project uses a **dual licensing model**:
 
 ---
 
+## 🤝 Contributors
+Thanks to our amazing contributors!
+
+[![FCP Contributors](https://contrib.rocks/image?repo=Hyacinthe-primus/File_Converter_Pro)](https://github.com/Hyacinthe-primus/File_Converter_Pro/graphs/contributors)
+
+---
+
 <div align="center">
 <sub>Built by Hyacinthe <em>because file conversion should actually feel good.</em></sub>
 </div>
