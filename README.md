@@ -225,40 +225,50 @@ python main.py help                # Show CLI usage
 
 | Input | Output | Notes |
 |-------|--------|-------|
-| JPEG / JPG | PNG | EXIF preserved |
-| PNG | JPG | Max quality, EXIF preserved |
-| WebP | PNG | |
-| BMP | PNG | |
-| TIFF | PNG | |
-| HEIC | PNG | via `pillow-heif` |
-| GIF | PNG | |
+| Any image | PNG | EXIF preserved |
+| Any image | JPEG | Max quality, EXIF preserved |
+| Any image | JPG | |
+| Any image | BMP | |
+| Any image |  WEBP| |
+| Any image | HEIC | via `pillow-heif` |
+| Any image | TIFF | |
+| Any image | PSD | via `psd-tools` or `imageMagick` |
+| Any image | SVG | |
+| Any image | AVIF | |
+| Any image | J2K | |
+| Any image | DNG | via `rawpy` and `ImageMagick` |
 | Any image | ICO | Multi-resolution icon generation |
 
-All image conversions use Pillow at maximum quality with EXIF metadata preserved.
+All image conversions use Pillow and others libraries at maximum quality with EXIF metadata preserved.
 
 ### 🔊 Audio
 
 | Input | Output |
 |-------|--------|
-| WAV | MP3 |
-| MP3 | WAV |
-| AAC | MP3 |
-| MP3 | AAC |
-| FLAC | MP3 |
-| OGG | MP3 |
-| MP4 | MP3 |
-| AVI | MP3 |
-| WebM | MP3 |
-| MKV | MP3 |
+| Audio | MP3 |
+| Audio | WAV |
+| Audio | AAC |
+| Audio | OGG |
+| Audio | FLAC |
+| Audio | M4A |
+| Video | MP3 |
+| Video | WAV |
+| Video | AAC |
+| Video | FLAC |
 
 ### 🎬 Video
 
 | Input | Output |
 |-------|--------|
-| AVI | MP4 |
-| WebM | MP4 |
-| MKV | MP4 |
-| MOV | MP4 |
+| Video | MP4 |
+| Video | WEBM |
+| Video | MOV |
+| Video | MKV |
+| Video | AVI |
+
+> **Audio**: covers the following extensions only (.mp3, .wav, .aac, .ogg, .flac, .m4a)
+
+> **Video**: covers the following extensions only (.mp4, .webm, .mov, .mkv, .avi)
 
 All audio and video conversions are powered by a bundled `ffmpeg` binary located automatically at runtime, with quality presets per format. (you have to install it yourself)
 
@@ -284,7 +294,7 @@ This section is for anyone who just wants to **download and use** the app. No Py
 |-----------|------------|
 | **OS** | Windows 10 or Windows 11 (64-bit) |
 | **RAM** | 4 GB minimum / 8 GB recommended |
-| **Disk** | ~500 MB free (~435 MB compiled, inherent to the Python / PySide6 / Matplotlib ecosystem) |
+| **Disk** | ~500 MB free (~454 MB compiled, inherent to the Python / PySide6 / Matplotlib ecosystem) |
 | **Display** | 1280 × 720 or higher |
 | **Dependencies** | None, fully self-contained |
 
@@ -509,7 +519,21 @@ python main.py reset-all                 # Wipe all progress (prompts confirmati
 python main.py help                      # Show CLI usage
 ```
 
-> These commands print to stdout and are only usable when running from source (`python main.py`). The compiled `.exe` does not expose a console window, so this output would not be visible.
+#### Using Quick Convert
+
+During development, you can't directly use the Windows File Explorer context menu, but you can use the Quick Convert commands instead.
+
+> **Note:** Files must belong to the same format category. You cannot mix unrelated formats (e.g. `.mp3` and `.png`) in the same command.
+
+```bash
+# Convert a single file
+python main.py --context-menu --files "C:\Users\UserName\path\to\file.jpg"
+
+# Convert multiple files
+python main.py --context-menu --files "C:\Users\UserName\path\to\file.jpg" "C:\Users\UserName\path\to\file.psd"
+```
+
+> **Dev only:** These commands print to stdout and are only available when running from source (`python main.py`). The compiled `.exe` does not expose a console window.
 
 ---
 
@@ -579,6 +603,10 @@ File Converter Pro/
 │   ├── __init__.py               # FadingMainWindow, FileConverterApp
 │   ├── ui.py                     # AppUIMixin — all UI construction
 │   └── logic.py                  # AppLogicMixin — all business logic
+│
+├── context_menu/
+│   ├── __init__.py
+│   └── window.py                 # Quick Convert popup — Windows Shell Integration
 │
 ├── converter/
 │   ├── converters.py             # AdvancedConverterEngine — all format pipelines
