@@ -437,7 +437,12 @@ class PreviewDialog(QDialog):
         try:
             if ext == '.pdf':
                 self.preview_pdf()
-            elif ext in ('.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp', '.gif'):
+            elif ext in (
+                '.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.gif',
+                '.svg', '.ico', '.avif', '.heic', '.heif', '.webp',
+                '.psd', '.j2k', '.jp2', '.jpx', '.dng', '.cr2',
+                '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf',
+            ):
                 self.preview_image()
             elif ext in ('.docx', '.doc'):
                 self.preview_word()
@@ -511,9 +516,106 @@ class PreviewDialog(QDialog):
         except Exception as e:
             self._show_error(f"{self.translate_text('Erreur PDF:')} {e}")
 
+    _QPIXMAP_NATIVE = frozenset({
+        ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp", ".ico",
+    })
+
+    def _load_pixmap(self, path: str) -> "QPixmap":
+        """
+        Load any image as a QPixmap.
+        Priority:
+          1. QPixmap directly          — fast, for Qt-native formats
+          2. SVG via QSvgRenderer      — vector, lossless
+          3. pillow-heif               — HEIC/HEIF
+          4. rawpy                     — DNG/CR2/CR3/NEF/ARW/ORF/RW2/RAF
+          5. psd-tools                 — PSD (flatten layers)
+          6. Pillow generic            — AVIF, TIFF, J2K, JP2, WEBP anim, etc.
+          7. QPixmap fallback          — last resort (returns null if unsupported)
+        """
+        from pathlib import Path as _Path
+        from PySide6.QtGui import QPixmap, QImage
+        ext = _Path(path).suffix.lower()
+
+        if ext in self._QPIXMAP_NATIVE:
+            px = QPixmap(path)
+            if not px.isNull():
+                return px
+
+        if ext == ".svg":
+            try:
+                from PySide6.QtSvg import QSvgRenderer
+                from PySide6.QtGui import QPainter
+                renderer = QSvgRenderer(path)
+                sz = renderer.defaultSize()
+                if not sz.isValid():
+                    sz = renderer.viewBox().size()
+                w = max(sz.width(),  1)
+                h = max(sz.height(), 1)
+                img = QImage(w, h, QImage.Format_ARGB32)
+                img.fill(0)
+                painter = QPainter(img)
+                renderer.render(painter)
+                painter.end()
+                return QPixmap.fromImage(img)
+            except Exception:
+                pass
+
+        if ext in (".heic", ".heif"):
+            try:
+                from pillow_heif import register_heif_opener
+                register_heif_opener()
+                from PIL import Image
+                from PySide6.QtGui import QImage
+                img = Image.open(path).convert("RGBA")
+                data = img.tobytes("raw", "RGBA")
+                qi = QImage(data, img.width, img.height, QImage.Format_RGBA8888)
+                return QPixmap.fromImage(qi)
+            except Exception:
+                pass
+
+        if ext in (".dng", ".cr2", ".cr3", ".nef", ".arw", ".orf", ".rw2", ".raf"):
+            try:
+                import rawpy, numpy as np
+                with rawpy.imread(path) as raw:
+                    rgb = raw.postprocess(use_camera_wb=True, output_bps=8)
+                h, w, _ = rgb.shape
+                qi = QImage(rgb.tobytes(), w, h, w * 3, QImage.Format_RGB888)
+                return QPixmap.fromImage(qi)
+            except Exception:
+                pass
+
+        if ext == ".psd":
+            try:
+                from psd_tools import PSDImage
+                psd = PSDImage.open(path)
+                img = psd.composite().convert("RGBA")
+                data = img.tobytes("raw", "RGBA")
+                qi = QImage(data, img.width, img.height, QImage.Format_RGBA8888)
+                return QPixmap.fromImage(qi)
+            except Exception:
+                pass
+
+        try:
+            from PIL import Image
+            img = Image.open(path)
+            try:
+                img.seek(0)
+            except (AttributeError, EOFError):
+                pass
+            img = img.convert("RGBA")
+            data = img.tobytes("raw", "RGBA")
+            qi = QImage(data, img.width, img.height, QImage.Format_RGBA8888)
+            px = QPixmap.fromImage(qi)
+            if not px.isNull():
+                return px
+        except Exception:
+            pass
+
+        return QPixmap(path)
+
     def preview_image(self):
         try:
-            pixmap = QPixmap(self.file_path)
+            pixmap = self._load_pixmap(self.file_path)
             if pixmap.isNull():
                 self._show_error(self.translate_text("Format d'image non supporté"))
                 return
