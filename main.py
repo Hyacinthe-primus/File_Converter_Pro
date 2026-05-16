@@ -12,14 +12,7 @@ Modes of Execution:
         - Validates Terms & Privacy acceptance
 
     2. CLI Mode (Arguments):
-        - status:                 Display all achievement states
-        - reset <id>:             Reset specific achievement
-        - unlock <id>:            Manually unlock achievement
-        - reset-all:              Wipe all achievement progress
-        - help / -h:              Display CLI usage instructions
-        --lang fr                 Force language (e.g. fr, en, en-revisited, or any .lang name)
-        --theme dark/light        Force theme (dark or light)
-        --lang fr --theme dark    Force both language and theme
+        - help / -h / --help:              Display CLI usage instructions
 
 Author: Hyacinthe
 Version: 1.2
@@ -173,20 +166,32 @@ class CLIHandler:
 ==================================================
  CLI USAGE - FILE CONVERTER PRO
 ==================================================
-  main.py status                  — Display status of all achievements
-  main.py reset <achievement_id>  — Reset a specific achievement
-  main.py unlock <achievement_id> — Unlock a specific achievement
-  main.py reset-all               — Reset all achievements
-  main.py -h / --help             — Display this help
-  main.py --lang fr               — Force language (e.g. fr, en, en-revisited, or any .lang name)
-  main.py --theme dark/light      — Force theme (dark or light)
-  main.py --lang fr --theme dark  — Force both language and theme
+  main.py                                      — Run the application in GUI mode (default)
+  main.py status                               — Display status of all achievements
+  main.py reset <achievement_id>               — Reset a specific achievement
+  main.py unlock <achievement_id>              — Unlock a specific achievement
+  main.py reset-all                            — Reset all achievements
+  main.py help / -h / --help                   — Display this help
+  main.py --lang lang_code                     — Force language
+  main.py --theme theme_code                   — Force theme
+  main.py --lang lang_code --theme theme_code  — Force both language and theme
+
+Quick Convert (Context Menu):
+  main.py --context-menu --files "path/to/file.jpg"
+  main.py --context-menu --files "path/to/file.jpg" "path/to/file.psd"
+
+  Note: Files must belong to the same format category (e.g. all images, all audio).
+        Otherwise, the context menu will ignore them and show an error message.
 
 Examples:
   main.py status
   main.py reset  first_adventure
   main.py unlock apprentice
   main.py reset-all
+  main.py --lang fr (fr, en, en-revisited, or any .lang name)
+  main.py --theme dark (dark or light)
+  main.py --lang en --theme light
+  main.py --context-menu --files "C:\\Users\\UserName\\Desktop\\photo.jpg"
 """
 
     def __init__(self, argv: list[str]) -> None:
