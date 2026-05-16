@@ -781,13 +781,13 @@ class AchievementSystem(QObject):
                 "adv_format_nomade": {
                     "id": "adv_format_nomade",
                     "name": "⚡ Format Nomade",
-                    "description": "Avoir utilisé les 8 types de conversion image des Conversions Avancées",
+                    "description": "Avoir utilisé les 13 types de conversion image des Conversions Avancées",
                     "icon": "compass.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
                     "requirement": {
                         "type": "adv_image_types_used",
-                        "value": 8
+                        "value": 13
                     },
                     "reward_xp": 500,
                     "secret": False,
@@ -849,13 +849,13 @@ class AchievementSystem(QObject):
                 "adv_codec_master": {
                     "id": "adv_codec_master",
                     "name": "⚡ Codec Master",
-                    "description": "Avoir utilisé les 8 types de conversion vidéo des Conversions Avancées",
+                    "description": "Avoir utilisé les 9 types de conversion vidéo des Conversions Avancées",
                     "icon": "mechanical_raven.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
                     "requirement": {
                         "type": "adv_video_types_used",
-                        "value": 8
+                        "value": 9
                     },
                     "reward_xp": 500,
                     "secret": False,
@@ -923,7 +923,7 @@ class AchievementSystem(QObject):
                     "tier": "legendary",
                     "requirement": {
                         "type": "adv_all_types_used",
-                        "value": 36
+                        "value": 41
                     },
                     "reward_xp": 2000,
                     "secret": False,
@@ -1334,6 +1334,30 @@ class AchievementSystem(QObject):
                 "adv_pptx_to_pdf": 0,
                 "adv_image_types_used": 0,
                 "adv_video_types_used": 0,
+                # Per-type image flags (image_to_*)
+                "adv_image_to_png": 0,
+                "adv_image_to_jpeg": 0,
+                "adv_image_to_jpg": 0,
+                "adv_image_to_bmp": 0,
+                "adv_image_to_heic": 0,
+                "adv_image_to_webp": 0,
+                "adv_image_to_tiff": 0,
+                "adv_image_to_psd": 0,
+                "adv_image_to_svg": 0,
+                "adv_image_to_avif": 0,
+                "adv_image_to_j2k": 0,
+                "adv_image_to_dng": 0,
+                "adv_image_to_ico_flag": 0,
+                # Per-type video flags (video_to_*)
+                "adv_video_to_mp4": 0,
+                "adv_video_to_webm": 0,
+                "adv_video_to_mkv": 0,
+                "adv_video_to_mov": 0,
+                "adv_video_to_avi": 0,
+                "adv_video_to_mp3": 0,
+                "adv_video_to_wav": 0,
+                "adv_video_to_aac": 0,
+                "adv_video_to_flac": 0,
                 # Templates stats
                 "tpl_created_total": 0,
                 "tpl_applied_total": 0,
@@ -2120,51 +2144,67 @@ class AchievementSystem(QObject):
 
     # Advanced conversions tracking
     _ADV_TYPE_MAP = {
-        "txt_to_pdf":   ("adv_doc_conversions",   None,                    "adv_txt_to_pdf"),
-        "rtf_to_pdf":   ("adv_doc_conversions",   None,                    "adv_rtf_to_pdf"),
-        "txt_to_docx":  ("adv_doc_conversions",   None,                    "adv_txt_to_docx"),
-        "rtf_to_docx":  ("adv_doc_conversions",   None,                    "adv_rtf_to_docx"),
-        "csv_to_json":  ("adv_doc_conversions",   "adv_csv_json_conversions", "adv_csv_to_json"),
-        "json_to_csv":  ("adv_doc_conversions",   "adv_csv_json_conversions", "adv_json_to_csv"),
-        "xlsx_to_pdf":  ("adv_doc_conversions",   "adv_xlsx_to_pdf",       "adv_xlsx_to_pdf"),
-        "xlsx_to_json": ("adv_doc_conversions",   None,                    "adv_xlsx_to_json"),
-        "xlsx_to_csv":  ("adv_doc_conversions",   None,                    "adv_xlsx_to_csv"),
-        "pptx_to_pdf":  ("adv_doc_conversions",   "adv_pptx_to_pdf",       "adv_pptx_to_pdf"),
-        "html_to_pdf":  ("adv_doc_conversions",   "adv_html_to_pdf",       "adv_html_to_pdf_flag"),
-        "pdf_to_html":  ("adv_doc_conversions",   None,                    "adv_pdf_to_html"),
-        "epub_to_pdf":  ("adv_doc_conversions",   "adv_epub_to_pdf",       "adv_epub_to_pdf_flag"),
-        "jpeg_to_png":  ("adv_image_conversions", None,                    "adv_jpeg_to_png"),
-        "png_to_jpg":   ("adv_image_conversions", None,                    "adv_png_to_jpg"),
-        "jpg_to_png":   ("adv_image_conversions", None,                    "adv_jpg_to_png"),
-        "webp_to_png":  ("adv_image_conversions", None,                    "adv_webp_to_png"),
-        "bmp_to_png":   ("adv_image_conversions", None,                    "adv_bmp_to_png"),
-        "tiff_to_png":  ("adv_image_conversions", None,                    "adv_tiff_to_png"),
-        "heic_to_png":  ("adv_image_conversions", "adv_heic_conversions",  "adv_heic_to_png"),
-        "gif_to_png":   ("adv_image_conversions", None,                    "adv_gif_to_png"),
-        "image_to_ico": ("adv_image_conversions", "adv_image_to_ico",      "adv_image_to_ico_flag"),
-        "avi_to_mp4":   ("adv_video_conversions", None,                    "adv_avi_to_mp4"),
-        "webm_to_mp4":  ("adv_video_conversions", None,                    "adv_webm_to_mp4"),
-        "mkv_to_mp4":   ("adv_video_conversions", None,                    "adv_mkv_to_mp4"),
-        "mov_to_mp4":   ("adv_video_conversions", None,                    "adv_mov_to_mp4"),
-        "mp4_to_mp3":   ("adv_audio_conversions", "adv_video_to_audio",    "adv_mp4_to_mp3"),
-        "avi_to_mp3":   ("adv_audio_conversions", "adv_video_to_audio",    "adv_avi_to_mp3"),
-        "webm_to_mp3":  ("adv_audio_conversions", "adv_video_to_audio",    "adv_webm_to_mp3"),
-        "mkv_to_mp3":   ("adv_audio_conversions", "adv_video_to_audio",    "adv_mkv_to_mp3"),
-        "wav_to_mp3":   ("adv_audio_conversions", None,                    "adv_wav_to_mp3"),
-        "mp3_to_wav":   ("adv_audio_conversions", None,                    "adv_mp3_to_wav"),
-        "acc_to_mp3":   ("adv_audio_conversions", None,                    "adv_aac_to_mp3"),
-        "mp3_to_acc":   ("adv_audio_conversions", None,                    "adv_mp3_to_aac"),
-        "flac_to_mp3":  ("adv_audio_conversions", None,                    "adv_flac_to_mp3"),
-        "ogg_to_mp3":   ("adv_audio_conversions", None,                    "adv_ogg_to_mp3"),
+        # Documents (13 types)
+        "txt_to_pdf":    ("adv_doc_conversions",   None,                    "adv_txt_to_pdf"),
+        "rtf_to_pdf":    ("adv_doc_conversions",   None,                    "adv_rtf_to_pdf"),
+        "txt_to_docx":   ("adv_doc_conversions",   None,                    "adv_txt_to_docx"),
+        "rtf_to_docx":   ("adv_doc_conversions",   None,                    "adv_rtf_to_docx"),
+        "csv_to_json":   ("adv_doc_conversions",   "adv_csv_json_conversions", "adv_csv_to_json"),
+        "json_to_csv":   ("adv_doc_conversions",   "adv_csv_json_conversions", "adv_json_to_csv"),
+        "xlsx_to_pdf":   ("adv_doc_conversions",   "adv_xlsx_to_pdf",       "adv_xlsx_to_pdf_flag"),
+        "xlsx_to_json":  ("adv_doc_conversions",   None,                    "adv_xlsx_to_json"),
+        "xlsx_to_csv":   ("adv_doc_conversions",   None,                    "adv_xlsx_to_csv"),
+        "pptx_to_pdf":   ("adv_doc_conversions",   "adv_pptx_to_pdf",       "adv_pptx_to_pdf_flag"),
+        "html_to_pdf":   ("adv_doc_conversions",   "adv_html_to_pdf",       "adv_html_to_pdf_flag"),
+        "pdf_to_html":   ("adv_doc_conversions",   None,                    "adv_pdf_to_html"),
+        "epub_to_pdf":   ("adv_doc_conversions",   "adv_epub_to_pdf",       "adv_epub_to_pdf_flag"),
+        # Images (13 types unified image_to_* keys matching CATEGORY_MAP)
+        "image_to_png":  ("adv_image_conversions", None,                    "adv_image_to_png"),
+        "image_to_jpeg": ("adv_image_conversions", None,                    "adv_image_to_jpeg"),
+        "image_to_jpg":  ("adv_image_conversions", None,                    "adv_image_to_jpg"),
+        "image_to_bmp":  ("adv_image_conversions", None,                    "adv_image_to_bmp"),
+        "image_to_heic": ("adv_image_conversions", "adv_heic_conversions",  "adv_image_to_heic"),
+        "image_to_webp": ("adv_image_conversions", None,                    "adv_image_to_webp"),
+        "image_to_tiff": ("adv_image_conversions", None,                    "adv_image_to_tiff"),
+        "image_to_psd":  ("adv_image_conversions", None,                    "adv_image_to_psd"),
+        "image_to_svg":  ("adv_image_conversions", None,                    "adv_image_to_svg"),
+        "image_to_avif": ("adv_image_conversions", None,                    "adv_image_to_avif"),
+        "image_to_j2k":  ("adv_image_conversions", None,                    "adv_image_to_j2k"),
+        "image_to_dng":  ("adv_image_conversions", None,                    "adv_image_to_dng"),
+        "image_to_ico":  ("adv_image_conversions", "adv_image_to_ico",      "adv_image_to_ico_flag"),
+        # Video (9 types video_to_* keys matching CATEGORY_MAP)
+        "video_to_mp4":  ("adv_video_conversions", None,                    "adv_video_to_mp4"),
+        "video_to_webm": ("adv_video_conversions", None,                    "adv_video_to_webm"),
+        "video_to_mkv":  ("adv_video_conversions", None,                    "adv_video_to_mkv"),
+        "video_to_mov":  ("adv_video_conversions", None,                    "adv_video_to_mov"),
+        "video_to_avi":  ("adv_video_conversions", None,                    "adv_video_to_avi"),
+        "video_to_mp3":  ("adv_audio_conversions", "adv_video_to_audio",    "adv_video_to_mp3"),
+        "video_to_wav":  ("adv_audio_conversions", "adv_video_to_audio",    "adv_video_to_wav"),
+        "video_to_aac":  ("adv_audio_conversions", "adv_video_to_audio",    "adv_video_to_aac"),
+        "video_to_flac": ("adv_audio_conversions", "adv_video_to_audio",    "adv_video_to_flac"),
+        # Audio (6 types)
+        "wav_to_mp3":    ("adv_audio_conversions", None,                    "adv_wav_to_mp3"),
+        "mp3_to_wav":    ("adv_audio_conversions", None,                    "adv_mp3_to_wav"),
+        "acc_to_mp3":    ("adv_audio_conversions", None,                    "adv_aac_to_mp3"),
+        "mp3_to_acc":    ("adv_audio_conversions", None,                    "adv_mp3_to_aac"),
+        "flac_to_mp3":   ("adv_audio_conversions", None,                    "adv_flac_to_mp3"),
+        "ogg_to_mp3":    ("adv_audio_conversions", None,                    "adv_ogg_to_mp3"),
     }
 
+    # 13 image type flags — one per image_to_* conversion type
     _ADV_IMG_TYPE_FLAGS = [
-        "adv_jpeg_to_png", "adv_png_to_jpg", "adv_jpg_to_png", "adv_webp_to_png",
-        "adv_bmp_to_png", "adv_tiff_to_png", "adv_heic_to_png", "adv_gif_to_png",
+        "adv_image_to_png",  "adv_image_to_jpeg", "adv_image_to_jpg",
+        "adv_image_to_bmp",  "adv_image_to_heic", "adv_image_to_webp",
+        "adv_image_to_tiff", "adv_image_to_psd",  "adv_image_to_svg",
+        "adv_image_to_avif", "adv_image_to_j2k",  "adv_image_to_dng",
+        "adv_image_to_ico_flag",
     ]
+    # 9 video type flags — video_to_mp4/webm/mkv/mov/avi + video_to_mp3/wav/aac/flac
     _ADV_VID_TYPE_FLAGS = [
-        "adv_avi_to_mp4", "adv_webm_to_mp4", "adv_mkv_to_mp4", "adv_mov_to_mp4",
-        "adv_mp4_to_mp3", "adv_avi_to_mp3", "adv_webm_to_mp3", "adv_mkv_to_mp3",
+        "adv_video_to_mp4",  "adv_video_to_webm", "adv_video_to_mkv",
+        "adv_video_to_mov",  "adv_video_to_avi",
+        "adv_video_to_mp3",  "adv_video_to_wav",  "adv_video_to_aac",
+        "adv_video_to_flac",
     ]
 
     _TPL_CATEGORIES = {
@@ -2309,7 +2349,10 @@ class AchievementSystem(QObject):
         _ext_norm = {
             "jpeg": "jpg", "doc": "docx", "tiff": "png", "bmp": "png",
             "tgz": "gz",   "gzip": "gz",  "webp": "png", "gif": "png",
-            "heic": "png",
+            "heic": "png", "psd": "png",  "svg": "png",  "avif": "png",
+            "j2k": "png",  "dng": "png",  "ico": "png",
+            "webm": "mp4", "mkv": "mp4",  "mov": "mp4",  "avi": "mp4",
+            "mp3": "mp3",  "wav": "mp3",  "aac": "mp3",  "flac": "mp3",
         }.get(_ext, _ext)
         if _ext_norm in ("pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"):
             self.record_format_usage(_ext_norm)

@@ -765,7 +765,6 @@ class AchievementsManager(QDialog):
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
-        # Warning
         warning_label = QLabel(self.translator.translate(
             "⚠️ ATTENTION : Cet outil est réservé à l'administrateur. Les modifications sont permanentes !"
         ))
@@ -773,11 +772,9 @@ class AchievementsManager(QDialog):
         warning_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(warning_label)
         
-        # Stats
         stats_group = QGroupBox(self.translator.translate("📊 Statistiques"))
         stats_layout = QVBoxLayout(stats_group)
 
-        # Top row: counters
         counters_layout = QHBoxLayout()
         self.total_label    = QLabel(self.translator.translate("Total: 0"))
         self.unlocked_label = QLabel(self.translator.translate("Débloqués: 0"))
@@ -834,7 +831,6 @@ class AchievementsManager(QDialog):
         
         layout.addWidget(filters_group)
         
-        # Achievements table
         self.achievements_table = QTableWidget()
         self.achievements_table.setColumnCount(8)
         self.achievements_table.setHorizontalHeaderLabels([
@@ -856,7 +852,6 @@ class AchievementsManager(QDialog):
         
         layout.addWidget(self.achievements_table, stretch=10)
         
-        # Bulk actions
         bulk_group = QGroupBox(self.translator.translate("🎯 Actions en masse"))
         bulk_layout = QHBoxLayout(bulk_group)
         
@@ -1015,7 +1010,6 @@ class AchievementsManager(QDialog):
 
         self.achievements_table.setRowCount(0)
 
-        # Tier → accent colour mapping
         TIER_COLORS = {
             "starter":      "#a8dadc",
             "bronze":       "#cd7f32",
@@ -1139,7 +1133,6 @@ class AchievementsManager(QDialog):
             self.achievements_table.setCellWidget(i, 7, action_widget)
 
         self.achievements_table.resizeColumnsToContents()
-        # Connect row click to auto-fill the editor — disconnect only if already connected
         if self.achievements_table.receivers("cellClicked(int,int)") > 0:
             self.achievements_table.cellClicked.disconnect()
         self.achievements_table.cellClicked.connect(
@@ -1329,7 +1322,7 @@ class AchievementsManager(QDialog):
                     self._global_media_player = None
                     self._global_audio_output = None
             
-            from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput  # lazy — codecs loaded on first sound
+            from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
             self._global_audio_output = QAudioOutput()
             self._global_media_player = QMediaPlayer()
             
@@ -1616,9 +1609,6 @@ class QuickAchievementsReset(QDialog):
         self.language   = language if language is not None else detect_language()
         self.translator = TranslationManager(self.language)
         self.dark_mode  = _load_dark_mode()
-
-        # Apply our own stylesheet immediately — this overrides any cascade
-        # from the parent window (app.py) and restores correct emoji rendering.
         self.setStyleSheet(_DARK_STYLE if self.dark_mode else _LIGHT_STYLE)
 
         self.setWindowTitle(self.translator.translate("⚡ Réinitialisation Rapide des Succès"))
@@ -1633,7 +1623,6 @@ class QuickAchievementsReset(QDialog):
         except Exception:
             return False
 
-    # kept for backward-compat
     def apply_light_theme(self):
         self.setStyleSheet(_LIGHT_STYLE)
 
@@ -1644,13 +1633,11 @@ class QuickAchievementsReset(QDialog):
         """Configure the interface"""
         layout = QVBoxLayout(self)
         
-        # Title
         title_label = QLabel(self.translator.translate("⚡ RÉINITIALISATION RAPIDE DES SUCCÈS"))
         title_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #dc3545; padding: 10px;")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
-        # List of unlocked achievements
         unlocked_group = QGroupBox(self.translator.translate("✅ Succès actuellement débloqués"))
         unlocked_layout = QVBoxLayout(unlocked_group)
         
@@ -1660,7 +1647,6 @@ class QuickAchievementsReset(QDialog):
         
         layout.addWidget(unlocked_group)
         
-        # Quick actions
         actions_group = QGroupBox(self.translator.translate("🎯 Actions Rapides"))
         actions_layout = QVBoxLayout(actions_group)
         
@@ -1690,7 +1676,6 @@ class QuickAchievementsReset(QDialog):
         
         layout.addWidget(actions_group)
         
-        # Buttons
         close_btn = QPushButton(self.translator.translate("❌ Fermer"))
         close_btn.clicked.connect(self.close)
         
@@ -2035,7 +2020,6 @@ class QuickAchievementsReset(QDialog):
         self.full_manager = AchievementsManager(self.db_path, self)
         self.full_manager.show()
 
-# CLI utility functions
 def reset_specific_achievement_cli(achievement_id):
     """Reset a specific achievement (CLI)"""
     try:
