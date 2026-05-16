@@ -304,7 +304,7 @@ class AppLogicMixin:
         IMAGE_EXTS  = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp', '.gif'}
         EXCEL_EXTS  = {'.xlsx', '.xls'}
         AUDIO_EXTS  = {'.mp3', '.wav', '.aac', '.flac', '.ogg'}
-        VIDEO_EXTS  = {'.mp4', '.avi', '.mkv', '.webm'}
+        VIDEO_EXTS  = {'.mp4', '.avi', '.mkv', '.mov', '.webm'}
         WEB_EXTS    = {'.json', '.html', '.htm'}
         EPUB_EXTS   = {'.epub'}
         
@@ -733,7 +733,8 @@ class AppLogicMixin:
             # Run ffmpeg
             import subprocess
             cmd = [ffmpeg_bin, "-y", "-i", src_path] + args + [output_path]
-            result = subprocess.run(cmd, capture_output=True, timeout=3600)
+            _no_window = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
+            result = subprocess.run(cmd, capture_output=True, timeout=3600, creationflags=_no_window)
 
             if result.returncode != 0:
                 err = result.stderr.decode(errors="replace")[-500:]
@@ -3276,9 +3277,19 @@ class AppLogicMixin:
         
         c.setFont("Helvetica", 12)
         c.drawString(100, height - 150, message)
-        c.drawString(100, height - 170, "Le document original n'a pas pu être converti correctement.")
+        c.drawString(100, height - 170, "The original document could not be converted correctly.")
         
         c.save()
+
+    def _open_image_for_pdf(self, file_path):
+        try:
+            import fitz
+            return Image.open(file_path).convert('RGB')
+        except Exception:
+            doc = fitz.open(file_path)
+            pix = doc[0].get_pixmap(dpi=150)
+            doc.close()
+            return Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
     def convert_images_to_pdf(self):
         if not (hasattr(self, 'active_templates') and 'images_to_pdf' in self.active_templates):
@@ -3287,7 +3298,7 @@ class AppLogicMixin:
                 (self._ensure_template_manager() or object()).apply_template(_def_id, self)
 
         if hasattr(self, 'active_templates') and 'images_to_pdf' in self.active_templates:
-            self.config['separate_image_pdfs'] =                 self.active_templates['images_to_pdf'].get('separate', False)
+            self.config['separate_image_pdfs'] = self.active_templates['images_to_pdf'].get('separate', False)
 
         selected_items = self.files_list_widget.selectedItems()
         files_to_process = []
@@ -3299,7 +3310,14 @@ class AppLogicMixin:
         else:
             files_to_process = self.files_list
 
-        IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp')
+        IMAGE_EXTENSIONS = (
+            '.png',  '.jpeg', '.jpg',  '.bmp',
+            '.heic', '.heif', '.gif',  '.jpx',
+            '.webp', '.tiff', '.tif',  '.psd',
+            '.svg',  '.avif', '.j2k',  '.jp2',
+            '.dng',  '.cr2',  '.cr3',  '.nef',
+            '.arw',  '.orf',  '.rw2',  '.raf',
+)
         image_files = [f for f in files_to_process if f.lower().endswith(IMAGE_EXTENSIONS)]
         num_images = len(image_files)
         if num_images == 0:
@@ -3456,7 +3474,7 @@ class AppLogicMixin:
                 images = []
                 for i, file_path in enumerate(image_files):
                     try:
-                        img = Image.open(file_path).convert('RGB')
+                        img = self._open_image_for_pdf(file_path)
                         images.append(img)
                         self.progress_bar.setValue(int((i + 1) / num_images * 50))
                     except Exception as e:
@@ -3539,7 +3557,7 @@ class AppLogicMixin:
                 self.progress_bar.setValue(0)
                 
                 try:
-                    img = Image.open(file_path).convert('RGB')
+                    img = self._open_image_for_pdf(file_path)
                     img.save(output_file, format='PDF')
                     conversion_time = (datetime.now() - start_time).total_seconds()
                     
