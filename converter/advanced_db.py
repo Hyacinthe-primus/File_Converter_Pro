@@ -329,6 +329,7 @@ class AdvancedDatabaseManager:
         top_types = stats["top_types"]
 
         _LABELS = {
+            # Documents
             "txt_to_pdf":"TXT→PDF","rtf_to_pdf":"RTF→PDF",
             "txt_to_docx":"TXT→DOCX","rtf_to_docx":"RTF→DOCX",
             "csv_to_json":"CSV→JSON","json_to_csv":"JSON→CSV",
@@ -336,17 +337,24 @@ class AdvancedDatabaseManager:
             "xlsx_to_csv":"XLSX→CSV","pptx_to_pdf":"PPTX→PDF",
             "html_to_pdf":"HTML→PDF","pdf_to_html":"PDF→HTML",
             "epub_to_pdf":"EPUB→PDF",
-            "jpeg_to_png":"JPEG→PNG","png_to_jpg":"PNG→JPG",
-            "jpg_to_png":"JPG→PNG","webp_to_png":"WEBP→PNG",
-            "bmp_to_png":"BMP→PNG","tiff_to_png":"TIFF→PNG",
-            "wav_to_mp3":"WAV→MP3","mp3_to_wav":"MP3→WAV",
-            "acc_to_mp3":"AAC→MP3","mp3_to_acc":"MP3→AAC",
-            "flac_to_mp3":"FLAC→MP3","ogg_to_mp3":"OGG→MP3",
-            "avi_to_mp4":"AVI→MP4","webm_to_mp4":"WEBM→MP4",
-            "mkv_to_mp4":"MKV→MP4","mov_to_mp4":"MOV→MP4",
-            "mp4_to_mp3":"MP4→MP3",
-            "avi_to_mp3":"AVI→MP3","webm_to_mp3":"WEBM→MP3",
-            "mkv_to_mp3":"MKV→MP3",
+            # Images
+            "image_to_png":"Image→PNG","image_to_jpeg":"Image→JPEG",
+            "image_to_jpg":"Image→JPG","image_to_bmp":"Image→BMP",
+            "image_to_heic":"Image→HEIC","image_to_webp":"Image→WEBP",
+            "image_to_tiff":"Image→TIFF","image_to_psd":"Image→PSD",
+            "image_to_svg":"Image→SVG","image_to_avif":"Image→AVIF",
+            "image_to_j2k":"Image→J2K","image_to_dng":"Image→DNG",
+            "image_to_ico":"Image→ICO",
+            # Video
+            "video_to_mp4":"Video→MP4","video_to_webm":"Video→WEBM",
+            "video_to_mkv":"Video→MKV","video_to_mov":"Video→MOV",
+            "video_to_avi":"Video→AVI","video_to_mp3":"Video→MP3",
+            "video_to_wav":"Video→WAV","video_to_aac":"Video→AAC",
+            "video_to_flac":"Video→FLAC",
+            # Audio
+            "audio_to_mp3":"Audio→MP3","audio_to_wav":"Audio→WAV",
+            "audio_to_aac":"Audio→AAC","audio_to_ogg":"Audio→OGG",
+            "audio_to_flac":"Audio→FLAC","audio_to_m4a":"Audio→M4A",
         }
         top_labeled = [(_LABELS.get(t, t), c) for t, c in top_types]
 
