@@ -1337,7 +1337,9 @@ class EnhancedTemplatesDialog(QDialog):
         file_extensions = {
             self.translate_text("Conversion PDF→Word"): ['.pdf'],
             self.translate_text("Conversion Word→PDF"): ['.docx', '.doc'],
-            self.translate_text("Conversion Images→PDF"): ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'],
+            self.translate_text("Conversion Images→PDF"): ['.png', '.jpeg', '.jpg', '.bmp', '.heic', '.heif', '.gif', '.jpx',
+                                                           '.webp', '.tiff', '.tif', '.psd', '.svg', '.avif', '.j2k', '.jp2',
+                                                           '.dng', '.cr2', '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf'],
             self.translate_text("Fusion PDF"): ['.pdf'],
             self.translate_text("Fusion Word"): ['.docx', '.doc'],
             self.translate_text("Division PDF"): ['.pdf'],
@@ -1365,7 +1367,7 @@ class EnhancedTemplatesDialog(QDialog):
         elif template_type == self.translate_text("Conversion Word→PDF"):
             return "Fichiers Word (*.docx *.doc)"
         elif template_type == self.translate_text("Conversion Images→PDF"):
-            return "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.webp)"
+            return "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.psd *.svg *.dng)"
         elif template_type == self.translate_text("Fusion PDF"):
             return "Fichiers PDF (*.pdf)"
         elif template_type == self.translate_text("Fusion Word"):

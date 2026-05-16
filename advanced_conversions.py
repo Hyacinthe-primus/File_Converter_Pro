@@ -423,46 +423,59 @@ class AdvancedConversionsDialog(QDialog):
         return self._build_tab_from_groups(groups, "documents")
 
     def _build_images_tab(self) -> QWidget:
+        _IMG_EXTS = [
+            ".png",  ".jpeg", ".jpg",  ".bmp",
+            ".heic", ".heif", ".gif",  ".jpx",
+            ".webp", ".tiff", ".tif",  ".psd",
+            ".svg",  ".avif", ".j2k",  ".jp2",
+            ".dng",  ".cr2",  ".cr3",  ".nef",
+            ".arw",  ".orf",  ".rw2",  ".raf",
+]
         groups = [
-            (self.tr_("JPEG / PNG"), [
-                ("🖼️ JPEG → PNG", "jpeg_to_png", [".jpeg", ".jpg"]),
-                ("🖼️ PNG → JPG",  "png_to_jpg",  [".png"]),
-                ("🖼️ JPG → PNG",  "jpg_to_png",  [".jpg", ".jpeg"]),
-                ("🖼️ WEBP → PNG", "webp_to_png", [".webp"]),
-                ("🖼️ BMP → PNG",  "bmp_to_png",  [".bmp"]),
-                ("🖼️ TIFF → PNG", "tiff_to_png", [".tiff", ".tif"]),
-                ("🖼️ HEIC → PNG", "heic_to_png", [".heic", ".heif"]),
-                ("🖼️ GIF → PNG",  "gif_to_png",  [".gif"]),
+            (self.tr_("Images"), [
+                ("🖼️ Image → PNG",  "image_to_png",  _IMG_EXTS),
+                ("🖼️ Image → JPEG", "image_to_jpeg", _IMG_EXTS),
+                ("🖼️ Image → JPG",  "image_to_jpg",  _IMG_EXTS),
+                ("🖼️ Image → BMP",  "image_to_bmp",  _IMG_EXTS),
+                ("🖼️ Image → HEIC", "image_to_heic", _IMG_EXTS),
+                ("🖼️ Image → WEBP", "image_to_webp", _IMG_EXTS),
+                ("🖼️ Image → TIFF", "image_to_tiff", _IMG_EXTS),
+                ("🖼️ Image → PSD",  "image_to_psd",  _IMG_EXTS),
+                ("🖼️ Image → SVG",  "image_to_svg",  _IMG_EXTS),
+                ("🖼️ Image → AVIF", "image_to_avif", _IMG_EXTS),
+                ("🖼️ Image → J2K",  "image_to_j2k",  _IMG_EXTS),
+                ("🖼️ Image → DNG",  "image_to_dng",  _IMG_EXTS),
             ]),
             (self.tr_("ICO (Icône)"), [
-                ("🎨 Image → ICO", "image_to_ico",
-                 [".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif",
-                  ".webp", ".gif"]),
+                ("🎨 Image → ICO", "image_to_ico", _IMG_EXTS),
             ]),
         ]
         return self._build_tab_from_groups(groups, "images")
 
     def _build_av_tab(self) -> QWidget:
+        _VID_EXTS = [".mp4", ".webm", ".mkv", ".mov", ".avi"]
+        _AUD_EXTS = [".mp3", ".wav", ".aac", ".ogg", ".flac", ".m4a"]
         groups = [
             (self.tr_("Vidéo → Vidéo"), [
-                ("🎬 AVI → MP4",  "avi_to_mp4",  [".avi"]),
-                ("🎬 WEBM → MP4", "webm_to_mp4", [".webm"]),
-                ("🎬 MKV → MP4",  "mkv_to_mp4",  [".mkv"]),
-                ("🎬 MOV → MP4",  "mov_to_mp4",  [".mov"]),
+                ("🎬 Video → MP4",  "video_to_mp4",  _VID_EXTS),
+                ("🎬 Video → WEBM", "video_to_webm", _VID_EXTS),
+                ("🎬 Video → MKV",  "video_to_mkv",  _VID_EXTS),
+                ("🎬 Video → MOV",  "video_to_mov",  _VID_EXTS),
+                ("🎬 Video → AVI",  "video_to_avi",  _VID_EXTS),
             ]),
             (self.tr_("Vidéo → Audio"), [
-                ("🎬 MP4 → MP3",  "mp4_to_mp3",  [".mp4"]),
-                ("🎬 AVI → MP3",  "avi_to_mp3",  [".avi"]),
-                ("🎬 WEBM → MP3", "webm_to_mp3", [".webm"]),
-                ("🎬 MKV → MP3",  "mkv_to_mp3",  [".mkv"]),
+                ("🎬 Video → MP3",  "video_to_mp3",  _VID_EXTS),
+                ("🎬 Video → WAV",  "video_to_wav",  _VID_EXTS),
+                ("🎬 Video → AAC",  "video_to_aac",  _VID_EXTS),
+                ("🎬 Video → FLAC", "video_to_flac", _VID_EXTS),
             ]),
             (self.tr_("Audio → Audio"), [
-                ("🎵 WAV → MP3",  "wav_to_mp3",  [".wav"]),
-                ("🎵 MP3 → WAV",  "mp3_to_wav",  [".mp3"]),
-                ("🎵 AAC → MP3",  "acc_to_mp3",  [".aac", ".m4a"]),
-                ("🎵 MP3 → AAC",  "mp3_to_acc",  [".mp3"]),
-                ("🎵 FLAC → MP3", "flac_to_mp3", [".flac"]),
-                ("🎵 OGG → MP3",  "ogg_to_mp3",  [".ogg"]),
+                ("🎵 Audio → MP3",  "audio_to_mp3",  _AUD_EXTS),
+                ("🎵 Audio → WAV",  "audio_to_wav",  _AUD_EXTS),
+                ("🎵 Audio → AAC",  "audio_to_aac",  _AUD_EXTS),
+                ("🎵 Audio → OGG",  "audio_to_ogg",  _AUD_EXTS),
+                ("🎵 Audio → FLAC", "audio_to_flac", _AUD_EXTS),
+                ("🎵 Audio → M4A",  "audio_to_m4a",  _AUD_EXTS),
             ]),
         ]
         return self._build_tab_from_groups(groups, "audio_video")
@@ -512,109 +525,173 @@ class AdvancedConversionsDialog(QDialog):
         btn = QPushButton(label)
         btn.setMinimumHeight(45)
         btn.setCursor(Qt.PointingHandCursor)
-        btn.setStyleSheet(self._btn_style("conversion", tab_type))
+        btn.setProperty("tab_type", tab_type)
         btn.clicked.connect(
             lambda _checked, ct=conversion_type, exts=accepted_exts:
                 self._run_conversion(ct, exts)
         )
         return btn
 
-    # Theme / styling
     def _apply_theme_style(self) -> None:
         dark = getattr(self.parent_window, "dark_mode", False)
+
+        btn_glassy = """
+            /* Documents — blue */
+            QPushButton[tab_type="documents"] {
+                background: rgba(110,190,255,0.15);
+                color: rgb(110,190,255);
+                border: 1px solid rgba(110,190,255,0.30);
+                border-radius: 8px;
+                font-weight: bold; font-size: 13px;
+                font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+                letter-spacing: 0.3px;
+            }
+            QPushButton[tab_type="documents"]:hover   { background: rgba(110,190,255,0.26); }
+            QPushButton[tab_type="documents"]:pressed { background: rgba(110,190,255,0.38); }
+
+            /* Images — teal */
+            QPushButton[tab_type="images"] {
+                background: rgba(32,200,170,0.15);
+                color: rgb(32,200,170);
+                border: 1px solid rgba(32,200,170,0.30);
+                border-radius: 8px;
+                font-weight: bold; font-size: 13px;
+                font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+                letter-spacing: 0.3px;
+            }
+            QPushButton[tab_type="images"]:hover   { background: rgba(32,200,170,0.26); }
+            QPushButton[tab_type="images"]:pressed { background: rgba(32,200,170,0.38); }
+
+            /* Audio/Video — orange */
+            QPushButton[tab_type="audio_video"] {
+                background: rgba(255,140,60,0.15);
+                color: rgb(255,140,60);
+                border: 1px solid rgba(255,140,60,0.30);
+                border-radius: 8px;
+                font-weight: bold; font-size: 13px;
+                font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+                letter-spacing: 0.3px;
+            }
+            QPushButton[tab_type="audio_video"]:hover   { background: rgba(255,140,60,0.26); }
+            QPushButton[tab_type="audio_video"]:pressed { background: rgba(255,140,60,0.38); }
+        """
+
         if dark:
             self.setStyleSheet("""
-                QDialog { background-color: #1a1d23; }
-                QLabel  { color: #e9ecef; }
+                QDialog { background-color: #0f1117; }
+                QLabel  { color: #e6edf3; }
                 QGroupBox {
-                    color: #adb5bd; border: 2px solid #495057;
-                    border-radius: 8px; margin-top: 10px; padding-top: 10px;
-                    background-color: #2d333b;
+                    color: rgba(255,255,255,0.45);
+                    border: 1px solid rgba(255,255,255,0.08);
+                    border-radius: 10px; margin-top: 10px; padding-top: 10px;
+                    background-color: rgba(255,255,255,0.03);
                 }
-                QGroupBox::title { subcontrol-origin: margin; left: 10px;
-                    padding: 0 5px; color: #adb5bd; }
+                QGroupBox::title {
+                    subcontrol-origin: margin; left: 10px;
+                    padding: 0 5px; color: rgba(255,255,255,0.45);
+                    font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
+                }
                 QScrollArea { border: none; background-color: transparent; }
                 QProgressBar {
-                    border: 1px solid #495057; border-radius: 6px;
-                    background: #2d333b; color: #e9ecef; text-align: center;
+                    border: 1px solid rgba(255,255,255,0.10); border-radius: 6px;
+                    background: rgba(255,255,255,0.04); color: #e6edf3; text-align: center;
                 }
-                QProgressBar::chunk { background: #6366f1; border-radius: 5px; }
+                QProgressBar::chunk { background: rgba(110,190,255,0.70); border-radius: 5px; }
                 QTextEdit {
-                    background: #2d333b; color: #d1d5db;
-                    border: 1px solid #495057; border-radius: 6px;
+                    background: rgba(255,255,255,0.04); color: #c9d1d9;
+                    border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
                 }
-            """)
+            """ + btn_glassy)
         else:
             self.setStyleSheet("""
                 QDialog { background-color: #f8f9fa; }
                 QLabel  { color: #212529; }
                 QGroupBox {
-                    color: #495057; border: 2px solid #dee2e6;
-                    border-radius: 8px; margin-top: 10px; padding-top: 10px;
+                    color: #495057; border: 1px solid #dee2e6;
+                    border-radius: 10px; margin-top: 10px; padding-top: 10px;
                     background-color: #ffffff;
                 }
-                QGroupBox::title { subcontrol-origin: margin; left: 10px;
-                    padding: 0 5px; color: #495057; }
+                QGroupBox::title {
+                    subcontrol-origin: margin; left: 10px;
+                    padding: 0 5px; color: #495057;
+                    font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
+                }
                 QScrollArea { border: none; background-color: transparent; }
                 QProgressBar {
                     border: 1px solid #dee2e6; border-radius: 6px;
                     background: #f1f3f5; color: #212529; text-align: center;
                 }
-                QProgressBar::chunk { background: #6366f1; border-radius: 5px; }
+                QProgressBar::chunk { background: rgba(110,190,255,0.85); border-radius: 5px; }
                 QTextEdit {
                     background: #ffffff; color: #212529;
                     border: 1px solid #dee2e6; border-radius: 6px;
                 }
-            """)
+            """ + btn_glassy)
 
     def _tab_style(self, active_index: int = 0) -> str:
-        colors = ["#6366f1", "#10b981", "#f59e0b"]
-        ac = colors[active_index % len(colors)]
+        dark = getattr(self.parent_window, "dark_mode", False)
+        inactive_bg   = "rgba(255,255,255,0.05)"  if dark else "rgba(0,0,0,0.05)"
+        inactive_fg   = "rgba(255,255,255,0.45)"  if dark else "rgba(0,0,0,0.45)"
+        inactive_bdr  = "rgba(255,255,255,0.08)"  if dark else "rgba(0,0,0,0.12)"
+        hover_bg      = "rgba(255,255,255,0.09)"  if dark else "rgba(0,0,0,0.08)"
+        hover_fg      = "rgba(255,255,255,0.72)"  if dark else "rgba(0,0,0,0.72)"
+        pane_bg       = "rgba(255,255,255,0.03)"  if dark else "rgba(0,0,0,0.02)"
+        pane_bdr      = "rgba(255,255,255,0.08)"  if dark else "rgba(0,0,0,0.10)"
+        palettes = [
+            (110, 190, 255),  # documents — blue
+            (32,  200, 170),  # images    — teal
+            (255, 140,  60),  # audio/vid — orange
+        ]
+        r, g, b = palettes[active_index % len(palettes)]
         return f"""
-            QTabWidget::pane  {{ border: 2px solid #495057; border-radius: 8px;
-                                 background-color: #2d333b; }}
-            QTabBar::tab      {{ background-color: #374151; color: #e9ecef;
-                                 padding: 12px 24px; margin-right: 4px;
-                                 border-top-left-radius: 6px;
-                                 border-top-right-radius: 6px;
-                                 font-weight: bold; font-size: 13px; }}
-            QTabBar::tab:selected      {{ background-color: {ac}; color: white; }}
-            QTabBar::tab:hover:!selected {{ background-color: #4b5563; }}
+            QTabWidget::pane {{
+                border: 1px solid {pane_bdr};
+                border-radius: 10px;
+                background-color: {pane_bg};
+            }}
+            QTabBar::tab {{
+                background: {inactive_bg};
+                color: {inactive_fg};
+                border: 1px solid {inactive_bdr};
+                padding: 10px 22px; margin-right: 4px;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+                font-weight: 700; font-size: 13px;
+                font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+            }}
+            QTabBar::tab:selected {{
+                background: rgba({r},{g},{b},0.18);
+                color: rgb({r},{g},{b});
+                border: 1px solid rgba({r},{g},{b},0.35);
+            }}
+            QTabBar::tab:hover:!selected {{
+                background: {hover_bg};
+                color: {hover_fg};
+            }}
         """
 
     def _btn_style(self, kind: str, tab_type: str = "documents") -> str:
-        palettes = {
-            "documents" : ("#6366f1", "#4f46e5", "#4338ca"),
-            "images"    : ("#10b981", "#059669", "#047857"),
-            "audio_video": ("#f59e0b", "#d97706", "#b45309"),
-        }
-        s, h, p = palettes.get(tab_type, palettes["documents"])
-
-        if kind == "conversion":
-            return f"""
-                QPushButton {{ background: qlineargradient(x1:0,y1:0,x2:1,y2:1,
-                                stop:0 {s}, stop:1 {h});
-                    color: white; border: none; padding: 10px 16px;
-                    border-radius: 8px; font-weight: bold; font-size: 13px; }}
-                QPushButton:hover   {{ background: {h}; }}
-                QPushButton:pressed {{ background: {p}; }}
-            """
-        elif kind == "close":
+        if kind == "close":
             return """
-                QPushButton { background: #6b7280; color: white; border: none;
+                QPushButton { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.70);
+                    border: 1px solid rgba(255,255,255,0.12);
                     padding: 10px 20px; border-radius: 8px;
-                    font-weight: bold; font-size: 13px; }
-                QPushButton:hover   { background: #4b5563; }
-                QPushButton:pressed { background: #374151; }
+                    font-weight: bold; font-size: 13px;
+                    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif; }
+                QPushButton:hover   { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.92); }
+                QPushButton:pressed { background: rgba(255,255,255,0.18); }
             """
         elif kind == "cancel":
             return """
-                QPushButton { background: #ef4444; color: white; border: none;
+                QPushButton { background: rgba(255,80,80,0.15); color: rgb(255,100,100);
+                    border: 1px solid rgba(255,80,80,0.30);
                     padding: 8px 16px; border-radius: 8px;
-                    font-weight: bold; font-size: 12px; }
-                QPushButton:hover   { background: #dc2626; }
-                QPushButton:pressed { background: #b91c1c; }
-                QPushButton:disabled { background: #6b7280; color: #9ca3af; }
+                    font-weight: bold; font-size: 12px;
+                    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif; }
+                QPushButton:hover   { background: rgba(255,80,80,0.26); }
+                QPushButton:pressed { background: rgba(255,80,80,0.38); }
+                QPushButton:disabled { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.25);
+                    border-color: rgba(255,255,255,0.08); }
             """
         return ""
 
