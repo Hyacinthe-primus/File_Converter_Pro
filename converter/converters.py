@@ -71,6 +71,7 @@ def _read_file_b64(path):
         return base64.b64encode(f.read()).decode()
 
 CATEGORY_MAP = {
+    # Documents
     "txt_to_pdf":  "document", "rtf_to_pdf":   "document",
     "txt_to_docx": "document", "rtf_to_docx":  "document",
     "csv_to_json": "document", "json_to_csv":  "document",
@@ -78,24 +79,31 @@ CATEGORY_MAP = {
     "xlsx_to_csv": "document", "pptx_to_pdf":  "document",
     "html_to_pdf": "document", "pdf_to_html":  "document",
     "epub_to_pdf": "document",
-    "jpeg_to_png": "image",    "png_to_jpg":   "image",
-    "jpg_to_png":  "image",    "webp_to_png":  "image",
-    "bmp_to_png":  "image",    "tiff_to_png":  "image",
-    "heic_to_png": "image",    "gif_to_png":   "image",
-    "image_to_ico": "image",
-    "wav_to_mp3":  "audio",    "mp3_to_wav":   "audio",
-    "acc_to_mp3":  "audio",    "mp3_to_acc":   "audio",
-    "flac_to_mp3": "audio",    "ogg_to_mp3":   "audio",
-    "avi_to_mp4":  "video",    "webm_to_mp4":  "video",
-    "mkv_to_mp4":  "video",    "mov_to_mp4":   "video",
-    "mp4_to_mp3":  "audio",    "avi_to_mp3":   "audio",
-    "webm_to_mp3": "audio",    "mkv_to_mp3":   "audio",
+    # Images
+    "image_to_png":  "image", "image_to_jpeg": "image",
+    "image_to_jpg":  "image", "image_to_bmp":  "image",
+    "image_to_heic": "image", "image_to_webp": "image",
+    "image_to_tiff": "image", "image_to_psd":  "image",
+    "image_to_svg":  "image", "image_to_avif": "image",
+    "image_to_j2k":  "image", "image_to_dng":  "image",
+    "image_to_ico":  "image",
+    # Video
+    "video_to_mp4":  "video", "video_to_webm": "video",
+    "video_to_mkv":  "video", "video_to_mov":  "video",
+    "video_to_avi":  "video", "video_to_mp3":  "audio",
+    "video_to_wav":  "audio", "video_to_aac":  "audio",
+    "video_to_flac": "audio",
+    # Audio
+    "audio_to_mp3":  "audio", "audio_to_wav":  "audio",
+    "audio_to_aac":  "audio", "audio_to_ogg":  "audio",
+    "audio_to_flac": "audio", "audio_to_m4a":  "audio",
 }
 
 
 class AdvancedConverterEngine:
 
     _DISPATCH = {
+        # Documents
         "txt_to_pdf":   ("_txt_to_pdf",     "pdf"),
         "rtf_to_pdf":   ("_rtf_to_pdf",     "pdf"),
         "txt_to_docx":  ("_txt_to_docx",    "docx"),
@@ -109,29 +117,38 @@ class AdvancedConverterEngine:
         "html_to_pdf":  ("_html_to_pdf",    "pdf"),
         "pdf_to_html":  ("_pdf_to_html",    "html"),
         "epub_to_pdf":  ("_epub_to_pdf",    "pdf"),
-        "jpeg_to_png":  ("_image_convert",  "png"),
-        "png_to_jpg":   ("_image_convert",  "jpg"),
-        "jpg_to_png":   ("_image_convert",  "png"),
-        "webp_to_png":  ("_image_convert",  "png"),
-        "bmp_to_png":   ("_image_convert",  "png"),
-        "tiff_to_png":  ("_image_convert",  "png"),
-        "heic_to_png":  ("_heic_to_png",    "png"),
-        "gif_to_png":   ("_image_convert",  "png"),
-        "image_to_ico": ("_image_to_ico",   "ico"),
-        "wav_to_mp3":   ("_ffmpeg_convert", "mp3"),
-        "mp3_to_wav":   ("_ffmpeg_convert", "wav"),
-        "acc_to_mp3":   ("_ffmpeg_convert", "mp3"),
-        "mp3_to_acc":   ("_ffmpeg_convert", "aac"),
-        "flac_to_mp3":  ("_ffmpeg_convert", "mp3"),
-        "ogg_to_mp3":   ("_ffmpeg_convert", "mp3"),
-        "avi_to_mp4":   ("_ffmpeg_convert", "mp4"),
-        "webm_to_mp4":  ("_ffmpeg_convert", "mp4"),
-        "mkv_to_mp4":   ("_ffmpeg_convert", "mp4"),
-        "mov_to_mp4":   ("_ffmpeg_convert", "mp4"),
-        "mp4_to_mp3":   ("_ffmpeg_convert", "mp3"),
-        "avi_to_mp3":   ("_ffmpeg_convert", "mp3"),
-        "webm_to_mp3":  ("_ffmpeg_convert", "mp3"),
-        "mkv_to_mp3":   ("_ffmpeg_convert", "mp3"),
+        # Images
+        "image_to_png":  ("_image_convert",  "png"),
+        "image_to_jpeg": ("_image_convert",  "jpeg"),
+        "image_to_jpg":  ("_image_convert",  "jpg"),
+        "image_to_bmp":  ("_image_convert",  "bmp"),
+        "image_to_heic": ("_heic_convert",   "heic"),
+        "image_to_webp": ("_image_convert",  "webp"),
+        "image_to_tiff": ("_image_convert",  "tiff"),
+        "image_to_psd":  ("_magick_convert",  "psd"),
+        "image_to_svg":  ("_image_to_svg",   "svg"),
+        "image_to_avif": ("_image_convert",  "avif"),
+        "image_to_j2k":  ("_image_convert",  "j2k"),
+        "image_to_dng":  ("_raw_convert",    "dng"),
+        "image_to_ico":  ("_image_to_ico",   "ico"),
+        # Video → Video
+        "video_to_mp4":  ("_ffmpeg_convert", "mp4"),
+        "video_to_webm": ("_ffmpeg_convert", "webm"),
+        "video_to_mkv":  ("_ffmpeg_convert", "mkv"),
+        "video_to_mov":  ("_ffmpeg_convert", "mov"),
+        "video_to_avi":  ("_ffmpeg_convert", "avi"),
+        # Video → Audio
+        "video_to_mp3":  ("_ffmpeg_convert", "mp3"),
+        "video_to_wav":  ("_ffmpeg_convert", "wav"),
+        "video_to_aac":  ("_ffmpeg_convert", "aac"),
+        "video_to_flac": ("_ffmpeg_convert", "flac"),
+        # Audio → Audio
+        "audio_to_mp3":  ("_ffmpeg_convert", "mp3"),
+        "audio_to_wav":  ("_ffmpeg_convert", "wav"),
+        "audio_to_aac":  ("_ffmpeg_convert", "aac"),
+        "audio_to_ogg":  ("_ffmpeg_convert", "ogg"),
+        "audio_to_flac": ("_ffmpeg_convert", "flac"),
+        "audio_to_m4a":  ("_ffmpeg_convert", "m4a"),
     }
 
     @staticmethod
@@ -260,7 +277,7 @@ try {{
         file_size = os.path.getsize(src) if os.path.exists(src) else 0
         try:
             method = getattr(self, method_name)
-            if method_name in ("_image_convert", "_ffmpeg_convert", "_heic_to_png"):
+            if method_name in ("_image_convert", "_ffmpeg_convert", "_heic_convert", "_raw_convert"):
                 elapsed = _timed(lambda: method(src, dst, conversion_type))
             else:
                 elapsed = _timed(lambda: method(src, dst))
@@ -2746,86 +2763,486 @@ try {{
             try: os.remove(f)
             except Exception: pass
 
-    def _image_convert(self, src, dst, conversion_type):
+    def _open_universal_image(self, src: str):
+        """
+        Open any image file as a PIL.Image with chained fallbacks.
+
+        Attempt order:
+          1. Pillow native          → .png .jpg .bmp .webp .tiff .psd .gif .apng …
+          2. pillow-heif / pyheif   → .heic .heif
+          3. cairosvg               → .svg  (rasterised at 1024 px wide)
+          4. pillow-avif-plugin     → .avif
+          5. rawpy                  → .dng .cr2 .cr3 .nef .arw .orf .rw2 .raf
+          6. ImageMagick            → universal last-resort fallback
+
+        Returns a PIL.Image (mode RGB or RGBA).
+        Raises RuntimeError if every fallback fails.
+        """
         from PIL import Image, ImageOps
-        img = Image.open(src)
-        try: img = ImageOps.exif_transpose(img)
-        except Exception: pass
+        import subprocess, tempfile
 
+        src_ext = Path(src).suffix.lower()
+
+        # Pillow native
+        try:
+            img = Image.open(src)
+            img.load()
+            try:
+                img = ImageOps.exif_transpose(img)
+            except Exception:
+                pass
+            return img
+        except Exception:
+            pass
+
+        # HEIC / HEIF
+        if src_ext in (".heic", ".heif"):
+            try:
+                from pillow_heif import register_heif_opener
+                register_heif_opener()
+                img = Image.open(src)
+                img.load()
+                try:
+                    img = ImageOps.exif_transpose(img)
+                except Exception:
+                    pass
+                return img
+            except Exception:
+                pass
+            try:
+                import pyheif
+                heif_file = pyheif.read(src)
+                img = Image.frombytes(
+                    heif_file.mode, heif_file.size,
+                    heif_file.data, "raw", heif_file.mode, heif_file.stride,
+                )
+                return img
+            except Exception:
+                pass
+
+        # SVG → raster via cairosvg
+        if src_ext == ".svg":
+            try:
+                import cairosvg, io
+                png_bytes = cairosvg.svg2png(url=src, output_width=1024)
+                img = Image.open(io.BytesIO(png_bytes))
+                return img.convert("RGBA")
+            except Exception:
+                pass
+
+        # AVIF via pillow-avif-plugin
+        if src_ext == ".avif":
+            try:
+                import pillow_avif
+                img = Image.open(src)
+                img.load()
+                return img
+            except Exception:
+                pass
+
+        # DNG / camera RAW via rawpy
+        if src_ext in (".dng", ".cr2", ".cr3", ".nef", ".arw",
+                       ".orf", ".rw2", ".raf"):
+            try:
+                import rawpy
+                import numpy
+                with rawpy.imread(src) as raw:
+                    rgb = raw.postprocess(use_camera_wb=True, output_bps=8)
+                return Image.fromarray(rgb)
+            except Exception:
+                pass
+
+        # ImageMagick — universal
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp_path = tmp.name
+        try:
+            subprocess.run(
+                ["magick", "convert", src, tmp_path],
+                check=True, capture_output=True, timeout=120,
+            )
+            img = Image.open(tmp_path)
+            img.load()
+            return img
+        except Exception as exc:
+            raise RuntimeError(
+                f"Could not open '{Path(src).name}' with any available decoder. "
+                f"Last error: {exc}"
+            )
+        finally:
+            try:
+                Path(tmp_path).unlink(missing_ok=True)
+            except Exception:
+                pass
+
+    def _image_convert(self, src, dst, conversion_type):
+        """
+        Convert an image to any target format supported by _image_convert_save().
+
+        Uses _open_universal_image() to handle all source formats including
+        HEIC, SVG, AVIF, DNG, and animated GIF/APNG/WEBP.
+        """
+        img = self._open_universal_image(src)
         ext = Path(dst).suffix.lower().lstrip(".")
-        if ext in ("jpg", "jpeg"):
-            if img.mode in ("RGBA", "P", "LA"):
-                bg   = Image.new("RGB", img.size, (255, 255, 255))
-                if img.mode == "P": img = img.convert("RGBA")
-                mask = img.split()[-1] if img.mode == "RGBA" else None
-                bg.paste(img, mask=mask); img = bg
-            elif img.mode != "RGB":
-                img = img.convert("RGB")
-            img.save(dst, "JPEG", quality=95, subsampling=0, optimize=True)
-        elif ext == "png":
-            if img.mode not in ("RGB", "RGBA", "L", "LA", "P"):
-                img = img.convert("RGBA")
-            img.save(dst, "PNG", optimize=True, compress_level=6)
-        elif ext == "webp":
-            img.save(dst, "WEBP", quality=92, method=6)
-        elif ext == "bmp":
-            if img.mode not in ("RGB", "RGBA"):
-                img = img.convert("RGB")
-            img.save(dst, "BMP")
-        else:
-            img.save(dst)
+        self._image_convert_save(img, dst, ext)
 
-    _ICO_SIZES = [(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)]
+    _ICO_SIZES = [(16, 16), (24, 24), (32, 32), (48, 48),
+                  (64, 64), (128, 128), (256, 256)]
 
     def _image_to_ico(self, src, dst, conversion_type=None):
         """
-        Convert any Pillow-readable image to a multi-resolution .ico file.
-        """
-        from PIL import Image, ImageOps
+        Convert any image to a multi-resolution .ico file.
 
-        img = Image.open(src)
+        Sizes included are those that fit within the source image dimensions.
+        Falls back to (16×16) if the source is smaller than 16 px.
+        Animated sources (GIF/APNG) are flattened to their first frame.
+        """
+        img = self._open_universal_image(src)
 
         try:
-            img = ImageOps.exif_transpose(img)
-        except Exception:
+            img.seek(0)
+        except (AttributeError, EOFError):
             pass
 
         img = img.convert("RGBA")
 
         src_min = min(img.size)
-        sizes = [(w, h) for (w, h) in self._ICO_SIZES if w <= src_min]
+        sizes = [(w, h) for w, h in self._ICO_SIZES if w <= src_min]
         if not sizes:
             sizes = [(16, 16)]
 
         img.save(dst, format="ICO", sizes=sizes)
 
-    def _heic_to_png(self, src, dst, conversion_type=None):
+    @staticmethod
+    def _find_imagemagick() -> str | None:
+        """Return the ImageMagick 'magick' binary path, or None if absent."""
+        import shutil, os, sys
+        found = shutil.which("magick")
+        if found:
+            return found
+        candidates = [
+            r"C:\Program Files\ImageMagick-7\magick.exe",
+            r"C:\Program Files\ImageMagick\magick.exe",
+            r"C:\Program Files (x86)\ImageMagick-7\magick.exe",
+            r"C:\Program Files (x86)\ImageMagick\magick.exe",
+            os.path.join(getattr(sys, "_MEIPASS", ""), "magick.exe"),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "magick.exe"),
+            "/usr/bin/magick", "/usr/local/bin/magick",
+            "/opt/homebrew/bin/magick",
+        ]
+        for c in candidates:
+            if c and os.path.isfile(c):
+                return c
+        return None
+
+    def _magick_convert(self, src, dst, conversion_type=None):
+        """
+        Convert src → dst for formats Pillow cannot write natively (PSD, exotic targets).
+
+        Strategy:
+          1. ImageMagick ('magick convert')  — if available on the system
+          2. psd-tools                       — Python-only fallback, no external app needed
+             - PSD  src  → any raster : flatten layers then save via Pillow
+             - any  src  → PSD  dst   : wrap flattened image as a minimal PSD
+          3. Pillow universal open + _image_convert_save — last-resort raster fallback
+        """
+        from pathlib import Path as _Path
+        src_ext = _Path(src).suffix.lower().lstrip(".")
+        dst_ext = _Path(dst).suffix.lower().lstrip(".")
+
+        magick = self._find_imagemagick()
+        if magick:
+            try:
+                subprocess.run(
+                    [magick, "convert", src, dst],
+                    check=True, capture_output=True, timeout=120,
+                )
+                return
+            except Exception:
+                pass
+
+        if src_ext == "psd":
+            try:
+                from psd_tools import PSDImage
+                psd = PSDImage.open(src)
+                img = psd.composite()
+                self._image_convert_save(img, dst, dst_ext)
+                return
+            except Exception:
+                pass
+
+        if dst_ext == "psd":
+            try:
+                from psd_tools import PSDImage
+                from PIL import Image
+                try:
+                    img = self._open_universal_image(src)
+                except Exception:
+                    img = Image.open(src)
+                    img.load()
+                psd = PSDImage.frompil(img)
+                psd.save(dst)
+                return
+            except Exception:
+                pass
+
         try:
-            from pillow_heif import register_heif_opener
-            from PIL import Image, ImageOps
-            register_heif_opener()
-            img = Image.open(src)
-            try: img = ImageOps.exif_transpose(img)
-            except Exception: pass
+            img = self._open_universal_image(src)
+            self._image_convert_save(img, dst, dst_ext)
+            return
+        except Exception:
+            pass
+
+        raise RuntimeError(
+            f"Unable to convert '{src}' → '{dst}'.\n"
+            "Install ImageMagick (https://imagemagick.org) for PSD formats "
+            "or install 'psd-tools' (pip install psd-tools)."
+        )
+
+    def _image_to_svg(self, src, dst, conversion_type=None):
+        """
+        Wrap a raster image inside an SVG <image> element using a base64 data URI.
+
+        No vector tracing is performed — the pixel data is embedded as-is.
+        For formats that Pillow can read natively (PNG, JPEG, WEBP, BMP, TIFF,
+        GIF) the original bytes are embedded directly so no re-encoding quality
+        loss occurs.  For exotic formats (HEIC, AVIF, DNG, SVG source…) the
+        image is decoded via _open_universal_image() and re-encoded as PNG before
+        embedding.
+        Animated GIFs embedded this way will not animate inside the SVG; only
+        the first frame is shown (SVG does not support animated raster embeds).
+        """
+        import base64
+        import io
+        from PIL import Image
+
+        src_ext = Path(src).suffix.lower().lstrip(".")
+
+        EMBED_NATIVE = {"png", "jpg", "jpeg", "bmp", "webp",
+                        "tiff", "tif", "gif"}
+        MIME_MAP = {
+            "jpg": "jpeg", "jpeg": "jpeg", "png": "png",
+            "webp": "webp", "bmp": "bmp",
+            "tiff": "tiff", "tif": "tiff", "gif": "gif",
+        }
+
+        if src_ext in EMBED_NATIVE:
+            with open(src, "rb") as f:
+                raw = f.read()
+            mime = MIME_MAP.get(src_ext, "png")
+            img  = Image.open(src)
+            w, h = img.size
+            b64  = base64.b64encode(raw).decode("ascii")
+        else:
+            img  = self._open_universal_image(src)
+            w, h = img.size
+            buf  = io.BytesIO()
+            img.convert("RGBA").save(buf, format="PNG")
+            b64  = base64.b64encode(buf.getvalue()).decode("ascii")
+            mime = "png"
+
+        svg = (
+            f'<?xml version="1.0" encoding="UTF-8"?>\n'
+            f'<svg xmlns="http://www.w3.org/2000/svg" '
+            f'xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'width="{w}" height="{h}" viewBox="0 0 {w} {h}">\n'
+            f'  <image width="{w}" height="{h}" '
+            f'xlink:href="data:image/{mime};base64,{b64}"/>\n'
+            f'</svg>\n'
+        )
+        with open(dst, "w", encoding="utf-8") as f:
+            f.write(svg)
+
+    def _image_convert_save(self, img, dst, ext):
+        """
+        Save a PIL.Image to *dst* using the best encoder for *ext*.
+
+        Handles per-format quirks:
+          - JPEG  : flattens transparency onto white, forces RGB
+          - PNG   : preserves alpha; animated GIF/WEBP/APNG sources are saved
+                    as APNG when they contain more than one frame
+          - WEBP  : preserves animation if source is multi-frame
+          - BMP   : strips alpha (BMP has no alpha channel)
+          - TIFF  : saved as-is (Pillow picks the right compression)
+          - J2K   : requires Pillow built with OpenJPEG
+          - AVIF  : requires pillow-avif-plugin
+          - HEIC  : requires pillow-heif
+          - ICO   : use _image_to_ico() instead (handles multi-size logic)
+          - everything else: passed straight to img.save(dst)
+        """
+        from PIL import Image
+
+        if ext in ("jpg", "jpeg"):
+            if img.mode in ("RGBA", "P", "LA"):
+                bg = Image.new("RGB", img.size, (255, 255, 255))
+                if img.mode == "P":
+                    img = img.convert("RGBA")
+                mask = img.split()[-1] if img.mode == "RGBA" else None
+                bg.paste(img, mask=mask)
+                img = bg
+            elif img.mode != "RGB":
+                img = img.convert("RGB")
+            img.save(dst, "JPEG", quality=95, subsampling=0, optimize=True)
+
+        elif ext in ("png", "apng"):
+            frames, durations = [], []
+            try:
+                while True:
+                    frame = img.copy()
+                    if frame.mode not in ("RGB", "RGBA", "L", "LA", "P"):
+                        frame = frame.convert("RGBA")
+                    frames.append(frame)
+                    durations.append(img.info.get("duration", 100))
+                    img.seek(img.tell() + 1)
+            except (EOFError, AttributeError):
+                pass
+
+            if len(frames) > 1:
+                frames[0].save(
+                    dst,
+                    format="PNG",
+                    save_all=True,
+                    append_images=frames[1:],
+                    loop=img.info.get("loop", 0),
+                    duration=durations,
+                    optimize=False,
+                )
+            else:
+                frame = frames[0] if frames else img
+                if frame.mode not in ("RGB", "RGBA", "L", "LA", "P"):
+                    frame = frame.convert("RGBA")
+                frame.save(dst, "PNG", optimize=True, compress_level=6)
+
+        elif ext == "webp":
+            frames, durations = [], []
+            try:
+                while True:
+                    frames.append(img.copy().convert("RGBA"))
+                    durations.append(img.info.get("duration", 100))
+                    img.seek(img.tell() + 1)
+            except (EOFError, AttributeError):
+                pass
+
+            if len(frames) > 1:
+                frames[0].save(
+                    dst,
+                    format="WEBP",
+                    save_all=True,
+                    append_images=frames[1:],
+                    loop=img.info.get("loop", 0),
+                    duration=durations,
+                    quality=92,
+                    method=6,
+                )
+            else:
+                frame = frames[0] if frames else img
+                frame.save(dst, "WEBP", quality=92, method=6)
+
+        elif ext == "bmp":
+            if img.mode in ("RGBA", "LA", "PA"):
+                bg = Image.new("RGB", img.size, (255, 255, 255))
+                if img.mode == "PA":
+                    img = img.convert("RGBA")
+                mask = img.split()[-1]
+                bg.paste(img.convert("RGB"), mask=mask)
+                img = bg
+            elif img.mode != "RGB":
+                img = img.convert("RGB")
+            img.save(dst, "BMP")
+
+        elif ext in ("tiff", "tif"):
+            img.save(dst, "TIFF")
+
+        elif ext in ("j2k", "jp2", "jpx"):
+            if img.mode not in ("RGB", "RGBA", "L"):
+                img = img.convert("RGB")
+            img.save(dst, "JPEG2000", quality_mode="rates", quality_layers=[20])
+
+        elif ext == "avif":
+            try:
+                import pillow_avif
+            except ImportError:
+                raise RuntimeError(
+                    "AVIF output requires pillow-avif-plugin: "
+                    "pip install pillow-avif-plugin"
+                )
             if img.mode not in ("RGB", "RGBA"):
                 img = img.convert("RGB")
-            img.save(dst, "PNG", optimize=True, compress_level=6)
-            return
-        except Exception:
-            pass
-        try:
-            import pyheif
-            from PIL import Image
-            heif_file = pyheif.read(src)
-            img = Image.frombytes(heif_file.mode, heif_file.size,
-                                  heif_file.data, "raw",
-                                  heif_file.mode, heif_file.stride)
-            img.save(dst, "PNG", optimize=True, compress_level=6)
-            return
-        except Exception:
-            pass
-        subprocess.run(["magick", "convert", src, dst],
-                       check=True, capture_output=True, timeout=120)
+            img.save(dst, "AVIF", quality=80)
+
+        elif ext in ("heic", "heif"):
+            try:
+                from pillow_heif import register_heif_opener
+                register_heif_opener()
+            except ImportError:
+                raise RuntimeError(
+                    "HEIC output requires pillow-heif: "
+                    "pip install pillow-heif"
+                )
+            if img.mode not in ("RGB", "RGBA"):
+                img = img.convert("RGB")
+            img.save(dst, format="HEIF", quality=90)
+
+        elif ext == "gif":
+            frames, durations = [], []
+            try:
+                while True:
+                    frames.append(img.copy().convert("RGBA"))
+                    durations.append(img.info.get("duration", 100))
+                    img.seek(img.tell() + 1)
+            except (EOFError, AttributeError):
+                pass
+
+            if len(frames) > 1:
+                # Convert back to palette mode for proper GIF encoding
+                pal_frames = [f.convert("P", palette=Image.ADAPTIVE, colors=256)
+                              for f in frames]
+                pal_frames[0].save(
+                    dst,
+                    format="GIF",
+                    save_all=True,
+                    append_images=pal_frames[1:],
+                    loop=img.info.get("loop", 0),
+                    duration=durations,
+                    optimize=True,
+                )
+            else:
+                frame = frames[0] if frames else img
+                frame.convert("P", palette=Image.ADAPTIVE, colors=256).save(
+                    dst, "GIF", optimize=True
+                )
+
+        else:
+            img.save(dst)
+
+    def _raw_convert(self, src, dst, conversion_type=None):
+        """
+        Decode a camera RAW file (CR2, NEF, ARW, …) to DNG or any raster format.
+        Tries rawpy first, then ImageMagick as fallback.
+        """
+        from PIL import Image
+
+        src_ext = Path(src).suffix.lower().lstrip(".")
+        dst_ext = Path(dst).suffix.lower().lstrip(".")
+
+        CAMERA_RAW_EXTS = {"cr2", "cr3", "nef", "arw", "orf", "rw2", "raf", "dng"}
+
+        if src_ext in CAMERA_RAW_EXTS:
+            try:
+                import rawpy
+                with rawpy.imread(src) as raw:
+                    rgb = raw.postprocess(use_camera_wb=True, output_bps=8)
+                img = Image.fromarray(rgb)
+                self._image_convert_save(img, dst, dst_ext if dst_ext != "dng" else "png")
+                return
+            except Exception:
+                pass
+
+        _no_window = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
+        subprocess.run(
+            ["magick", "convert", src, dst],
+            check=True, capture_output=True, timeout=120,
+            creationflags=_no_window,
+        )
 
     _FFMPEG_PRESETS = {
         "mp3":  ["-codec:a","libmp3lame","-q:a","2","-ar","44100"],
@@ -2833,6 +3250,9 @@ try {{
         "aac":  ["-codec:a","aac","-b:a","192k","-ar","44100"],
         "ogg":  ["-codec:a","libvorbis","-q:a","5"],
         "flac": ["-codec:a","flac","-compression_level","8"],
+        "m4a":  ["-codec:a","aac","-b:a","192k","-movflags","+faststart"],
+        "mov":  ["-codec:v","libx264","-crf","20","-preset","slow",
+                 "-codec:a","aac","-b:a","192k"],
         "mp4":  ["-codec:v","libx264","-crf","20","-preset","slow",
                  "-codec:a","aac","-b:a","192k","-movflags","+faststart"],
         "avi":  ["-codec:v","libxvid","-qscale:v","3",
@@ -2871,12 +3291,12 @@ try {{
     def _has_audio_stream(self, src: str, ffmpeg_bin: str) -> bool:
         """Return True if *src* contains at least one audio stream."""
         try:
+            _no_window = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
             result = subprocess.run(
                 [ffmpeg_bin, "-i", src],
                 capture_output=True, timeout=30,
+                creationflags=_no_window,
             )
-            output = result.stderr.decode("utf-8", errors="replace")
-            return "Audio:" in output
         except Exception:
             return True
 
@@ -2915,7 +3335,9 @@ try {{
         except Exception:
             pass
 
+        _no_window = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
         subprocess.run(
             [ffmpeg_bin, "-y", "-i", src] + presets + [dst],
             check=True, capture_output=True, timeout=1800,
+            creationflags=_no_window,
         )
