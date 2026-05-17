@@ -19,6 +19,11 @@ Users can now disable the achievements system entirely from Settings, for a more
 ### Windows Context Menu Support
 Convert files directly from File Explorer -- right-click any supported file, hover **Convert with FCP**, and pick the conversion. A lightweight window opens, converts, and closes automatically. No need to open the app at all.
 
+### Expanded Image Conversion Support
+Image converters previously limited to PNG and JPG outputs now support 13 output formats:
+PNG, JPEG, JPG, BMP, HEIC, WebP, TIFF, PSD, SVG, AVIF, J2K, DNG, ICO.
+Input format support has also been extended to cover most common image extensions.
+
 > **Note:** When selecting multiple files, each file must be the same type.
 
 ---
