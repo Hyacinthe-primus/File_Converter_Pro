@@ -1310,6 +1310,111 @@ Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\14_to_png";          
 Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
 Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
 
+; DOCUMENTS
+
+; .docx
+Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP";                         ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP";                         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP";                         ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\01_to_pdf";         ValueType: string; ValueName: "MUIVerb"; ValueData: "Word → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\01_to_pdf";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\01_to_pdf\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type docx_to_pdf"; Tasks: contextmenu
+
+; .doc
+Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Word → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type docx_to_pdf"; Tasks: contextmenu
+
+; .pdf
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\01_to_docx";         ValueType: string; ValueName: "MUIVerb"; ValueData: "PDF → Word";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\01_to_docx";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\01_to_docx\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type pdf_to_docx"; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\02_to_html";         ValueType: string; ValueName: "MUIVerb"; ValueData: "PDF → HTML";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\02_to_html";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\02_to_html\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type pdf_to_html"; Tasks: contextmenu
+
+; .txt
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "TXT → PDF";             Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type txt_to_pdf"; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\02_to_docx";         ValueType: string; ValueName: "MUIVerb"; ValueData: "TXT → DOCX";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\02_to_docx";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\02_to_docx\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type txt_to_docx"; Tasks: contextmenu
+
+; .rtf
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "RTF → PDF";             Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type rtf_to_pdf"; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\02_to_docx";         ValueType: string; ValueName: "MUIVerb"; ValueData: "RTF → DOCX";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\02_to_docx";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\02_to_docx\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type rtf_to_docx"; Tasks: contextmenu
+
+; .xlsx
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "XLSX → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type xlsx_to_pdf"; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\02_to_csv";          ValueType: string; ValueName: "MUIVerb"; ValueData: "XLSX → CSV";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\02_to_csv";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\02_to_csv\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type xlsx_to_csv"; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\03_to_json";         ValueType: string; ValueName: "MUIVerb"; ValueData: "XLSX → JSON";           Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\03_to_json";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\03_to_json\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type xlsx_to_json"; Tasks: contextmenu
+
+; .pptx
+Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "PPTX → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type pptx_to_pdf"; Tasks: contextmenu
+
+; .html
+Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "HTML → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type html_to_pdf"; Tasks: contextmenu
+
+; .epub
+Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "EPUB → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type epub_to_pdf"; Tasks: contextmenu
+
+; .csv
+Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP\shell\01_to_json";          ValueType: string; ValueName: "MUIVerb"; ValueData: "CSV → JSON";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP\shell\01_to_json";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP\shell\01_to_json\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type csv_to_json"; Tasks: contextmenu
+
+; .json
+Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP\shell\01_to_csv";          ValueType: string; ValueName: "MUIVerb"; ValueData: "JSON → CSV";            Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP\shell\01_to_csv";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
+Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP\shell\01_to_csv\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type json_to_csv"; Tasks: contextmenu
+
 ; AUDIO
 
 ; .mp3
