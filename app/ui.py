@@ -2364,7 +2364,7 @@ class AppUIMixin(AppLogicMixin):
             self.translate_text(
                 "Tous les fichiers supportés ("
                 "*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls "
-                "*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif "
+                "*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif "
                 "*.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 "
                 "*.mp3 *.wav *.aac *.flac *.ogg *.m4a "
                 "*.mp4 *.avi *.mkv *.webm *.mov "
@@ -2378,7 +2378,7 @@ class AppUIMixin(AppLogicMixin):
                 "Excel (*.xlsx *.xls);;"
                 "EPUB (*.epub);;"
                 "HTML (*.html *.htm);;"
-                "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2);;"
+                "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif *.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2);;"
                 "Audio (*.mp3 *.wav *.aac *.flac *.ogg *.m4a);;"
                 "Vidéo (*.mp4 *.avi *.mkv *.webm *.mov);;"
                 "Données (*.csv *.json);;"
@@ -2565,7 +2565,7 @@ class AppUIMixin(AppLogicMixin):
             '.csv', '.json',
             # Images
             '.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.webp', '.gif',
-            '.svg', '.ico', '.avif', '.heic', '.heif', '.psd', '.j2k', '.jp2',
+            '.svg', '.ico', '.avif', '.heic', '.heif', '.psd', '.j2k', '.jp2', '.jfif',
             '.dng', '.cr2', '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf', '.jpx',
             # Audio
             '.mp3', '.wav', '.aac', '.flac', '.ogg',
@@ -2700,6 +2700,7 @@ class AppUIMixin(AppLogicMixin):
             '.tiff': 'img.ico',
             '.gif': 'img.ico',
             '.heic': 'img.ico',
+            '.jfif': 'img.ico',
             '.tif':  'img.ico',
             '.svg':  'img.ico',
             '.ico':  'img.ico',
@@ -2758,7 +2759,7 @@ class AppUIMixin(AppLogicMixin):
         elif ext in ['.docx', '.doc', 'txt', 'rtf']:
             return '📝'
         elif ext in ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.webp', '.gif',
-                     '.svg', '.ico', '.avif', '.heic', '.heif', '.psd', '.j2k', '.jp2',
+                     '.svg', '.ico', '.avif', '.heic', '.heif', '.psd', '.j2k', '.jp2', '.jfif',
                      '.dng', '.cr2', '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf', '.jpx',]:
             return '🖼️'
         elif ext in ['.zip', '.rar', '.tar', '.gz', '.7z']:

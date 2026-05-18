@@ -3317,6 +3317,7 @@ class AppLogicMixin:
             '.svg',  '.avif', '.j2k',  '.jp2',
             '.dng',  '.cr2',  '.cr3',  '.nef',
             '.arw',  '.orf',  '.rw2',  '.raf',
+            '.jfif'
 )
         image_files = [f for f in files_to_process if f.lower().endswith(IMAGE_EXTENSIONS)]
         num_images = len(image_files)
