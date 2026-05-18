@@ -439,7 +439,7 @@ class PreviewDialog(QDialog):
                 self.preview_pdf()
             elif ext in (
                 '.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.gif',
-                '.svg', '.ico', '.avif', '.heic', '.heif', '.webp',
+                '.svg', '.ico', '.avif', '.heic', '.heif', '.webp', '.jfif',
                 '.psd', '.j2k', '.jp2', '.jpx', '.dng', '.cr2',
                 '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf',
             ):
