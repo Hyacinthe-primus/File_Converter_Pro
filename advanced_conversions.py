@@ -430,6 +430,7 @@ class AdvancedConversionsDialog(QDialog):
             ".svg",  ".avif", ".j2k",  ".jp2",
             ".dng",  ".cr2",  ".cr3",  ".nef",
             ".arw",  ".orf",  ".rw2",  ".raf",
+            ".jfif"
 ]
         groups = [
             (self.tr_("Images"), [
