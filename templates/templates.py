@@ -1339,7 +1339,7 @@ class EnhancedTemplatesDialog(QDialog):
             self.translate_text("Conversion Word→PDF"): ['.docx', '.doc'],
             self.translate_text("Conversion Images→PDF"): ['.png', '.jpeg', '.jpg', '.bmp', '.heic', '.heif', '.gif', '.jpx',
                                                            '.webp', '.tiff', '.tif', '.psd', '.svg', '.avif', '.j2k', '.jp2',
-                                                           '.dng', '.cr2', '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf'],
+                                                           '.dng', '.cr2', '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf', '.jfif'],
             self.translate_text("Fusion PDF"): ['.pdf'],
             self.translate_text("Fusion Word"): ['.docx', '.doc'],
             self.translate_text("Division PDF"): ['.pdf'],
