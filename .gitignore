@@ -36,3 +36,6 @@ env/
 # OneDrive temp files
 *.tmp
 ~$*
+
+# Social preview files
+social_preview.png
