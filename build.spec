@@ -250,6 +250,7 @@ a = Analysis(
         'pytest', 'unittest', 'nose', 'sphinx', 'docutils',
         'torch', 'torchvision', 'torchaudio',
         'scipy',
+        'skimage', 'sklearn', 'numba', 'llvmlite',
         'IPython', 'jedi', 'parso', 'prompt_toolkit',
         'zmq', 'tornado', 'ipykernel', 'ipython_genutils',
         'pandas',
@@ -328,3 +329,14 @@ coll = COLLECT(
     ],
     name='File Converter Pro',
 )
+
+import shutil, glob, os
+dist_dir = os.path.join(DISTPATH, 'File Converter Pro', '_internal')
+for d in glob.glob(os.path.join(dist_dir, '*.dist-info')):
+    shutil.rmtree(d)
+py_files = glob.glob(os.path.join(dist_dir, '**', '*.py'), recursive=True)
+for py in py_files:
+    os.remove(py)
+old_ffmpeg = os.path.join(dist_dir, 'cv2', 'opencv_videoio_ffmpeg4100_64.dll')
+if os.path.exists(old_ffmpeg):
+    os.remove(old_ffmpeg)
