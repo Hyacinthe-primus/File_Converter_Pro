@@ -717,7 +717,7 @@ File Converter Pro is and will remain **completely free**. If it saves you time,
 <div align="center">
 
 [![Support me on Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/hyacinthe_primus/goal?g=0)
-
+[![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-003087?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/HyacintheATHO)
 
 </div>
 
