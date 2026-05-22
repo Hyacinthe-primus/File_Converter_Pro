@@ -114,7 +114,7 @@ class SystemNotifier:
         self._qt_notifier = QtNotifier()
 
         backend = "winotify (Windows)" if (IS_WINDOWS and WINOTIFY_AVAILABLE) else "Qt tray"
-        print(f"[NOTIFIER] ✅ Initialized — backend: {backend} | "
+        print(f"[NOTIFIER] Initialized — backend: {backend} | "
               f"Icon: {os.path.exists(self.toast_icon_path) if self.toast_icon_path else 'None'}")
 
     def set_translator(self, tm) -> None:
@@ -246,9 +246,7 @@ class SystemNotifier:
                     ],
                 )
 
-            print("[NOTIFIER] ✅ Notification displayed successfully")
             self._play_sound()
-            print(f"[NOTIFIER] 🎉 Notification sent successfully for: {operation_type}")
             return True
 
         except Exception as e:
@@ -311,7 +309,7 @@ class SystemNotifier:
             current = __version__.lstrip("v")
 
             if latest == current:
-                print(f"[NOTIFIER] ✅ Up to date ({current})")
+                print(f"[NOTIFIER] Up to date ({current})")
                 return False
 
             print(f"[NOTIFIER] 🆕 Update available: {current} → {latest}")
