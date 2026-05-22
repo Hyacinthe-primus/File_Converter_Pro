@@ -1232,10 +1232,10 @@ class AchievementSystem(QObject):
             
             conn.commit()
             conn.close()
-            print(f"[✅ DB OK] Database created/updated: {self.db_path}")
+            print(f"[DB OK] Database created/updated: {self.db_path}")
         
         except Exception as e:
-            print(f"[❌ DB ERROR] Cannot access {self.db_path}: {e}")
+            print(f"[DB ERROR] Cannot access {self.db_path}: {e}")
             traceback.print_exc()
 
     def initialize_achievements(self):
@@ -1776,10 +1776,10 @@ class AchievementSystem(QObject):
     def check_flash_gordon(self, files_count, time_seconds):
         """Checks and triggers Flash Gordon if ≥50 files in ≤300s."""
         if files_count >= 50 and time_seconds <= 300:
-            print(f"[DEBUG FLASH GORDON] ✅ Condition met: {files_count} files in {time_seconds:.2f}s")
+            print(f"[DEBUG FLASH GORDON] Condition met: {files_count} files in {time_seconds:.2f}s")
             self.check_achievement("flash_gordon")
         else:
-            print(f"[DEBUG FLASH GORDON] ❌ Failed: {files_count} files in {time_seconds:.2f}s (threshold: ≥50 / ≤300s)")
+            print(f"[DEBUG FLASH GORDON] Failed: {files_count} files in {time_seconds:.2f}s (threshold: ≥50 / ≤300s)")
 
     def unlock_achievement(self, achievement_id):
         try:
