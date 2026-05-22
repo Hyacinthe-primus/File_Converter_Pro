@@ -94,9 +94,9 @@ except Exception:
 
 try:
     from PyInstaller.utils.hooks import collect_all as _ca
-    _np_datas, _np_bins, _np_hidden = _ca("numpy")
+    _, _np_bins, _np_hidden = _ca("numpy")
 except Exception:
-    _np_datas, _np_bins, _np_hidden = [], [], []
+    _, _np_bins, _np_hidden = [], [], []
 
 try:
     from PyInstaller.utils.hooks import collect_dynamic_libs, collect_data_files as _cdf
@@ -104,13 +104,13 @@ try:
     _cv2_datas = _cdf("cv2")
     _cv2_hidden = ["cv2"]
 except Exception:
-    _cv2_datas, _cv2_bins, _cv2_hidden = [], [], []
+    _, _cv2_bins, _cv2_hidden = [], [], []
 
 try:
     from PyInstaller.utils.hooks import collect_all as _ca
-    _ft_datas, _ft_bins, _ft_hidden = _ca("fontTools")
+    _, _ft_bins, _ft_hidden = _ca("fontTools")
 except Exception:
-    _ft_datas, _ft_bins, _ft_hidden = [], [], []
+    _, _ft_bins, _ft_hidden = [], [], []
 
 a = Analysis(
     ['main.py'],
@@ -172,7 +172,7 @@ a = Analysis(
 
         'PySide6.QtMultimedia', 'PySide6.QtMultimediaWidgets',
         'PySide6.QtNetwork', 'PySide6.QtCore', 'PySide6.QtGui',
-        'PySide6.QtWidgets', 'PySide6.QtPrintSupport',
+        'PySide6.QtWidgets',
 
         'fitz', 'pymupdf', 'pypdf',
 
