@@ -403,10 +403,8 @@ class TermsGuard:
 
         if self.config.get("terms_acceptance_timestamp") is not None:
             self.config["terms_reacceptance_timestamp"] = now
-            print(f"[TERMS] ✅ Re-acceptance — timestamp: {now}")
         else:
             self.config["terms_acceptance_timestamp"] = now
-            print(f"[TERMS] ℹ️  First acceptance — timestamp: {now}")
 
         self.config_manager.save_config(self.config)
 
