@@ -2834,10 +2834,10 @@ class SettingsDialog(QDialog):
 
             if config.get("terms_acceptance_timestamp") is not None:
                 config["terms_reacceptance_timestamp"] = datetime.now().isoformat()
-                print(f"[TERMS DEBUG] ✅ Re-acceptance detected - terms_reacceptance_timestamp added: {config['terms_reacceptance_timestamp']}")
+                print(f"[TERMS DEBUG] Re-acceptance detected - terms_reacceptance_timestamp added: {config['terms_reacceptance_timestamp']}")
             else:
                 config["terms_acceptance_timestamp"] = datetime.now().isoformat()
-                print(f"[TERMS DEBUG] ℹ️ First acceptance - terms_acceptance_timestamp set: {config['terms_acceptance_timestamp']}")
+                print(f"[TERMS DEBUG] First acceptance - terms_acceptance_timestamp set: {config['terms_acceptance_timestamp']}")
 
             parent_app.config_manager.save_config(config)
             parent_app.config.update(config)
