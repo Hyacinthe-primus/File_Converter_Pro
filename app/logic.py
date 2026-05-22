@@ -251,10 +251,8 @@ class AppLogicMixin:
             
             if self.config.get("terms_acceptance_timestamp") is not None:
                 self.config["terms_reacceptance_timestamp"] = now
-                print(f"[TERMS DEBUG] ✅ Re-acceptance detected - terms_reacceptance_timestamp added: {now}")
             else:
                 self.config["terms_acceptance_timestamp"] = now
-                print(f"[TERMS DEBUG] ℹ️ First acceptance - terms_acceptance_timestamp set: {now}")
             
             self.config_manager.save_config(self.config)
             self.terms_accepted = True
