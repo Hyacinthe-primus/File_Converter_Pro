@@ -577,6 +577,8 @@ class QuickConvertWindow(QWidget):
         self._converting = False
         self.progress.hide()
         self.status_label.show()
+        self.adjustSize()
+        self.setFixedHeight(self.sizeHint().height())
 
         if success:
             self.status_label.setObjectName("statusOk")
