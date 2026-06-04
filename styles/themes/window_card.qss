@@ -1,0 +1,63 @@
+/* File Converter Pro — Contextual Theme */
+
+#card {
+    background: rgba(20, 22, 35, 0.92);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+QLabel { color: rgba(255,255,255,0.85); font-family: 'Segoe UI'; }
+#title    { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.92); }
+#fileList { font-size: 11px; color: rgba(255,255,255,0.45); }
+QComboBox {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 7px;
+    padding: 7px 10px; font-size: 12px; font-family: 'Segoe UI';
+    min-height: 16px;
+}
+QComboBox::drop-down { border: none; width: 20px; }
+QComboBox QAbstractItemView {
+    background: #1a1d2e; color: rgba(255,255,255,0.85);
+    selection-background-color: rgba(110,190,255,0.20);
+    border: 1px solid rgba(255,255,255,0.08); outline: none;
+}
+QPushButton#convertBtn {
+    background: rgba(110,190,255,0.18);
+    color: rgb(110,190,255);
+    border: 1px solid rgba(110,190,255,0.35);
+    border-radius: 8px;
+    padding: 9px 0; font-weight: 700;
+    font-size: 12px; font-family: 'Segoe UI';
+}
+QPushButton#convertBtn:hover    { background: rgba(110,190,255,0.28); }
+QPushButton#convertBtn:disabled {
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.20);
+    border-color: rgba(255,255,255,0.07);
+}
+QPushButton#cancelBtn {
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.40);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 8px;
+    padding: 9px 0; font-size: 12px; font-family: 'Segoe UI';
+}
+QPushButton#cancelBtn:hover {
+    background: rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.75);
+    border-color: rgba(255,255,255,0.20);
+}
+QProgressBar {
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    min-height: 5px; max-height: 5px; border: none;
+}
+QProgressBar::chunk { background: rgba(110,190,255,0.70); border-radius: 3px; }
+#statusOk  { font-size: 11px; color: rgb(32,200,170); font-family: 'Segoe UI'; }
+#statusErr { font-size: 11px; color: rgb(255,100,100); font-family: 'Segoe UI'; }
+#conversionLabel {
+    font-size: 12px; font-weight: 600;
+    color: rgb(110,190,255);
+    font-family: 'Segoe UI';
+}

@@ -1,0 +1,185 @@
+QPushButton#BtnOK {
+    background: rgba(40,167,69,0.20); color: rgb(30,140,60);
+    border: 1px solid rgba(40,167,69,0.50);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnOK:hover    { background: rgba(40,167,69,0.32); }
+QPushButton#BtnOK:pressed  { background: rgba(40,167,69,0.45); }
+QPushButton#BtnOK:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnCancel {
+    background: rgba(108,117,125,0.18); color: rgb(70,78,86);
+    border: 1px solid rgba(108,117,125,0.50);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnCancel:hover    { background: rgba(108,117,125,0.30); }
+QPushButton#BtnCancel:pressed  { background: rgba(108,117,125,0.42); }
+QPushButton#BtnCancel:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnDecline {
+    background: rgba(220,53,69,0.18); color: rgb(170,25,40);
+    border: 1px solid rgba(220,53,69,0.50);
+    padding: 10px 20px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnDecline:hover    { background: rgba(220,53,69,0.30); }
+QPushButton#BtnDecline:pressed  { background: rgba(220,53,69,0.42); }
+QPushButton#BtnDecline:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnIndigo {
+    background: rgba(99,102,241,0.18); color: rgb(60,63,210);
+    border: 1px solid rgba(99,102,241,0.50);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnIndigo:hover    { background: rgba(99,102,241,0.30); }
+QPushButton#BtnIndigo:pressed  { background: rgba(99,102,241,0.42); }
+QPushButton#BtnIndigo:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnGhost {
+    background: rgba(55,65,81,0.15); color: rgb(40,48,60);
+    border: 1px solid rgba(55,65,81,0.40);
+    padding: 6px 14px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnGhost:hover    { background: rgba(55,65,81,0.26); color: rgb(20,28,40); }
+QPushButton#BtnGhost:pressed  { background: rgba(55,65,81,0.38); }
+QPushButton#BtnGhost:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnClose {
+    background: rgba(80,80,80,0.12); color: rgb(50,50,50);
+    border: 1px solid rgba(80,80,80,0.35);
+    padding: 10px 20px; border-radius: 8px;
+    font-weight: bold; font-size: 13px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnClose:hover    { background: rgba(80,80,80,0.22); color: rgb(20,20,20); }
+QPushButton#BtnClose:pressed  { background: rgba(80,80,80,0.32); }
+QPushButton#BtnClose:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnCancelGlassy {
+    background: rgba(220,50,50,0.18); color: rgb(175,25,25);
+    border: 1px solid rgba(220,50,50,0.50);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnCancelGlassy:hover    { background: rgba(220,50,50,0.30); }
+QPushButton#BtnCancelGlassy:pressed  { background: rgba(220,50,50,0.42); }
+QPushButton#BtnCancelGlassy:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnReconvert {
+    background: rgba(16,185,129,0.18); color: rgb(10,130,90);
+    border: 1px solid rgba(16,185,129,0.50);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnReconvert:hover    { background: rgba(16,185,129,0.30); }
+QPushButton#BtnReconvert:pressed  { background: rgba(16,185,129,0.42); }
+QPushButton#BtnReconvert:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnPrintPdf {
+    background: rgba(99,102,241,0.18); color: rgb(60,63,210);
+    border: 1px solid rgba(99,102,241,0.50);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnPrintPdf:hover    { background: rgba(99,102,241,0.30); }
+QPushButton#BtnPrintPdf:pressed  { background: rgba(99,102,241,0.42); }
+QPushButton#BtnPrintPdf:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnExportJson {
+    background: rgba(130,185,20,0.18); color: rgb(85,120,5);
+    border: 1px solid rgba(130,185,20,0.55);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnExportJson:hover    { background: rgba(130,185,20,0.30); }
+QPushButton#BtnExportJson:pressed  { background: rgba(130,185,20,0.42); }
+QPushButton#BtnExportJson:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnDeleteSelection {
+    background: rgba(239,68,68,0.18); color: rgb(165,18,18);
+    border: 1px solid rgba(239,68,68,0.50);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnDeleteSelection:hover    { background: rgba(239,68,68,0.30); }
+QPushButton#BtnDeleteSelection:pressed  { background: rgba(239,68,68,0.42); }
+QPushButton#BtnDeleteSelection:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnClearAll {
+    background: rgba(220,38,38,0.18); color: rgb(155,15,15);
+    border: 1px solid rgba(220,38,38,0.55);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnClearAll:hover    { background: rgba(220,38,38,0.30); }
+QPushButton#BtnClearAll:pressed  { background: rgba(220,38,38,0.42); }
+QPushButton#BtnClearAll:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnHistoryClose {
+    background: rgba(107,114,128,0.15); color: rgb(55,62,70);
+    border: 1px solid rgba(107,114,128,0.42);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: bold; font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnHistoryClose:hover    { background: rgba(107,114,128,0.26); color: rgb(30,36,44); }
+QPushButton#BtnHistoryClose:pressed  { background: rgba(107,114,128,0.38); color: rgb(10,14,20); }
+QPushButton#BtnHistoryClose:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnFolderAsItem {
+    background: rgba(238,108,77,0.18);
+    color: rgb(190,70,40);
+    border: 1px solid rgba(238,108,77,0.50);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnFolderAsItem:hover    { background: rgba(238,108,77,0.30); }
+QPushButton#BtnFolderAsItem:pressed  { background: rgba(238,108,77,0.42); }
+QPushButton#BtnFolderAsItem:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }
+
+QPushButton#BtnFolderContent {
+    background: rgba(0,109,119,0.18);
+    color: rgb(0,100,108);
+    border: 1px solid rgba(0,109,119,0.50);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 12px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+}
+QPushButton#BtnFolderContent:hover    { background: rgba(0,109,119,0.30); }
+QPushButton#BtnFolderContent:pressed  { background: rgba(0,109,119,0.42); }
+QPushButton#BtnFolderContent:disabled { background: rgba(128,128,128,0.10); color: rgba(128,128,128,0.40);
+    border-color: rgba(128,128,128,0.20); }

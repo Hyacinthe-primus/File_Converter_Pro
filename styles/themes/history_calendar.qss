@@ -1,0 +1,6 @@
+QCalendarWidget QSpinBox {
+    min-height: 30px; padding: 2px; font-size: 12px; border-radius: 4px;
+}
+QCalendarWidget QToolButton {
+    min-height: 30px; padding: 2px; border-radius: 4px;
+}

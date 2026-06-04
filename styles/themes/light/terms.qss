@@ -1,0 +1,117 @@
+QDialog, QWidget {
+    background-color: #f5f6fa;
+    color: #212529;
+}
+QLabel {
+    background-color: transparent;
+    color: #212529;
+}
+
+QTabWidget::pane {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #ffffff;
+    margin-top: -5px;
+}
+QTabBar::tab {
+    background: #e9ecef;
+    color: #495057;
+    padding: 10px 18px;
+    margin-right: 2px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+}
+QTabBar::tab:selected {
+    background: #3498db;
+    color: #ffffff;
+}
+QTabBar::tab:hover:!selected {
+    background: #ced4da;
+}
+
+QTextBrowser#TermsTextBrowser {
+    background-color: #ffffff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 11px;
+}
+QTextBrowser#TermsTextBrowser QScrollBar:vertical {
+    background: transparent;
+    width: 6px;
+    margin: 4px 2px 4px 0px;
+    border: none;
+}
+QTextBrowser#TermsTextBrowser QScrollBar::handle:vertical {
+    background: #c8cdd4;
+    border-radius: 3px;
+    min-height: 32px;
+}
+QTextBrowser#TermsTextBrowser QScrollBar::handle:vertical:hover  { background: #9aa0ab; }
+QTextBrowser#TermsTextBrowser QScrollBar::handle:vertical:pressed { background: #3498db; }
+QTextBrowser#TermsTextBrowser QScrollBar::add-line:vertical,
+QTextBrowser#TermsTextBrowser QScrollBar::sub-line:vertical {
+    height: 0px; border: none; background: none;
+}
+QTextBrowser#TermsTextBrowser QScrollBar::add-page:vertical,
+QTextBrowser#TermsTextBrowser QScrollBar::sub-page:vertical { background: transparent; }
+
+QGroupBox#ContactGroup {
+    font-weight: bold;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    margin-top: 12px;
+    padding-top: 8px;
+    background-color: #f8f9fa;
+    font-size: 10px;
+}
+QGroupBox#ContactGroup::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 5px;
+    color: #3498db;
+    background-color: transparent;
+    font-size: 10px;
+}
+
+QTextBrowser#ContactLinks {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 6px 8px;
+    font-size: 9px;
+    color: #212529;
+    margin: 0;
+}
+QTextBrowser#ContactLinks QScrollBar:vertical {
+    background: #f8f9fa;
+    width: 8px;
+}
+QTextBrowser#ContactLinks QScrollBar::handle:vertical {
+    background: #ced4da;
+    border-radius: 4px;
+}
+
+QCheckBox#TermsCheckBox {
+    color: #212529;
+    font-size: 11px;
+    spacing: 8px;
+    background-color: transparent;
+}
+QCheckBox#TermsCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #adb5bd;
+    border-radius: 4px;
+    background-color: #ffffff;
+}
+QCheckBox#TermsCheckBox::indicator:checked {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+QCheckBox#TermsCheckBox::indicator:hover { border-color: #3498db; }

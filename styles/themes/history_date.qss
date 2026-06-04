@@ -1,0 +1,6 @@
+QDateEdit { padding: 3px 6px; border-radius: 4px; }
+QDateEdit::drop-down {
+    subcontrol-origin: padding; subcontrol-position: top right;
+    width: 22px; border-left: 1px solid #555;
+}
+QDateEdit::down-arrow { image: url({arrow_path}); width: 10px; height: 10px; }

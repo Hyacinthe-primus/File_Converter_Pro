@@ -1,0 +1,22 @@
+QDialog { background-color: #f8f9fa; }
+QLabel  { color: #212529; }
+QGroupBox {
+    color: #495057; border: 1px solid #dee2e6;
+    border-radius: 10px; margin-top: 10px; padding-top: 10px;
+    background-color: #ffffff;
+}
+QGroupBox::title {
+    subcontrol-origin: margin; left: 10px;
+    padding: 0 5px; color: #495057;
+    font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
+}
+QScrollArea { border: none; background-color: transparent; }
+QProgressBar {
+    border: 1px solid #dee2e6; border-radius: 6px;
+    background: #f1f3f5; color: #212529; text-align: center;
+}
+QProgressBar::chunk { background: rgba(110,190,255,0.85); border-radius: 5px; }
+QTextEdit {
+    background: #ffffff; color: #212529;
+    border: 1px solid #dee2e6; border-radius: 6px;
+}

@@ -1,0 +1,54 @@
+QGroupBox {
+    font-weight: bold;
+    font-size: 16px;
+    color: #6c757d;
+    background-color: #1c2128;
+    border: 1.5px solid #30363d;
+    border-radius: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    margin-left: 2px;
+}
+QGroupBox:checked {
+    color: #74c0fc;
+    background-color: #0a1929;
+    border: 1.5px solid #4dabf7;
+}
+QGroupBox:unchecked:hover {
+    border: 1.5px solid #495057;
+    background-color: #1e2530;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 30px;
+    padding: 0 10px;
+    color: #6c757d;
+}
+QGroupBox:checked::title {
+    color: #74c0fc;
+}
+QGroupBox::indicator {
+    width: 18px; height: 18px;
+    border-radius: 9px;
+    border: 2px solid #30363d;
+    background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
+        stop:0 #2d333b, stop:1 #1c2128);
+    margin-right: 6px; margin-top: 3px;
+}
+QGroupBox::indicator:unchecked:hover {
+    border: 2px solid #4dabf7;
+    background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
+        stop:0 #1a2d42, stop:0.6 #142236, stop:1 #0d1929);
+}
+QGroupBox::indicator:checked {
+    border: 2px solid #4dabf7;
+    background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
+        stop:0 #c8e6ff, stop:0.28 #89c4f4,
+        stop:0.36 #4dabf7, stop:0.60 #2980b9, stop:1 #1a5f8a);
+}
+QGroupBox::indicator:checked:hover {
+    border: 2px solid #74c0fc;
+    background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
+        stop:0 #e8f4ff, stop:0.28 #a8d8ff,
+        stop:0.36 #74c0fc, stop:0.60 #3a9bd5, stop:1 #1e6fa0);
+}

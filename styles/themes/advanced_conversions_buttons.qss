@@ -1,0 +1,29 @@
+QPushButton[tab_type="documents"] {
+    background: rgba(110,190,255,0.15); color: rgb(110,190,255);
+    border: 1px solid rgba(110,190,255,0.30); border-radius: 8px;
+    font-weight: bold; font-size: 13px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+    letter-spacing: 0.3px;
+}
+QPushButton[tab_type="documents"]:hover   { background: rgba(110,190,255,0.26); }
+QPushButton[tab_type="documents"]:pressed { background: rgba(110,190,255,0.38); }
+
+QPushButton[tab_type="images"] {
+    background: rgba(32,200,170,0.15); color: rgb(32,200,170);
+    border: 1px solid rgba(32,200,170,0.30); border-radius: 8px;
+    font-weight: bold; font-size: 13px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+    letter-spacing: 0.3px;
+}
+QPushButton[tab_type="images"]:hover   { background: rgba(32,200,170,0.26); }
+QPushButton[tab_type="images"]:pressed { background: rgba(32,200,170,0.38); }
+
+QPushButton[tab_type="audio_video"] {
+    background: rgba(255,140,60,0.15); color: rgb(255,140,60);
+    border: 1px solid rgba(255,140,60,0.30); border-radius: 8px;
+    font-weight: bold; font-size: 13px;
+    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
+    letter-spacing: 0.3px;
+}
+QPushButton[tab_type="audio_video"]:hover   { background: rgba(255,140,60,0.26); }
+QPushButton[tab_type="audio_video"]:pressed { background: rgba(255,140,60,0.38); }
