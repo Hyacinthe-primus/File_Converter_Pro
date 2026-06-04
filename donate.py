@@ -1,10 +1,8 @@
 """
-Donate Dialog — File Converter Pro
+Donate Dialog
 A beautiful, animated donation page with Ko-fi support.
 Supports dark and light themes automatically.
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sys
@@ -1049,7 +1047,6 @@ class ThankYouDialog(QDialog):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # Test ThankYouDialog directly
     dlg = ThankYouDialog(dark_mode=True, amount="5")
     dlg.exec()
     sys.exit(0)

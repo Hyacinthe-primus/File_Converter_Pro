@@ -1,5 +1,5 @@
 """
-Statistics Dashboard - File Converter Pro
+Statistics Dashboard
 
 Visual analytics panel using Matplotlib for data visualization.
 
@@ -18,16 +18,6 @@ Features:
 Classes:
     StatisticsDashboard: Main widget containing tabs for Overview, Charts, and Details.
 
-Design:
-    - Theme-aware plot colors (Dark/Light mode)
-    - Responsive layout with scrollable areas
-    - Professional styling consistent with main UI
-    - Animated stat counters
-    - Glassmorphism stat cards
-    - Smooth transitions
-
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sys
@@ -42,7 +32,10 @@ from PySide6.QtCore import (QDate, QTimer, QPropertyAnimation, QEasingCurve,
                             Qt )
 from PySide6.QtGui import QColor
 from datetime import datetime
+
+from qss_helpers import _load_qss
 from converter import AdvancedDatabaseManager
+
 
 FigureCanvas = None
 Figure       = None
@@ -391,198 +384,9 @@ class StatisticsDashboard(QDialog):
         return hasattr(self.parent(), 'dark_mode') and self.parent().dark_mode
 
     def _apply_global_style(self):
-        dm = self._dark
-        base_bg     = "#0d1117" if dm else "#f0f2f7"
-        tab_bg      = "#161b27" if dm else "#ffffff"
-        tab_sel     = "#1e2535" if dm else "#ffffff"
-        tab_txt     = "#c8d0dc" if dm else "#4a5568"
-        tab_sel_txt = "#ffffff" if dm else "#1a202c"
-        border      = "#2d3748" if dm else "#dde3ec"
-        sb_track    = "#1e2535" if dm else "#e8ecf0"
-        sb_handle   = "#3d4f6a" if dm else "#b0bec5"
-        sb_hover    = "#5a7090" if dm else "#90a4ae"
-        input_bg    = "#1a2236" if dm else "#ffffff"
-        input_txt   = "#e0e8f0" if dm else "#1a202c"
-        arrow_svg   = _get_asset_path("Assets/down-arrow.svg")
-
-        self.setStyleSheet(f"""
-            QWidget {{
-                background-color: {base_bg};
-                color: {tab_sel_txt if dm else tab_txt};
-                font-family: 'Segoe UI', 'SF Pro Display', sans-serif;
-            }}
-            StatisticsDashboard {{
-                border-radius: 16px;
-            }}
-            QTabWidget::pane {{
-                background: {tab_bg};
-                border: 1px solid {border};
-                border-radius: 12px;
-                top: -1px;
-            }}
-            QTabBar::tab {{
-                background: transparent;
-                color: {tab_txt};
-                padding: 10px 22px;
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: 500;
-                margin-right: 4px;
-                min-width: 100px;
-            }}
-            QTabBar::tab:selected {{
-                background: {tab_sel};
-                color: {tab_sel_txt};
-                font-weight: 700;
-                border-bottom: 2px solid #4dabf7;
-            }}
-            QTabBar::tab:hover:!selected {{
-                background: {'#1a2236' if dm else '#edf2ff'};
-                color: {'#90caf9' if dm else '#2c5282'};
-            }}
-            QGroupBox {{
-                background: {tab_bg};
-                border: 1px solid {border};
-                border-radius: 12px;
-                margin-top: 30px;
-                font-size: 13px;
-                font-weight: 600;
-                color: {tab_sel_txt if dm else tab_txt};
-                padding: 18px 8px 8px 8px;
-            }}
-            QGroupBox::title {{
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                left: 10px;
-                top: -18px;
-                padding: 4px 10px;
-                background: {tab_bg};
-                color: {'#90caf9' if dm else '#2b6cb0'};
-                font-size: 13px;
-                font-weight: 700;
-                border-radius: 6px;
-            }}
-            QTableWidget {{
-                background: {tab_bg};
-                border: 1px solid {border};
-                border-radius: 10px;
-                gridline-color: {border};
-                font-size: 12px;
-                selection-background-color: {'#2d3e56' if dm else '#dbeafe'};
-                selection-color: {tab_sel_txt if dm else '#1e40af'};
-                alternate-background-color: {'#19202e' if dm else '#f7faff'};
-                color: {input_txt};
-            }}
-            QTableWidget::item {{
-                padding: 6px 8px;
-                border: none;
-            }}
-            QHeaderView::section {{
-                background: {'#1a2236' if dm else '#eef2fa'};
-                color: {'#90caf9' if dm else '#374151'};
-                padding: 8px 10px;
-                border: none;
-                border-right: 1px solid {border};
-                font-size: 12px;
-                font-weight: 700;
-                letter-spacing: 0.3px;
-            }}
-            QComboBox {{
-                background: {input_bg};
-                color: {input_txt};
-                border: 1px solid {border};
-                border-radius: 8px;
-                padding: 6px 12px;
-                font-size: 12px;
-                min-width: 140px;
-            }}
-            QComboBox:hover {{
-                border-color: #4dabf7;
-            }}
-            QComboBox::drop-down {{
-                border: none;
-                width: 24px;
-            }}
-            QComboBox QAbstractItemView {{
-                background: {input_bg};
-                color: {input_txt};
-                border: 1px solid {border};
-                border-radius: 8px;
-                selection-background-color: {'#2d3e56' if dm else '#dbeafe'};
-            }}
-            QLineEdit {{
-                background: {input_bg};
-                color: {input_txt};
-                border: 1px solid {border};
-                border-radius: 8px;
-                padding: 6px 12px;
-                font-size: 12px;
-            }}
-            QLineEdit:focus {{
-                border-color: #4dabf7;
-            }}
-            QDateEdit {{
-                background: {input_bg};
-                color: {input_txt};
-                border: 1px solid {border};
-                border-radius: 8px;
-                padding: 6px 22px 6px 10px;
-                font-size: 12px;
-            }}
-            QDateEdit:hover {{
-                border-color: #4dabf7;
-            }}
-            QDateEdit::drop-down {{
-                subcontrol-origin: padding;
-                subcontrol-position: center right;
-                width: 18px;
-                border: none;
-                background: transparent;
-                margin-right: 2px;
-            }}
-            QDateEdit::down-arrow {{
-                image: url({arrow_svg});
-                width: 14px;
-                height: 14px;
-            }}
-            QDateEdit::down-arrow:hover {{
-                image: url({arrow_svg});
-                width: 16px;
-                height: 16px;
-            }}
-            QLabel {{
-                background: transparent;
-            }}
-            QScrollBar:vertical {{
-                background: {sb_track};
-                width: 8px;
-                margin: 0;
-                border-radius: 4px;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {sb_handle};
-                border-radius: 4px;
-                min-height: 28px;
-            }}
-            QScrollBar::handle:vertical:hover {{
-                background: {sb_hover};
-            }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
-            QScrollBar:horizontal {{
-                background: {sb_track};
-                height: 8px;
-                border-radius: 4px;
-            }}
-            QScrollBar::handle:horizontal {{
-                background: {sb_handle};
-                border-radius: 4px;
-                min-width: 28px;
-            }}
-            QScrollBar::handle:horizontal:hover {{
-                background: {sb_hover};
-            }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0; }}
-        """)
+        arrow_svg = _get_asset_path("Assets/down-arrow.svg")
+        qss = _load_qss("dashboard.qss", "dark" if self._dark else "light")
+        self.setStyleSheet(qss.replace("{arrow_svg}", arrow_svg))
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -833,21 +637,8 @@ class StatisticsDashboard(QDialog):
         self.end_date_edit.setMinimumWidth(160)
         self.end_date_edit.setDisplayFormat("dd/MM/yyyy")
 
-        _cal_style = """
-            QCalendarWidget QSpinBox {
-                min-height: 30px;
-                padding: 2px 2px;
-                font-size: 12px;
-                border-radius: 4px;
-            }
-            QCalendarWidget QToolButton {
-                min-height: 30px;
-                padding: 2px;
-                border-radius: 4px;
-            }
-        """
-        self.start_date_edit.calendarWidget().setStyleSheet(_cal_style)
-        self.end_date_edit.calendarWidget().setStyleSheet(_cal_style)
+        self.start_date_edit.calendarWidget().setStyleSheet(_load_qss("history_calendar.qss"))
+        self.end_date_edit.calendarWidget().setStyleSheet(_load_qss("history_calendar.qss"))
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(self.translate_text("Rechercher dans l'historique..."))
 

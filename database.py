@@ -1,5 +1,5 @@
 """
-Database Manager - File Converter Pro
+Database Manager
 
 Manages SQLite database operations for history, statistics, and templates.
 
@@ -17,8 +17,6 @@ Features:
     - Export functionality (CSV, JSON)
     - Template storage and retrieval
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sqlite3, csv, json
