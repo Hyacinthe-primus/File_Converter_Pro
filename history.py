@@ -1,5 +1,5 @@
 """
-Conversion History - File Converter Pro
+Conversion History
 
 Interface for viewing, filtering, and managing conversion logs.
 
@@ -18,8 +18,6 @@ Integration:
     - Context menu support for quick actions
     - Tooltip display for full file paths
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sys
@@ -38,6 +36,8 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                                QLineEdit, QDialog, QMenu, QTableWidget, QTableWidgetItem, QDateEdit)
 from PySide6.QtCore import Qt, QDate, QThread, Signal, QObject
 from PySide6.QtGui import QKeySequence, QShortcut
+
+from qss_helpers import _load_qss, _apply_dialog_btn
 
 class HistoryLoader(QObject):
     """Worker that runs the DB query in a separate thread."""
@@ -88,32 +88,8 @@ class HistoryDialog(QDialog):
         self.load_history()
 
     def apply_scrollbar_style(self):
-        """Apply a style to the scrollbar"""
-        if hasattr(self.parent_window, 'dark_mode') and self.parent_window.dark_mode:
-            scrollbar_style = """
-                QScrollBar:vertical { background-color: #4d5564; width: 10px; margin: 0px; border: none; }
-                QScrollBar::handle:vertical { background-color: #6c757d; border-radius: 5px; min-height: 30px; }
-                QScrollBar::handle:vertical:hover { background-color: #868e96; }
-                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
-                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background-color: #4d5564; }
-                QScrollBar:horizontal { background-color: #4d5564; height: 10px; margin: 0px; border: none; }
-                QScrollBar::handle:horizontal { background-color: #6c757d; border-radius: 5px; min-width: 30px; }
-                QScrollBar::handle:horizontal:hover { background-color: #868e96; }
-                QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background-color: #4d5564; }
-            """
-        else:
-            scrollbar_style = """
-                QScrollBar:vertical { background-color: #dee2e6; width: 10px; margin: 0px; border: none; }
-                QScrollBar::handle:vertical { background-color: #adb5bd; border-radius: 5px; min-height: 30px; }
-                QScrollBar::handle:vertical:hover { background-color: #868e96; }
-                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
-                QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background-color: #dee2e6; }
-                QScrollBar:horizontal { background-color: #dee2e6; height: 10px; margin: 0px; border: none; }
-                QScrollBar::handle:horizontal { background-color: #adb5bd; border-radius: 5px; min-width: 30px; }
-                QScrollBar::handle:horizontal:hover { background-color: #868e96; }
-                QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background-color: #dee2e6; }
-            """
-        self.setStyleSheet(self.styleSheet() + scrollbar_style)
+        dark = hasattr(self.parent_window, 'dark_mode') and self.parent_window.dark_mode
+        self.setStyleSheet(self.styleSheet() + _load_qss("history_scrollbar.qss", "dark" if dark else "light"))
 
     def setup_shortcuts(self):
         """Keyboard shortcuts for the history window"""
@@ -126,113 +102,6 @@ class HistoryDialog(QDialog):
         shortcut_close.activated.connect(self.close)
 
     def setup_ui(self):
-
-        reconvert_button_style = """
-        QPushButton {
-            background-color: #10B981;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #059669;
-        }
-        QPushButton:pressed {
-            background-color: #047857;
-        }
-        """
-
-        print_pdf_button_style = """
-        QPushButton {
-            background-color: #6366F1;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #4F46E5;
-        }
-        QPushButton:pressed {
-            background-color: #4338CA;
-        }
-        """
-
-        export_json_button_style = """
-        QPushButton {
-            background-color: #A3E635;
-            color: #1A1A1A;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #93D625;
-        }
-        QPushButton:pressed {
-            background-color: #83C615;
-        }
-        """
-
-        delete_selection_style = """
-        QPushButton {
-            background-color: #EF4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #DC2626;
-        }
-        QPushButton:pressed {
-            background-color: #B91C1C;
-        }
-        """
-
-        clear_all_style = """
-        QPushButton {
-            background-color: #DC2626;
-            color: white;
-            border: 2px solid #B91C1C;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #B91C1C;
-            border-color: #991B1B;
-        }
-        QPushButton:pressed {
-            background-color: #991B1B;
-            border-color: #7F1A1A;
-        }
-        """
-
-        close_button_style = """
-        QPushButton {
-            background-color: transparent;
-            color: #6B7280;
-            border: 1px solid #D1D5DB;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #F3F4F6;
-            color: #4B5563;
-            border-color: #9CA3AF;
-        }
-        QPushButton:pressed {
-            background-color: #E5E7EB;
-            color: #1F2937;
-        }
-        """
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
@@ -286,23 +155,7 @@ class HistoryDialog(QDialog):
         self.search_input.textChanged.connect(self.load_history)
 
         arrow_path = _resource_path("Assets/down-arrow.svg")
-        date_style = f"""
-            QDateEdit {{
-                padding: 3px 6px;
-                border-radius: 4px;
-            }}
-            QDateEdit::drop-down {{
-                subcontrol-origin: padding;
-                subcontrol-position: top right;
-                width: 22px;
-                border-left: 1px solid #555;
-            }}
-            QDateEdit::down-arrow {{
-                image: url({arrow_path});
-                width: 10px;
-                height: 10px;
-            }}
-        """
+        date_style = _load_qss("history_date.qss").replace("{arrow_path}", arrow_path)
 
         self.start_date_edit = QDateEdit()
         self.start_date_edit.setCalendarPopup(True)
@@ -319,22 +172,8 @@ class HistoryDialog(QDialog):
         self.end_date_edit.setDisplayFormat("dd/MM/yyyy")
         self.end_date_edit.setFixedWidth(140)
         self.end_date_edit.setStyleSheet(date_style)
-
-        _cal_style = """
-            QCalendarWidget QSpinBox {
-                min-height: 30px;
-                padding: 2px 2px;
-                font-size: 12px;
-                border-radius: 4px;
-            }
-            QCalendarWidget QToolButton {
-                min-height: 30px;
-                padding: 2px;
-                border-radius: 4px;
-            }
-        """
-        self.start_date_edit.calendarWidget().setStyleSheet(_cal_style)
-        self.end_date_edit.calendarWidget().setStyleSheet(_cal_style)
+        self.start_date_edit.calendarWidget().setStyleSheet(_load_qss("history_calendar.qss"))
+        self.end_date_edit.calendarWidget().setStyleSheet(_load_qss("history_calendar.qss"))
 
         self.limit_combo = QComboBox()
         self.limit_combo.addItems(["50", "100", "200", "500", "1000", "2000", "5000", "7500", "10000"])
@@ -388,29 +227,29 @@ class HistoryDialog(QDialog):
         button_layout = QHBoxLayout()
         
         self.reconvert_btn = QPushButton("🔄 " + self.translate_text("Reconvertir la sélection"))
-        self.reconvert_btn.setStyleSheet(reconvert_button_style)
+        _apply_dialog_btn(self.reconvert_btn, "BtnReconvert")
         self.reconvert_btn.clicked.connect(self.reconvert_selected)
         self.reconvert_btn.setEnabled(False)
         
         self.delete_btn = QPushButton("🗑️ " + self.translate_text("Supprimer la sélection"))
-        self.delete_btn.setStyleSheet(delete_selection_style)
+        _apply_dialog_btn(self.delete_btn, "BtnDeleteSelection")
         self.delete_btn.clicked.connect(self.delete_selected)
         self.delete_btn.setEnabled(False)
         
         self.clear_all_btn = QPushButton("🧹 " + self.translate_text("Effacer tout l'historique"))
-        self.clear_all_btn.setStyleSheet(clear_all_style)
+        _apply_dialog_btn(self.clear_all_btn, "BtnClearAll")
         self.clear_all_btn.clicked.connect(self.clear_all_history)
         
         print_pdf_btn = QPushButton("🖨️ " + self.translate_text("Imprimer en PDF"))
-        print_pdf_btn.setStyleSheet(print_pdf_button_style)
+        _apply_dialog_btn(print_pdf_btn, "BtnPrintPdf")
         print_pdf_btn.clicked.connect(self.print_pdf)
         
         export_json_btn = QPushButton("📋 " + self.translate_text("Exporter en JSON"))
-        export_json_btn.setStyleSheet(export_json_button_style)
+        _apply_dialog_btn(export_json_btn, "BtnExportJson")
         export_json_btn.clicked.connect(self.export_json)
         
         close_btn = QPushButton(self.translate_text("Fermer"))
-        close_btn.setStyleSheet(close_button_style)
+        _apply_dialog_btn(close_btn, "BtnHistoryClose")
         close_btn.clicked.connect(self.close)
         
         button_layout.addWidget(self.reconvert_btn)
