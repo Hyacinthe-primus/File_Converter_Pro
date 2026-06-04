@@ -1,5 +1,5 @@
 """
-Configuration Manager - File Converter Pro
+Configuration Manager
 
 Handles application settings, system theme detection, and secure storage.
 
@@ -9,18 +9,12 @@ Key Features:
     - User preferences management (language, theme, paths, notifications)
     - Secure key generation and management for sensitive data
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import os
 import json
 from cryptography.fernet import Fernet
-import subprocess
-import sys
 from PySide6.QtWidgets import QApplication
-
-# Constants
 
 CONFIG_FILE = "file_converter_config.dat"
 KEY_FILE    = "file_converter_key.key"
@@ -118,8 +112,6 @@ class ConfigManager:
     def load_config(self) -> dict:
         """
         Load configuration from disk.
-        - First launch: returns defaults with the system theme applied.
-        - Subsequent launches: merges saved values over defaults.
         """
         try:
             if os.path.exists(self.config_file):
@@ -148,19 +140,11 @@ class ConfigManager:
     def _read_config(self) -> dict:
         """
         Dispatch to the appropriate reader based on cipher availability.
-
-        Falls back to plain-text JSON when decryption fails — this covers
-        the case where the installer wrote a minimal plain-text config
-        (containing just {"language": "en/fr"}) before the app was ever
-        launched. On the next save_config() call the file will be
-        transparently re-written in encrypted form.
         """
         if self.cipher_suite:
             try:
                 return _decrypt_config(self.config_file, self.cipher_suite)
             except Exception:
-                # File is plain-text (e.g. written by the Inno Setup installer
-                # on first install before the app was launched for the first time).
                 return _read_plain_config(self.config_file)
         return _read_plain_config(self.config_file)
 
