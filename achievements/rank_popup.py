@@ -1,11 +1,9 @@
 """
-Rank Popup for File Converter Pro
+Rank Popup
 - Animated notification for rank progression
 - Uses same assets/sounds as achievements
 - Theme-aware and multi-language
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import os
@@ -14,11 +12,11 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve
 from PySide6.QtGui import QPixmap, QFont, QColor
 from PySide6.QtCore import QUrl
-import sys as _sys, os as _os
-_PKG_DIR  = _os.path.dirname(_os.path.abspath(__file__))
-_ROOT_DIR = _os.path.dirname(_PKG_DIR)
-if _ROOT_DIR not in _sys.path:
-    _sys.path.insert(0, _ROOT_DIR)
+import sys
+_PKG_DIR  = os.path.dirname(os.path.abspath(__file__))
+_ROOT_DIR = os.path.dirname(_PKG_DIR)
+if _ROOT_DIR not in sys.path:
+    sys.path.insert(0, _ROOT_DIR)
 
 from translations import TranslationManager
 

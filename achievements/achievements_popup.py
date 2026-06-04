@@ -1,13 +1,6 @@
 """
-Achievements Popup for File Converter Pro
-- High-end animated notification for trophy acquisition
-- Sequential animations (Fade-in, slide-up, exit)
-- Integrated sound effects (QSoundEffect)
-- Theme-aware styling (Light/Dark mode)
-- Auto-closing logic with manual dismissal option
+Achievements Popup
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import os
@@ -16,11 +9,11 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QUrl, Signal
 from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtMultimedia import QSoundEffect
-import sys as _sys, os as _os
-_PKG_DIR  = _os.path.dirname(_os.path.abspath(__file__))
-_ROOT_DIR = _os.path.dirname(_PKG_DIR)
-if _ROOT_DIR not in _sys.path:
-    _sys.path.insert(0, _ROOT_DIR)
+import sys
+_PKG_DIR  = os.path.dirname(os.path.abspath(__file__))
+_ROOT_DIR = os.path.dirname(_PKG_DIR)
+if _ROOT_DIR not in sys.path:
+    sys.path.insert(0, _ROOT_DIR)
 from translations import TranslationManager
 
 class AchievementPopup(QDialog):

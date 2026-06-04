@@ -1,12 +1,10 @@
 """
-Achievements Admin Manager for File Converter Pro
+Achievements Admin Manager
 - Internal tool for testing and database maintenance
 - Real-time achievement status modification (Lock/Unlock)
 - Direct SQLite database manipulation via GUI
 - Debugging features for achievement triggers and stats reset
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sys

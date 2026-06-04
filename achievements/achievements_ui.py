@@ -1,22 +1,15 @@
 """
-Achievements UI for File Converter Pro  —  Premium Edition
-Aesthetic: Luxury game HUD — deep-space dark, rich gold accents, gem-tier palette.
+Achievements UI
+Aesthetic: Luxury game HUD
 Every card, ring and bar is custom-drawn with QPainter for a premium feel.
 
 Visual highlights:
-  • XPRingWidget      — circular arc progress ring with animated shimmer
-  • AchievementCard   — tier-gradient border + glow, hexagonal icon badge
-  • StatBarWidget     — animated horizontal bars for the Statistics tab
-  • Custom tab row    — pill-style navigation (no QTabWidget chrome)
-  • Filter chips      — compact, themed pill buttons for category/tier
-  • All original logic preserved 100% — only presentation layer changed
+  • XPRingWidget
+  • AchievementCard
+  • StatBarWidget
+  • Custom tab row
+  • Filter chips
 
-Changes (v2):
-  • RankBadgeWidget       — rank-tier-aware evolving animation (pulse → orbit → plasma)
-  • Category tree hover   — gold-tinted highlight, full text contrast on both themes
-
-Author: Hyacinthe
-Version: 1.0
 """
 
 import os
@@ -35,11 +28,11 @@ from PySide6.QtGui import (
     QPixmap, QColor, QPainter, QPainterPath, QBrush, QPen,
     QLinearGradient, QRadialGradient, QFont, QFontMetrics)
 
-import sys as _sys, os as _os
-_PKG_DIR  = _os.path.dirname(_os.path.abspath(__file__))
-_ROOT_DIR = _os.path.dirname(_PKG_DIR)
-if _ROOT_DIR not in _sys.path:
-    _sys.path.insert(0, _ROOT_DIR)
+import sys
+_PKG_DIR  = os.path.dirname(os.path.abspath(__file__))
+_ROOT_DIR = os.path.dirname(_PKG_DIR)
+if _ROOT_DIR not in sys.path:
+    sys.path.insert(0, _ROOT_DIR)
 from translations import TranslationManager
 
 
@@ -931,7 +924,7 @@ class RankBadgeWidget(QWidget):
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
-        self._timer.start(20)   # 50 fps - smooth orbits
+        self._timer.start(20)
 
     def _resolve_anim_level(self, rank_name: str) -> int:
         key = rank_name.lower().strip()
@@ -1000,7 +993,7 @@ class RankBadgeWidget(QWidget):
         p.setBrush(Qt.NoBrush)
         p.drawRoundedRect(QRectF(1, 1, w - 2, h - 2), h / 2, h / 2)
 
-        # (b) Shimmer arc — gold, platinum, diamond
+        # Shimmer arc
         if lv >= 2:
             arc_rect = QRectF(3, 3, w - 6, h - 6)
             arc_start  = int(self._phase * 180 / math.pi * 16) % (360 * 16)
@@ -1019,7 +1012,7 @@ class RankBadgeWidget(QWidget):
                 p.setPen(QPen(arc_c2, 2.0, Qt.SolidLine, Qt.RoundCap))
                 p.drawArc(arc_rect, arc_start + 180 * 16, arc_span)
 
-        # (c) Orbiting satellite dots — platinum (1 dot) & diamond (3 dots)
+        # Orbiting satellite dots
         if lv >= 3:
             orbit_r = h * 0.58
             dot_r   = 3.0 if lv == 3 else 2.5
@@ -1094,7 +1087,6 @@ class AchievementsUI(QDialog):
         self.setWindowTitle(self.T("🏆 Succès & Trophées"))
         self.setMinimumSize(920, 720)
         self.resize(980, 760)
-        # Always delete on close — caller recreates each time
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self._apply_global_style()
         self.setup_ui()
@@ -1142,7 +1134,6 @@ class AchievementsUI(QDialog):
     def translate_text(self, text: str) -> str:
         return self._tm.translate_text(text)
 
-    # Global stylesheet
     def _apply_global_style(self):
         self.setStyleSheet(f"""
             QDialog, QWidget {{
@@ -1329,7 +1320,6 @@ class AchievementsUI(QDialog):
                 }}
             """)
 
-    # Main UI assembly
     def setup_ui(self):
         root = QVBoxLayout(self)
         root.setContentsMargins(DS.PAD, DS.PAD, DS.PAD, DS.PAD)
@@ -1783,7 +1773,6 @@ class AchievementsUI(QDialog):
                 if "color" in cat_data:
                     item.setForeground(0, QColor(cat_data["color"]))
 
-        # Rank badge
         rank_idx, rank_fr, rank_color = ach_sys.get_current_rank()
         rank_name = self.T(rank_fr)
         rank_key  = ach_sys.ranks[rank_idx][0].lower().replace(" ", "_")
@@ -1796,7 +1785,6 @@ class AchievementsUI(QDialog):
             if item.widget():
                 item.widget().deleteLater()
 
-        # Remove skeleton label if still present
         if hasattr(self, "_skeleton_lbl") and self._skeleton_lbl is not None:
             self._skeleton_lbl = None
         achievements = self.achievement_system.get_all_achievements()
@@ -1861,7 +1849,6 @@ class AchievementsUI(QDialog):
             filtered[aid] = ach
         return filtered
 
-    # Public aliases
     def filter_achievements(self):
         self.load_achievements_list()
 

@@ -1,12 +1,10 @@
 """
-Achievements System for File Converter Pro
+Achievements System
 - Central logic for unlocking, tracking, and persisting achievements
 - SQLite database integration for permanent storage
 - Signal-based architecture for real-time notifications
 - Support for secret achievements and progression statistics
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import json
