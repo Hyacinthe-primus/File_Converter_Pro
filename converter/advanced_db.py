@@ -1,22 +1,14 @@
 """
-Advanced Conversions Database — File Converter Pro
+Advanced Conversions Database
 converter/advanced_db.py
 
 Separate SQLite database that stores only conversions performed through the
 AdvancedConversionsDialog (documents, images, audio/video).
 
-Why a separate DB?
-    - Keeps the main database (file_converter_stats.db) clean and focused on
-      the core conversion history shown on the existing dashboard.
-    - Lets the user pick which database to visualise in StatisticsDashboard
-      without mixing basic and advanced data.
-
 Tables:
-    adv_conversion_history : one row per advanced conversion attempt
-    adv_daily_stats        : aggregated daily counters
+    adv_conversion_history
+    adv_daily_stats
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sqlite3

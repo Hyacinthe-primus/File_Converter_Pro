@@ -1,6 +1,6 @@
 """
-Advanced Converter Engine — File Converter Pro
-converter/converters.py  v3.0 — PEAK
+Advanced Converter Engine
+converter/converters.py
 
 HTML → PDF  : Playwright (headless Chrome) › pdfkit › fitz › reportlab+images
 PDF → HTML  : fitz dict-mode (flow layout, base64 images, adaptive sizing)
@@ -11,8 +11,6 @@ EPUB → PDF  : pypandoc › spine-order native (images embedded)
 Images      : Pillow max-quality, EXIF preserved, HEIC via pillow-heif
 Audio/Video : ffmpeg binary auto-located, quality presets per format
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 from __future__ import annotations
@@ -185,16 +183,21 @@ class AdvancedConverterEngine:
                     try:
                         for sheet in wb.Worksheets:
                             try:
-                                used   = sheet.UsedRange
-                                n_cols = used.Columns.Count
-                                n_rows = used.Rows.Count
-                                if n_cols > 6 or (n_cols > 0 and n_cols > n_rows * 1.5):
-                                    sheet.PageSetup.Orientation = XL_LANDSCAPE
-                                else:
-                                    sheet.PageSetup.Orientation = XL_PORTRAIT
-                                sheet.PageSetup.Zoom           = False
-                                sheet.PageSetup.FitToPagesWide = 1
-                                sheet.PageSetup.FitToPagesTall = 0
+                                used = sheet.UsedRange
+                                ps   = sheet.PageSetup
+
+                                # Measure real column width in points via .Width property
+                                # A4 portrait printable ~510 pt, landscape ~750 pt
+                                total_width_pts = sum(
+                                    sheet.Columns(used.Column + i).Width
+                                    for i in range(used.Columns.Count)
+                                )
+                                ps.Orientation = XL_LANDSCAPE if total_width_pts > 510 else XL_PORTRAIT
+                                # Zoom=100, no FitTo — Excel paginates naturally
+                                ps.Zoom           = 100
+                                ps.FitToPagesWide = False
+                                ps.FitToPagesTall = False
+                                ps.PrintArea      = used.Address
                             except Exception:
                                 pass
                         wb.ExportAsFixedFormat(XL_PDF, dst_abs)

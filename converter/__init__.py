@@ -1,12 +1,10 @@
 """
-converter/ — Advanced Conversion Engine for File Converter Pro
+converter/ Advanced Conversion Engine for File Converter Pro
 
 Exports:
-    AdvancedDatabaseManager  : SQLite database for advanced conversions
-    AdvancedConverterEngine  : Real conversion implementations
+    AdvancedDatabaseManager
+    AdvancedConverterEngine
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 from .advanced_db import AdvancedDatabaseManager
