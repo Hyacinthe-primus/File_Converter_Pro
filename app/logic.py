@@ -1,6 +1,5 @@
 """
-app/logic.py — AppLogicMixin
-File Converter Pro
+app/logic.py
 
 Contains all conversion, processing, and data-management methods of
 FileConverterApp, extracted as a mixin for clarity.  Import order:
@@ -11,39 +10,6 @@ FileConverterApp, extracted as a mixin for clarity.  Import order:
         ↑
     __init__.py (FileConverterApp)
 
-Author: Hyacinthe
-Version: 1.0
-"""
-
-"""
-Main Application Logic - File Converter Pro
-
-Core application window and conversion engine implementation.
-
-Classes:
-    FileConverterApp(QMainWindow):
-        - Complete UI layout (File list, Conversion panel, Toolbar)
-        - Multi-format conversion engine (PDF, Word, Images, Archives)
-        - Integration with external systems (Achievements, Notifications)
-        - Project management (Save/Load .fcproj)
-    
-    FadingMainWindow(FileConverterApp):
-        - Subclass with fade-in animation support on launch
-
-Key Functionalities:
-    - Drag & Drop file handling
-    - Batch conversions and operations
-    - Encrypted PDF handling (Decrypt → Convert)
-    - Office file optimization (Metadata removal, Compression)
-    - Achievement system tracking (Unlocks, Stats, Ranks)
-
-Design:
-    - Modular imports (config, database, widgets, dialogs, etc.)
-    - Signal/Slot architecture for decoupled communication
-    - Robust resource path management (Dev + PyInstaller)
-
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sys
@@ -162,8 +128,7 @@ class AppLogicMixin:
             self.adv_db_manager = AdvancedDatabaseManager()
         except Exception:
             pass
-        
-        # Achievements system
+
         self.achievement_system = AchievementSystem(self.config_manager)
         self.achievement_system.achievement_unlocked.connect(self.queue_achievement)
         self.achievement_system.rank_unlocked.connect(self.show_rank_popup)
@@ -171,7 +136,6 @@ class AppLogicMixin:
         self.is_showing_achievement = False
         self.rank_queue = []
 
-        # Record app launch
         self.achievement_system.record_app_launch()
         self.dashboard_dialog = None
         self.history_dialog = None
@@ -179,19 +143,17 @@ class AppLogicMixin:
         self.achievements_dialog = None
         self.dark_mode_timer_start = None
 
-        # If app starts in dark mode, initialize the timer
         if self.dark_mode:
             self.dark_mode_timer_start = time.time()
         self.dark_mode_timer = QTimer()
         self.dark_mode_timer.timeout.connect(self.update_dark_mode_time)
-        self.dark_mode_timer.start(60000)  # Each minute
+        self.dark_mode_timer.start(60000)
 
         self.system_notifier = SystemNotifier(self, self.current_language)
         self.system_notifier.set_translator(self.translation_manager)
 
         self.setup_ui()
 
-        # Restore the window size/position
         _geom = self.config.get("window_geometry")
         _maximized = self.config.get("window_maximized", False)
         if _maximized:
@@ -207,10 +169,7 @@ class AppLogicMixin:
             if not QGuiApplication.screenAt(self.geometry().center()):
                 self.setGeometry(100, 100, 1400, 900)
 
-        if self.dark_mode:
-            self.apply_modern_dark_theme()
-        else:
-            self.apply_modern_light_theme()
+        self.apply_theme(self.dark_mode)
         
         self.update_texts()
         self.special_events = SpecialEventsManager(self)
@@ -265,11 +224,21 @@ class AppLogicMixin:
             sys.exit(0)
 
     def closeEvent(self, event):
-        """Flush and close the persistent SQLite connection on exit."""
+        """Handle app closing: save config, close DB, stop threads, clean temp files."""
         try:
             self.db_manager.close()
         except Exception:
             pass
+        if hasattr(self, "_watcher"):
+            try:
+                self._watcher.stop()
+            except Exception:
+                pass
+        if hasattr(self, "_scheduler"):
+            try:
+                self._scheduler.stop()
+            except Exception:
+                pass
         super().closeEvent(event)
 
     def cleanup_temp_files(self):
@@ -319,7 +288,6 @@ class AppLogicMixin:
                 original_size = os.path.getsize(file_path)
                 total_original_size += original_size
                 
-                # Determine output file path
                 if keep_backup:
                     output_file = os.path.join(output_dir, f"optimized_{Path(file_path).name}")
                 else:
@@ -327,7 +295,6 @@ class AppLogicMixin:
                 
                 operation_start = datetime.now()
                 
-                # Determine compression level based on quality_level
                 if quality_level == 0:
                     compression_level = "high"
                 elif quality_level == 1:
@@ -441,7 +408,6 @@ class AppLogicMixin:
         total_time = (datetime.now() - start_time).total_seconds()
         self.show_progress(False)
         
-        # Calculate stats
         if total_original_size > 0:
             compression_rate = ((total_original_size - total_compressed_size) / total_original_size * 100)
             savings_mb = (total_original_size - total_compressed_size) / (1024 * 1024)
@@ -3925,7 +3891,7 @@ class AppLogicMixin:
 
         if len(pdf_files) > 1:
             dialog.setWindowTitle(
-                self.translate_text("Diviser PDF") + f"  —  {len(pdf_files)} " + self.translate_text("fichiers")
+                self.translate_text("Diviser PDF") + f" - {len(pdf_files)} " + self.translate_text("fichiers")
             )
 
         _bypass_dialog = False

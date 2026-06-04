@@ -13,8 +13,6 @@ Inheritance chain:
                         └── FileConverterApp
                                 └── FadingMainWindow
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 __version__ = "1.0.5"
@@ -34,7 +32,6 @@ class FadingMainWindow(FileConverterApp):
     def __init__(self, config_manager):
         super().__init__(config_manager)
         self.setWindowOpacity(0.0)
-        # Let Qt recreate the HWND, then reapply the icon.
         QTimer.singleShot(0, self.set_application_icon)
 
     def fade_in(self, duration=600):
