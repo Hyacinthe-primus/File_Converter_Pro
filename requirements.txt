@@ -18,6 +18,7 @@ python-docx==1.2.0
 docx2pdf==0.1.8
 python-pptx==1.0.2
 openpyxl==3.1.5
+docxcompose==2.1.0
 
 #Images
 Pillow==12.0.0
@@ -48,6 +49,10 @@ cryptography==46.0.3
 
 # Charts/Visualization
 matplotlib==3.10.7
+
+# Watchdog and Scheduling
+watchdog==6.0.0
+APScheduler==3.11.2
 
 # Exe Packager
 pyinstaller==6.16.0
