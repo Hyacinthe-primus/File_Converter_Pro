@@ -1120,6 +1120,18 @@
     "entrée(s)": "",
     "Fmt src": "",
     "Fmt cible": "",
+    "Automatisation": "",
+    "Démon d'automatisation": "",
+    "Lancer le démon automatiquement au démarrage de Windows": "",
+    "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée.": "",
+    "Dossiers surveillés": "",
+    "Tâches planifiées": "",
+    "Ouvrir le dossier automation/": "",
+    "Recharger": "",
+    "Aucun dossier surveillé configuré.": "",
+    "Aucune tâche planifiée configurée.": "",
+    "Actif": "",
+    "Inactif": "",
     "dropzone_line1": "",
     "dropzone_line2": ""
   }

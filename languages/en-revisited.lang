@@ -1120,6 +1120,18 @@
     "entrée(s)": "entry(ies)",
     "Fmt src": "Src fmt",
     "Fmt cible": "Tgt fmt",
+    "Automatisation": "Automation",
+    "Démon d'automatisation": "Automation daemon",
+    "Lancer le démon automatiquement au démarrage de Windows": "Launch the daemon automatically at Windows startup",
+    "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée.": "The daemon monitors your folders and runs scheduled tasks even when the application is closed.",
+    "Dossiers surveillés": "Watched folders",
+    "Tâches planifiées": "Scheduled tasks",
+    "Ouvrir le dossier automation/": "Open automation/ folder",
+    "Recharger": "Reload",
+    "Aucun dossier surveillé configuré.": "No watched folders configured.",
+    "Aucune tâche planifiée configurée.": "No scheduled tasks configured.",
+    "Actif": "Active",
+    "Inactif": "Inactive",
     "dropzone_line1": "██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗\n██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝\n██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗  \n██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝  \n╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗\n ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝",
     "dropzone_line2": "██████╗ ██████╗  ██████╗ ██████╗     ███████╗██╗██╗     ███████╗███████╗    ██╗  ██╗███████╗██████╗ ███████╗\n██╔══██╗██╔══██╗██╔═══██╗██╔══██╗    ██╔════╝██║██║     ██╔════╝██╔════╝    ██║  ██║██╔════╝██╔══██╗██╔════╝\n██║  ██║██████╔╝██║   ██║██████╔╝    █████╗  ██║██║     █████╗  ███████╗    ███████║█████╗  ██████╔╝█████╗  \n██║  ██║██╔══██╗██║   ██║██╔═══╝     ██╔══╝  ██║██║     ██╔══╝  ╚════██║    ██╔══██║██╔══╝  ██╔══██╗██╔══╝  \n██████╔╝██║  ██║╚██████╔╝██║         ██║     ██║███████╗███████╗███████║    ██║  ██║███████╗██║  ██║███████╗\n╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝         ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝    ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝"
   }
