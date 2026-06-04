@@ -5,6 +5,9 @@
 # GUI Framework
 PySide6==6.10.0
 
+#Terminal rich text formatting
+rich==14.2.0
+
 #PDF Handling Libraries
 PyMuPDF==1.26.6
 pypdf==6.9.1
