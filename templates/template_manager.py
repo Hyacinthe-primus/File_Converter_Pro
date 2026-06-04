@@ -1,5 +1,5 @@
 """
-TemplateManager - File Converter Pro
+TemplateManager
 
 Centralized manager for conversion presets.
 Extracted from templates.py for better code organization.
@@ -9,8 +9,6 @@ Responsibilities:
     - Dynamic application of settings based on template type
     - Import/Export functionality (JSON)
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import json
