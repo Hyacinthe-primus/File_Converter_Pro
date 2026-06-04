@@ -1,5 +1,5 @@
 """
-Conversion Worker — File Converter Pro
+Conversion Worker
 
 Runs any conversion workload in a background QThread so the UI
 never freezes.  Drop-in replacement for the blocking for-loops
@@ -15,8 +15,6 @@ Usage (from app.py):
     self._worker.error.connect(self._on_conversion_error)
     self._worker.start()
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 from PySide6.QtCore import QThread, Signal
