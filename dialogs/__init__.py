@@ -1,11 +1,9 @@
 """
-dialogs/ — package grouping all dialog boxes of File Converter Pro.
+dialogs/ package grouping all dialog boxes of File Converter Pro.
 
 Re-exports public classes so that app.py can continue to write:
     from dialogs import SettingsDialog, PasswordDialog, SplitDialog, ...
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 from .dialogs import (

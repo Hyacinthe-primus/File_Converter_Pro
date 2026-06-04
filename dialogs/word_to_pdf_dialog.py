@@ -3,16 +3,6 @@ Provides a modal dialog for configuring Word-to-PDF conversion settings,
 including formatting preservation mode, image quality, metadata options,
 and a live-updating preview panel that reflects the selected mode.
 
-Features:
-    - Two conversion modes: preserve all formatting vs. text-only
-    - Collapsible advanced options (image quality, compression, metadata)
-    - Dynamic preview panel with dark/light theme support
-    - Modern slim scrollbar styled per theme
-    - Bilingual support (French / English)
-    - Intelligent space management: dialog resizes when advanced panel toggles
-
-Author: Hyacinthe
-Version: 1.0
 """
 
 from PySide6.QtWidgets import (
@@ -20,15 +10,9 @@ from PySide6.QtWidgets import (
     QFormLayout, QComboBox, QDialogButtonBox, QTextEdit, QSizePolicy
 )
 
-import sys as _sys, os as _os
-_PKG_DIR  = _os.path.dirname(_os.path.abspath(__file__))
-_ROOT_DIR = _os.path.dirname(_PKG_DIR)
-if _ROOT_DIR not in _sys.path:
-    _sys.path.insert(0, _ROOT_DIR)
-
 from widgets import AnimatedCheckBox
-
 from translations import TranslationManager
+from qss_helpers import _load_qss, _apply_dialog_btn
 
 _DARK = {
     "preview_bg":    "#0d1117",
@@ -55,140 +39,6 @@ _LIGHT = {
     "bullet_active": "#343a40",
     "bullet_muted":  "#ced4da",
 }
-
-_ADVANCED_GROUP_DARK = """
-    QGroupBox {
-        font-weight: bold;
-        font-size: 16px;
-        color: #6c757d;
-        background-color: #1c2128;
-        border: 1.5px solid #30363d;
-        border-radius: 12px;
-        margin-top: 16px;
-        padding-top: 16px;
-        margin-left: 2px;
-    }
-    QGroupBox:checked {
-        color: #74c0fc;
-        background-color: #0a1929;
-        border: 1.5px solid #4dabf7;
-    }
-    QGroupBox:unchecked:hover {
-        border: 1.5px solid #495057;
-        background-color: #1e2530;
-    }
-    QGroupBox::title {
-        subcontrol-origin: margin;
-        left: 30px;
-        padding: 0 10px;
-        color: #6c757d;
-    }
-    QGroupBox:checked::title {
-        color: #74c0fc;
-    }
-    QGroupBox::indicator {
-        width: 18px; height: 18px;
-        border-radius: 9px;
-        border: 2px solid #30363d;
-        background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-            stop:0 #2d333b, stop:1 #1c2128);
-        margin-right: 6px; margin-top: 3px;
-    }
-    QGroupBox::indicator:unchecked:hover {
-        border: 2px solid #4dabf7;
-        background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-            stop:0 #1a2d42, stop:0.6 #142236, stop:1 #0d1929);
-    }
-    QGroupBox::indicator:checked {
-        border: 2px solid #4dabf7;
-        background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-            stop:0 #c8e6ff, stop:0.28 #89c4f4,
-            stop:0.36 #4dabf7, stop:0.60 #2980b9, stop:1 #1a5f8a);
-    }
-    QGroupBox::indicator:checked:hover {
-        border: 2px solid #74c0fc;
-        background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-            stop:0 #e8f4ff, stop:0.28 #a8d8ff,
-            stop:0.36 #74c0fc, stop:0.60 #3a9bd5, stop:1 #1e6fa0);
-    }
-"""
-
-_ADVANCED_GROUP_LIGHT = """
-    QGroupBox {
-        font-weight: bold;
-        font-size: 16px;
-        color: #868e96;
-        background-color: #f8f9fa;
-        border: 1.5px solid #dee2e6;
-        border-radius: 12px;
-        margin-top: 16px;
-        padding-top: 16px;
-        margin-left: 2px;
-    }
-    QGroupBox:checked {
-        color: #1971c2;
-        background-color: #e8f4fd;
-        border: 1.5px solid #4dabf7;
-    }
-    QGroupBox:unchecked:hover {
-        border: 1.5px solid #adb5bd;
-        background-color: #f1f3f5;
-    }
-    QGroupBox::title {
-        subcontrol-origin: margin;
-        left: 30px;
-        padding: 0 10px;
-        color: #868e96;
-    }
-    QGroupBox:checked::title {
-        color: #1971c2;
-    }
-    QGroupBox::indicator {
-        width: 18px; height: 18px;
-        border-radius: 9px;
-        border: 2px solid #ced4da;
-        background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-            stop:0 #ffffff, stop:1 #f1f3f5);
-        margin-right: 6px; margin-top: 3px;
-    }
-    QGroupBox::indicator:unchecked:hover {
-        border: 2px solid #74c0fc;
-        background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-            stop:0 #f0f8ff, stop:0.6 #dbeeff, stop:1 #c5e3f7);
-    }
-    QGroupBox::indicator:checked {
-        border: 2px solid #4dabf7;
-        background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-            stop:0 #ffffff, stop:0.30 #e8f4ff,
-            stop:0.36 #4dabf7, stop:0.65 #2980b9, stop:1 #1a6fa3);
-    }
-    QGroupBox::indicator:checked:hover {
-        border: 2px solid #339af0;
-        background: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-            stop:0 #ffffff, stop:0.30 #f0f8ff,
-            stop:0.36 #339af0, stop:0.65 #1a7fd4, stop:1 #0f5a9e);
-    }
-"""
-
-_BTN_OK = """
-    QPushButton {
-        background-color: #28a745; color: white;
-        border: none; padding: 8px 16px;
-        border-radius: 6px; font-weight: bold;
-    }
-    QPushButton:hover   { background-color: #218838; }
-    QPushButton:pressed { background-color: #1e7e34; }
-"""
-
-_BTN_CANCEL = """
-    QPushButton {
-        background-color: #B55454; color: white;
-        border: none; padding: 8px 16px;
-        border-radius: 6px; font-weight: bold;
-    }
-    QPushButton:hover   { background-color: #A04040; }
-    QPushButton:pressed { background-color: #8B3030; }
-"""
 
 
 class WordToPdfOptionsDialog(QDialog):
@@ -274,7 +124,7 @@ class WordToPdfOptionsDialog(QDialog):
         group.setChecked(False)
 
         group.setStyleSheet(
-            _ADVANCED_GROUP_DARK if self.is_dark_mode else _ADVANCED_GROUP_LIGHT
+            _load_qss("advanced_group.qss", "dark" if self.is_dark_mode else "light")
         )
 
         form = QFormLayout(group)
@@ -361,13 +211,8 @@ class WordToPdfOptionsDialog(QDialog):
         """Create and style the OK / Cancel button box."""
         box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
-        ok = box.button(QDialogButtonBox.Ok)
-        if ok:
-            ok.setStyleSheet(_BTN_OK)
-
-        cancel = box.button(QDialogButtonBox.Cancel)
-        if cancel:
-            cancel.setStyleSheet(_BTN_CANCEL)
+        _apply_dialog_btn(box.button(QDialogButtonBox.Ok), "BtnOK")
+        _apply_dialog_btn(box.button(QDialogButtonBox.Cancel), "BtnCancelGlassy")
 
         box.accepted.connect(self.accept)
         box.rejected.connect(self.reject)

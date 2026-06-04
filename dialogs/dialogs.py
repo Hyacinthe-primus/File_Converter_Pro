@@ -1,5 +1,5 @@
 """
-Dialog Windows - File Converter Pro
+Dialog Windows
 
 Collection of modal and non-modal dialog windows for user interaction.
 
@@ -14,13 +14,6 @@ Main Dialogs:
     - ConversionOptionsDialog: Generic conversion selection menu.
     - WordToPdfOptionsDialog: Specific options for Word→PDF conversion(from word_to_pdf_dialog.py).
 
-Features:
-    - Bilingual support via TranslationManager
-    - Theme-aware CSS styling
-    - Robust resource path handling (Dev + PyInstaller)
-
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sys
@@ -38,17 +31,14 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
 from PySide6.QtCore import (Qt, QPropertyAnimation, QEasingCurve, QTimer, QSize,
                             QSequentialAnimationGroup, QCoreApplication, Signal)
 from PySide6.QtGui import (QIcon, QPixmap)
-import sys as _sys, os as _os
-_PKG_DIR  = _os.path.dirname(_os.path.abspath(__file__))
-_ROOT_DIR = _os.path.dirname(_PKG_DIR)
-if _ROOT_DIR not in _sys.path:
-    _sys.path.insert(0, _ROOT_DIR)
 
 from datetime import datetime
 
+from qss_helpers import _apply_dialog_btn
 from widgets import AnimatedCheckBox
 from .terms_dialog import TermsAndPrivacyDialog
 from translations import TranslationManager
+
 
 def _make_tm(language):
     """Helper: create a TranslationManager set to *language*."""
@@ -109,41 +99,9 @@ class PdfToWordDialog(QDialog):
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         ok_button = buttons.button(QDialogButtonBox.Ok)
-        if ok_button:
-            ok_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #28a745;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #218838;
-                }
-                QPushButton:pressed {
-                    background-color: #1e7e34;
-                }
-            """)
         cancel_button = buttons.button(QDialogButtonBox.Cancel)
-        if cancel_button:
-            cancel_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #B55454;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #A04040;
-                }
-                QPushButton:pressed {
-                    background-color: #8B3030;
-                }
-            """)
+        _apply_dialog_btn(ok_button, "BtnOK")
+        _apply_dialog_btn(cancel_button, "BtnCancel")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
@@ -176,16 +134,16 @@ class ModernSplashScreen(QWidget):
         self.setWindowTitle(self.translate_text("File Converter Pro - convertisseur de fichiers professionnels"))
 
     def get_icon_path(self):
-        """Retrieve icon path (icon.ico) robustly (dev + PyInstaller)"""
+        """Find icon.ico robustly (dev + PyInstaller)"""
         icon_name = "icon.ico"
-
+        
         if getattr(sys, 'frozen', False):
-            base_path = sys._MEIPASS
-            path = os.path.join(base_path, icon_name)
+            path = os.path.join(sys._MEIPASS, icon_name)
             if os.path.exists(path):
                 return path
 
-        path = os.path.join(_ROOT_DIR, icon_name)
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(root_dir, icon_name)
         if os.path.exists(path):
             return path
 
@@ -280,7 +238,7 @@ class ModernSplashScreen(QWidget):
             self.setStyleSheet("""
                 #container {
                     background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                        stop:0 #2d333b, stop:1 #1a1d23);
+                        stop:0 #1e2229, stop:1 #1a1d23);
                     border-radius: 20px;
                     border: 1px solid #495057;
                 }
@@ -487,12 +445,12 @@ class PreviewDialog(QDialog):
             for i in range(max_pages):
                 page = pdf_document.load_page(i)
                 pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
-                import tempfile, os as _os
+                import tempfile
                 tmp = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
                 tmp.close()
                 pix.save(tmp.name)
                 pixmap = QPixmap(tmp.name)
-                _os.unlink(tmp.name)
+                os.unlink(tmp.name)
                 if not pixmap.isNull():
                     if pixmap.width() > 660:
                         pixmap = pixmap.scaledToWidth(660, Qt.SmoothTransformation)
@@ -1220,41 +1178,9 @@ class PasswordDialog(QDialog):
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         ok_button = buttons.button(QDialogButtonBox.Ok)
-        if ok_button:
-            ok_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #28a745;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #218838;
-                }
-                QPushButton:pressed {
-                    background-color: #1e7e34;
-                }
-            """)
         cancel_button = buttons.button(QDialogButtonBox.Cancel)
-        if cancel_button:
-            cancel_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #B55454;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #A04040;
-                }
-                QPushButton:pressed {
-                    background-color: #8B3030;
-                }
-            """)
+        _apply_dialog_btn(ok_button, "BtnOK")
+        _apply_dialog_btn(cancel_button, "BtnCancel")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
@@ -1309,41 +1235,9 @@ class SplitDialog(QDialog):
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         ok_button = buttons.button(QDialogButtonBox.Ok)
-        if ok_button:
-            ok_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #28a745;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #218838;
-                }
-                QPushButton:pressed {
-                    background-color: #1e7e34;
-                }
-            """)
         cancel_button = buttons.button(QDialogButtonBox.Cancel)
-        if cancel_button:
-            cancel_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #B55454;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #A04040;
-                }
-                QPushButton:pressed {
-                    background-color: #8B3030;
-                }
-            """)
+        _apply_dialog_btn(ok_button, "BtnOK")
+        _apply_dialog_btn(cancel_button, "BtnCancel")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
 
@@ -1436,7 +1330,7 @@ class CompressionDialog(QDialog):
         split_size_layout.addStretch()
 
         self.split_info_label = QLabel()
-        self.split_info_label.setStyleSheet("font-size: 10px; color: #6c757d; font-style: italic;")
+        self.split_info_label.setStyleSheet("font-size: 10px; color: #1e2229; font-style: italic;")
         self.split_info_label.setWordWrap(True)
         self.split_info_label.setVisible(False)
 
@@ -1449,7 +1343,7 @@ class CompressionDialog(QDialog):
         layout.addWidget(options_group)
 
         self.format_info = QLabel()
-        self.format_info.setStyleSheet("font-size: 11px; color: #6c757d; font-style: italic;")
+        self.format_info.setStyleSheet("font-size: 11px; color: #1e2229; font-style: italic;")
         self.format_info.setWordWrap(True)
         layout.addWidget(self.format_info)
 
@@ -1465,41 +1359,9 @@ class CompressionDialog(QDialog):
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         ok_button = buttons.button(QDialogButtonBox.Ok)
-        if ok_button:
-            ok_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #28a745;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #218838;
-                }
-                QPushButton:pressed {
-                    background-color: #1e7e34;
-                }
-            """)
         cancel_button = buttons.button(QDialogButtonBox.Cancel)
-        if cancel_button:
-            cancel_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #B55454;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #A04040;
-                }
-                QPushButton:pressed {
-                    background-color: #8B3030;
-                }
-            """)
+        _apply_dialog_btn(ok_button, "BtnOK")
+        _apply_dialog_btn(cancel_button, "BtnCancelGlassy")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -1532,11 +1394,11 @@ class CompressionDialog(QDialog):
         if hasattr(parent, 'dark_mode'):
             if parent.dark_mode:
                 self.setStyleSheet("""
-                    QDialog { background-color: #2d333b; }
+                    QDialog { background-color: #1e2229; }
                     QLabel { color: #e9ecef; }
                     QGroupBox {
                         color: #adb5bd;
-                        border: 1px solid #495057;
+                        border: 1px solid #2c313a;
                         border-radius: 6px;
                         margin-top: 10px;
                     }
@@ -1546,9 +1408,9 @@ class CompressionDialog(QDialog):
                         padding: 0 5px;
                     }
                     QComboBox, QLineEdit, QSpinBox {
-                        background-color: #495057;
+                        background-color: #2c313a;;
                         color: #e9ecef;
-                        border: 1px solid #6c757d;
+                        border: 1px solid #1e2229;
                         border-radius: 4px;
                         padding: 5px;
                     }
@@ -1556,7 +1418,7 @@ class CompressionDialog(QDialog):
                     QCheckBox::indicator {
                         width: 16px; height: 16px;
                         border-radius: 3px;
-                        border: 2px solid #6c757d;
+                        border: 2px solid #1e2229;
                     }
                     QCheckBox::indicator:checked {
                         background-color: #4dabf7;
@@ -1603,7 +1465,6 @@ class CompressionDialog(QDialog):
             message = template.format(value)
             self.split_info_label.setText(message)
             self.split_info_label.setVisible(True)
-            print(f"[DEBUG] Custom size changed: {value} MB")
 
     def on_split_changed(self, state):
         is_enabled = state == Qt.Checked
@@ -1728,15 +1589,9 @@ class CompressionDialog(QDialog):
                                                 self.translate_text("ZIP"),
                                                 self.translate_text("RAR")]
 
-        print(f"[DEBUG GET_SETTINGS] Split checkbox: {is_split_enabled}")
-        print(f"[DEBUG GET_SETTINGS] Format: {current_format}")
-        print(f"[DEBUG GET_SETTINGS] Split supported: {is_split_supported}")
-        print(f"[DEBUG GET_SETTINGS] Split size: {self.split_size_spin.value()}")
-
         split_size = 0
         if is_split_enabled and is_split_supported:
             split_size = self.split_size_spin.value()
-            print(f"[DEBUG] Splitting size chosen: {split_size}MB")
             if split_size < 1:
                 split_size = 100
 
@@ -1749,9 +1604,6 @@ class CompressionDialog(QDialog):
             'split_size': split_size,
             'delete_originals': self.delete_original_checkbox.isChecked()
         }
-
-        print(f"[DEBUG FINAL SETTINGS] Format: {settings['format']}")
-        print(f"[DEBUG FINAL SETTINGS] Split: {settings['split']}, Size: {settings['split_size']}MB")
 
         return settings
 
@@ -1789,41 +1641,9 @@ class BatchConvertDialog(QDialog):
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         ok_button = buttons.button(QDialogButtonBox.Ok)
-        if ok_button:
-            ok_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #28a745;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #218838;
-                }
-                QPushButton:pressed {
-                    background-color: #1e7e34;
-                }
-            """)
         cancel_button = buttons.button(QDialogButtonBox.Cancel)
-        if cancel_button:
-            cancel_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #B55454;
-                    color: white;
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 6px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #A04040;
-                }
-                QPushButton:pressed {
-                    background-color: #8B3030;
-                }
-            """)
+        _apply_dialog_btn(ok_button, "BtnOK")
+        _apply_dialog_btn(cancel_button, "BtnCancel")
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addRow(buttons)
@@ -1989,20 +1809,10 @@ class BatchRenameDialog(QDialog):
         btn_row = QHBoxLayout()
         self.rename_btn = QPushButton("✅ " + self.tr_("br_apply"))
         self.rename_btn.setMinimumHeight(36)
-        self.rename_btn.setStyleSheet("""
-            QPushButton { background:#28a745; color:white; border:none;
-                          border-radius:7px; font-weight:bold; padding:6px 20px; }
-            QPushButton:hover { background:#218838; }
-            QPushButton:pressed { background:#1e7e34; }
-        """)
+        _apply_dialog_btn(self.rename_btn, "BtnOK")
         cancel_btn = QPushButton(self.tr_("Annuler"))
         cancel_btn.setMinimumHeight(36)
-        cancel_btn.setStyleSheet("""
-            QPushButton { background:#B55454; color:white; border:none;
-                          border-radius:7px; font-weight:bold; padding:6px 20px; }
-            QPushButton:hover { background:#A04040; }
-            QPushButton:pressed { background:#8B3030; }
-        """)
+        _apply_dialog_btn(cancel_btn, "BtnDecline")
         self.rename_btn.clicked.connect(self.accept)
         cancel_btn.clicked.connect(self.reject)
         btn_row.addStretch()
@@ -2021,23 +1831,23 @@ class BatchRenameDialog(QDialog):
         files = list(self.files)
         idx = self.order_combo.currentIndex()
         if idx == 1:
-            files.sort(key=lambda f: _os.path.basename(f).lower())
+            files.sort(key=lambda f: os.path.basename(f).lower())
         elif idx == 2:
-            files.sort(key=lambda f: _os.path.basename(f).lower(), reverse=True)
+            files.sort(key=lambda f: os.path.basename(f).lower(), reverse=True)
         elif idx == 3:
             def _nk(f):
-                nums = _re2.findall(r'\d+', _os.path.splitext(_os.path.basename(f))[0])
+                nums = _re2.findall(r'\d+', os.path.splitext(os.path.basename(f))[0])
                 return [int(n) for n in nums] if nums else [0]
             files.sort(key=_nk)
         elif idx == 4:
             def _nkd(f):
-                nums = _re2.findall(r'\d+', _os.path.splitext(_os.path.basename(f))[0])
+                nums = _re2.findall(r'\d+', os.path.splitext(os.path.basename(f))[0])
                 return [int(n) for n in nums] if nums else [0]
             files.sort(key=_nkd, reverse=True)
         elif idx == 5:
-            files.sort(key=lambda f: _os.path.getmtime(f) if _os.path.exists(f) else 0)
+            files.sort(key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0)
         elif idx == 6:
-            files.sort(key=lambda f: _os.path.getmtime(f) if _os.path.exists(f) else 0, reverse=True)
+            files.sort(key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0, reverse=True)
         return files
 
     def _apply_transforms(self, stem):
@@ -2062,8 +1872,8 @@ class BatchRenameDialog(QDialog):
 
     def _compute_new_name(self, file_path, index):
         from datetime import datetime as _dt
-        stem = _os.path.splitext(_os.path.basename(file_path))[0]
-        ext  = _os.path.splitext(file_path)[1]
+        stem = os.path.splitext(os.path.basename(file_path))[0]
+        ext  = os.path.splitext(file_path)[1]
         num  = self.start_spin.value() + index * self.step_spin.value()
         pad  = self.pad_spin.value()
         date = _dt.now().strftime("%Y-%m-%d")
@@ -2082,7 +1892,7 @@ class BatchRenameDialog(QDialog):
         files = self._sorted_files()
         self.preview_table.setRowCount(len(files))
         for i, fp in enumerate(files):
-            old_name = _os.path.basename(fp)
+            old_name = os.path.basename(fp)
             new_name = self._compute_new_name(fp, i)
             old_item = QTableWidgetItem(old_name)
             new_item = QTableWidgetItem(new_name)
@@ -2329,6 +2139,7 @@ class SettingsDialog(QDialog):
         privacy_layout.addStretch()
 
         self.tab_widget.addTab(general_tab,  self.translate_text("Général"))
+        self.tab_widget.addTab(self._build_automation_tab(), self.translate_text("Automatisation"))
         self.tab_widget.addTab(privacy_tab,  self.translate_text("Confidentialité"))
         self.tab_widget.addTab(self._build_language_tab(), self.translate_text("Langue"))
 
@@ -2497,15 +2308,7 @@ class SettingsDialog(QDialog):
 
         import_btn = QPushButton("📥 " + self.translate_text("Importer un fichier .lang"))
         import_btn.setMinimumHeight(36)
-        import_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #6366F1; color: white;
-                border: none; padding: 8px 16px;
-                border-radius: 6px; font-weight: bold; font-size: 12px;
-            }
-            QPushButton:hover   { background-color: #4F46E5; }
-            QPushButton:pressed { background-color: #4338CA; }
-        """)
+        _apply_dialog_btn(import_btn, "BtnIndigo")
         import_btn.clicked.connect(self._import_lang_file)
         layout.addWidget(import_btn)
 
@@ -2883,6 +2686,221 @@ class SettingsDialog(QDialog):
         self.auto_save_templates_check.setChecked(True)
         self.separate_image_pdfs_checkbox.setChecked(False)
         self.use_system_theme_checkbox.setChecked(True)
+
+    def _build_automation_tab(self) -> QWidget:
+        dark = self._lang_is_dark()
+
+        tab_bg       = "#0d1117" if dark else "#f8f9fa"
+        group_bg     = "#161b22" if dark else "#ffffff"
+        group_border = "#30363d" if dark else "#dee2e6"
+        text_primary = "#e6edf3" if dark else "#1c2526"
+        text_muted   = "#8b949e" if dark else "#6b7280"
+
+        tab = QWidget()
+        tab.setStyleSheet(f"background-color: {tab_bg};")
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(8, 10, 8, 10)
+        layout.setSpacing(12)
+
+        from daemon import is_autostart_enabled, set_autostart
+
+        autostart_group = QGroupBox(self.translate_text("Démon d'automatisation"))
+        autostart_group.setStyleSheet(f"""
+            QGroupBox {{
+                color: {text_muted}; background-color: {group_bg};
+                border: 1px solid {group_border}; border-radius: 8px;
+                margin-top: 10px; padding-top: 10px;
+                font-size: 11px; font-weight: 600;
+            }}
+            QGroupBox::title {{
+                subcontrol-origin: margin; left: 10px; padding: 0 6px; color: {text_muted};
+            }}
+        """)
+        autostart_layout = QVBoxLayout(autostart_group)
+        autostart_layout.setSpacing(8)
+
+        self._autostart_check = AnimatedCheckBox(
+            self.translate_text("Lancer le démon automatiquement au démarrage de Windows")
+        )
+        self._autostart_check.setProperty("i18n_key", "Lancer le démon automatiquement au démarrage de Windows")
+        self._autostart_check.setChecked(is_autostart_enabled())
+        self._autostart_check.stateChanged.connect(self._on_autostart_toggled)
+
+        hint = QLabel("ℹ️ " + self.translate_text(
+            "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée."
+        ))
+        hint.setProperty("i18n_key",
+            "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée."
+        )
+        hint.setWordWrap(True)
+        hint.setStyleSheet(f"color: {text_muted}; font-size: 10px; font-style: italic; background: transparent;")
+
+        autostart_layout.addWidget(self._autostart_check)
+        autostart_layout.addWidget(hint)
+        layout.addWidget(autostart_group)
+
+        wf_group = QGroupBox(self.translate_text("Dossiers surveillés"))
+        wf_group.setStyleSheet(autostart_group.styleSheet())
+        wf_layout = QVBoxLayout(wf_group)
+        wf_layout.setSpacing(6)
+        wf_layout.setContentsMargins(8, 8, 8, 8)
+
+        self._wf_inner_layout = QVBoxLayout()
+        self._wf_inner_layout.setSpacing(5)
+        wf_layout.addLayout(self._wf_inner_layout)
+        layout.addWidget(wf_group)
+
+        st_group = QGroupBox(self.translate_text("Tâches planifiées"))
+        st_group.setStyleSheet(autostart_group.styleSheet())
+        st_layout = QVBoxLayout(st_group)
+        st_layout.setSpacing(6)
+        st_layout.setContentsMargins(8, 8, 8, 8)
+
+        self._st_inner_layout = QVBoxLayout()
+        self._st_inner_layout.setSpacing(5)
+        st_layout.addLayout(self._st_inner_layout)
+        layout.addWidget(st_group)
+
+        btn_row = QHBoxLayout()
+
+        open_btn = QPushButton("📂 " + self.translate_text("Ouvrir le dossier automation/"))
+        open_btn.setProperty("i18n_key", "Ouvrir le dossier automation/")
+        open_btn.setMinimumHeight(32)
+        _apply_dialog_btn(open_btn, "BtnGhost")
+        open_btn.clicked.connect(self._open_automation_dir)
+
+        reload_btn = QPushButton("🔄 " + self.translate_text("Recharger"))
+        reload_btn.setProperty("i18n_key", "Recharger")
+        reload_btn.setMinimumHeight(32)
+        _apply_dialog_btn(reload_btn, "BtnIndigo")
+        reload_btn.clicked.connect(self._refresh_automation_tab)
+
+        btn_row.addWidget(open_btn)
+        btn_row.addWidget(reload_btn)
+        btn_row.addStretch()
+        layout.addLayout(btn_row)
+        layout.addStretch()
+
+        self._refresh_automation_tab()
+        return tab
+
+    def _refresh_automation_tab(self) -> None:
+        """Reload watch folders and scheduled tasks from automation/*.toml."""
+        from tasks.watcher   import get_all_watch_folder_configs
+        from tasks.scheduler import get_all_scheduled_task_configs
+
+        dark         = self._lang_is_dark()
+        card_bg      = "#1c2333" if dark else "#ffffff"
+        card_border  = "#30363d" if dark else "#dee2e6"
+        text_primary = "#c9d1d9" if dark else "#1c2526"
+        text_muted   = "#8b949e" if dark else "#6b7280"
+        active_col   = "#3fb950" if dark else "#10B981"
+        inactive_col = "#8b949e" if dark else "#9ca3af"
+
+        def _clear(layout):
+            while layout.count():
+                item = layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+
+        def _make_card(name, path, enabled, extra_label=""):
+            card = QFrame()
+            card.setStyleSheet(f"""
+                QFrame {{
+                    border: 1px solid {card_border};
+                    border-radius: 7px;
+                    background-color: {card_bg};
+                }}
+            """)
+            row = QHBoxLayout(card)
+            row.setContentsMargins(10, 7, 10, 7)
+            row.setSpacing(10)
+
+            status_dot = QLabel("●")
+            status_dot.setStyleSheet(
+                f"color: {active_col if enabled else inactive_col}; font-size: 14px; border: none;"
+            )
+            row.addWidget(status_dot)
+
+            info = QVBoxLayout()
+            info.setSpacing(1)
+            status_text = self.translate_text("Actif") if enabled else self.translate_text("Inactif")
+            name_lbl = QLabel(f"{name}  –  {status_text}")
+            name_lbl.setStyleSheet(
+                f"font-weight: bold; font-size: 12px; color: {text_primary}; border: none;"
+            )
+            name_lbl.setWordWrap(True)
+            path_lbl = QLabel(path + (f"  {extra_label}" if extra_label else ""))
+            path_lbl.setStyleSheet(f"font-size: 10px; color: {text_muted}; border: none;")
+            path_lbl.setWordWrap(True)
+            info.addWidget(name_lbl)
+            info.addWidget(path_lbl)
+            row.addLayout(info, 1)
+
+            return card
+
+        # Watch Folders
+        _clear(self._wf_inner_layout)
+        wf_configs = get_all_watch_folder_configs()
+        if not wf_configs:
+            empty = QLabel(self.translate_text("Aucun dossier surveillé configuré."))
+            empty.setStyleSheet(f"color: {text_muted}; font-size: 11px; font-style: italic;")
+            self._wf_inner_layout.addWidget(empty)
+        else:
+            for cfg in wf_configs:
+                rules_summary = ", ".join(
+                    f".{ext}→{','.join(r['fmt'] if r['kind'] == 'convert' else r['action'] for r in fmts) if isinstance(fmts, list) else fmts}"
+                    for ext, fmts in cfg["rules"].items()
+                )
+                card = _make_card(cfg["name"], cfg["path"], cfg["enabled"], f"({rules_summary})")
+                self._wf_inner_layout.addWidget(card)
+
+        # Scheduled Tasks
+        _clear(self._st_inner_layout)
+        st_configs = get_all_scheduled_task_configs()
+        if not st_configs:
+            empty = QLabel(self.translate_text("Aucune tâche planifiée configurée."))
+            empty.setStyleSheet(f"color: {text_muted}; font-size: 11px; font-style: italic;")
+            self._st_inner_layout.addWidget(empty)
+        else:
+            for cfg in st_configs:
+                t = cfg["trigger"]
+                trigger_str = (
+                    f"cron – {t.get('day_of_week','*')} {t.get('hour',0):02d}:{t.get('minute',0):02d}"
+                    if t.get("type") == "cron"
+                    else f"interval – every {t.get('hours',0)}h {t.get('minutes',0)}min"
+                )
+                card = _make_card(cfg["name"], cfg["path"], cfg["enabled"], f"[{trigger_str}]")
+                self._st_inner_layout.addWidget(card)
+
+    def _on_autostart_toggled(self, state: int) -> None:
+        import subprocess
+        from daemon import set_autostart
+
+        enabled = bool(state)
+        set_autostart(enabled)
+
+        if enabled:
+            if getattr(sys, "frozen", False):
+                cmd = [sys.executable, "--daemon"]
+                flags = 0x08000000
+            else:
+                main_script = str(Path(__file__).resolve().parent.parent / "main.py")
+                cmd = [sys.executable, main_script, "--daemon"]
+                flags = 0x08000000 | 0x00000008
+
+            subprocess.Popen(cmd, creationflags=flags)
+        else:
+            from daemon import AUTOMATION_DIR
+            stop_flag = AUTOMATION_DIR / ".stop"
+            stop_flag.touch()
+
+    def _open_automation_dir(self) -> None:
+        import subprocess
+        from tasks.watcher import _get_automation_dir
+        path = _get_automation_dir()
+        path.mkdir(exist_ok=True)
+        subprocess.Popen(["explorer", str(path)])
 
     def get_settings(self):
         quality_map = {0: "high", 1: "standard", 2: "compressed"}

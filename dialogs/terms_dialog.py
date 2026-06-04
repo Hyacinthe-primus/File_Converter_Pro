@@ -1,11 +1,9 @@
 """
-TermsAndPrivacyDialog - File Converter Pro
+TermsAndPrivacyDialog
 
 Modal dialog for legal acceptance (Terms of Use / Privacy Policy).
 Extracted from dialogs.py for better code organization.
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sys
@@ -17,12 +15,8 @@ from PySide6.QtWidgets import (
     QGroupBox, QTextBrowser, QTabWidget, QWidget, QMessageBox
 )
 from PySide6.QtGui import QIcon, QDesktopServices
-import sys as _sys, os as _os
-_PKG_DIR  = _os.path.dirname(_os.path.abspath(__file__))
-_ROOT_DIR = _os.path.dirname(_PKG_DIR)
-if _ROOT_DIR not in _sys.path:
-    _sys.path.insert(0, _ROOT_DIR)
 
+from qss_helpers import _load_qss, _apply_dialog_btn
 from widgets import AnimatedCheckBox
 from translations import TranslationManager
 
@@ -30,6 +24,7 @@ def _make_tm(language):
     tm = TranslationManager()
     tm.set_language(language)
     return tm
+
 
 class TermsAndPrivacyDialog(QDialog):
     def __init__(self, parent=None, language="fr", dark_mode=False):
@@ -43,36 +38,7 @@ class TermsAndPrivacyDialog(QDialog):
         self.setWindowIcon(QIcon(self.get_icon_path()))
         self.closed_by_cross = False
 
-        if self.dark_mode:
-            self.setStyleSheet("""
-                QDialog {
-                    background-color: #1e1e1e;
-                    color: #e0e0e0;
-                }
-                QWidget {
-                    background-color: #1e1e1e;
-                    color: #e0e0e0;
-                }
-                QLabel {
-                    background-color: transparent;
-                    color: #e0e0e0;
-                }
-            """)
-        else:
-            self.setStyleSheet("""
-                QDialog {
-                    background-color: #f5f6fa;
-                    color: #212529;
-                }
-                QWidget {
-                    background-color: #f5f6fa;
-                    color: #212529;
-                }
-                QLabel {
-                    background-color: transparent;
-                    color: #212529;
-                }
-            """)
+        self.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
 
         self.setup_ui()
 
@@ -84,16 +50,21 @@ class TermsAndPrivacyDialog(QDialog):
     def get_icon_path(self):
         """Find icon.ico robustly (dev + PyInstaller)"""
         icon_name = "icon.ico"
-        path = os.path.join(_ROOT_DIR, icon_name)
-        if os.path.exists(path):
-            return path
-        path = os.path.join(os.getcwd(), icon_name)
-        if os.path.exists(path):
-            return path
+        
         if getattr(sys, 'frozen', False):
             path = os.path.join(sys._MEIPASS, icon_name)
             if os.path.exists(path):
                 return path
+
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(root_dir, icon_name)
+        if os.path.exists(path):
+            return path
+
+        path = os.path.join(os.getcwd(), icon_name)
+        if os.path.exists(path):
+            return path
+
         return icon_name
 
     def get_legal_files_path(self):
@@ -108,7 +79,8 @@ class TermsAndPrivacyDialog(QDialog):
                 return path
 
         # Dev mode - project root
-        path = os.path.join(_ROOT_DIR, legal_dir)
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(root_dir, legal_dir)
         if os.path.exists(path):
             return path
 
@@ -149,58 +121,6 @@ class TermsAndPrivacyDialog(QDialog):
         layout.setSpacing(12)
 
         self.tab_widget = QTabWidget()
-        if self.dark_mode:
-            self.tab_widget.setStyleSheet("""
-                QTabWidget::pane {
-                    border: 1px solid #3a3a3a;
-                    border-radius: 6px;
-                    background: #2d2d2d;
-                    margin-top: -5px;
-                }
-                QTabBar::tab {
-                    background: #3a3a3a;
-                    color: #e0e0e0;
-                    padding: 10px 18px;
-                    margin-right: 2px;
-                    border-top-left-radius: 6px;
-                    border-top-right-radius: 6px;
-                    font-size: 11px;
-                    font-weight: 500;
-                }
-                QTabBar::tab:selected {
-                    background: #3498db;
-                    color: #ffffff;
-                }
-                QTabBar::tab:hover:!selected {
-                    background: #4a4a4a;
-                }
-            """)
-        else:
-            self.tab_widget.setStyleSheet("""
-                QTabWidget::pane {
-                    border: 1px solid #dee2e6;
-                    border-radius: 6px;
-                    background: #ffffff;
-                    margin-top: -5px;
-                }
-                QTabBar::tab {
-                    background: #e9ecef;
-                    color: #495057;
-                    padding: 10px 18px;
-                    margin-right: 2px;
-                    border-top-left-radius: 6px;
-                    border-top-right-radius: 6px;
-                    font-size: 11px;
-                    font-weight: 500;
-                }
-                QTabBar::tab:selected {
-                    background: #3498db;
-                    color: #ffffff;
-                }
-                QTabBar::tab:hover:!selected {
-                    background: #ced4da;
-                }
-            """)
 
         self.terms_tab = QWidget()
         self.terms_tab.setStyleSheet(f"background-color: {'#2d2d2d' if self.dark_mode else '#ffffff'};")
@@ -218,84 +138,8 @@ class TermsAndPrivacyDialog(QDialog):
         self.terms_text.setOpenExternalLinks(False)
         self.terms_text.setOpenLinks(False)
         self.terms_text.setHtml(self.get_terms_content())
-        if self.dark_mode:
-            self.terms_text.setStyleSheet("""
-                QTextBrowser {
-                    background-color: #2d2d2d;
-                    color: #e0e0e0;
-                    border: 1px solid #3a3a3a;
-                    border-radius: 6px;
-                    padding: 15px;
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    font-size: 11px;
-                }
-                QScrollBar:vertical {
-                    background: transparent;
-                    width: 6px;
-                    margin: 4px 2px 4px 0px;
-                    border: none;
-                }
-                QScrollBar::handle:vertical {
-                    background: #555d6b;
-                    border-radius: 3px;
-                    min-height: 32px;
-                }
-                QScrollBar::handle:vertical:hover {
-                    background: #7a8699;
-                }
-                QScrollBar::handle:vertical:pressed {
-                    background: #4dabf7;
-                }
-                QScrollBar::add-line:vertical,
-                QScrollBar::sub-line:vertical {
-                    height: 0px;
-                    border: none;
-                    background: none;
-                }
-                QScrollBar::add-page:vertical,
-                QScrollBar::sub-page:vertical {
-                    background: transparent;
-                }
-            """)
-        else:
-            self.terms_text.setStyleSheet("""
-                QTextBrowser {
-                    background-color: #ffffff;
-                    color: #212529;
-                    border: 1px solid #dee2e6;
-                    border-radius: 6px;
-                    padding: 15px;
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    font-size: 11px;
-                }
-                QScrollBar:vertical {
-                    background: transparent;
-                    width: 6px;
-                    margin: 4px 2px 4px 0px;
-                    border: none;
-                }
-                QScrollBar::handle:vertical {
-                    background: #c8cdd4;
-                    border-radius: 3px;
-                    min-height: 32px;
-                }
-                QScrollBar::handle:vertical:hover {
-                    background: #9aa0ab;
-                }
-                QScrollBar::handle:vertical:pressed {
-                    background: #3498db;
-                }
-                QScrollBar::add-line:vertical,
-                QScrollBar::sub-line:vertical {
-                    height: 0px;
-                    border: none;
-                    background: none;
-                }
-                QScrollBar::add-page:vertical,
-                QScrollBar::sub-page:vertical {
-                    background: transparent;
-                }
-            """)
+        self.terms_text.setObjectName("TermsTextBrowser")
+        self.terms_text.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
         self.terms_text.document().setDefaultStyleSheet(self.get_html_theme_css())
         terms_layout.addWidget(self.terms_text)
 
@@ -313,84 +157,8 @@ class TermsAndPrivacyDialog(QDialog):
         self.privacy_text.setOpenExternalLinks(False)
         self.privacy_text.setOpenLinks(False)
         self.privacy_text.setHtml(self.get_privacy_content())
-        if self.dark_mode:
-            self.privacy_text.setStyleSheet("""
-                QTextBrowser {
-                    background-color: #2d2d2d;
-                    color: #e0e0e0;
-                    border: 1px solid #3a3a3a;
-                    border-radius: 6px;
-                    padding: 15px;
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    font-size: 11px;
-                }
-                QScrollBar:vertical {
-                    background: transparent;
-                    width: 6px;
-                    margin: 4px 2px 4px 0px;
-                    border: none;
-                }
-                QScrollBar::handle:vertical {
-                    background: #555d6b;
-                    border-radius: 3px;
-                    min-height: 32px;
-                }
-                QScrollBar::handle:vertical:hover {
-                    background: #7a8699;
-                }
-                QScrollBar::handle:vertical:pressed {
-                    background: #4dabf7;
-                }
-                QScrollBar::add-line:vertical,
-                QScrollBar::sub-line:vertical {
-                    height: 0px;
-                    border: none;
-                    background: none;
-                }
-                QScrollBar::add-page:vertical,
-                QScrollBar::sub-page:vertical {
-                    background: transparent;
-                }
-            """)
-        else:
-            self.privacy_text.setStyleSheet("""
-                QTextBrowser {
-                    background-color: #ffffff;
-                    color: #212529;
-                    border: 1px solid #dee2e6;
-                    border-radius: 6px;
-                    padding: 15px;
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    font-size: 11px;
-                }
-                QScrollBar:vertical {
-                    background: transparent;
-                    width: 6px;
-                    margin: 4px 2px 4px 0px;
-                    border: none;
-                }
-                QScrollBar::handle:vertical {
-                    background: #c8cdd4;
-                    border-radius: 3px;
-                    min-height: 32px;
-                }
-                QScrollBar::handle:vertical:hover {
-                    background: #9aa0ab;
-                }
-                QScrollBar::handle:vertical:pressed {
-                    background: #3498db;
-                }
-                QScrollBar::add-line:vertical,
-                QScrollBar::sub-line:vertical {
-                    height: 0px;
-                    border: none;
-                    background: none;
-                }
-                QScrollBar::add-page:vertical,
-                QScrollBar::sub-page:vertical {
-                    background: transparent;
-                }
-            """)
+        self.privacy_text.setObjectName("TermsTextBrowser")
+        self.privacy_text.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
         self.privacy_text.document().setDefaultStyleSheet(self.get_html_theme_css())
         privacy_layout.addWidget(self.privacy_text)
 
@@ -403,48 +171,8 @@ class TermsAndPrivacyDialog(QDialog):
         self.privacy_text.anchorClicked.connect(self.handle_privacy_link_click)
 
         contact_group = QGroupBox(self.translate_text("Contact"))
-        if self.dark_mode:
-            contact_group.setStyleSheet("""
-                QGroupBox {
-                    font-weight: bold;
-                    color: #808080;
-                    border: 1px solid #3a3a3a;
-                    border-radius: 6px;
-                    margin-top: 12px;
-                    padding-top: 8px;
-                    background-color: #252525;
-                    font-size: 10px;
-                }
-                QGroupBox::title {
-                    subcontrol-origin: margin;
-                    left: 10px;
-                    padding: 0 5px;
-                    color: #5dade2;
-                    background-color: transparent;
-                    font-size: 10px;
-                }
-            """)
-        else:
-            contact_group.setStyleSheet("""
-                QGroupBox {
-                    font-weight: bold;
-                    color: #6c757d;
-                    border: 1px solid #dee2e6;
-                    border-radius: 6px;
-                    margin-top: 12px;
-                    padding-top: 8px;
-                    background-color: #f8f9fa;
-                    font-size: 10px;
-                }
-                QGroupBox::title {
-                    subcontrol-origin: margin;
-                    left: 10px;
-                    padding: 0 5px;
-                    color: #3498db;
-                    background-color: transparent;
-                    font-size: 10px;
-                }
-            """)
+        contact_group.setObjectName("ContactGroup")
+        contact_group.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
         contact_layout = QVBoxLayout(contact_group)
         contact_layout.setContentsMargins(12, 8, 12, 8)
         contact_layout.setSpacing(6)
@@ -455,66 +183,11 @@ class TermsAndPrivacyDialog(QDialog):
         contact_links.setOpenExternalLinks(True)
         contact_links.setHtml(contact_links_html)
         contact_links.setMaximumHeight(70)
-        if self.dark_mode:
-            contact_links.setStyleSheet("""
-                QTextBrowser {
-                    background-color: #202020;
-                    border: 1px solid #333333;
-                    border-radius: 5px;
-                    padding: 6px 8px;
-                    font-size: 9px;
-                    color: #b0b0b0;
-                    margin: 0;
-                }
-                QScrollBar:vertical {
-                    background: #202020;
-                    width: 8px;
-                }
-                QScrollBar::handle:vertical {
-                    background: #404040;
-                    border-radius: 4px;
-                }
-            """)
-            contact_links.document().setDefaultStyleSheet("""
-                body { color: #b0b0b0; background-color: #202020; font-size: 9px; margin: 0; padding: 0; }
-                a { color: #5dade2; text-decoration: none; font-weight: 500; }
-                a:hover { color: #3498db; text-decoration: underline; }
-                ul { margin: 2px 0; padding-left: 15px; }
-                li { margin: 1px 0; }
-                p { margin: 2px 0; line-height: 1.4; }
-                strong { color: #5dade2; font-weight: 600; }
-                .warning { color: #e74c3c !important; font-weight: 600; }
-            """)
-        else:
-            contact_links.setStyleSheet("""
-                QTextBrowser {
-                    background-color: #ffffff;
-                    border: 1px solid #dee2e6;
-                    border-radius: 5px;
-                    padding: 6px 8px;
-                    font-size: 9px;
-                    color: #212529;
-                    margin: 0;
-                }
-                QScrollBar:vertical {
-                    background: #f8f9fa;
-                    width: 8px;
-                }
-                QScrollBar::handle:vertical {
-                    background: #ced4da;
-                    border-radius: 4px;
-                }
-            """)
-            contact_links.document().setDefaultStyleSheet("""
-                body { color: #212529; background-color: #ffffff; font-size: 9px; margin: 0; padding: 0; }
-                a { color: #1c7ed6; text-decoration: none; font-weight: 600; }
-                a:hover { color: #1864ab; text-decoration: underline; }
-                ul { margin: 2px 0; padding-left: 15px; }
-                li { margin: 1px 0; }
-                p { margin: 2px 0; line-height: 1.4; color: #212529; }
-                strong { color: #212529; font-weight: 700; }
-                .warning { color: #dc3545 !important; font-weight: 600; }
-            """)
+        contact_links.setObjectName("ContactLinks")
+        contact_links.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
+        contact_links.document().setDefaultStyleSheet(
+            _load_qss("contact_links.css", "dark" if self.dark_mode else "light")
+        )
         contact_layout.addWidget(contact_links)
 
         layout.addWidget(contact_group)
@@ -523,10 +196,12 @@ class TermsAndPrivacyDialog(QDialog):
         checkbox_layout.setSpacing(15)
 
         self.terms_checkbox = AnimatedCheckBox(self.translate_text("J'accepte les conditions d'utilisation"))
-        self.terms_checkbox.setStyleSheet(self.get_checkbox_style())
+        self.terms_checkbox.setObjectName("TermsCheckBox")
+        self.terms_checkbox.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
 
         self.privacy_checkbox = AnimatedCheckBox(self.translate_text("J'accepte la politique de confidentialité"))
-        self.privacy_checkbox.setStyleSheet(self.get_checkbox_style())
+        self.privacy_checkbox.setObjectName("TermsCheckBox")
+        self.privacy_checkbox.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
 
         checkbox_layout.addWidget(self.terms_checkbox)
         checkbox_layout.addWidget(self.privacy_checkbox)
@@ -561,23 +236,7 @@ class TermsAndPrivacyDialog(QDialog):
             }}
         """)
 
-        self.decline_button.setStyleSheet("""
-            QPushButton {
-                background-color: #dc3545;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 6px;
-                font-weight: bold;
-                font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #c82333;
-            }
-            QPushButton:pressed {
-                background-color: #bd2130;
-            }
-        """)
+        _apply_dialog_btn(self.decline_button, "BtnDecline")
 
         button_layout.addStretch()
         button_layout.addWidget(self.decline_button)
@@ -608,135 +267,9 @@ class TermsAndPrivacyDialog(QDialog):
             if url_str.startswith("mailto:") or url_str.startswith("http"):
                 QDesktopServices.openUrl(url)
 
-    def get_html_theme_css(self):
-        """CSS to style HTML content according to the current theme"""
-        if self.dark_mode:
-            return """
-                body {
-                    background-color: #2d2d2d !important;
-                    color: #e0e0e0 !important;
-                    margin: 0;
-                    padding: 0;
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    font-size: 11px;
-                    line-height: 1.5;
-                }
-                h1, h2, h3, h4, h5, h6 {
-                    color: #ffffff !important;
-                    border-color: #3498db !important;
-                    margin-top: 15px;
-                    margin-bottom: 10px;
-                }
-                h1 { font-size: 20px; }
-                h2 { font-size: 16px; }
-                h3 { font-size: 14px; }
-                h4 { font-size: 13px; }
-                p, li, td, th, div, span {
-                    color: #e0e0e0 !important;
-                    margin: 8px 0;
-                }
-                a {
-                    color: #5dade2 !important;
-                    text-decoration: none;
-                }
-                a:hover {
-                    color: #3498db !important;
-                    text-decoration: underline;
-                }
-                strong, b {
-                    color: #ffffff !important;
-                    font-weight: 600;
-                }
-                em, i {
-                    color: #b0b0b0 !important;
-                }
-                hr {
-                    border: 0;
-                    border-top: 1px solid #3a3a3a !important;
-                    margin: 15px 0;
-                }
-                ul, ol {
-                    color: #e0e0e0 !important;
-                    padding-left: 20px;
-                    margin: 10px 0;
-                }
-                li { margin-bottom: 5px; }
-                * { background-color: transparent !important; }
-                body, html { background-color: #2d2d2d !important; }
-                .highlight {
-                    background-color: #3a3a2d !important;
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-                .warning {
-                    color: #e74c3c !important;
-                    font-weight: bold;
-                }
-            """
-        else:
-            return """
-                body {
-                    background-color: #ffffff !important;
-                    color: #212529 !important;
-                    margin: 0;
-                    padding: 0;
-                    font-family: 'Segoe UI', Arial, sans-serif;
-                    font-size: 11px;
-                    line-height: 1.5;
-                }
-                h1, h2, h3, h4, h5, h6 {
-                    color: #1a1a2e !important;
-                    border-color: #3498db !important;
-                    margin-top: 15px;
-                    margin-bottom: 10px;
-                }
-                h1 { font-size: 20px; }
-                h2 { font-size: 16px; }
-                h3 { font-size: 14px; }
-                h4 { font-size: 13px; }
-                p, li, td, th, div, span {
-                    color: #212529 !important;
-                    margin: 8px 0;
-                }
-                a {
-                    color: #3498db !important;
-                    text-decoration: none;
-                }
-                a:hover {
-                    color: #1c7ed6 !important;
-                    text-decoration: underline;
-                }
-                strong, b {
-                    color: #1a1a2e !important;
-                    font-weight: 600;
-                }
-                em, i { color: #6c757d !important; }
-                hr {
-                    border: 0;
-                    border-top: 1px solid #dee2e6 !important;
-                    margin: 15px 0;
-                }
-                ul, ol {
-                    color: #212529 !important;
-                    padding-left: 20px;
-                    margin: 10px 0;
-                }
-                li { margin-bottom: 5px; }
-                * { background-color: transparent !important; }
-                body, html { background-color: #ffffff !important; }
-                .highlight {
-                    background-color: #fff3cd !important;
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                }
-                .warning {
-                    color: #dc3545 !important;
-                    font-weight: bold;
-                }
-            """
-
-    def get_html_dark_theme_css(self):
-        return self.get_html_theme_css()
+    def get_html_theme_css(self) -> str:
+        """Load HTML theme CSS from styles/themes/dark/ or light/."""
+        return _load_qss("terms_html.css", "dark" if self.dark_mode else "light")
 
     def get_compact_contact_links_html(self):
         """Generate ultra-compact HTML for contact links"""
@@ -762,68 +295,19 @@ class TermsAndPrivacyDialog(QDialog):
             return """
             <p style="margin:2px 0;font-size:9px;">
                 <strong>Developer:</strong>
-                <a href="mailto:hyacintheatho91@gmail.com" style="font-weight:500;">hyacintheatho91@gmail.com</a>
+                <a href="mailto:hyacintheatho91@gmail.com" style="font-weight:500;color:#3498db;">hyacintheatho91@gmail.com</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
-                <a href="https://github.com/Hyacinthe-primus" style="margin-right:8px;">💻 GitHub</a>
-                <a href="https://www.instagram.com/___hyacinthe_" style="margin-right:8px;">📸 Instagram</a>
-                <a href="https://www.reddit.com/user/___Hyacinthe_/">🔴 Reddit</a>
+                <a href="https://github.com/Hyacinthe-primus" style="margin-right:8px;color:#7c5cbf;">💻 GitHub</a>
+                <a href="https://www.instagram.com/___hyacinthe_" style="margin-right:8px;color:#7c5cbf;">📸 Instagram</a>
+                <a href="https://www.reddit.com/user/___Hyacinthe_/" style="color:#7c5cbf;">🔴 Reddit</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
-                <a href="mailto:hyacintheatho91@gmail.com?subject=Report%20Bug%20from%20File%20Converter%20Pro"
-                   style="color:#e74c3c;font-weight:600;">
-                   🐛 Report a bug
+                <a href="mailto:hyacintheatho91@gmail.com?subject=Bug%20Report%20from%20File%20Converter%20Pro"
+                style="color:#e74c3c;font-weight:600;">
+                🐛 Report a Bug
                 </a>
             </p>
-            """
-
-    def get_checkbox_style(self):
-        """Compact style for checkboxes"""
-        if self.dark_mode:
-            return """
-                QCheckBox {
-                    color: #e0e0e0;
-                    font-size: 11px;
-                    spacing: 8px;
-                    background-color: transparent;
-                }
-                QCheckBox::indicator {
-                    width: 18px;
-                    height: 18px;
-                    border: 2px solid #3a3a3a;
-                    border-radius: 4px;
-                    background-color: #2d2d2d;
-                }
-                QCheckBox::indicator:checked {
-                    background-color: #3498db;
-                    border-color: #3498db;
-                }
-                QCheckBox::indicator:hover {
-                    border-color: #5dade2;
-                }
-            """
-        else:
-            return """
-                QCheckBox {
-                    color: #212529;
-                    font-size: 11px;
-                    spacing: 8px;
-                    background-color: transparent;
-                }
-                QCheckBox::indicator {
-                    width: 18px;
-                    height: 18px;
-                    border: 2px solid #adb5bd;
-                    border-radius: 4px;
-                    background-color: #ffffff;
-                }
-                QCheckBox::indicator:checked {
-                    background-color: #3498db;
-                    border-color: #3498db;
-                }
-                QCheckBox::indicator:hover {
-                    border-color: #3498db;
-                }
             """
 
     def translate_text(self, text):
@@ -857,11 +341,7 @@ class TermsAndPrivacyDialog(QDialog):
 
     def _get_legal_lang_code(self, prefix: str) -> str:
         """
-        Returns the best available language code for a given legal file prefix.
-        prefix is either 'terms_conditions' or 'privacy_policy'.
-        Priority: exact match (e.g. 'it') -> 'en' fallback -> 'fr' fallback
-        Each file type is checked independently, so having terms_conditions_it.html
-        does not imply privacy_policy_it.html exists.
+        Returns the best available language code for a given legal file prefix
         """
         legal_path = self.get_legal_files_path()
         if os.path.exists(os.path.join(legal_path, f"{prefix}_{self.language}.html")):
