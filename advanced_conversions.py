@@ -1,19 +1,15 @@
 """
-Advanced Conversions Dialog — File Converter Pro
+Advanced Conversions Dialog
 
 What does it do?
     - Provides a dedicated interface for advanced conversion formats
     - Conversions are REAL (not placeholders).
     - File source: items selected in the main window's file list
-      (or ALL files if nothing is selected).
     - Output folder: prompted once, then remembered per session.
     - Every result is recorded in the dedicated AdvancedDatabaseManager
-      (file_converter_advanced.db) — separate from the main DB.
     - Progress is shown inline in the dialog (progress bar + log).
     - Worker thread keeps the UI responsive.
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 from __future__ import annotations
@@ -31,6 +27,7 @@ from PySide6.QtWidgets import (
 
 from converter import AdvancedDatabaseManager, AdvancedConverterEngine
 from translations import TranslationManager
+from qss_helpers import _load_qss, _apply_dialog_btn
 
 
 class _ConversionWorker(QObject):
@@ -143,7 +140,6 @@ class _ConversionWorker(QObject):
 
             self.progress.emit(i, total, filename)
 
-        # Flash Gordon: check if the entire batch qualifies (>=50 files in <=5 min)
         if self.achievement_system is not None and ok > 0:
             try:
                 _batch_time = time.time() - _batch_start
@@ -368,7 +364,7 @@ class AdvancedConversionsDialog(QDialog):
         self._log_area.setReadOnly(True)
         self._log_area.setFixedHeight(120)
         self._log_area.setStyleSheet(
-            "font-family: Consolas, monospace; font-size: 11px;"
+            "font-family: 'Cascadia Code', 'JetBrains Mono', 'Segoe UI', sans-serif; font-size: 11px;"
         )
         prog_layout.addWidget(self._log_area)
 
@@ -378,7 +374,7 @@ class AdvancedConversionsDialog(QDialog):
         btn_row = QHBoxLayout()
         self._cancel_btn = QPushButton(self.tr_("⛔ Annuler la conversion"))
         self._cancel_btn.setEnabled(False)
-        self._cancel_btn.setStyleSheet(self._btn_style("cancel"))
+        _apply_dialog_btn(self._cancel_btn, "BtnCancelGlassy")
         self._cancel_btn.clicked.connect(self._cancel_conversion)
         btn_row.addWidget(self._cancel_btn)
 
@@ -386,7 +382,7 @@ class AdvancedConversionsDialog(QDialog):
 
         close_btn = QPushButton(self.tr_("Fermer"))
         close_btn.setMinimumHeight(38)
-        close_btn.setStyleSheet(self._btn_style("close"))
+        _apply_dialog_btn(close_btn, "BtnClose")
         close_btn.clicked.connect(self.close)
         btn_row.addWidget(close_btn)
 
@@ -535,99 +531,11 @@ class AdvancedConversionsDialog(QDialog):
 
     def _apply_theme_style(self) -> None:
         dark = getattr(self.parent_window, "dark_mode", False)
-
-        btn_glassy = """
-            /* Documents — blue */
-            QPushButton[tab_type="documents"] {
-                background: rgba(110,190,255,0.15);
-                color: rgb(110,190,255);
-                border: 1px solid rgba(110,190,255,0.30);
-                border-radius: 8px;
-                font-weight: bold; font-size: 13px;
-                font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
-                letter-spacing: 0.3px;
-            }
-            QPushButton[tab_type="documents"]:hover   { background: rgba(110,190,255,0.26); }
-            QPushButton[tab_type="documents"]:pressed { background: rgba(110,190,255,0.38); }
-
-            /* Images — teal */
-            QPushButton[tab_type="images"] {
-                background: rgba(32,200,170,0.15);
-                color: rgb(32,200,170);
-                border: 1px solid rgba(32,200,170,0.30);
-                border-radius: 8px;
-                font-weight: bold; font-size: 13px;
-                font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
-                letter-spacing: 0.3px;
-            }
-            QPushButton[tab_type="images"]:hover   { background: rgba(32,200,170,0.26); }
-            QPushButton[tab_type="images"]:pressed { background: rgba(32,200,170,0.38); }
-
-            /* Audio/Video — orange */
-            QPushButton[tab_type="audio_video"] {
-                background: rgba(255,140,60,0.15);
-                color: rgb(255,140,60);
-                border: 1px solid rgba(255,140,60,0.30);
-                border-radius: 8px;
-                font-weight: bold; font-size: 13px;
-                font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
-                letter-spacing: 0.3px;
-            }
-            QPushButton[tab_type="audio_video"]:hover   { background: rgba(255,140,60,0.26); }
-            QPushButton[tab_type="audio_video"]:pressed { background: rgba(255,140,60,0.38); }
-        """
-
-        if dark:
-            self.setStyleSheet("""
-                QDialog { background-color: #0f1117; }
-                QLabel  { color: #e6edf3; }
-                QGroupBox {
-                    color: rgba(255,255,255,0.45);
-                    border: 1px solid rgba(255,255,255,0.08);
-                    border-radius: 10px; margin-top: 10px; padding-top: 10px;
-                    background-color: rgba(255,255,255,0.03);
-                }
-                QGroupBox::title {
-                    subcontrol-origin: margin; left: 10px;
-                    padding: 0 5px; color: rgba(255,255,255,0.45);
-                    font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
-                }
-                QScrollArea { border: none; background-color: transparent; }
-                QProgressBar {
-                    border: 1px solid rgba(255,255,255,0.10); border-radius: 6px;
-                    background: rgba(255,255,255,0.04); color: #e6edf3; text-align: center;
-                }
-                QProgressBar::chunk { background: rgba(110,190,255,0.70); border-radius: 5px; }
-                QTextEdit {
-                    background: rgba(255,255,255,0.04); color: #c9d1d9;
-                    border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
-                }
-            """ + btn_glassy)
-        else:
-            self.setStyleSheet("""
-                QDialog { background-color: #f8f9fa; }
-                QLabel  { color: #212529; }
-                QGroupBox {
-                    color: #495057; border: 1px solid #dee2e6;
-                    border-radius: 10px; margin-top: 10px; padding-top: 10px;
-                    background-color: #ffffff;
-                }
-                QGroupBox::title {
-                    subcontrol-origin: margin; left: 10px;
-                    padding: 0 5px; color: #495057;
-                    font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
-                }
-                QScrollArea { border: none; background-color: transparent; }
-                QProgressBar {
-                    border: 1px solid #dee2e6; border-radius: 6px;
-                    background: #f1f3f5; color: #212529; text-align: center;
-                }
-                QProgressBar::chunk { background: rgba(110,190,255,0.85); border-radius: 5px; }
-                QTextEdit {
-                    background: #ffffff; color: #212529;
-                    border: 1px solid #dee2e6; border-radius: 6px;
-                }
-            """ + btn_glassy)
+        theme = "dark" if dark else "light"
+        self.setStyleSheet(
+            _load_qss("advanced_conversions.qss", theme) +
+            _load_qss("advanced_conversions_buttons.qss")
+        )
 
     def _tab_style(self, active_index: int = 0) -> str:
         dark = getattr(self.parent_window, "dark_mode", False)
@@ -670,31 +578,6 @@ class AdvancedConversionsDialog(QDialog):
                 color: {hover_fg};
             }}
         """
-
-    def _btn_style(self, kind: str, tab_type: str = "documents") -> str:
-        if kind == "close":
-            return """
-                QPushButton { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.70);
-                    border: 1px solid rgba(255,255,255,0.12);
-                    padding: 10px 20px; border-radius: 8px;
-                    font-weight: bold; font-size: 13px;
-                    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif; }
-                QPushButton:hover   { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.92); }
-                QPushButton:pressed { background: rgba(255,255,255,0.18); }
-            """
-        elif kind == "cancel":
-            return """
-                QPushButton { background: rgba(255,80,80,0.15); color: rgb(255,100,100);
-                    border: 1px solid rgba(255,80,80,0.30);
-                    padding: 8px 16px; border-radius: 8px;
-                    font-weight: bold; font-size: 12px;
-                    font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif; }
-                QPushButton:hover   { background: rgba(255,80,80,0.26); }
-                QPushButton:pressed { background: rgba(255,80,80,0.38); }
-                QPushButton:disabled { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.25);
-                    border-color: rgba(255,255,255,0.08); }
-            """
-        return ""
 
     def _on_tab_changed(self, index: int) -> None:
         self.tab_widget.setStyleSheet(self._tab_style(index))
