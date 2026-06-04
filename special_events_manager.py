@@ -1,18 +1,6 @@
 """
-Special Events Manager for File Converter Pro
-• True 3D Perlin FBM — seamless, artifact-free liquid border
-• Particle system — event-themed floating confetti / sparkles
-• Perceptual color cycling (Oklab-inspired smooth hue shifts)
-• Per-event color theming  (gold/amber for birthday, cyan/violet for new year)
-• Countdown ring — shows remaining display time
-• Fixed Property declarations (PySide6-compatible)
-• Fixed closeEvent (removed phantom attributes)
-• Performance — path rebuilt only when size changes (cached)
-• BirthdayInputDialog — hint hidden until validation fails
-• Robust .exe resource path resolution
+Special Events Manager 
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import os
@@ -53,7 +41,7 @@ class PerlinNoise:
     • noise3D(x, y, z): use z=time for seamless, never-cycling animation
     • fbm(): replaces stacking 4 separate PerlinNoise instances — one call,
       tunable octaves / persistence / lacunarity
-    • Isolated RNG (random.Random) — won't pollute global random state
+    • Isolated RNG (random.Random)
     """
 
     _GRAD3: List[Tuple[int, int, int]] = [
@@ -175,8 +163,8 @@ class Particle:
     def update(self):
         self.x  += self.vx
         self.y  += self.vy
-        self.vy += 0.04          # gravity
-        self.vx *= 0.99          # drag
+        self.vy += 0.04
+        self.vx *= 0.99
         self.rotation += self.rot_speed
         self.life -= 1
 

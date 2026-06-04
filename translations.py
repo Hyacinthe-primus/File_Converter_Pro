@@ -1,5 +1,5 @@
 """
-Translation Manager - File Converter Pro
+Translation Manager
 
 Provides internationalization (i18n) support for French, English,
 and any external language loaded from a .lang file (JSON format).
@@ -41,8 +41,6 @@ Usage:
     # Load an external .lang file
     ok, msg = translator.load_lang_file("/path/to/german.lang")
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import os
@@ -1317,9 +1315,19 @@ class TranslationManager:
                 "Fmt cible": "Fmt cible",
                 "Statut": "Statut",
                 "Historique exporté avec succès vers": "Historique exporté avec succès vers",
-                # Drop-zone ASCII art (DraggableListWidget empty state)
-                # line1 = greeting word,  line2 = subtitle
-                # Each value is a multiline string: rows separated by \n
+                "Automatisation": "Automatisation",
+                "Démon d'automatisation": "Démon d'automatisation",
+                "Lancer le démon automatiquement au démarrage de Windows": "Lancer le démon automatiquement au démarrage de Windows",
+                "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée.": "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée.",
+                "Dossiers surveillés": "Dossiers surveillés",
+                "Tâches planifiées": "Tâches planifiées",
+                "Ouvrir le dossier automation/": "Ouvrir le dossier automation/",
+                "Recharger": "Recharger",
+                "Aucun dossier surveillé configuré.": "Aucun dossier surveillé configuré.",
+                "Aucune tâche planifiée configurée.": "Aucune tâche planifiée configurée.",
+                "History successfully exported to": "Historique exporté avec succès vers",
+                "Actif": "Actif",
+                "Inactif": "Inactif",
                 "dropzone_line1": (
                     "██████╗ ██╗███████╗███╗   ██╗██╗   ██╗███████╗███╗   ██╗██╗   ██╗███████╗\n"
                     "██╔══██╗██║██╔════╝████╗  ██║██║   ██║██╔════╝████╗  ██║██║   ██║██╔════╝\n"
@@ -2595,7 +2603,18 @@ class TranslationManager:
                 "Fmt cible": "Tgt fmt",
                 "Statut": "Status",
                 "Historique exporté avec succès vers": "History successfully exported to",
-                # Drop-zone ASCII art (DraggableListWidget empty state)
+                "Automatisation": "Automation",
+                "Démon d'automatisation": "Automation daemon",
+                "Lancer le démon automatiquement au démarrage de Windows": "Launch the daemon automatically at Windows startup",
+                "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée.": "The daemon monitors your folders and runs scheduled tasks even when the application is closed.",
+                "Dossiers surveillés": "Watched folders",
+                "Tâches planifiées": "Scheduled tasks",
+                "Ouvrir le dossier automation/": "Open automation/ folder",
+                "Recharger": "Reload",
+                "Aucun dossier surveillé configuré.": "No watched folders configured.",
+                "Aucune tâche planifiée configurée.": "No scheduled tasks configured.",
+                "Actif": "Active",
+                "Inactif": "Inactive",
                 "dropzone_line1": (
                     "██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗\n"
                     "██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝\n"

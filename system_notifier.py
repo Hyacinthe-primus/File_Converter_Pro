@@ -11,10 +11,7 @@ Features:
     - Native Windows toast notifications (winotify)
     - Cross-platform fallback via Qt system tray
     - FR/EN translations
-    - Dev and packaged (.exe) mode compatibility
 
-Author: Hyacinthe feat ivanmag22
-Version: 1.1
 """
 
 import os

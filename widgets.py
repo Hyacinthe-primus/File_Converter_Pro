@@ -1,5 +1,5 @@
 """
-Custom Widgets - File Converter Pro
+Custom Widgets
 
 Contains customized Qt widgets with advanced animations and behaviors.
 
@@ -14,13 +14,6 @@ Classes:
         - Intelligent parent detection via duck typing
         - Emits signals or calls parent methods on file drop
 
-Design:
-    - Uses Indigo (#6366f1) as primary accent color
-    - Non-linear easing curves for natural motion
-    - Accessible cursors and tooltips
-
-Author: Hyacinthe
-Version: 1.0
 """
 
 from PySide6.QtWidgets import QCheckBox, QListWidget, QStyledItemDelegate, QStyle
@@ -330,10 +323,6 @@ class DraggableListWidget(QListWidget):
     - Supports internal reordering by drag & drop (single or multiple items)
     - Visual highlight on drag hover via viewport event filter (no timer)
     - ASCII art glitch animation when empty.
-      The two ASCII blocks (greeting + subtitle) are read from the active
-      TranslationManager via the keys  "dropzone_line1" / "dropzone_line2",
-      so ANY language — including custom .lang files — is automatically
-      supported without touching this widget.
     """
 
     # Glitch character pool
