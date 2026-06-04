@@ -1,10 +1,8 @@
 """
-File Converter Pro — Quick Check
+Quick Check
 Verifies all critical files are present in the onedir build.
 Uses tkinter (stdlib) to keep the exe lightweight.
 
-Author: Hyacinthe
-Version: 1.0
 """
 
 import sys
@@ -289,7 +287,6 @@ class QuickCheckApp:
                                    relief="flat", cursor="hand2",
                                    command=self.root.destroy)
 
-        # Scroll souris → canvas de l'onglet actif
         def _on_mousewheel(event):
             tab_idx = self.notebook.index("current")
             group_name = list(ALL_GROUPS.keys())[tab_idx]
@@ -467,7 +464,6 @@ class QuickCheckApp:
             self.close_btn.pack(fill="x", padx=20, pady=(0, 12), ipady=6)
 
 
-#  ENTRY POINT
 if __name__ == "__main__":
     root = tk.Tk()
     app = QuickCheckApp(root)
