@@ -1,0 +1,82 @@
+# Main folder configuration: watch directory and output destination
+[watch_folders.inbox]
+path            = "C:/Users/User/Desktop/Inbox"
+output_dir      = "C:/Users/User/Desktop/Converted"
+enabled         = true       # set to false to disable this watch folder without deleting its config
+recursive       = false      # set to true to also watch sub-folders
+convert_existing = false     # convert files already in the folder on startup
+
+  # Rules: which input format converts to which output format(s)
+  [watch_folders.inbox.rules]
+  png  = ["pdf", "webp"]    # PNG → PDF and WebP (for two or more output formats, use an array)
+  jpg  = "pdf"              # JPG → PDF only
+  wav  = "mp3"              # WAV → MP3
+  docx = "pdf"              # Word → PDF
+
+
+[scheduled_tasks.weekly_cleanup]
+path       = "C:/Users/User/Desktop/ToArchive"
+output_dir = "C:/Users/User/Desktop/Archives"
+enabled    = true
+recursive  = true
+
+  # Trigger configuration: controls when the task runs.
+  [scheduled_tasks.weekly_cleanup.trigger]
+  type        = "cron"
+  day_of_week = "fri"       # mon, tue, wed, thu, fri, sat, sun or * for every day
+  hour        = 18
+  minute      = 0
+
+  [scheduled_tasks.weekly_cleanup.rules]
+  png  = "webp"
+  jpg  = "pdf"
+  docx = "pdf"
+
+
+[scheduled_tasks.monthly_archive]
+path       = "C:/Users/User/Documents/Monthly"
+output_dir = "D:/Backups/Monthly"
+enabled    = false
+recursive  = false
+
+  # Every month on the 1st at 08:00
+  [scheduled_tasks.monthly_archive.trigger]
+  type   = "cron"
+  day    = 1                # 1st of every month
+  hour   = 8
+  minute = 0
+
+  [scheduled_tasks.monthly_archive.rules]
+  docx = "pdf"
+
+
+[scheduled_tasks.frequent_sync]
+path       = "C:/Users/User/Desktop/AutoSync"
+output_dir = "C:/Users/User/Desktop/Synced"
+enabled    = false
+recursive  = false
+
+  # Every 6 hours (regardless of time or day)
+  [scheduled_tasks.frequent_sync.trigger]
+  type  = "interval"
+  hours = 6                 # you can also use: minutes = 30
+
+  [scheduled_tasks.frequent_sync.rules]
+  wav = "mp3"
+  png = "webp"
+
+
+[scheduled_tasks.one_time_export]
+path       = "C:/Users/User/Desktop/ToExport"
+output_dir = "C:/Users/User/Desktop/Exported"
+enabled    = true
+recursive  = false
+
+  # Once on a specific date and time
+  [scheduled_tasks.one_time_export.trigger]
+  type   = "date"
+  run_at = "2026-06-03T23:45:00"   # ISO 8601 — runs once, then the job is removed
+
+  [scheduled_tasks.one_time_export.rules]
+  docx = "pdf"
+  png  = "webp"
