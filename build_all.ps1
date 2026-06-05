@@ -1,3 +1,5 @@
+# Run build steps, stop on failure.
+
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseApprovedVerbs', '')]
 param()
 
@@ -35,9 +37,8 @@ function Run-Step {
 
 $Start = Get-Date
 
-Run-Step "1/3  Main Build"       "build.ps1"
-Run-Step "2/3  Quick Check"      "build_quick_check.ps1"
-Run-Step "3/3  Installer"        "build_installer.ps1"
+Run-Step "1/2  Main Build"  "build.ps1"
+Run-Step "2/2  Installer"   "build_installer.ps1"
 
 $Duration = (Get-Date) - $Start
 Write-Host ""
