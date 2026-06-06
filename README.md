@@ -646,15 +646,7 @@ QMainWindow
 
 File Converter Pro ships with built-in **French** and **English**.
 
-Anyone can add a new language without touching the source code. Create a `.lang` file (UTF-8 JSON) and place it in the `languages/` folder next to the executable, it will be detected and listed in Settings automatically on next launch. See [CONTRIBUTING.md](CONTRIBUTING.md) for a step-by-step guide.
-
-You can also force a language from the command line *(development only)* :
-
-```
-main.py --lang de
-main.py --lang en-revisited
-main.py --lang "my custom language"
-```
+Anyone can add a new language without touching the source code. Create a `.lang` file (UTF-8 JSON) and place it in the `languages/` folder in internal directory next to the executable, it will be detected and listed in Settings automatically on next launch. See [CONTRIBUTING.md](CONTRIBUTING.md) for a step-by-step guide.
 
 ---
 
