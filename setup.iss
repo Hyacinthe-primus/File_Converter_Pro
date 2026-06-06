@@ -67,12 +67,6 @@ Source: "icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "{#MyAppExeName}"
 
-; Quick Check utility
-Source: "{#MyDistDir}\Quick Check.exe"; DestDir: "{app}"; Flags: ignoreversion
-
-; Language files
-Source: "languages\*"; DestDir: "{app}\languages"; Flags: ignoreversion recursesubdirs; Excludes: "blank.lang,en-revisited.lang"
-
 ; Configuration and keys
 Source: "file_converter_config.dat"; DestDir: "{app}"; Flags: ignoreversion; Check: FileExists('file_converter_config.dat')
 Source: "file_converter_key.key";    DestDir: "{app}"; Flags: ignoreversion; Check: FileExists('file_converter_key.key')
