@@ -277,7 +277,7 @@ class TermsAndPrivacyDialog(QDialog):
             return """
             <p style="margin:2px 0;font-size:9px;">
                 <strong>Développeur :</strong>
-                <a href="mailto:hyacintheatho91@gmail.com" style="font-weight:500;color:#3498db;">hyacintheatho91@gmail.com</a>
+                <a href="mailto:prime.enterprises.dev@gmail.com" style="font-weight:500;color:#3498db;">prime.enterprises.dev@gmail.com</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
                 <a href="https://github.com/Hyacinthe-primus" style="margin-right:8px;color:#7c5cbf;">💻 GitHub</a>
@@ -285,7 +285,7 @@ class TermsAndPrivacyDialog(QDialog):
                 <a href="https://www.reddit.com/user/___Hyacinthe_/" style="color:#7c5cbf;">🔴 Reddit</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
-                <a href="mailto:hyacintheatho91@gmail.com?subject=Report%20Bug%20from%20File%20Converter%20Pro"
+                <a href="mailto:prime.enterprises.dev@gmail.com?subject=Report%20Bug%20from%20File%20Converter%20Pro"
                    style="color:#e74c3c;font-weight:600;">
                    🐛 Signaler un bug
                 </a>
@@ -295,7 +295,7 @@ class TermsAndPrivacyDialog(QDialog):
             return """
             <p style="margin:2px 0;font-size:9px;">
                 <strong>Developer:</strong>
-                <a href="mailto:hyacintheatho91@gmail.com" style="font-weight:500;color:#3498db;">hyacintheatho91@gmail.com</a>
+                <a href="mailto:prime.enterprises.dev@gmail.com" style="font-weight:500;color:#3498db;">prime.enterprises.dev@gmail.com</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
                 <a href="https://github.com/Hyacinthe-primus" style="margin-right:8px;color:#7c5cbf;">💻 GitHub</a>
@@ -303,7 +303,7 @@ class TermsAndPrivacyDialog(QDialog):
                 <a href="https://www.reddit.com/user/___Hyacinthe_/" style="color:#7c5cbf;">🔴 Reddit</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
-                <a href="mailto:hyacintheatho91@gmail.com?subject=Bug%20Report%20from%20File%20Converter%20Pro"
+                <a href="mailto:prime.enterprises.dev@gmail.com?subject=Bug%20Report%20from%20File%20Converter%20Pro"
                 style="color:#e74c3c;font-weight:600;">
                 🐛 Report a Bug
                 </a>
