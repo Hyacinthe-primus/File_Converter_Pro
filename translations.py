@@ -13,23 +13,6 @@ Key Features:
     - .lang files are stored in the  languages/  sub-folder next to the app.
     - On startup all .lang files in that folder are loaded automatically.
 
-.lang file format  (JSON, UTF-8):
-    {
-      "meta": {
-        "code":        "de",
-        "name":        "Deutsch",
-        "author":      "Your Name",
-        "version":     "1.0",
-        "created":     "2026-02-06",
-        "description": "Official German translation"
-      },
-      "strings": {
-        "Parametres": "Einstellungen",
-        "Fermer":     "Schliessen",
-        ...
-      }
-    }
-
 Classes:
     TranslationManager: Manages current language state and translates text on demand.
 
@@ -50,10 +33,10 @@ import sys
 
 # Folder where .lang files are stored
 # - Dev mode  : next to translations.py
-# - PyInstaller onedir/onefile : next to the exe
+# - PyInstaller onedir/ : in the internal dir of the exe
 def _get_languages_dir() -> str:
     if getattr(sys, 'frozen', False):
-        base = os.path.dirname(sys.executable)
+        base = os.path.join(os.path.dirname(sys.executable), "_internal")
     else:
         base = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base, "languages")
