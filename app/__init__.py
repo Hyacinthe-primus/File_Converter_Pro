@@ -30,6 +30,11 @@ class FileConverterApp(AppUIMixin, QMainWindow):
 class FadingMainWindow(FileConverterApp):
     """Version of FileConverterApp with fade-in support"""
     def __init__(self, config_manager):
+        """Initialize the fading window with fade-in animation support.
+
+        Args:
+            config_manager: The application configuration manager instance.
+        """
         super().__init__(config_manager)
         self.setWindowOpacity(0.0)
         QTimer.singleShot(0, self.set_application_icon)
