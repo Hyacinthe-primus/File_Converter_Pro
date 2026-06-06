@@ -89,7 +89,7 @@ class HistoryDialog(QDialog):
 
     def apply_scrollbar_style(self):
         dark = hasattr(self.parent_window, 'dark_mode') and self.parent_window.dark_mode
-        self.setStyleSheet(self.styleSheet() + _load_qss("history_scrollbar.qss", "dark" if dark else "light"))
+        self.setStyleSheet(self.styleSheet() + _load_qss("scrollbar.qss", "dark" if dark else "light"))
 
     def setup_shortcuts(self):
         """Keyboard shortcuts for the history window"""
