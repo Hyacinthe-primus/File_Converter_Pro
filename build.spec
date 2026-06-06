@@ -13,7 +13,7 @@ def collect_data_files():
         ('icons', 'icons'),
         ('fonts', 'fonts'),
         ('legal', 'legal'),
-        ('styles', 'styles')
+        ('styles', 'styles'),
     ]
 
     filtered_datas = []
@@ -22,6 +22,11 @@ def collect_data_files():
             filtered_datas.append((src, dst))
         else:
             print(f"File not found (skipped): {src}")
+
+    lang_excludes = {'blank.lang', 'en-revisited.lang'}
+    for f in glob.glob('languages/*.lang'):
+        if os.path.basename(f) not in lang_excludes:
+            filtered_datas.append((f, 'languages'))
 
     try:
         import docx
@@ -38,7 +43,6 @@ def collect_data_files():
         templates_dir = os.path.join(docxcompose_dir, 'templates')
         if os.path.exists(templates_dir):
             filtered_datas.append((templates_dir, 'docxcompose/templates'))
-            print("docxcompose templates added")
     except ImportError:
         print("docxcompose not installed")
 
@@ -47,7 +51,6 @@ def collect_data_files():
         pptx_templates = os.path.join(os.path.dirname(pptx.__file__), 'templates')
         if os.path.exists(pptx_templates):
             filtered_datas.append((pptx_templates, 'pptx/templates'))
-            print("python-pptx templates added")
     except ImportError:
         print("python-pptx not installed")
 
@@ -56,7 +59,6 @@ def collect_data_files():
         gen_dir = os.path.join(os.path.dirname(comtypes.__file__), 'gen')
         if os.path.exists(gen_dir):
             filtered_datas.append((gen_dir, 'comtypes/gen'))
-            print("comtypes gen cache added")
     except ImportError:
         print("comtypes not installed")
 
@@ -64,7 +66,6 @@ def collect_data_files():
         from PyInstaller.utils.hooks import collect_all
         pdf2docx_datas, pdf2docx_bins, pdf2docx_hidden = collect_all("pdf2docx")
         filtered_datas.extend(pdf2docx_datas)
-        print("pdf2docx data files added")
     except Exception as e:
         print(f"pdf2docx collect_all failed: {e}")
 
@@ -72,7 +73,6 @@ def collect_data_files():
         from PyInstaller.utils.hooks import collect_all
         np_datas, _, _ = collect_all("numpy")
         filtered_datas.extend(np_datas)
-        print("numpy data files added")
     except Exception as e:
         print(f"numpy collect_all failed: {e}")
 
@@ -80,7 +80,6 @@ def collect_data_files():
         from PyInstaller.utils.hooks import collect_data_files as _cdf
         cv2_datas = _cdf("cv2")
         filtered_datas.extend(cv2_datas)
-        print("cv2 data files added")
     except Exception as e:
         print(f"cv2 collect failed: {e}")
 
@@ -88,7 +87,6 @@ def collect_data_files():
         from PyInstaller.utils.hooks import collect_all
         ft_datas, _, _ = collect_all("fontTools")
         filtered_datas.extend(ft_datas)
-        print("fontTools data files added")
     except Exception as e:
         print(f"fontTools collect_all failed: {e}")
 
