@@ -31,7 +31,7 @@ This code of conduct applies to all project spaces: GitHub issues, pull requests
 
 ## Enforcement
 
-If you witness or experience unacceptable behavior, contact the maintainer at **hyacintheatho91@gmail.com**. All reports will be handled with discretion.
+If you witness or experience unacceptable behavior, contact the maintainer at **prime.enterprises.dev@gmail.com**. All reports will be handled with discretion.
 
 Violations may result in a warning, removal from discussions, or a permanent ban from the project depending on severity.
 
