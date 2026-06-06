@@ -599,6 +599,8 @@ File Converter Pro/
 ├── special_events_manager.py     # Date-aware special events (birthday, new year…)
 ├── system_notifier.py            # Native Windows desktop notifications
 ├── quick_check.py                # Companion build-verification tool (Tkinter)
+├── daemon.py                     # Silent background daemon — runs watcher/scheduler tasks
+├── qss_helpers.py                # Shared QSS utilities (_load_qss, _apply_dialog_btn)
 │
 ├── app/
 │   ├── __init__.py               # FadingMainWindow, FileConverterApp
@@ -624,6 +626,21 @@ File Converter Pro/
 │   ├── dialogs.py                # General-purpose dialogs
 │   ├── terms_dialog.py           # Terms & Privacy acceptance dialog
 │   └── word_to_pdf_dialog.py     # Word → PDF options dialog (mode, quality, metadata)
+│
+├── tasks/
+|   ├── __init__.py               # Automation engine: Watch Folders and Scheduled Tasks.
+│   ├── watcher.py                # Folder watcher — monitors paths for new files
+│   └── scheduler.py              # Task scheduler — triggers conversions on interval/time
+│
+├── automation/
+│   └── *.toml                    # TOML rule configs for watcher & scheduler tasks
+│
+├── styles/
+│   └── themes/
+│       ├── dark/                 # Per-theme QSS and CSS files
+│       ├── light/
+│       ├── buttons.qss           # Shared — BtnOK, BtnCancel, BtnCancelRed
+│       └── *.qss / *.css         # Global shared stylesheets
 │
 └── templates/
     ├── templates.py              # Conversion template definitions
