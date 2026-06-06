@@ -34,7 +34,7 @@ from PySide6.QtGui import (QIcon, QPixmap)
 
 from datetime import datetime
 
-from qss_helpers import _apply_dialog_btn
+from qss_helpers import _apply_dialog_btn, _load_qss
 from widgets import AnimatedCheckBox
 from .terms_dialog import TermsAndPrivacyDialog
 from translations import TranslationManager
@@ -2172,47 +2172,8 @@ class SettingsDialog(QDialog):
         self.apply_scrollbar_style()
 
     def apply_scrollbar_style(self):
-        if hasattr(self.parent(), 'dark_mode') and self.parent().dark_mode:
-            scrollbar_style = """
-            QScrollBar:vertical {
-                background-color: #4d5564; width: 10px; margin: 0px; border: none;
-            }
-            QScrollBar::handle:vertical {
-                background-color: #6c757d; border-radius: 5px; min-height: 30px;
-            }
-            QScrollBar::handle:vertical:hover { background-color: #868e96; }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background-color: #4d5564; }
-            QScrollBar:horizontal {
-                background-color: #4d5564; height: 10px; margin: 0px; border: none;
-            }
-            QScrollBar::handle:horizontal {
-                background-color: #6c757d; border-radius: 5px; min-width: 30px;
-            }
-            QScrollBar::handle:horizontal:hover { background-color: #868e96; }
-            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background-color: #4d5564; }
-            """
-        else:
-            scrollbar_style = """
-            QScrollBar:vertical {
-                background-color: #dee2e6; width: 10px; margin: 0px; border: none;
-            }
-            QScrollBar::handle:vertical {
-                background-color: #adb5bd; border-radius: 5px; min-height: 30px;
-            }
-            QScrollBar::handle:vertical:hover { background-color: #868e96; }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background-color: #dee2e6; }
-            QScrollBar:horizontal {
-                background-color: #dee2e6; height: 10px; margin: 0px; border: none;
-            }
-            QScrollBar::handle:horizontal {
-                background-color: #adb5bd; border-radius: 5px; min-width: 30px;
-            }
-            QScrollBar::handle:horizontal:hover { background-color: #868e96; }
-            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background-color: #dee2e6; }
-            """
-        self.setStyleSheet(self.styleSheet() + scrollbar_style)
+        dark = hasattr(self.parent(), 'dark_mode') and self.parent().dark_mode
+        self.setStyleSheet(self.styleSheet() + _load_qss("scrollbar.qss", "dark" if dark else "light"))
 
     def translate_text(self, text):
         return self._tm.translate_text(text)
@@ -2229,12 +2190,9 @@ class SettingsDialog(QDialog):
         tab_bg        = "#0d1117" if dark else "#f8f9fa"
         group_bg      = "#161b22" if dark else "#ffffff"
         scroll_bg     = "#161b22" if dark else "#ffffff"
-        # Text
         text_primary  = "#e6edf3" if dark else "#1c2526"
         text_muted    = "#8b949e" if dark else "#6b7280"
-        # Borders
         group_border  = "#30363d" if dark else "#dee2e6"
-        # Active indicator
         active_green  = "#3fb950" if dark else "#10B981"
 
         tab = QWidget()
@@ -2282,21 +2240,7 @@ class SettingsDialog(QDialog):
         self._lang_list.setWidgetResizable(True)
         self._lang_list.setFrameShape(QFrame.NoFrame)
         self._lang_list.setMinimumHeight(185)
-        self._lang_list.setStyleSheet(f"""
-            QScrollArea {{ background: {scroll_bg}; border: none; }}
-            QScrollBar:vertical {{
-                background: {"#21262d" if dark else "#e9ecef"};
-                width: 6px; border-radius: 3px; margin: 0;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {"#484f58" if dark else "#adb5bd"};
-                border-radius: 3px; min-height: 24px;
-            }}
-            QScrollBar::handle:vertical:hover {{
-                background: {"#6e7681" if dark else "#6c757d"};
-            }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
-        """)
+        self._lang_list.setStyleSheet(_load_qss("lang_scroll.qss", "dark" if dark else "light"))
         self._lang_inner = QWidget()
         self._lang_inner.setStyleSheet(f"background: {scroll_bg};")
         self._lang_inner_layout = QVBoxLayout(self._lang_inner)
@@ -2693,7 +2637,6 @@ class SettingsDialog(QDialog):
         tab_bg       = "#0d1117" if dark else "#f8f9fa"
         group_bg     = "#161b22" if dark else "#ffffff"
         group_border = "#30363d" if dark else "#dee2e6"
-        text_primary = "#e6edf3" if dark else "#1c2526"
         text_muted   = "#8b949e" if dark else "#6b7280"
 
         tab = QWidget()
@@ -2702,7 +2645,7 @@ class SettingsDialog(QDialog):
         layout.setContentsMargins(8, 10, 8, 10)
         layout.setSpacing(12)
 
-        from daemon import is_autostart_enabled, set_autostart
+        from daemon import is_autostart_enabled
 
         autostart_group = QGroupBox(self.translate_text("Démon d'automatisation"))
         autostart_group.setStyleSheet(f"""
@@ -2766,7 +2709,7 @@ class SettingsDialog(QDialog):
         open_btn = QPushButton("📂 " + self.translate_text("Ouvrir le dossier automation/"))
         open_btn.setProperty("i18n_key", "Ouvrir le dossier automation/")
         open_btn.setMinimumHeight(32)
-        _apply_dialog_btn(open_btn, "BtnGhost")
+        _apply_dialog_btn(open_btn, "BtnOK")
         open_btn.clicked.connect(self._open_automation_dir)
 
         reload_btn = QPushButton("🔄 " + self.translate_text("Recharger"))
