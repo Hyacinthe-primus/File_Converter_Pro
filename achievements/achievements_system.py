@@ -42,10 +42,8 @@ class AchievementSystem(QObject):
             app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
         self.db_path = os.path.join(app_dir, "achievements.db")
-        print(f"[INFO] Database path set to: {self.db_path}")
         if not os.path.exists(self.db_path):
             print("[INFO] Creating achievements database...")
-        print(f"[INFO] Database path set to: {self.db_path}")
         
         self.load_achievements_data()
         self.init_database()
