@@ -2667,6 +2667,7 @@ class AppUIMixin(AppLogicMixin):
         self.new_action.setText("🆕 " + self.translate_text("Nouveau Projet"))
         self.open_action.setText("📂 " + self.translate_text("Ouvrir Projet"))
         self.save_action.setText("💾 " + self.translate_text("Enregistrer Projet"))
+        self.setup_tooltips_with_shortcuts()
 
     def apply_theme(self, dark: bool) -> None:
         self.setStyleSheet(_load_qss("style.qss", "dark" if dark else "light"))
