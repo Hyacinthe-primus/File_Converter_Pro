@@ -241,7 +241,7 @@ SHARED_EXCLUDES = [
     'scipy', 'skimage', 'sklearn', 'numba', 'llvmlite',
     'IPython', 'jedi', 'parso', 'prompt_toolkit',
     'zmq', 'tornado', 'ipykernel', 'ipython_genutils',
-    'pandas',
+    'pandas', 'babel',
     'PySide6.QtBluetooth', 'PySide6.QtDBus',
     'PySide6.QtLocation', 'PySide6.QtNfc',
     'PySide6.QtPositioning', 'PySide6.QtRemoteObjects',
@@ -323,10 +323,21 @@ for d in glob.glob(os.path.join(dist_dir, '*.dist-info')):
 for py in glob.glob(os.path.join(dist_dir, '**', '*.py'), recursive=True):
     os.remove(py)
 
+for pyc in glob.glob(os.path.join(dist_dir, '**', '*.pyc'), recursive=True):
+    os.remove(pyc)
+
+comtypes_cache = os.path.join(DISTPATH, "File Converter Pro", "_internal", "comtypes", "gen")
+if os.path.exists(comtypes_cache):
+    shutil.rmtree(comtypes_cache)
+    os.makedirs(comtypes_cache)
+
+mpl_sample = os.path.join(dist_dir, 'matplotlib', 'mpl-data', 'sample_data')
+if os.path.exists(mpl_sample):
+    shutil.rmtree(mpl_sample)
+
 old_ffmpeg = os.path.join(dist_dir, 'cv2', 'opencv_videoio_ffmpeg4100_64.dll')
 if os.path.exists(old_ffmpeg):
     os.remove(old_ffmpeg)
 
 automation_dir = os.path.join(DISTPATH, 'File Converter Pro', 'automation')
 os.makedirs(automation_dir, exist_ok=True)
-print(f"automation/ folder created at {automation_dir}")
