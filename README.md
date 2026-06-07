@@ -609,6 +609,7 @@ File Converter Pro/
 │
 ├── context_menu/
 │   ├── __init__.py
+|   ├── formats.py                # Context menu formats
 │   └── window.py                 # Quick Convert popup — Windows Shell Integration
 │
 ├── converter/
