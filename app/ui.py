@@ -2172,7 +2172,11 @@ class AppUIMixin(AppLogicMixin):
             else:
                 item.setText(f"{number} {icon} {display_name}")
             
+            if os.path.isfile(file_path):
+                item.setData(Qt.UserRole + 4, self.format_size(os.path.getsize(file_path)))
+            
             self.files_list_widget.addItem(item)
+            self._attach_preview_btn(item, file_path)
         
         self.update_file_counter()
 
