@@ -27,6 +27,8 @@ import time
 import zipfile
 from pathlib import Path
 
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
+
 
 class ConversionResult:
     __slots__ = ("success", "source", "target", "elapsed", "error", "file_size")
@@ -225,7 +227,8 @@ try {{
                 r = subprocess.run(
                     ["powershell", "-NoProfile", "-NonInteractive",
                      "-ExecutionPolicy", "Bypass", "-Command", ps_a],
-                    capture_output=True, timeout=120
+                    capture_output=True, timeout=120,
+                    creationflags=_NO_WINDOW,
                 )
                 if Path(tmp_dst).exists():
                     shutil.move(tmp_dst, dst_abs)
@@ -243,7 +246,8 @@ try {{
                 r2 = subprocess.run(
                     ["powershell", "-NoProfile", "-NonInteractive",
                      "-ExecutionPolicy", "Bypass", "-Command", ps_b],
-                    capture_output=True, timeout=120
+                    capture_output=True, timeout=120,
+                    creationflags=_NO_WINDOW,
                 )
                 if Path(tmp_dst).exists():
                     shutil.move(tmp_dst, dst_abs)
@@ -988,7 +992,8 @@ try {{
                 subprocess.run(
                     [lo_bin, "--headless", "--convert-to", "pdf",
                      "--outdir", dst_dir, src_abs],
-                    check=True, capture_output=True, timeout=120)
+                    check=True, capture_output=True, timeout=120,
+                    creationflags=_NO_WINDOW)
                 lo_out = Path(dst_dir) / (Path(src).stem + ".pdf")
                 if lo_out.exists() and str(lo_out) != dst:
                     lo_out.rename(dst)
@@ -1125,7 +1130,8 @@ try {{
                 subprocess.run(
                     [lo_bin, "--headless", "--convert-to", "pdf",
                      "--outdir", dst_dir, src_abs],
-                    check=True, capture_output=True, timeout=120)
+                    check=True, capture_output=True, timeout=120,
+                    creationflags=_NO_WINDOW)
                 lo_out = Path(dst_dir) / (Path(src).stem + ".pdf")
                 if lo_out.exists() and str(lo_out) != dst:
                     lo_out.rename(dst)
@@ -2862,6 +2868,7 @@ try {{
             subprocess.run(
                 ["magick", "convert", src, tmp_path],
                 check=True, capture_output=True, timeout=120,
+                creationflags=_NO_WINDOW,
             )
             img = Image.open(tmp_path)
             img.load()
@@ -2958,6 +2965,7 @@ try {{
                 subprocess.run(
                     [magick, "convert", src, dst],
                     check=True, capture_output=True, timeout=120,
+                    creationflags=_NO_WINDOW,
                 )
                 return
             except Exception:

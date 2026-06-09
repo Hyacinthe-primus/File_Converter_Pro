@@ -14,11 +14,14 @@ FileConverterApp, extracted as a mixin for clarity.  Import order:
 
 import sys
 import os
+import subprocess
 import tempfile
 import shutil
 import io
 import zipfile
 from pathlib import Path
+
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QListWidgetItem,
                                QFileDialog, QMessageBox, QGroupBox, QScrollArea,
                                QLineEdit, QDialog, QDialogButtonBox, QTextEdit,
@@ -2359,6 +2362,7 @@ class AppLogicMixin:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 timeout=120,
+                creationflags=_NO_WINDOW,
             )
 
             if progress_callback:
@@ -5017,7 +5021,7 @@ class AppLogicMixin:
                 if path in ["rar", "winrar"]:
                     try:
                         import subprocess
-                        result = subprocess.run([path, "--version"], capture_output=True, shell=True)
+                        result = subprocess.run([path, "--version"], capture_output=True, creationflags=_NO_WINDOW)
                         if result.returncode == 0 or result.returncode == 1:
                             winrar_exe = path
                             break
@@ -5081,7 +5085,7 @@ class AppLogicMixin:
                 print(f"[DEBUG] WinRAR command for split ZIP: {' '.join(cmd)}")
                 
                 import subprocess
-                result = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+                result = subprocess.run(cmd, capture_output=True, text=True, creationflags=_NO_WINDOW)
                 
                 try:
                     os.unlink(list_file)
@@ -5363,7 +5367,7 @@ class AppLogicMixin:
                 if path in ["rar", "winrar"]:
                     try:
                         import subprocess
-                        result = subprocess.run([path, "--version"], capture_output=True, shell=True)
+                        result = subprocess.run([path, "--version"], capture_output=True, creationflags=_NO_WINDOW)
                         if result.returncode == 0 or result.returncode == 1:
                             winrar_exe = path
                             break
@@ -5426,7 +5430,7 @@ class AppLogicMixin:
                 print(f"[DEBUG] WinRAR command: {' '.join(cmd)}")
                 
                 import subprocess
-                result = subprocess.run(cmd, capture_output=True, text=True, shell=True)
+                result = subprocess.run(cmd, capture_output=True, text=True, creationflags=_NO_WINDOW)
                 
                 try:
                     os.unlink(list_file)
