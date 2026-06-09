@@ -64,17 +64,10 @@ def collect_data_files():
 
     try:
         from PyInstaller.utils.hooks import collect_all
-        pdf2docx_datas, pdf2docx_bins, pdf2docx_hidden = collect_all("pdf2docx")
+        pdf2docx_datas, _, _ = collect_all("pdf2docx")
         filtered_datas.extend(pdf2docx_datas)
     except Exception as e:
         print(f"pdf2docx collect_all failed: {e}")
-
-    try:
-        from PyInstaller.utils.hooks import collect_all
-        np_datas, _, _ = collect_all("numpy")
-        filtered_datas.extend(np_datas)
-    except Exception as e:
-        print(f"numpy collect_all failed: {e}")
 
     try:
         from PyInstaller.utils.hooks import collect_data_files as _cdf
@@ -82,13 +75,6 @@ def collect_data_files():
         filtered_datas.extend(cv2_datas)
     except Exception as e:
         print(f"cv2 collect failed: {e}")
-
-    try:
-        from PyInstaller.utils.hooks import collect_all
-        ft_datas, _, _ = collect_all("fontTools")
-        filtered_datas.extend(ft_datas)
-    except Exception as e:
-        print(f"fontTools collect_all failed: {e}")
 
     return filtered_datas
 
@@ -100,24 +86,11 @@ except Exception:
     _pdf2docx_bins, _pdf2docx_hidden = [], []
 
 try:
-    from PyInstaller.utils.hooks import collect_all as _ca
-    _, _np_bins, _np_hidden = _ca("numpy")
-except Exception:
-    _, _np_bins, _np_hidden = [], [], []
-
-try:
     from PyInstaller.utils.hooks import collect_dynamic_libs, collect_data_files as _cdf
     _cv2_bins = collect_dynamic_libs("cv2")
-    _cv2_datas = _cdf("cv2")
     _cv2_hidden = ["cv2"]
 except Exception:
-    _, _cv2_bins, _cv2_hidden = [], [], []
-
-try:
-    from PyInstaller.utils.hooks import collect_all as _ca
-    _, _ft_bins, _ft_hidden = _ca("fontTools")
-except Exception:
-    _, _ft_bins, _ft_hidden = [], [], []
+    _cv2_bins, _cv2_hidden = [], []
 
 SHARED_HIDDEN = [
     'cryptography.hazmat.primitives.kdf.pbkdf2',
@@ -127,8 +100,6 @@ SHARED_HIDDEN = [
 
     *_pdf2docx_hidden,
     *_cv2_hidden,
-    *_ft_hidden,
-    *_np_hidden,
 
     'pdf2docx', 'pdf2docx.main', 'pdf2docx.converter',
     'pdf2docx.common', 'pdf2docx.common.share', 'pdf2docx.common.algorithm',
@@ -178,21 +149,16 @@ SHARED_HIDDEN = [
     'PySide6.QtNetwork', 'PySide6.QtCore', 'PySide6.QtGui',
     'PySide6.QtWidgets',
     'fitz', 'pymupdf', 'pypdf',
-    'matplotlib', 'matplotlib.pyplot', 'matplotlib.backends.backend_qt5agg',
+    'matplotlib', 'matplotlib.pyplot',
+    'matplotlib.backends.backend_qtagg',
+    'matplotlib.backends.backend_agg',
     'matplotlib.figure', 'matplotlib.patches',
     'cycler', 'kiwisolver', 'dateutil', 'dateutil.parser',
     'dateutil.relativedelta', 'pytz', 'six', 'pyparsing',
     'numpy', 'numpy.core', 'numpy.core.multiarray',
-    'numpy.core._multiarray_umath', 'numpy.core._multiarray_tests',
-    'numpy.core.numeric', 'numpy.core.fromnumeric',
-    'numpy.core.arrayprint', 'numpy.core.defchararray',
-    'numpy.core.records', 'numpy.core.memmap',
-    'numpy.core.function_base', 'numpy.core.machar',
-    'numpy.core.getlimits', 'numpy.core.shape_base',
-    'numpy.core.einsumfunc', 'numpy.core._dtype',
-    'numpy.core._type_aliases', 'numpy.core._ufunc_config',
-    'numpy.lib', 'numpy.lib.stride_tricks', 'numpy.lib.mixins',
-    'numpy.lib.index_tricks', 'numpy.lib.nanfunctions',
+    'numpy.core._multiarray_umath',
+    'fontTools', 'fontTools.ttLib', 'fontTools.misc',
+    'fontTools.misc.encodingTools', 'fontTools.misc.textTools',
     'openpyxl', 'openpyxl.styles', 'openpyxl.utils',
     'pptx', 'pptx.util', 'pptx.enum.shapes', 'pptx.enum.chart',
     'reportlab.lib', 'reportlab.lib.pagesizes',
@@ -201,18 +167,10 @@ SHARED_HIDDEN = [
     'reportlab.platypus', 'reportlab.platypus.tables',
     'reportlab.platypus.flowables', 'reportlab.pdfbase',
     'reportlab.pdfbase.pdfmetrics', 'reportlab.pdfbase.ttfonts',
-    'fontTools', 'fontTools.ttLib', 'fontTools.ttLib.ttFont',
-    'fontTools.ttLib.tables', 'fontTools.ttLib.tables._n_a_m_e',
-    'fontTools.ttLib.tables.otTables', 'fontTools.ttLib.tables.DefaultTable',
-    'fontTools.pens', 'fontTools.pens.basePen', 'fontTools.pens.pointPen',
-    'fontTools.misc', 'fontTools.misc.encodingTools', 'fontTools.misc.textTools',
-    'fontTools.misc.roundTools', 'fontTools.misc.fixedTools',
-    'fontTools.misc.arrayTools', 'fontTools.misc.psCharStrings',
-    'fontTools.cffLib', 'fontTools.varLib', 'fontTools.feaLib',
-    'fontTools.designspaceLib', 'fontTools.colorLib',
     'cv2',
     'lxml', 'lxml.etree', 'lxml._elementpath', 'lxml.html', 'ebooklib',
     'pillow_heif', 'weasyprint',
+    'rawpy',
     'config', 'database', 'translations', 'widgets',
     'dialogs', 'dialogs.dialogs', 'dialogs.terms_dialog', 'dialogs.word_to_pdf_dialog',
     'dashboard', 'history',
@@ -251,6 +209,7 @@ SHARED_EXCLUDES = [
     'PySide6.QtWebChannel', 'PySide6.QtWebEngine',
     'PySide6.QtWebEngineCore', 'PySide6.QtWebEngineWidgets',
     'PySide6.QtWebSockets',
+    'PySide6.QtQml', 'PySide6.QtQuick', 'PySide6.QtQuickWidgets',
 ]
 
 UPX_EXCLUDE = [
@@ -268,11 +227,11 @@ UPX_EXCLUDE = [
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[] + _pdf2docx_bins + _cv2_bins + _ft_bins + _np_bins,
+    binaries=[] + _pdf2docx_bins + _cv2_bins,
     datas=collect_data_files(),
     hiddenimports=SHARED_HIDDEN,
     hookspath=[],
-    hooksconfig={'matplotlib': {'backends': 'qt5agg'}},
+    hooksconfig={'matplotlib': {'backends': ['qtagg', 'agg']}},
     runtime_hooks=[],
     excludes=SHARED_EXCLUDES,
     win_no_prefer_redirects=False,
@@ -326,7 +285,10 @@ for py in glob.glob(os.path.join(dist_dir, '**', '*.py'), recursive=True):
 for pyc in glob.glob(os.path.join(dist_dir, '**', '*.pyc'), recursive=True):
     os.remove(pyc)
 
-comtypes_cache = os.path.join(DISTPATH, "File Converter Pro", "_internal", "comtypes", "gen")
+for cache in glob.glob(os.path.join(dist_dir, '**', '__pycache__'), recursive=True):
+    shutil.rmtree(cache, ignore_errors=True)
+
+comtypes_cache = os.path.join(DISTPATH, 'File Converter Pro', '_internal', 'comtypes', 'gen')
 if os.path.exists(comtypes_cache):
     shutil.rmtree(comtypes_cache)
     os.makedirs(comtypes_cache)
@@ -334,6 +296,14 @@ if os.path.exists(comtypes_cache):
 mpl_sample = os.path.join(dist_dir, 'matplotlib', 'mpl-data', 'sample_data')
 if os.path.exists(mpl_sample):
     shutil.rmtree(mpl_sample)
+
+mpl_fonts = os.path.join(dist_dir, 'matplotlib', 'mpl-data', 'fonts')
+if os.path.exists(mpl_fonts):
+    for f in glob.glob(os.path.join(mpl_fonts, '**', '*.ttf'), recursive=True):
+        if 'DejaVu' not in os.path.basename(f):
+            os.remove(f)
+    for f in glob.glob(os.path.join(mpl_fonts, '**', '*.afm'), recursive=True):
+        os.remove(f)
 
 old_ffmpeg = os.path.join(dist_dir, 'cv2', 'opencv_videoio_ffmpeg4100_64.dll')
 if os.path.exists(old_ffmpeg):
