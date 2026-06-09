@@ -49,8 +49,8 @@ def _ensure_matplotlib():
     if FigureCanvas is not None:
         return
     import matplotlib
-    matplotlib.use('Qt5Agg')
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as _FigureCanvas
+    matplotlib.use('QtAgg')
+    from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as _FigureCanvas
     from matplotlib.figure import Figure as _Figure
     import matplotlib.pyplot as _plt
     import matplotlib.dates as _mdates
