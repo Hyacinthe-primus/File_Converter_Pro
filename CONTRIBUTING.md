@@ -101,7 +101,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-See the [Developer section in README](README.md#-for-developers) for build instructions and all CLI flags.
+See the [Developer section in the Wiki](https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/For-Developers) for build instructions and all CLI flags.
 
 ---
 
