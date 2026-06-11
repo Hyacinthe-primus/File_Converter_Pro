@@ -197,6 +197,8 @@
     "Application": "Application",
     "Quitter": "Quit",
     "Aide des raccourcis": "Shortcuts Help",
+    "Support en ligne": "Online Support",
+    "Guide d'utilisation complet": "Full User Guide",
     "Fermer les fenêtres secondaires": "Close secondary windows",
     "Ouverture du dossier": "Opening folder",
     "Voulez-vous ouvrir le dossier contenant les PDF protégés ?": "Would you like to open the folder containing the protected PDFs?",
