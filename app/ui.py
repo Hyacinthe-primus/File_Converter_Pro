@@ -866,14 +866,11 @@ class AppUIMixin(AppLogicMixin):
         language_action.setToolTip(self.translate_text("Changer la langue de l'interface (F3)"))
         view_menu.addAction(language_action)
         
-        help_menu_title = self.translate_text("A&ide")
-        help_menu = menubar.addMenu(help_menu_title)
-        
-        shortcuts_action = QAction(self.translate_text("&Raccourcis clavier"), self)
-        shortcuts_action.setShortcut("F1")
-        shortcuts_action.triggered.connect(self.show_shortcuts_help)
-        shortcuts_action.setToolTip(self.translate_text("Afficher la liste des raccourcis clavier (F1)"))
-        help_menu.addAction(shortcuts_action)
+        help_action = QAction(self.translate_text("A&ide"), self)
+        help_action.setShortcut("F1")
+        help_action.triggered.connect(self.show_shortcuts_help)
+        help_action.setToolTip(self.translate_text("Afficher la liste des raccourcis clavier (F1)"))
+        menubar.addAction(help_action)
 
     def show_shortcuts_help(self):
         """Display a help window with all shortcuts"""
@@ -916,6 +913,8 @@ class AppUIMixin(AppLogicMixin):
         <li><b>Ctrl+Q</b> : {t("Quitter")}</li>
         <li><b>F1</b> : {t("Aide des raccourcis")}</li>
         </ul>
+        <h3>{t("Support en ligne")}</h3>
+        <p><a href="https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/How-To-Use">{t("Guide d'utilisation complet")}</a></p>
         """
         
         msg_box = QMessageBox(self)
