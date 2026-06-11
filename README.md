@@ -102,7 +102,7 @@ See **[CONTRIBUTING.md](CONTRIBUTING.md)** for translations, bug reports, code f
 ## 📄 License
 
 Dual licensed: **GPLv3** for open-source use · **Commercial License** for proprietary products.
-See [`LICENSE.txt`](LICENSE/LICENSE.txt) and [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md).
+See [`LICENSE`](LICENSE/LICENSE.txt) and [COMMERCIAL LICENSE](COMMERCIALLICENSE.md).
 
 © 2026 Prime Enterprises (Hyacinthe). All rights reserved.
 
