@@ -63,7 +63,7 @@ def _fcp_banner() -> Panel:
     )
     art.append("File Converter Pro", style="bold bright_white")
     art.append("  ·  CLI Reference\n", style="dim white")
-    art.append("──── by Prime Enterprises ────", style="dim cyan")
+    art.append("   ──── by Prime Enterprises ────", style="dim cyan")
     return Panel(
         Align.center(art),
         border_style="cyan",
@@ -289,7 +289,6 @@ class CLIHandler:
         content.append("  [--conversion-type ", style="dim white")
         content.append("type", style="italic white")
         content.append("]\n\n", style="dim white")
-        content.append("⚠  ", style="bold yellow")
         content.append("Files must share the same category (image / audio / video).", style="dim white")
         return Panel(content, title="[bold cyan]Context Menu – Quick Convert[/bold cyan]", border_style="cyan", padding=(0, 2))
 
