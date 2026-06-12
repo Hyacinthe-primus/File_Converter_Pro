@@ -41,19 +41,35 @@ ArchitecturesInstallIn64BitMode=x64compatible
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"; LicenseFile: "LICENSE\LICENSE.txt"
-Name: "french";  MessagesFile: "compiler:Languages\French.isl"; LicenseFile: "LICENSE\LICENSE_FR.txt"
+Name: "french";  MessagesFile: "compiler:Languages\French.isl"; LicenseFile: "LICENSE\LICENSE.txt"
+Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"; LicenseFile: "LICENSE\LICENSE.txt"
+Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"; LicenseFile: "LICENSE\LICENSE.txt"
 
 [CustomMessages]
 french.AddAntivirusExclusion=Ajouter une exclusion Windows Defender (recommandé pour les performances)
 english.AddAntivirusExclusion=Add Windows Defender exclusion (recommended for performance)
+italian.AddAntivirusExclusion=Aggiungi un'esclusione a Windows Defender (consigliato per le prestazioni)
+russian.AddAntivirusExclusion=Добавить исключение в Windows Defender (рекомендуется для производительности)
+
 french.AppDescription=File Converter Pro - Le convertisseur de fichiers professionnel et rapide, entièrement gratuit
 english.AppDescription=File Converter Pro - Fast professional file converter, made for free
+italian.AppDescription=File Converter Pro - Il convertitore di file professionale e veloce, completamente gratuito
+russian.AppDescription=File Converter Pro - быстрый профессиональный конвертер файлов, совершенно бесплатный
+
 french.AssocFileType=Associer les fichiers .fcproj avec File Converter Pro
 english.AssocFileType=Associate .fcproj files with File Converter Pro
+italian.AssocFileType=Associa i file .fcproj a File Converter Pro
+russian.AssocFileType=Связать файлы .fcproj с File Converter Pro
+
 french.AddContextMenu=Ajouter "Convertir avec FCP" au menu contextuel Windows
 english.AddContextMenu=Add "Convert with FCP" to Windows right-click menu
+italian.AddContextMenu=Aggiungi "Convertire con FCP" al menu contestuale di Windows
+russian.AddContextMenu=Добавить "Конвертировать с FCP" в контекстное меню Windows
+
 french.ConvertWithFCP=Convertir avec FCP
 english.ConvertWithFCP=Convert with FCP
+italian.ConvertWithFCP=Convertire con FCP
+russian.ConvertWithFCP=Конвертировать с FCP
 
 [Tasks]
 Name: "desktopicon";   Description: "{cm:CreateDesktopIcon}";    GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
@@ -1885,6 +1901,10 @@ function GetLangCode(Param: String): String;
 begin
   if ActiveLanguage() = 'french' then
     Result := 'fr'
+  else if ActiveLanguage() = 'italian' then
+    Result := 'it'
+  else if ActiveLanguage() = 'russian' then
+    Result := 'ru'
   else
     Result := 'en';
 end;
