@@ -33,6 +33,9 @@ Example: *"Convert everything in this folder every Monday at 9:00 AM."*
 ### Watch Folder
 Monitor a folder and automatically convert any file dropped into it, using a predefined output format and template. Zero interaction required once configured.
 
+### Reduced Build Size
+Investigate selective PyInstaller bundling and optional module lazy-loading to bring the compiled size below 300 MB without dropping any features.
+
 ---
 
 ## User Features
@@ -102,9 +105,6 @@ Expand the supported format matrix over time. Candidates include:
 - **MP4 → GIF** / **GIF → WebP** for quick web-ready exports
 ### Conversion Engine Versioning
 Track which engine version produced a given output (e.g. `ffmpeg 6.1`, `LibreOffice 24.8`). Useful for reproducing or debugging quality differences across machines or after an update.
-
-### Reduced Build Size
-Investigate selective PyInstaller bundling and optional module lazy-loading to bring the compiled size below 300 MB without dropping any features.
 
 ---
 
