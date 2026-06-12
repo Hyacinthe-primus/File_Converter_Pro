@@ -26,6 +26,13 @@ Input format support has also been extended to cover most common image extension
 
 > **Note:** When selecting multiple files, each file must be the same type.
 
+### Advanced Batch Scheduling
+Schedule conversion tasks to run at a specific time or on a recurring basis.
+Example: *"Convert everything in this folder every Monday at 9:00 AM."*
+
+### Watch Folder
+Monitor a folder and automatically convert any file dropped into it, using a predefined output format and template. Zero interaction required once configured.
+
 ---
 
 ## User Features
@@ -35,7 +42,6 @@ Revisit the main code to add linux support such as:
 - Appimage
 - Flatpack
 - Specific Linux Distributions support (may come really late)
-
 ### User Profiles
 Support for multiple independent profiles on the same machine, each with their own:
 - Achievement progress and stats
@@ -44,13 +50,6 @@ Support for multiple independent profiles on the same machine, each with their o
 
 ### System Notifications (Extended)
 Windows toast notifications are already supported for certain events. The next step is extending them to **long-running conversions** — so users can switch to another app while a heavy batch runs and still get notified the moment it's done.
-
-###  Advanced Batch Scheduling
-Schedule conversion tasks to run at a specific time or on a recurring basis.
-Example: *"Convert everything in this folder every Monday at 9:00 AM."*
-
-### Watch Folder
-Monitor a folder and automatically convert any file dropped into it, using a predefined output format and template. Zero interaction required once configured.
 
 ### Conversion Queue with Priorities
 A visible queue panel where users can reorder pending conversions, pause individual items, or cancel specific tasks without killing the whole batch. Useful when converting dozens of files at once and something more urgent comes up.
@@ -101,7 +100,6 @@ Expand the supported format matrix over time. Candidates include:
 - **SVG → PNG / PDF** via CairoSVG
 - **ODT / ODS / ODP** (LibreOffice native formats)
 - **MP4 → GIF** / **GIF → WebP** for quick web-ready exports
-
 ### Conversion Engine Versioning
 Track which engine version produced a given output (e.g. `ffmpeg 6.1`, `LibreOffice 24.8`). Useful for reproducing or debugging quality differences across machines or after an update.
 
@@ -114,16 +112,15 @@ Investigate selective PyInstaller bundling and optional module lazy-loading to b
 ### Revisit the UI approach
 make the UI of the software more intuitive to use
 
-
 ### Output Preview
 A quick preview pane showing a thumbnail or first page of the converted output before the user opens it in another app. Particularly useful for image and PDF outputs.
 
 ### Custom Themes
- 
+
 File Converter Pro already supports automatic Dark and Light modes driven by the Windows registry. Custom themes would take this further by letting users define their own color schemes through a simple file format — no code changes required, following the same philosophy as the `.lang` translation system.
- 
+
 A `.theme` file (UTF-8 JSON) placed in a `themes/` folder next to the executable would be detected automatically and listed in Settings:
- 
+
 ```json
 {
   "meta": {
@@ -150,7 +147,7 @@ A `.theme` file (UTF-8 JSON) placed in a `themes/` folder next to the executable
 ```
  
 The `base` field tells the app which built-in stylesheet to use as a fallback for any key not defined in the file — so a theme only needs to override what it changes.
- 
+
 A built-in **Theme Editor** in Settings would let users tweak colors visually with a live preview, then export the result as a `.theme` file they can share.
 
 ### More Special Events
