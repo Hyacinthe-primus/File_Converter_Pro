@@ -15,7 +15,7 @@ Inheritance chain:
 
 """
 
-__version__ = "1.0.5"
+__version__ = "1.0.6"
 from PySide6.QtWidgets import QMainWindow
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QTimer
 
