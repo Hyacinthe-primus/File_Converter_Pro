@@ -1,6 +1,6 @@
 ; Setup.iss (FCP)
 ; Inno Setup Script for File Converter Pro
-; Dual language support: French / English
+; Multi-language support
 ; Complete uninstallation support
 
 #define MyAppName "File Converter Pro"
