@@ -145,7 +145,7 @@ def _get_toml_mtimes() -> dict:
 def main() -> None:
     _setup_logging()
     _trim_log_if_clean()
-    logger = logging.getLogger(__name__)
+    logging.getLogger(__name__)
 
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))

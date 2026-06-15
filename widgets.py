@@ -427,7 +427,6 @@ class DraggableListWidget(QListWidget):
 
     def _tick_glitch(self):
         """Called every 80 ms. Drives all glitch state."""
-        import random
         if self.count() > 0:
             self._glitch_timer.setInterval(500)
             self.viewport().update()

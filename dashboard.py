@@ -20,8 +20,6 @@ Classes:
 
 """
 
-import sys
-import os
 from pathlib import Path
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                                QLabel, QFileDialog, QMessageBox, QComboBox,
@@ -35,6 +33,7 @@ from datetime import datetime
 
 from qss_helpers import _load_qss
 from converter import AdvancedDatabaseManager
+from utils.translation_mixin import TranslationMixin
 
 
 FigureCanvas = None
@@ -62,18 +61,9 @@ def _ensure_matplotlib():
     animation    = _animation
 
 def _get_asset_path(relative: str) -> str:
-    """Resolve an asset path — dev mode AND PyInstaller (onedir + onefile).
-
-    PyInstaller onefile  → assets extracted to sys._MEIPASS (temp dir)
-    PyInstaller onedir   → assets sit next to the exe, _MEIPASS == exe dir
-    Dev mode             → assets sit next to this .py file
-    """
-    if getattr(sys, 'frozen', False):
-        # _MEIPASS is always set by PyInstaller, for both onefile and onedir
-        base = getattr(sys, '_MEIPASS', os.path.dirname(sys.executable))
-    else:
-        base = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(base, relative).replace('\\', '/')
+    """Resolve an asset path — dev mode AND PyInstaller (onedir + onefile)."""
+    from utils import resource_path
+    return resource_path(relative).replace('\\', '/')
 
 class _AdvDbProxy:
     """
@@ -151,7 +141,7 @@ class _FillBar(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        from PySide6.QtGui import QPainter, QLinearGradient, QBrush, QPen, QColor
+        from PySide6.QtGui import QPainter, QLinearGradient, QBrush, QColor
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
 
@@ -351,7 +341,7 @@ class AnimatedStatCard(QFrame):
         self._apply_card_style(t=0.0)
 
 
-class StatisticsDashboard(QDialog):
+class StatisticsDashboard(TranslationMixin, QDialog):
 
     def __init__(self, db_manager, language="fr", parent=None, translation_manager=None):
         super().__init__(parent)
@@ -1153,8 +1143,6 @@ class StatisticsDashboard(QDialog):
             size_bytes /= 1024.0
         return f"{size_bytes:.2f} Po"
 
-    def translate_text(self, text):
-        return self._translation_manager.translate_text(text)
 
     def translate_operation_type(self, operation_key):
         return self._translation_manager.translate_operation_type(operation_key)

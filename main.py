@@ -523,10 +523,9 @@ class AppBootstrap:
 
     @classmethod
     def _resolve_icon(cls) -> str | None:
-        return next(
-            (path for c in cls._ICON_CANDIDATES if os.path.exists(path := c())),
-            None,
-        )
+        from utils import get_icon_path
+        path = get_icon_path("icon.ico")
+        return path if path and os.path.exists(path) else None
 
 
 class TermsGuard:

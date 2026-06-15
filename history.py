@@ -26,16 +26,14 @@ from pathlib import Path
 
 def _resource_path(relative_path):
     """Resolve path for both dev and PyInstaller exe."""
-    try:
-        base = sys._MEIPASS
-    except AttributeError:
-        base = os.path.abspath(".")
-    return os.path.join(base, relative_path).replace("\\", "/")
+    from utils import resource_path
+    return resource_path(relative_path).replace("\\", "/")
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, 
                                QLabel, QFileDialog, QMessageBox, QComboBox,
                                QLineEdit, QDialog, QMenu, QTableWidget, QTableWidgetItem, QDateEdit)
 from PySide6.QtCore import Qt, QDate, QThread, Signal, QObject
 from PySide6.QtGui import QKeySequence, QShortcut
+from utils.translation_mixin import TranslationMixin
 
 from qss_helpers import _load_qss, _apply_dialog_btn
 
@@ -64,14 +62,12 @@ class HistoryLoader(QObject):
         self.finished.emit(results)
 from datetime import datetime
 import sqlite3
-from translations import TranslationManager
 
 def _make_tm(language):
-    tm = TranslationManager()
-    tm.set_language(language)
-    return tm
+    from utils import make_tm
+    return make_tm(language)
 
-class HistoryDialog(QDialog):
+class HistoryDialog(TranslationMixin, QDialog):
     def __init__(self, db_manager, parent=None, language="fr", adv_db_manager=None):
         super().__init__(parent)
         self.db_manager     = db_manager
@@ -642,7 +638,7 @@ class HistoryDialog(QDialog):
                 for idx, (date, src, src_fmt, tgt, tgt_fmt, status) in enumerate(data_rows):
                     src_name = Path(src).name
                     tgt_name = Path(tgt).name
-                    bg = COLOR_ROW_ODD if idx % 2 == 0 else COLOR_ROW_EVEN
+                    COLOR_ROW_ODD if idx % 2 == 0 else COLOR_ROW_EVEN
                     row = [
                         Paragraph(date, cell_style),
                         Paragraph(src_name, cell_style),
@@ -718,8 +714,6 @@ class HistoryDialog(QDialog):
                     self.translate_text(f"Erreur lors de l'export: {str(e)}")
                 )
 
-    def translate_text(self, text):
-        return self._tm.translate_text(text)
 
     def translate_operation_type(self, operation_key):
         """Translate a technical key into readable text according to the language"""

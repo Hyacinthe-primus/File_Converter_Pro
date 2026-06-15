@@ -15,9 +15,7 @@ Features:
 """
 
 import os
-import sys
 import platform
-from pathlib import Path
 import webbrowser
 
 
@@ -127,8 +125,8 @@ class SystemNotifier:
 
     def _get_resource_path(self, relative_path: str) -> str:
         """Return absolute path to a resource, compatible with dev and PyInstaller."""
-        base_path = sys._MEIPASS if getattr(sys, "frozen", False) else Path(__file__).parent.absolute()
-        return os.path.join(base_path, relative_path)
+        from utils import resource_path
+        return resource_path(relative_path)
 
     def _translate_message(self, task_name: str) -> str:
         """Translate the notification body via the shared TranslationManager."""
@@ -311,7 +309,7 @@ class SystemNotifier:
 
             print(f"[NOTIFIER] 🆕 Update available: {current} → {latest}")
 
-            release_url = f"https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest"
+            release_url = "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest"
             title   = "File Converter Pro — Update Available"
             message = f"Version {latest} is available. You're on {current}"
 

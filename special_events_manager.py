@@ -27,9 +27,8 @@ from translations import TranslationManager
 from widgets import AnimatedCheckBox
 
 def _make_tm(language: str) -> TranslationManager:
-    tm = TranslationManager()
-    tm.set_language(language)
-    return tm
+    from utils import make_tm
+    return make_tm(language)
 
 
 class PerlinNoise:
@@ -1025,12 +1024,8 @@ class BirthdayInputDialog(QDialog):
 
 def _resource_path(relative: str) -> str:
     """Resolves asset paths for both dev mode and PyInstaller .exe."""
-    try:
-        base = sys._MEIPASS
-    except AttributeError:
-        base = os.path.abspath(".")
-
-    p = os.path.join(base, relative)
+    from utils import resource_path as _rp
+    p = _rp(relative)
     if os.path.exists(p):
         return p
 

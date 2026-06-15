@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
 from converter import AdvancedDatabaseManager, AdvancedConverterEngine
 from translations import TranslationManager
 from qss_helpers import _load_qss, _apply_dialog_btn
+from utils.translation_mixin import TranslationMixin
 
 
 class _ConversionWorker(QObject):
@@ -151,7 +152,7 @@ class _ConversionWorker(QObject):
         self.finished.emit(ok, fail)
 
 
-class AdvancedConversionsDialog(QDialog):
+class AdvancedConversionsDialog(TranslationMixin, QDialog):
     """
     Dialog for advanced conversion formats.
 
@@ -583,7 +584,4 @@ class AdvancedConversionsDialog(QDialog):
         self.tab_widget.setStyleSheet(self._tab_style(index))
 
     def tr_(self, text: str) -> str:
-        return self._tm.translate_text(text)
-
-    def translate_text(self, text: str) -> str:
         return self._tm.translate_text(text)
