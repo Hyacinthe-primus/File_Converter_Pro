@@ -379,10 +379,6 @@ class ConversionThread(QThread):
             if base not in sys.path:
                 sys.path.insert(0, base)
 
-            is_merge = (
-                self.conversion_type == "images_to_pdf_merged"
-                or self.conversion_type in MERGE_DISPATCH
-            )
 
             dst_dir = os.path.dirname(self.files[0])
 
@@ -461,15 +457,10 @@ class QuickConvertWindow(QWidget):
         self._center_on_screen()
 
     def _set_icon(self):
-        candidates = [
-            os.path.join(os.path.dirname(sys.executable), "icon.ico"),
-            os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "icon.ico"),
-            "icon.ico",
-        ]
-        for p in candidates:
-            if os.path.exists(p):
-                self.setWindowIcon(QIcon(p))
-                break
+        from utils import get_icon_path
+        icon_path = get_icon_path("icon.ico")
+        if icon_path and os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
 
     def _build_ui(self):
         root = QVBoxLayout(self)

@@ -34,6 +34,7 @@ _ROOT_DIR = os.path.dirname(_PKG_DIR)
 if _ROOT_DIR not in sys.path:
     sys.path.insert(0, _ROOT_DIR)
 from translations import TranslationManager
+from utils.translation_mixin import TranslationMixin
 
 
 class _DSBase:
@@ -876,7 +877,6 @@ _RANK_ANIM_MAP = {
     "adepte":      1,   # Adept     — double-beat
     "vétéran":     2,   # Veteran   — shimmer arc
     "élite":       2,   # Elite     — shimmer arc
-    "champion":    3,   # Champion  — shimmer + 1 orbit
     "maître":      3,   # Master    — shimmer + 1 orbit
     "grand maître":4,   # GrandMstr — plasma 3 orbits
     "légendaire":  4,   # Legendary — plasma 3 orbits
@@ -1069,7 +1069,7 @@ class RankBadgeWidget(QWidget):
         p.end()
 
 
-class AchievementsUI(QDialog):
+class AchievementsUI(TranslationMixin, QDialog):
     """Achievements interface — premium luxury HUD redesign."""
 
     def __init__(self, achievement_system, parent=None, language="fr"):
@@ -1130,9 +1130,6 @@ class AchievementsUI(QDialog):
     # Translations
     def T(self, key: str) -> str:
         return self._tm.translate_text(key)
-
-    def translate_text(self, text: str) -> str:
-        return self._tm.translate_text(text)
 
     def _apply_global_style(self):
         self.setStyleSheet(f"""

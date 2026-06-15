@@ -446,7 +446,7 @@ class _FolderEventHandler(FileSystemEventHandler):
             self._merge_timers.pop(key, None)
 
         watch_root  = self.config["path"]
-        recursive   = self.config["recursive"]
+        self.config["recursive"]
 
         out_base = self.config["output_dir"] if self.config["output_dir"] else watch_root
         rel = os.path.relpath(output_dir, out_base)

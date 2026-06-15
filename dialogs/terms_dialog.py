@@ -18,20 +18,17 @@ from PySide6.QtGui import QIcon, QDesktopServices
 
 from qss_helpers import _load_qss, _apply_dialog_btn
 from widgets import AnimatedCheckBox
-from translations import TranslationManager
 
-def _make_tm(language):
-    tm = TranslationManager()
-    tm.set_language(language)
-    return tm
+from utils import make_tm
+from utils.translation_mixin import TranslationMixin
 
 
-class TermsAndPrivacyDialog(QDialog):
+class TermsAndPrivacyDialog(TranslationMixin, QDialog):
     def __init__(self, parent=None, language="fr", dark_mode=False):
         super().__init__(parent)
         self.language = language
         self.dark_mode = dark_mode
-        self._tm = _make_tm(language)
+        self._tm = make_tm(language)
         self.setWindowTitle(self.translate_text("Conditions d'utilisation et Politique de confidentialité"))
         self.setModal(True)
         self.setMinimumSize(800, 650)
@@ -49,23 +46,8 @@ class TermsAndPrivacyDialog(QDialog):
 
     def get_icon_path(self):
         """Find icon.ico robustly (dev + PyInstaller)"""
-        icon_name = "icon.ico"
-        
-        if getattr(sys, 'frozen', False):
-            path = os.path.join(sys._MEIPASS, icon_name)
-            if os.path.exists(path):
-                return path
-
-        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        path = os.path.join(root_dir, icon_name)
-        if os.path.exists(path):
-            return path
-
-        path = os.path.join(os.getcwd(), icon_name)
-        if os.path.exists(path):
-            return path
-
-        return icon_name
+        from utils import get_icon_path
+        return get_icon_path("icon.ico")
 
     def get_legal_files_path(self):
         """Find the legal folder robustly (dev + PyInstaller)"""
@@ -309,9 +291,6 @@ class TermsAndPrivacyDialog(QDialog):
                 </a>
             </p>
             """
-
-    def translate_text(self, text):
-        return self._tm.translate_text(text)
 
     def _apply_theme_to_html(self, content: str) -> str:
         """

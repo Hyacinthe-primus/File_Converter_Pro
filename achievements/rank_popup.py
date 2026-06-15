@@ -19,8 +19,9 @@ if _ROOT_DIR not in sys.path:
     sys.path.insert(0, _ROOT_DIR)
 
 from translations import TranslationManager
+from utils.translation_mixin import TranslationMixin
 
-class RankPopup(QDialog):
+class RankPopup(TranslationMixin, QDialog):
 
     def __init__(self, rank_data, achievement_system, parent=None, language="fr"):
         super().__init__(parent)
@@ -160,9 +161,6 @@ class RankPopup(QDialog):
         self.setup_ui()
         self.play_sound()
         self.setup_animations()
-
-    def translate_text(self, text):
-        return self._tm.translate_text(text)
 
     def play_sound(self):
         try:

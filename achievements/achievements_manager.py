@@ -47,10 +47,10 @@ def get_assets_dir():
     - PyInstaller : sys._MEIPASS  (where datas are extracted by PyInstaller)
     - Development : project root (_ROOT_DIR)
     """
-    meipass = getattr(sys, '_MEIPASS', None)
-    if meipass:
-        return meipass
-    return _ROOT_DIR
+    from utils import resource_path
+    # resource_path("") resolves to _MEIPASS in frozen mode, project root otherwise
+    base = resource_path("")
+    return base if os.path.isdir(base) else _ROOT_DIR
 
 def _load_dark_mode() -> bool:
     """Reads dark_mode from config, returns False on any error."""
@@ -543,7 +543,6 @@ class TranslationManager:
         "Verrouillés": "Locked",
         "Secrets": "Secrets",
         "Toutes catégories": "All categories",
-        "Verrouiller": "Lock",
         
         # Table headers
         "ID": "ID",
@@ -936,7 +935,7 @@ class AchievementsManager(QDialog):
             achievements = cursor.fetchall()
             
             cursor.execute('SELECT key, value FROM stats')
-            stats = {row[0]: row[1] for row in cursor.fetchall()}
+            {row[0]: row[1] for row in cursor.fetchall()}
             
             conn.close()
             
@@ -1300,7 +1299,7 @@ class AchievementsManager(QDialog):
                         sound_file = group["sfx"]
                         break
             
-            script_dir = get_app_dir()
+            get_app_dir()
             sound_path = os.path.join(get_assets_dir(), "SFX", sound_file)
             
             if not os.path.exists(sound_path):
@@ -2084,7 +2083,7 @@ def show_achievements_status_cli():
         achievements  = cursor.fetchall()
         conn.close()
         unlocked_count = sum(1 for a in achievements if a[2])
-        print(f"📊 Achievement status:")
+        print("📊 Achievement status:")
         print(f"   Total:    {len(achievements)}")
         print(f"   Unlocked: {unlocked_count}")
         print(f"   Locked:   {len(achievements) - unlocked_count}")

@@ -15,8 +15,9 @@ _ROOT_DIR = os.path.dirname(_PKG_DIR)
 if _ROOT_DIR not in sys.path:
     sys.path.insert(0, _ROOT_DIR)
 from translations import TranslationManager
+from utils.translation_mixin import TranslationMixin
 
-class AchievementPopup(QDialog):
+class AchievementPopup(TranslationMixin, QDialog):
     """Achievement acquisition popup"""
     finished_display = Signal()
     
@@ -43,9 +44,6 @@ class AchievementPopup(QDialog):
         self.setup_animations()
         self.play_sound()
         self.apply_theme_style()
-
-    def translate_text(self, text):
-        return self._tm.translate_text(text)
 
     def setup_ui(self):
         """Configure the interface"""

@@ -1446,7 +1446,7 @@ class AchievementSystem(QObject):
                     else:
                         achievement["progress"] = 0
                         
-                except Exception as e:
+                except Exception:
                     achievement["progress"] = 0
             elif req_type == "batch_max_files":
                 progress = self.stats.get("max_batch_files", 0)

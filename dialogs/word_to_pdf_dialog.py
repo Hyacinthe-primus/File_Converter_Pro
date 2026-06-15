@@ -11,8 +11,10 @@ from PySide6.QtWidgets import (
 )
 
 from widgets import AnimatedCheckBox
-from translations import TranslationManager
 from qss_helpers import _load_qss, _apply_dialog_btn
+
+from utils import make_tm
+from utils.translation_mixin import TranslationMixin
 
 _DARK = {
     "preview_bg":    "#0d1117",
@@ -41,7 +43,7 @@ _LIGHT = {
 }
 
 
-class WordToPdfOptionsDialog(QDialog):
+class WordToPdfOptionsDialog(TranslationMixin, QDialog):
     """
     Modal dialog for Word to PDF conversion settings.
 
@@ -57,7 +59,7 @@ class WordToPdfOptionsDialog(QDialog):
 
         self.language     = language
         self.has_content  = has_content
-        self._tm          = TranslationManager(); self._tm.set_language(language)
+        self._tm          = make_tm(language)
         self.is_dark_mode: bool = getattr(parent, "dark_mode", False) if parent else False
 
         self.setWindowTitle(self.translate_text("Options de conversion Word vers PDF"))
@@ -274,10 +276,6 @@ class WordToPdfOptionsDialog(QDialog):
         )
 
         self.preview_text.setHtml(html)
-
-    def translate_text(self, text: str) -> str:
-        """Return the translated string for the current language, falling back to the key itself."""
-        return self._tm.translate_text(text)
 
     def get_conversion_mode(self) -> dict:
         """
