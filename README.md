@@ -9,7 +9,7 @@
 [![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=flat-square&logo=qt&logoColor=white)](#)
 [![License](https://img.shields.io/badge/license-GPLv3%20%2F%20Commercial-blue?style=flat-square)](#license)
 [![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)](#)
-[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.13-3776AB?style=flat-square&logo=python&logoColor=white)](#)
+[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.13-3776AB?style=flat-square&logo=python&logoColor=white)](#)
 [![Downloads](https://img.shields.io/github/downloads/Hyacinthe-primus/File_Converter_Pro/total.svg)](https://github.com/Hyacinthe-primus/File_Converter_Pro/releases)
 [![Last Commit](https://img.shields.io/github/last-commit/Hyacinthe-primus/File_Converter_Pro)](https://github.com/Hyacinthe-primus/File_Converter_Pro)
 
