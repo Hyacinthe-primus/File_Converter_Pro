@@ -7,7 +7,7 @@ name = "file-converter-pro"
 version = "1.0.6"
 description = "Professional file converter with PDF, Word, images, and more"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "GNU General Public License v3.0"}
 requires-python = ">=3.10"
 authors = [
     {name = "Hyacinthe"},
