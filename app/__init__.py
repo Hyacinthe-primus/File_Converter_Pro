@@ -6,12 +6,11 @@ Exposes:
     FileConverterApp   — the main application window
     FadingMainWindow   — FileConverterApp with fade-in animation
 
-Inheritance chain:
-    QMainWindow
-        └── AppLogicMixin   (app/logic.py)
-                └── AppUIMixin      (app/ui.py)
-                        └── FileConverterApp
-                                └── FadingMainWindow
+Inheritance chain (MRO):
+    AppLogicMixin(OptimizationMixin, ImageToPdfMixin, BatchMixin, ...)
+      └── AppUIMixin(FileManagementMixin, PanelsMixin, ..., AppLogicMixin)
+            └── FileConverterApp(AppUIMixin, QMainWindow)  ← QMainWindow mixed in here
+                  └── FadingMainWindow
 
 """
 
