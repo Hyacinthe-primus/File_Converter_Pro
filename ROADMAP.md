@@ -36,6 +36,9 @@ Monitor a folder and automatically convert any file dropped into it, using a pre
 ### Reduced Build Size
 Investigate selective PyInstaller bundling and optional module lazy-loading to bring the compiled size below 300 MB without dropping any features.
 
+### Automated Tests
+Build a test suite covering the conversion engines and fallback chains. Given the size and complexity of the project, automated regression tests would prevent silent breakage when engines or dependencies are updated.
+
 ---
 
 ## User Features
@@ -94,8 +97,6 @@ Allow users to add custom converters via external Python scripts, without modify
 Expose conversion functionality via a lightweight local HTTP API, enabling integration with external tools — shell scripts, Zapier workflows, or any automation layer that can make HTTP requests.
 Everything stays local: the API binds to `localhost` only and never opens an external port.
 
-### Automated Tests
-Build a test suite covering the conversion engines and fallback chains. Given the size and complexity of the project, automated regression tests would prevent silent breakage when engines or dependencies are updated.
 
 ### More Format Support
 Expand the supported format matrix over time. Candidates include:
@@ -149,9 +150,6 @@ A `.theme` file (UTF-8 JSON) placed in a `themes/` folder next to the executable
 The `base` field tells the app which built-in stylesheet to use as a fallback for any key not defined in the file — so a theme only needs to override what it changes.
 
 A built-in **Theme Editor** in Settings would let users tweak colors visually with a live preview, then export the result as a `.theme` file they can share.
-
-### More Special Events
-The date-aware event overlay system already supports New Year and birthdays. Extending it to cover more calendar events requires only new event definitions.
 
 ### Pinned Formats
 Let users pin their most-used input/output format combinations to the top of the format selector so they don't have to scroll every time.
