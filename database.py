@@ -155,6 +155,14 @@ class DatabaseManager:
         cursor.execute(query, params)
         return cursor.fetchall()
 
+    def get_first_conversion_date(self):
+        """Return the date of the first conversion, or None if no records exist."""
+        conn = self._conn
+        cursor = conn.cursor()
+        cursor.execute('SELECT MIN(DATE(timestamp)) FROM conversion_history')
+        result = cursor.fetchone()
+        return result[0] if result and result[0] else None
+
     def get_statistics(self, days=30):
         conn = self._conn
         cursor = conn.cursor()

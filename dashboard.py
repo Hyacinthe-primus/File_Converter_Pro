@@ -617,7 +617,13 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
         self.start_date_edit = QDateEdit()
         self.start_date_edit.setCalendarPopup(True)
-        self.start_date_edit.setDate(QDate.currentDate().addDays(-30))
+        first_date = self._main_db.get_first_conversion_date()
+        if first_date:
+            min_qdate = QDate.fromString(first_date, "yyyy-MM-dd")
+            self.start_date_edit.setMinimumDate(min_qdate)
+            self.start_date_edit.setDate(min_qdate)
+        else:
+            self.start_date_edit.setDate(QDate.currentDate().addDays(-30))
         self.start_date_edit.setMinimumWidth(160)
         self.start_date_edit.setDisplayFormat("dd/MM/yyyy")
 
