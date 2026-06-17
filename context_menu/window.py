@@ -316,13 +316,13 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
                 finally:
                     if doc is not None:
                         try: doc.Close(False)
-                        except: pass
+                        except Exception: pass
                     if word is not None:
                         try: word.Quit()
-                        except: pass
+                        except Exception: pass
                     try:
                         import pythoncom as _pc; _pc.CoUninitialize()
-                    except: pass
+                    except Exception: pass
 
             dismisser = threading.Thread(target=_dialog_dismisser, daemon=True)
             dismisser.start()
