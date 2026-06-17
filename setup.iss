@@ -38,6 +38,8 @@ SolidCompression=yes
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+CloseApplications=yes
+RestartApplications=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"; LicenseFile: "LICENSE\LICENSE.txt"
@@ -1920,6 +1922,124 @@ begin
   begin
     JsonContent := '{"language": "' + GetLangCode('') + '"}';
     SaveStringToFile(ConfigPath, JsonContent, False);
+  end;
+end;
+
+function IsPreservedFile(const FileName: String): Boolean;
+var
+  Lower: String;
+begin
+  Lower := LowerCase(FileName);
+  Result := (Lower = 'achievements.db') or
+            (Lower = 'file_converter_advanced.db') or
+            (Lower = 'file_converter_config.dat') or
+            (Lower = 'file_converter_key.key') or
+            (Lower = 'file_converter_stats.db') or
+            (Lower = 'special_events.db');
+end;
+
+procedure CleanInstallDir();
+var
+  FindRec: TFindRec;
+  DirPath, FilePath: String;
+begin
+  DirPath := ExpandConstant('{app}');
+  if not DirExists(DirPath) then Exit;
+
+  if FindFirst(DirPath + '\*', FindRec) then
+  begin
+    repeat
+      if (FindRec.Name = '.') or (FindRec.Name = '..') then Continue;
+      FilePath := DirPath + '\' + FindRec.Name;
+
+      if (FindRec.Attributes and $10) <> 0 then
+      begin
+        if LowerCase(FindRec.Name) <> 'automation' then
+          DelTree(FilePath, True, True, True);
+      end
+      else
+      begin
+        if not IsPreservedFile(FindRec.Name) then
+          DeleteFile(FilePath);
+      end;
+    until not FindNext(FindRec);
+    FindClose(FindRec);
+  end;
+end;
+
+procedure DeleteContextMenuForExtension(const Ext: String);
+begin
+  RegDeleteKeyIncludingSubkeys(HKCU,
+    'Software\Classes\SystemFileAssociations\.' + Ext + '\shell\ConvertWithFCP');
+end;
+
+procedure CleanOldRegistry();
+begin
+  RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\.fcproj');
+  RegDeleteKeyIncludingSubkeys(HKCU, 'Software\Classes\FileConverterPro.Project');
+
+  DeleteContextMenuForExtension('aac');
+  DeleteContextMenuForExtension('apng');
+  DeleteContextMenuForExtension('arw');
+  DeleteContextMenuForExtension('avi');
+  DeleteContextMenuForExtension('avif');
+  DeleteContextMenuForExtension('bmp');
+  DeleteContextMenuForExtension('cr2');
+  DeleteContextMenuForExtension('cr3');
+  DeleteContextMenuForExtension('csv');
+  DeleteContextMenuForExtension('dng');
+  DeleteContextMenuForExtension('doc');
+  DeleteContextMenuForExtension('docx');
+  DeleteContextMenuForExtension('epub');
+  DeleteContextMenuForExtension('flac');
+  DeleteContextMenuForExtension('gif');
+  DeleteContextMenuForExtension('heic');
+  DeleteContextMenuForExtension('heif');
+  DeleteContextMenuForExtension('html');
+  DeleteContextMenuForExtension('j2k');
+  DeleteContextMenuForExtension('jfif');
+  DeleteContextMenuForExtension('jp2');
+  DeleteContextMenuForExtension('jpeg');
+  DeleteContextMenuForExtension('jpg');
+  DeleteContextMenuForExtension('jpx');
+  DeleteContextMenuForExtension('json');
+  DeleteContextMenuForExtension('m4a');
+  DeleteContextMenuForExtension('mkv');
+  DeleteContextMenuForExtension('mov');
+  DeleteContextMenuForExtension('mp3');
+  DeleteContextMenuForExtension('mp4');
+  DeleteContextMenuForExtension('nef');
+  DeleteContextMenuForExtension('ogg');
+  DeleteContextMenuForExtension('orf');
+  DeleteContextMenuForExtension('pdf');
+  DeleteContextMenuForExtension('png');
+  DeleteContextMenuForExtension('pptx');
+  DeleteContextMenuForExtension('psd');
+  DeleteContextMenuForExtension('raf');
+  DeleteContextMenuForExtension('raw');
+  DeleteContextMenuForExtension('rw2');
+  DeleteContextMenuForExtension('svg');
+  DeleteContextMenuForExtension('tif');
+  DeleteContextMenuForExtension('tiff');
+  DeleteContextMenuForExtension('txt');
+  DeleteContextMenuForExtension('wav');
+  DeleteContextMenuForExtension('webm');
+  DeleteContextMenuForExtension('webp');
+  DeleteContextMenuForExtension('xlsx');
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  ResultCode: Integer;
+begin
+  Result := '';
+  Exec('taskkill.exe', '/f /im "File Converter Pro.exe"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Sleep(500);
+
+  if DirExists(ExpandConstant('{app}')) then
+  begin
+    CleanInstallDir();
+    CleanOldRegistry();
   end;
 end;
 
