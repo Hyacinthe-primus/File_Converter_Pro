@@ -132,7 +132,7 @@ class ArchiveEnginesMixin:
                 for file in files:
                     if file not in parts_created:
                         parts_created.append(file)
-            except:
+            except Exception:
                 continue
 
         parts_created.sort()
@@ -159,7 +159,7 @@ class ArchiveEnginesMixin:
                         if result.returncode == 0 or result.returncode == 1:
                             winrar_exe = path
                             break
-                    except:
+                    except Exception:
                         continue
                 elif os.path.exists(path):
                     winrar_exe = path
@@ -220,7 +220,7 @@ class ArchiveEnginesMixin:
 
                 try:
                     os.unlink(list_file)
-                except:
+                except Exception:
                     pass
 
                 if result.returncode == 0:
@@ -288,9 +288,9 @@ class ArchiveEnginesMixin:
                                 try:
                                     os.remove(file)
                                     print(f"[DEBUG] Cleaning: {file.name}")
-                                except:
+                                except Exception:
                                     pass
-                    except:
+                    except Exception:
                         pass
 
                     return False
@@ -301,7 +301,7 @@ class ArchiveEnginesMixin:
                 try:
                     if os.path.exists(list_file):
                         os.unlink(list_file)
-                except:
+                except Exception:
                     pass
 
                 return False
@@ -497,7 +497,7 @@ class ArchiveEnginesMixin:
                         if result.returncode == 0 or result.returncode == 1:
                             winrar_exe = path
                             break
-                    except:
+                    except Exception:
                         continue
                 elif os.path.exists(path):
                     winrar_exe = path
@@ -558,7 +558,7 @@ class ArchiveEnginesMixin:
 
                 try:
                     os.unlink(list_file)
-                except:
+                except Exception:
                     pass
 
                 if result.returncode == 0:
@@ -599,9 +599,9 @@ class ArchiveEnginesMixin:
                             for part in base_dir.glob(f"{base_name}.part*.rar"):
                                 try:
                                     os.remove(part)
-                                except:
+                                except Exception:
                                     pass
-                    except:
+                    except Exception:
                         pass
 
                     return False
@@ -612,7 +612,7 @@ class ArchiveEnginesMixin:
                 try:
                     if os.path.exists(list_file):
                         os.unlink(list_file)
-                except:
+                except Exception:
                     pass
 
                 return False

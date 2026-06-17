@@ -48,7 +48,7 @@ class PdfToWordMixin:
                     break
             doc.close()
             return has_images
-        except:
+        except Exception:
             return False
 
     def handle_encrypted_pdfs(self, encrypted_pdfs, all_pdfs):
@@ -225,7 +225,7 @@ class PdfToWordMixin:
                         if not password:
                             try:
                                 pdf_reader.decrypt('')
-                            except:
+                            except Exception:
                                 failed_files.append(f"{Path(pdf_file).name} - {self.translate_text('Mot de passe requis')}")
                                 continue
                         else:
@@ -237,7 +237,7 @@ class PdfToWordMixin:
                                         success = pdf_reader.decrypt(pwd_variation)
                                         if success:
                                             break
-                                    except:
+                                    except Exception:
                                         continue
 
                                 if not success:
@@ -320,7 +320,7 @@ class PdfToWordMixin:
                             success = pdf_reader.decrypt(pwd_variation)
                             if success:
                                 break
-                        except:
+                        except Exception:
                             continue
 
                     if not success:
@@ -587,14 +587,14 @@ class PdfToWordMixin:
             finally:
                 if doc is not None:
                     try: doc.Close(False)
-                    except: pass
+                    except Exception: pass
                 if word is not None:
                     try: word.Quit()
-                    except: pass
+                    except Exception: pass
                 try:
                     import pythoncom
                     pythoncom.CoUninitialize()
-                except: pass
+                except Exception: pass
 
         dismisser = threading.Thread(target=_dialog_dismisser, daemon=True)
         dismisser.start()

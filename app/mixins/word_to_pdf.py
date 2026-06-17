@@ -77,7 +77,7 @@ class WordToPdfMixin:
                     if paragraph.style.name not in ['Normal', 'Default Paragraph Font']:
                         has_formatted_content = True
                         break
-            except:
+            except Exception:
                 pass
 
         if hasattr(self, 'active_templates') and 'word_to_pdf' in self.active_templates:
@@ -238,16 +238,16 @@ class WordToPdfMixin:
             if doc is not None:
                 try:
                     doc.Close(False)
-                except:
+                except Exception:
                     pass
             if word is not None:
                 try:
                     word.Quit()
-                except:
+                except Exception:
                     pass
             try:
                 pythoncom.CoUninitialize()
-            except:
+            except Exception:
                 pass
 
     def convert_docx_to_pdf_preserve_all(self, docx_path, pdf_path, options, progress_callback=None):
@@ -469,7 +469,7 @@ class WordToPdfMixin:
                             rel = doc.part.rels.get(rId)
                             if rel and hasattr(rel, 'target_part'):
                                 return rel.target_part.blob
-                except:
+                except Exception:
                     pass
                 return None
 
@@ -484,7 +484,7 @@ class WordToPdfMixin:
                                 blob = _get_inline_image_blob(drawing)
                                 if blob:
                                     draw_image_from_blob(blob)
-                        except:
+                        except Exception:
                             pass
 
             for table in doc.tables:
@@ -833,7 +833,7 @@ class WordToPdfMixin:
                             c.drawString(x + 2, y - 14, cell.text.strip()[:30])
                             x += 82
                         y -= 24
-                except:
+                except Exception:
                     pass
 
             c.save()

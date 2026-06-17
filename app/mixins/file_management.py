@@ -156,7 +156,7 @@ class FileManagementMixin:
                 if os.path.exists(filepath):
                     try:
                         total_size += os.path.getsize(filepath)
-                    except:
+                    except Exception:
                         pass
         return total_size
 
