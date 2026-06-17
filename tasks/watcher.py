@@ -446,13 +446,13 @@ class _FolderEventHandler(FileSystemEventHandler):
             self._merge_timers.pop(key, None)
 
         watch_root  = self.config["path"]
-        self.config["recursive"]
+        recursive = self.config["recursive"]
 
         out_base = self.config["output_dir"] if self.config["output_dir"] else watch_root
         rel = os.path.relpath(output_dir, out_base)
         src_folder = watch_root if rel == "." else os.path.join(watch_root, rel)
 
-        files = _collect_merge_files(src_folder, action, recursive=False)
+        files = _collect_merge_files(src_folder, action, recursive=recursive)
         if not files:
             logger.warning("[Watcher] Merge fired but no files found in %s", src_folder)
             return
