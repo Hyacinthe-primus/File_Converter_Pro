@@ -1,0 +1,9 @@
+# Dev/Build dependencies
+# Install with: pip install -r requirements-dev.txt or 
+# py -(your_python_version) -m pip install -r requirements-dev.txt
+
+# Exe Packager
+pyinstaller==6.16.0
+
+# Linux Only
+Appimage==1.0.0

@@ -11,7 +11,6 @@ rich==14.2.0
 #PDF Handling Libraries
 PyMuPDF==1.26.6
 pypdf==6.9.1
-PyPDF2==3.0.1
 pdf2docx==0.5.8
 pdfkit==1.0.0
 reportlab==4.4.4
@@ -56,12 +55,6 @@ matplotlib==3.10.7
 # Watchdog and Scheduling
 watchdog==6.0.0
 APScheduler==3.11.2
-
-# Exe Packager
-pyinstaller==6.16.0
-
-# Linux Only
-Appimage==1.0.0
 
 # Windows Only
 winotify==1.1.0
