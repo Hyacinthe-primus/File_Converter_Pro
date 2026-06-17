@@ -827,7 +827,7 @@ class AchievementSystem(QObject):
                 "adv_extracteur_pro": {
                     "id": "adv_extracteur_pro",
                     "name": "⚡ Extracteur Pro",
-                    "description": "Extraire l'audio de 30 vidéos (MP4/AVI/WEBM/MKV→MP3) via les Conversions Avancées",
+                    "description": "Extraire l'audio de 30 vidéos (VIDEO→MP3) via les Conversions Avancées",
                     "icon": "eagle_shield.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
