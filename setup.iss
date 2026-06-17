@@ -85,15 +85,6 @@ Source: "icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "{#MyAppExeName}"
 
-; Configuration and keys
-Source: "file_converter_config.dat"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist; Check: FileExists('file_converter_config.dat')
-Source: "file_converter_key.key";    DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist; Check: FileExists('file_converter_key.key')
-
-; Databases
-Source: "achievements.db";         DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist; Check: FileExists('achievements.db')
-Source: "file_converter_stats.db"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist; Check: FileExists('file_converter_stats.db')
-Source: "special_events.db";       DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist; Check: FileExists('special_events.db')
-
 ; License
 Source: "LICENSE\LICENSE.txt";    DestDir: "{app}"; Flags: ignoreversion; Check: IsEnglish()
 Source: "LICENSE\LICENSE_FR.txt"; DestDir: "{app}"; Flags: ignoreversion; Check: IsFrench()
@@ -110,1770 +101,6 @@ Root: HKCU; Subkey: "Software\Classes\FileConverterPro.Project";                
 Root: HKCU; Subkey: "Software\Classes\FileConverterPro.Project\DefaultIcon";             ValueType: string; ValueName: ""; ValueData: "{app}\icon.ico,0";             Tasks: assocfileext
 Root: HKCU; Subkey: "Software\Classes\FileConverterPro.Project\shell\open\command";      ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: assocfileext
 Root: HKCU; Subkey: "Software\Classes\FileConverterPro.Project\shell\open";              ValueType: string; ValueName: "WorkingDirectory"; ValueData: "{app}";        Tasks: assocfileext
-
-#define CM "Software\Classes\SystemFileAssociations"
-#define EXE """{app}\{#MyAppExeName}"""
-#define ICON "{app}\icon.ico,0"
-#define BASE "--context-menu --files ""%1"""
-
-; IMAGES
-
-; .png
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.png\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .jpeg
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpeg\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .jpg
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpg\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .bmp
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.bmp\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .webp
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webp\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .tiff
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tiff\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .tif
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.tif\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .heic
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heic\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .heif
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\01_to_png";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\01_to_png";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\01_to_png\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\02_to_jpg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\02_to_jpg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\02_to_jpg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\03_to_jpeg";         ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\03_to_jpeg";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\03_to_jpeg\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\04_to_webp";         ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\04_to_webp";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\04_to_webp\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\05_to_avif";         ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\05_to_avif";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\05_to_avif\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\06_to_svg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\06_to_svg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\06_to_svg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\07_to_ico";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\07_to_ico";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\07_to_ico\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\08_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\08_to_pdf";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\08_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.heif\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .jfif
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jfif\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .avif
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avif\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .psd
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.psd\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .svg
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.svg\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .dng
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.dng\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .raw
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raw\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .gif
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.gif\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .apng
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.apng\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .jp2
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jp2\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .jpx
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.jpx\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .j2k
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.j2k\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .cr2
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr2\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .cr3
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.cr3\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .nef
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.nef\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .arw
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.arw\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .orf
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.orf\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .rw2
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rw2\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; .raf
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\01_to_jpg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\01_to_jpg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\01_to_jpg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\02_to_jpeg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → JPEG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\02_to_jpeg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\02_to_jpeg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_jpeg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\03_to_bmp";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → BMP";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\03_to_bmp";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\03_to_bmp\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_bmp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\04_to_webp";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → WEBP";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\04_to_webp";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\04_to_webp\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_webp"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\05_to_tiff";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → TIFF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\05_to_tiff";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\05_to_tiff\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_tiff"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\06_to_avif";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → AVIF";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\06_to_avif";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\06_to_avif\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_avif"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\07_to_svg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → SVG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\07_to_svg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\07_to_svg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_svg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\08_to_ico";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → ICO";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\08_to_ico";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\08_to_ico\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_ico"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\09_to_pdf";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PDF";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\09_to_pdf";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\09_to_pdf\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\10_to_heic";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → HEIC";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\10_to_heic";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\10_to_heic\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_heic"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\11_to_psd";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PSD";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\11_to_psd";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\11_to_psd\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_psd"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\12_to_dng";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → DNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\12_to_dng";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\12_to_dng\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_dng"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\13_to_j2k";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → J2K";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\13_to_j2k";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\13_to_j2k\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_j2k"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\14_to_png";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Image → PNG";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\14_to_png";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\14_to_png\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type image_to_png"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\15_to_pdf_merged";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Images → PDF (merged)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\15_to_pdf_merged";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.raf\shell\ConvertWithFCP\shell\15_to_pdf_merged\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type images_to_pdf_merged"; Tasks: contextmenu
-
-; DOCUMENTS
-
-; .docx
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP";                                      ValueType: string; ValueName: "MUIVerb";     ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP";                                      ValueType: string; ValueName: "Icon";        ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP";                                      ValueType: string; ValueName: "SubCommands"; ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\01_to_pdf";                      ValueType: string; ValueName: "MUIVerb"; ValueData: "Word → PDF";                     Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\01_to_pdf";                        ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\01_to_pdf\command";              ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type docx_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\02_merge_none";                  ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (current order)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\02_merge_none";                    ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\02_merge_none\command";          ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_none"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\03_merge_alpha_asc";             ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (name A → Z)";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\03_merge_alpha_asc";               ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\03_merge_alpha_asc\command";     ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_alpha_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\04_merge_alpha_desc";            ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (name Z → A)";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\04_merge_alpha_desc";              ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\04_merge_alpha_desc\command";    ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_alpha_desc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\05_merge_num_asc";               ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (number ↑)";      Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\05_merge_num_asc";                 ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\05_merge_num_asc\command";       ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_num_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\06_merge_num_desc";              ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (number ↓)";      Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\06_merge_num_desc";                ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\06_merge_num_desc\command";      ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_num_desc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\07_merge_date_asc";              ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (date oldest first)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\07_merge_date_asc";                ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\07_merge_date_asc\command";      ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_date_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\08_merge_date_desc";             ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (date newest first)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\08_merge_date_desc";               ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.docx\shell\ConvertWithFCP\shell\08_merge_date_desc\command";     ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_date_desc"; Tasks: contextmenu
-
-; .doc
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP";                                      ValueType: string; ValueName: "MUIVerb";     ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP";                                      ValueType: string; ValueName: "Icon";        ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP";                                      ValueType: string; ValueName: "SubCommands"; ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\01_to_pdf";                      ValueType: string; ValueName: "MUIVerb"; ValueData: "Word → PDF";                     Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\01_to_pdf";                        ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\01_to_pdf\command";              ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type docx_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\02_merge_none";                  ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (current order)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\02_merge_none";                    ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\02_merge_none\command";          ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_none"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\03_merge_alpha_asc";             ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (name A → Z)";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\03_merge_alpha_asc";               ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\03_merge_alpha_asc\command";     ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_alpha_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\04_merge_alpha_desc";            ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (name Z → A)";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\04_merge_alpha_desc";              ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\04_merge_alpha_desc\command";    ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_alpha_desc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\05_merge_num_asc";               ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (number ↑)";      Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\05_merge_num_asc";                 ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\05_merge_num_asc\command";       ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_num_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\06_merge_num_desc";              ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (number ↓)";      Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\06_merge_num_desc";                ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\06_merge_num_desc\command";      ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_num_desc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\07_merge_date_asc";              ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (date oldest first)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\07_merge_date_asc";                ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\07_merge_date_asc\command";      ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_date_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\08_merge_date_desc";             ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge Word docs (date newest first)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\08_merge_date_desc";               ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.doc\shell\ConvertWithFCP\shell\08_merge_date_desc\command";     ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_docx_date_desc"; Tasks: contextmenu
-
-; .pdf
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP";                                    ValueType: string; ValueName: "MUIVerb";     ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP";                                    ValueType: string; ValueName: "Icon";        ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP";                                    ValueType: string; ValueName: "SubCommands"; ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\01_to_docx";                   ValueType: string; ValueName: "MUIVerb"; ValueData: "PDF → Word";                    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\01_to_docx";                     ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\01_to_docx\command";           ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type pdf_to_docx"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\02_to_html";                   ValueType: string; ValueName: "MUIVerb"; ValueData: "PDF → HTML";                    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\02_to_html";                     ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\02_to_html\command";           ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type pdf_to_html"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\03_merge_none";                ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge PDFs (current order)";    Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\03_merge_none";                  ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\03_merge_none\command";        ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_pdf_none"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\04_merge_alpha_asc";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge PDFs (name A → Z)";       Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\04_merge_alpha_asc";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\04_merge_alpha_asc\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_pdf_alpha_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\05_merge_alpha_desc";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge PDFs (name Z → A)";       Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\05_merge_alpha_desc";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\05_merge_alpha_desc\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_pdf_alpha_desc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\06_merge_num_asc";             ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge PDFs (number ↑)";          Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\06_merge_num_asc";               ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\06_merge_num_asc\command";     ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_pdf_num_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\07_merge_num_desc";            ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge PDFs (number ↓)";          Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\07_merge_num_desc";              ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\07_merge_num_desc\command";    ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_pdf_num_desc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\08_merge_date_asc";            ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge PDFs (date oldest first)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\08_merge_date_asc";              ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\08_merge_date_asc\command";    ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_pdf_date_asc"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\09_merge_date_desc";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Merge PDFs (date newest first)"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\09_merge_date_desc";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pdf\shell\ConvertWithFCP\shell\09_merge_date_desc\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type merge_pdf_date_desc"; Tasks: contextmenu
-
-; .txt
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "TXT → PDF";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type txt_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\02_to_docx";         ValueType: string; ValueName: "MUIVerb"; ValueData: "TXT → DOCX";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\02_to_docx";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.txt\shell\ConvertWithFCP\shell\02_to_docx\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type txt_to_docx"; Tasks: contextmenu
-
-; .rtf
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "RTF → PDF";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type rtf_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\02_to_docx";         ValueType: string; ValueName: "MUIVerb"; ValueData: "RTF → DOCX";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\02_to_docx";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.rtf\shell\ConvertWithFCP\shell\02_to_docx\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type rtf_to_docx"; Tasks: contextmenu
-
-; .xlsx
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "XLSX → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type xlsx_to_pdf"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\02_to_csv";          ValueType: string; ValueName: "MUIVerb"; ValueData: "XLSX → CSV";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\02_to_csv";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\02_to_csv\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type xlsx_to_csv"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\03_to_json";         ValueType: string; ValueName: "MUIVerb"; ValueData: "XLSX → JSON";           Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\03_to_json";         ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.xlsx\shell\ConvertWithFCP\shell\03_to_json\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type xlsx_to_json"; Tasks: contextmenu
-
-; .pptx
-Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "PPTX → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.pptx\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type pptx_to_pdf"; Tasks: contextmenu
-
-; .html
-Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "HTML → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.html\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type html_to_pdf"; Tasks: contextmenu
-
-; .epub
-Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "MUIVerb"; ValueData: "EPUB → PDF";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP\shell\01_to_pdf";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.epub\shell\ConvertWithFCP\shell\01_to_pdf\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type epub_to_pdf"; Tasks: contextmenu
-
-; .csv
-Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP\shell\01_to_json";          ValueType: string; ValueName: "MUIVerb"; ValueData: "CSV → JSON";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP\shell\01_to_json";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.csv\shell\ConvertWithFCP\shell\01_to_json\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type csv_to_json"; Tasks: contextmenu
-
-; .json
-Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:ConvertWithFCP}";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                 Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands"; ValueData: "";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP\shell\01_to_csv";          ValueType: string; ValueName: "MUIVerb"; ValueData: "JSON → CSV";            Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP\shell\01_to_csv";          ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}";                  Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.json\shell\ConvertWithFCP\shell\01_to_csv\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type json_to_csv"; Tasks: contextmenu
-
-; AUDIO
-
-; .mp3
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\01_to_wav";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\01_to_wav";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\01_to_wav\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\02_to_aac";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\02_to_aac";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\02_to_aac\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\03_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\03_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\03_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_flac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\04_to_ogg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → OGG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\04_to_ogg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\04_to_ogg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_ogg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\05_to_m4a";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → M4A";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\05_to_m4a";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp3\shell\ConvertWithFCP\shell\05_to_m4a\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_m4a"; Tasks: contextmenu
-
-; .wav
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\01_to_mp3";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\01_to_mp3";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\01_to_mp3\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\02_to_aac";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\02_to_aac";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\02_to_aac\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\03_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\03_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\03_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_flac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\04_to_ogg";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → OGG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\04_to_ogg";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\04_to_ogg\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_ogg"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\05_to_m4a";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → M4A";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\05_to_m4a";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.wav\shell\ConvertWithFCP\shell\05_to_m4a\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_m4a"; Tasks: contextmenu
-
-; .aac
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\01_to_mp3";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\01_to_mp3";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\01_to_mp3\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\02_to_wav";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\02_to_wav";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\02_to_wav\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\03_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\03_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\03_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_flac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\04_to_m4a";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → M4A";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\04_to_m4a";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.aac\shell\ConvertWithFCP\shell\04_to_m4a\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_m4a"; Tasks: contextmenu
-
-; .flac
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\01_to_mp3";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\01_to_mp3";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\01_to_mp3\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\02_to_wav";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\02_to_wav";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\02_to_wav\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\03_to_aac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\03_to_aac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\03_to_aac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\04_to_ogg";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → OGG";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\04_to_ogg";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.flac\shell\ConvertWithFCP\shell\04_to_ogg\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_ogg"; Tasks: contextmenu
-
-; .ogg
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\01_to_mp3";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\01_to_mp3";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\01_to_mp3\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\02_to_wav";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\02_to_wav";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\02_to_wav\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\03_to_aac";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\03_to_aac";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\03_to_aac\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\04_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\04_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.ogg\shell\ConvertWithFCP\shell\04_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_flac"; Tasks: contextmenu
-
-; .m4a
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\01_to_mp3";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\01_to_mp3";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\01_to_mp3\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\02_to_wav";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\02_to_wav";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\02_to_wav\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\03_to_aac";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\03_to_aac";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\03_to_aac\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\04_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Audio → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\04_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.m4a\shell\ConvertWithFCP\shell\04_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type audio_to_flac"; Tasks: contextmenu
-
-; VIDEO
-
-; .mp4
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\01_to_mkv";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MKV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\01_to_mkv";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\01_to_mkv\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mkv"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\02_to_avi";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AVI";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\02_to_avi";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\02_to_avi\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_avi"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\03_to_webm";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WEBM";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\03_to_webm";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\03_to_webm\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_webm"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\04_to_mov";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MOV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\04_to_mov";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\04_to_mov\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mov"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\05_to_mp3";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\05_to_mp3";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\05_to_mp3\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\06_to_wav";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\06_to_wav";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\06_to_wav\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\07_to_aac";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\07_to_aac";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\07_to_aac\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\08_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\08_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mp4\shell\ConvertWithFCP\shell\08_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_flac"; Tasks: contextmenu
-
-; .webm
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP";                          ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP";                          ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP";                          ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\01_to_mp4";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP4";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\01_to_mp4";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\01_to_mp4\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp4"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\02_to_mkv";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MKV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\02_to_mkv";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\02_to_mkv\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mkv"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\03_to_avi";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AVI";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\03_to_avi";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\03_to_avi\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_avi"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\04_to_mov";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MOV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\04_to_mov";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\04_to_mov\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mov"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\05_to_mp3";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\05_to_mp3";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\05_to_mp3\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\06_to_wav";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\06_to_wav";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\06_to_wav\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\07_to_aac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\07_to_aac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\07_to_aac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\08_to_flac";         ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\08_to_flac";           ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.webm\shell\ConvertWithFCP\shell\08_to_flac\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_flac"; Tasks: contextmenu
-
-; .mkv
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\01_to_mp4";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP4";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\01_to_mp4";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\01_to_mp4\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp4"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\02_to_avi";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AVI";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\02_to_avi";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\02_to_avi\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_avi"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\03_to_webm";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WEBM";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\03_to_webm";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\03_to_webm\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_webm"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\04_to_mov";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MOV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\04_to_mov";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\04_to_mov\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mov"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\05_to_mp3";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\05_to_mp3";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\05_to_mp3\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\06_to_wav";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\06_to_wav";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\06_to_wav\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\07_to_aac";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\07_to_aac";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\07_to_aac\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\08_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\08_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mkv\shell\ConvertWithFCP\shell\08_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_flac"; Tasks: contextmenu
-
-; .mov
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\01_to_mp4";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP4";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\01_to_mp4";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\01_to_mp4\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp4"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\02_to_mkv";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MKV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\02_to_mkv";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\02_to_mkv\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mkv"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\03_to_avi";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AVI";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\03_to_avi";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\03_to_avi\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_avi"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\04_to_webm";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WEBM";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\04_to_webm";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\04_to_webm\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_webm"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\05_to_mp3";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\05_to_mp3";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\05_to_mp3\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\06_to_wav";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\06_to_wav";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\06_to_wav\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\07_to_aac";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\07_to_aac";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\07_to_aac\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\08_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\08_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.mov\shell\ConvertWithFCP\shell\08_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_flac"; Tasks: contextmenu
-
-; .avi
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP";                           ValueType: string; ValueName: "MUIVerb";      ValueData: "{cm:ConvertWithFCP}"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP";                           ValueType: string; ValueName: "Icon";         ValueData: "{#ICON}";             Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP";                           ValueType: string; ValueName: "SubCommands";  ValueData: "";                    Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\01_to_mp4";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP4";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\01_to_mp4";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\01_to_mp4\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp4"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\02_to_mkv";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MKV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\02_to_mkv";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\02_to_mkv\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mkv"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\03_to_webm";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WEBM";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\03_to_webm";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\03_to_webm\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_webm"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\04_to_mov";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MOV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\04_to_mov";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\04_to_mov\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mov"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\05_to_mp3";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → MP3";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\05_to_mp3";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\05_to_mp3\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_mp3"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\06_to_wav";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → WAV";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\06_to_wav";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\06_to_wav\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_wav"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\07_to_aac";           ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → AAC";   Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\07_to_aac";             ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\07_to_aac\command";   ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_aac"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\08_to_flac";          ValueType: string; ValueName: "MUIVerb"; ValueData: "Video → FLAC";  Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\08_to_flac";            ValueType: string; ValueName: "Icon"; ValueData: "{#ICON}"; Tasks: contextmenu
-Root: HKCU; Subkey: "{#CM}\.avi\shell\ConvertWithFCP\shell\08_to_flac\command";  ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" --context-menu --files ""%1"" --conversion-type video_to_flac"; Tasks: contextmenu
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Parameters: "--lang {code:GetLangCode}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
@@ -2018,6 +245,7 @@ begin
   DeleteContextMenuForExtension('raf');
   DeleteContextMenuForExtension('raw');
   DeleteContextMenuForExtension('rw2');
+  DeleteContextMenuForExtension('rtf');
   DeleteContextMenuForExtension('svg');
   DeleteContextMenuForExtension('tif');
   DeleteContextMenuForExtension('tiff');
@@ -2026,6 +254,595 @@ begin
   DeleteContextMenuForExtension('webm');
   DeleteContextMenuForExtension('webp');
   DeleteContextMenuForExtension('xlsx');
+end;
+
+procedure AddConversion(SubKey, Num, MenuLabel, ConvType: String);
+var
+  ShellKey, ExePath: String;
+begin
+  ShellKey := SubKey + '\shell\' + Num;
+  ExePath := ExpandConstant('{app}\{#MyAppExeName}');
+  RegWriteStringValue(HKCU, ShellKey, 'MUIVerb', MenuLabel);
+  RegWriteStringValue(HKCU, ShellKey, 'Icon', ExpandConstant('{app}\icon.ico,0'));
+  RegWriteStringValue(HKCU, ShellKey + '\command', '', '"' + ExePath + '" --context-menu --files "%1" --conversion-type ' + ConvType);
+end;
+
+procedure RegisterContextMenuForExt(Ext: String);
+var
+  CM, SubKey: String;
+begin
+  CM := 'Software\Classes\SystemFileAssociations';
+  SubKey := CM + '\.' + Ext + '\shell\ConvertWithFCP';
+  RegWriteStringValue(HKCU, SubKey, 'MUIVerb', ExpandConstant('{cm:ConvertWithFCP}'));
+  RegWriteStringValue(HKCU, SubKey, 'Icon', ExpandConstant('{app}\icon.ico,0'));
+  RegWriteStringValue(HKCU, SubKey, 'SubCommands', '');
+
+  if Ext = 'aac' then begin
+    AddConversion(SubKey, '01_to_mp3', 'Audio → MP3', 'audio_to_mp3');
+    AddConversion(SubKey, '02_to_wav', 'Audio → WAV', 'audio_to_wav');
+    AddConversion(SubKey, '03_to_flac', 'Audio → FLAC', 'audio_to_flac');
+    AddConversion(SubKey, '04_to_m4a', 'Audio → M4A', 'audio_to_m4a');
+  end else if Ext = 'apng' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'arw' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'avi' then begin
+    AddConversion(SubKey, '01_to_mp4', 'Video → MP4', 'video_to_mp4');
+    AddConversion(SubKey, '02_to_mkv', 'Video → MKV', 'video_to_mkv');
+    AddConversion(SubKey, '03_to_webm', 'Video → WEBM', 'video_to_webm');
+    AddConversion(SubKey, '04_to_mov', 'Video → MOV', 'video_to_mov');
+    AddConversion(SubKey, '05_to_mp3', 'Video → MP3', 'video_to_mp3');
+    AddConversion(SubKey, '06_to_wav', 'Video → WAV', 'video_to_wav');
+    AddConversion(SubKey, '07_to_aac', 'Video → AAC', 'video_to_aac');
+    AddConversion(SubKey, '08_to_flac', 'Video → FLAC', 'video_to_flac');
+  end else if Ext = 'avif' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'bmp' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'cr2' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'cr3' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'csv' then begin
+    AddConversion(SubKey, '01_to_json', 'CSV → JSON', 'csv_to_json');
+  end else if Ext = 'dng' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'doc' then begin
+    AddConversion(SubKey, '01_to_pdf', 'Word → PDF', 'docx_to_pdf');
+    AddConversion(SubKey, '02_merge_none', 'Merge (order)', 'merge_docx_none');
+    AddConversion(SubKey, '03_merge_alpha_asc', 'Merge A→Z', 'merge_docx_alpha_asc');
+    AddConversion(SubKey, '04_merge_alpha_desc', 'Merge Z→A', 'merge_docx_alpha_desc');
+    AddConversion(SubKey, '05_merge_num_asc', 'Merge 1→9', 'merge_docx_num_asc');
+    AddConversion(SubKey, '06_merge_num_desc', 'Merge 9→1', 'merge_docx_num_desc');
+    AddConversion(SubKey, '07_merge_date_asc', 'Merge oldest', 'merge_docx_date_asc');
+    AddConversion(SubKey, '08_merge_date_desc', 'Merge newest', 'merge_docx_date_desc');
+  end else if Ext = 'docx' then begin
+    AddConversion(SubKey, '01_to_pdf', 'Word → PDF', 'docx_to_pdf');
+    AddConversion(SubKey, '02_merge_none', 'Merge (order)', 'merge_docx_none');
+    AddConversion(SubKey, '03_merge_alpha_asc', 'Merge A→Z', 'merge_docx_alpha_asc');
+    AddConversion(SubKey, '04_merge_alpha_desc', 'Merge Z→A', 'merge_docx_alpha_desc');
+    AddConversion(SubKey, '05_merge_num_asc', 'Merge 1→9', 'merge_docx_num_asc');
+    AddConversion(SubKey, '06_merge_num_desc', 'Merge 9→1', 'merge_docx_num_desc');
+    AddConversion(SubKey, '07_merge_date_asc', 'Merge oldest', 'merge_docx_date_asc');
+    AddConversion(SubKey, '08_merge_date_desc', 'Merge newest', 'merge_docx_date_desc');
+  end else if Ext = 'epub' then begin
+    AddConversion(SubKey, '01_to_pdf', 'ePub → PDF', 'epub_to_pdf');
+  end else if Ext = 'flac' then begin
+    AddConversion(SubKey, '01_to_mp3', 'Audio → MP3', 'audio_to_mp3');
+    AddConversion(SubKey, '02_to_wav', 'Audio → WAV', 'audio_to_wav');
+    AddConversion(SubKey, '03_to_aac', 'Audio → AAC', 'audio_to_aac');
+    AddConversion(SubKey, '04_to_ogg', 'Audio → OGG', 'audio_to_ogg');
+  end else if Ext = 'gif' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'heic' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'heif' then begin
+    AddConversion(SubKey, '01_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '02_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '03_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '06_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '07_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '08_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'html' then begin
+    AddConversion(SubKey, '01_to_pdf', 'HTML → PDF', 'html_to_pdf');
+  end else if Ext = 'j2k' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'jfif' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'jp2' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'jpeg' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'jpg' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'jpx' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'json' then begin
+    AddConversion(SubKey, '01_to_csv', 'JSON → CSV', 'json_to_csv');
+  end else if Ext = 'm4a' then begin
+    AddConversion(SubKey, '01_to_mp3', 'Audio → MP3', 'audio_to_mp3');
+    AddConversion(SubKey, '02_to_wav', 'Audio → WAV', 'audio_to_wav');
+    AddConversion(SubKey, '03_to_aac', 'Audio → AAC', 'audio_to_aac');
+    AddConversion(SubKey, '04_to_flac', 'Audio → FLAC', 'audio_to_flac');
+  end else if Ext = 'mkv' then begin
+    AddConversion(SubKey, '01_to_mp4', 'Video → MP4', 'video_to_mp4');
+    AddConversion(SubKey, '02_to_avi', 'Video → AVI', 'video_to_avi');
+    AddConversion(SubKey, '03_to_webm', 'Video → WEBM', 'video_to_webm');
+    AddConversion(SubKey, '04_to_mov', 'Video → MOV', 'video_to_mov');
+    AddConversion(SubKey, '05_to_mp3', 'Video → MP3', 'video_to_mp3');
+    AddConversion(SubKey, '06_to_wav', 'Video → WAV', 'video_to_wav');
+    AddConversion(SubKey, '07_to_aac', 'Video → AAC', 'video_to_aac');
+    AddConversion(SubKey, '08_to_flac', 'Video → FLAC', 'video_to_flac');
+  end else if Ext = 'mov' then begin
+    AddConversion(SubKey, '01_to_mp4', 'Video → MP4', 'video_to_mp4');
+    AddConversion(SubKey, '02_to_mkv', 'Video → MKV', 'video_to_mkv');
+    AddConversion(SubKey, '03_to_avi', 'Video → AVI', 'video_to_avi');
+    AddConversion(SubKey, '04_to_webm', 'Video → WEBM', 'video_to_webm');
+    AddConversion(SubKey, '05_to_mp3', 'Video → MP3', 'video_to_mp3');
+    AddConversion(SubKey, '06_to_wav', 'Video → WAV', 'video_to_wav');
+    AddConversion(SubKey, '07_to_aac', 'Video → AAC', 'video_to_aac');
+    AddConversion(SubKey, '08_to_flac', 'Video → FLAC', 'video_to_flac');
+  end else if Ext = 'mp3' then begin
+    AddConversion(SubKey, '01_to_wav', 'Audio → WAV', 'audio_to_wav');
+    AddConversion(SubKey, '02_to_aac', 'Audio → AAC', 'audio_to_aac');
+    AddConversion(SubKey, '03_to_flac', 'Audio → FLAC', 'audio_to_flac');
+    AddConversion(SubKey, '04_to_ogg', 'Audio → OGG', 'audio_to_ogg');
+    AddConversion(SubKey, '05_to_m4a', 'Audio → M4A', 'audio_to_m4a');
+  end else if Ext = 'mp4' then begin
+    AddConversion(SubKey, '01_to_mkv', 'Video → MKV', 'video_to_mkv');
+    AddConversion(SubKey, '02_to_avi', 'Video → AVI', 'video_to_avi');
+    AddConversion(SubKey, '03_to_webm', 'Video → WEBM', 'video_to_webm');
+    AddConversion(SubKey, '04_to_mov', 'Video → MOV', 'video_to_mov');
+    AddConversion(SubKey, '05_to_mp3', 'Video → MP3', 'video_to_mp3');
+    AddConversion(SubKey, '06_to_wav', 'Video → WAV', 'video_to_wav');
+    AddConversion(SubKey, '07_to_aac', 'Video → AAC', 'video_to_aac');
+    AddConversion(SubKey, '08_to_flac', 'Video → FLAC', 'video_to_flac');
+  end else if Ext = 'nef' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'ogg' then begin
+    AddConversion(SubKey, '01_to_mp3', 'Audio → MP3', 'audio_to_mp3');
+    AddConversion(SubKey, '02_to_wav', 'Audio → WAV', 'audio_to_wav');
+    AddConversion(SubKey, '03_to_aac', 'Audio → AAC', 'audio_to_aac');
+    AddConversion(SubKey, '04_to_flac', 'Audio → FLAC', 'audio_to_flac');
+  end else if Ext = 'orf' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'pdf' then begin
+    AddConversion(SubKey, '01_to_docx', 'PDF → Word', 'pdf_to_docx');
+    AddConversion(SubKey, '02_to_html', 'PDF → HTML', 'pdf_to_html');
+    AddConversion(SubKey, '03_merge_none', 'Merge (order)', 'merge_pdf_none');
+    AddConversion(SubKey, '04_merge_alpha_asc', 'Merge A→Z', 'merge_pdf_alpha_asc');
+    AddConversion(SubKey, '05_merge_alpha_desc', 'Merge Z→A', 'merge_pdf_alpha_desc');
+    AddConversion(SubKey, '06_merge_num_asc', 'Merge 1→9', 'merge_pdf_num_asc');
+    AddConversion(SubKey, '07_merge_num_desc', 'Merge 9→1', 'merge_pdf_num_desc');
+    AddConversion(SubKey, '08_merge_date_asc', 'Merge oldest', 'merge_pdf_date_asc');
+    AddConversion(SubKey, '09_merge_date_desc', 'Merge newest', 'merge_pdf_date_desc');
+  end else if Ext = 'png' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'pptx' then begin
+    AddConversion(SubKey, '01_to_pdf', 'PPTX → PDF', 'pptx_to_pdf');
+  end else if Ext = 'psd' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'raf' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'raw' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'rtf' then begin
+    AddConversion(SubKey, '01_to_pdf', 'RTF → PDF', 'rtf_to_pdf');
+    AddConversion(SubKey, '02_to_docx', 'RTF → Word', 'rtf_to_docx');
+  end else if Ext = 'rw2' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'svg' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'tif' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'tiff' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'txt' then begin
+    AddConversion(SubKey, '01_to_pdf', 'TXT → PDF', 'txt_to_pdf');
+    AddConversion(SubKey, '02_to_docx', 'TXT → Word', 'txt_to_docx');
+  end else if Ext = 'wav' then begin
+    AddConversion(SubKey, '01_to_mp3', 'Audio → MP3', 'audio_to_mp3');
+    AddConversion(SubKey, '02_to_aac', 'Audio → AAC', 'audio_to_aac');
+    AddConversion(SubKey, '03_to_flac', 'Audio → FLAC', 'audio_to_flac');
+    AddConversion(SubKey, '04_to_ogg', 'Audio → OGG', 'audio_to_ogg');
+    AddConversion(SubKey, '05_to_m4a', 'Audio → M4A', 'audio_to_m4a');
+  end else if Ext = 'webm' then begin
+    AddConversion(SubKey, '01_to_mp4', 'Video → MP4', 'video_to_mp4');
+    AddConversion(SubKey, '02_to_mkv', 'Video → MKV', 'video_to_mkv');
+    AddConversion(SubKey, '03_to_avi', 'Video → AVI', 'video_to_avi');
+    AddConversion(SubKey, '04_to_mov', 'Video → MOV', 'video_to_mov');
+    AddConversion(SubKey, '05_to_mp3', 'Video → MP3', 'video_to_mp3');
+    AddConversion(SubKey, '06_to_wav', 'Video → WAV', 'video_to_wav');
+    AddConversion(SubKey, '07_to_aac', 'Video → AAC', 'video_to_aac');
+    AddConversion(SubKey, '08_to_flac', 'Video → FLAC', 'video_to_flac');
+  end else if Ext = 'webp' then begin
+    AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
+    AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
+    AddConversion(SubKey, '03_to_bmp', 'Image → BMP', 'image_to_bmp');
+    AddConversion(SubKey, '04_to_webp', 'Image → WEBP', 'image_to_webp');
+    AddConversion(SubKey, '05_to_tiff', 'Image → TIFF', 'image_to_tiff');
+    AddConversion(SubKey, '06_to_avif', 'Image → AVIF', 'image_to_avif');
+    AddConversion(SubKey, '07_to_svg', 'Image → SVG', 'image_to_svg');
+    AddConversion(SubKey, '08_to_ico', 'Image → ICO', 'image_to_ico');
+    AddConversion(SubKey, '09_to_pdf', 'Image → PDF', 'image_to_pdf');
+    AddConversion(SubKey, '10_to_heic', 'Image → HEIC', 'image_to_heic');
+    AddConversion(SubKey, '11_to_psd', 'Image → PSD', 'image_to_psd');
+    AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
+    AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
+    AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
+    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+  end else if Ext = 'xlsx' then begin
+    AddConversion(SubKey, '01_to_pdf', 'Excel → PDF', 'xlsx_to_pdf');
+    AddConversion(SubKey, '02_to_csv', 'Excel → CSV', 'xlsx_to_csv');
+    AddConversion(SubKey, '03_to_json', 'Excel → JSON', 'xlsx_to_json');
+  end;
+end;
+
+procedure RegisterAllContextMenus();
+var
+  Exts: array of String;
+  I: Integer;
+begin
+  Exts := ['aac','apng','arw','avi','avif','bmp','cr2','cr3','csv','dng',
+           'doc','docx','epub','flac','gif','heic','heif','html','j2k','jfif',
+           'jp2','jpeg','jpg','jpx','json','m4a','mkv','mov','mp3','mp4',
+           'nef','ogg','orf','pdf','png','pptx','psd','raf','raw','rw2','rtf',
+           'svg','tif','tiff','txt','wav','webm','webp','xlsx'];
+  for I := 0 to GetArrayLength(Exts) - 1 do
+    RegisterContextMenuForExt(Exts[I]);
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
@@ -2073,6 +890,12 @@ begin
       WizardForm.TasksList.Checked[I] := True;
 end;
 
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usPostUninstall then
+    CleanOldRegistry();
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: Integer;
@@ -2080,6 +903,9 @@ var
 begin
   if CurStep = ssPostInstall then begin
     ForceDirectories(ExpandConstant('{localappdata}\{#MyAppName}'));
+
+    if WizardIsTaskSelected('contextmenu') then
+      RegisterAllContextMenus();
 
     WriteLanguageConfig();
 
