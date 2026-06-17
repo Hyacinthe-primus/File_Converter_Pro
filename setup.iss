@@ -86,8 +86,8 @@ Source: "{#MyDistDir}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyDistDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "{#MyAppExeName}"
 
 ; Configuration and keys
-Source: "file_converter_config.dat"; DestDir: "{app}"; Flags: ignoreversion; Check: FileExists('file_converter_config.dat')
-Source: "file_converter_key.key";    DestDir: "{app}"; Flags: ignoreversion; Check: FileExists('file_converter_key.key')
+Source: "file_converter_config.dat"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist; Check: FileExists('file_converter_config.dat')
+Source: "file_converter_key.key";    DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist; Check: FileExists('file_converter_key.key')
 
 ; Databases
 Source: "achievements.db";         DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist; Check: FileExists('achievements.db')
