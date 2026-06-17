@@ -181,6 +181,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
         self._thread: QThread | None = None
         self._worker: _ConversionWorker | None = None
+        self._current_conversion_type: str | None = None
 
         self.setWindowTitle(self.tr_("🔄 Plus de Conversions"))
         self.setMinimumSize(900, 720)
@@ -282,6 +283,8 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self._progress_bar.setMaximum(len(sources))
         self._progress_widget.setVisible(True)
         self._cancel_btn.setEnabled(True)
+        self._current_conversion_type = conversion_type
+        self._last_ok = 0
 
         _ach_sys = getattr(self.parent_window, 'achievement_system', None)
         worker = _ConversionWorker(
@@ -327,6 +330,13 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         else:
             self._log_area.append(self.tr_("adv_log_partial").format(ok=ok, fail=fail))
         self._progress_bar.setValue(self._progress_bar.maximum())
+
+        if ok > 0 and self._current_conversion_type:
+            notifier = getattr(self.parent_window, "system_notifier", None)
+            if notifier is not None:
+                config = getattr(self.parent_window, "config", {})
+                enabled = config.get("enable_system_notifications", True)
+                notifier.send(self._current_conversion_type, config_enabled=enabled)
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
