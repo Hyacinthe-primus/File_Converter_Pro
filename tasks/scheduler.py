@@ -54,7 +54,7 @@ def _load_toml_with_paths() -> list[tuple[Path, dict]]:
             logger.error("[Scheduler] No TOML library available (tomllib / tomli)")
             return []
 
-    automation_dir = Path("automation")
+    automation_dir = Path(__file__).resolve().parent.parent / "automation"
     if not automation_dir.is_dir():
         return []
 
