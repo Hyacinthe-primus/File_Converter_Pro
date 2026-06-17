@@ -641,7 +641,6 @@ class HistoryDialog(TranslationMixin, QDialog):
                 for idx, (date, src, src_fmt, tgt, tgt_fmt, status) in enumerate(data_rows):
                     src_name = Path(src).name
                     tgt_name = Path(tgt).name
-                    COLOR_ROW_ODD if idx % 2 == 0 else COLOR_ROW_EVEN
                     row = [
                         Paragraph(date, cell_style),
                         Paragraph(src_name, cell_style),
