@@ -22,6 +22,7 @@ Integration:
 
 import sys
 import os
+import subprocess
 from pathlib import Path
 
 def _resource_path(relative_path):
@@ -60,6 +61,8 @@ class HistoryLoader(QObject):
         except Exception:
             results = []
         self.finished.emit(results)
+
+
 from datetime import datetime
 import sqlite3
 
@@ -499,9 +502,9 @@ class HistoryDialog(TranslationMixin, QDialog):
                 if sys.platform == "win32":
                     os.startfile(target_file)
                 elif sys.platform == "darwin":
-                    os.system(f"open '{target_file}'")
+                    subprocess.run(["open", target_file])
                 else:
-                    os.system(f"xdg-open '{target_file}'")
+                    subprocess.run(["xdg-open", target_file])
             except Exception as e:
                 QMessageBox.warning(
                     self, 
@@ -523,10 +526,10 @@ class HistoryDialog(TranslationMixin, QDialog):
                     if sys.platform == "win32":
                         os.startfile(source_file)
                     elif sys.platform == "darwin":
-                        os.system(f"open '{source_file}'")
+                        subprocess.run(["open", source_file])
                     else:
-                        os.system(f"xdg-open '{source_file}'")
-                except:
+                        subprocess.run(["xdg-open", source_file])
+                except Exception:
                     pass
 
     def open_target_files(self, rows):
@@ -537,10 +540,10 @@ class HistoryDialog(TranslationMixin, QDialog):
                     if sys.platform == "win32":
                         os.startfile(target_file)
                     elif sys.platform == "darwin":
-                        os.system(f"open '{target_file}'")
+                        subprocess.run(["open", target_file])
                     else:
-                        os.system(f"xdg-open '{target_file}'")
-                except:
+                        subprocess.run(["xdg-open", target_file])
+                except Exception:
                     pass
 
     def print_pdf(self):
