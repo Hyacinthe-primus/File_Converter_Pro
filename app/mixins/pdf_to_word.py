@@ -1037,17 +1037,17 @@ class PdfToWordMixin:
             for i, fp in enumerate(pdf_files)
         ]
         from conversion_worker import ConversionWorker
-        worker = ConversionWorker(tasks, _run_pdf_to_word)
-        worker.signals.file_done.connect(lambda r: None)
-        worker.signals.finished.connect(lambda s: (
+        self._pdf_to_word_worker = ConversionWorker(tasks, _run_pdf_to_word)
+        self._pdf_to_word_worker.file_done.connect(lambda r: None)
+        self._pdf_to_word_worker.finished.connect(lambda s: (
             self.show_progress(False),
             self._set_ui_enabled(True),
             QMessageBox.information(self, self.translate_text("Succès"),
-                self.translate_text("conversion_pdf_to_word_success").format(s['success_count'], s['total_count']))
+                self.translate_text("pdf_to_word_success_sum").format(s['success_count'], s['total'], f"{s['total_time']:.1f}"))
         ))
-        worker.signals.error.connect(lambda e: (
+        self._pdf_to_word_worker.error.connect(lambda e: (
             self.show_progress(False),
             self._set_ui_enabled(True),
             QMessageBox.critical(self, self.translate_text("Erreur"), str(e))
         ))
-        worker.start()
+        self._pdf_to_word_worker.start()
