@@ -181,7 +181,7 @@ class DocumentConverters:
                 font = "Helvetica-Bold" if span.get("bold") else "Helvetica-Oblique" if span.get("italic") else "Helvetica"
                 try:
                     c.setFont(font, size)
-                except:
+                except Exception:
                     c.setFont("Helvetica", size)
                 lines = simpleSplit(text, font, size, width - 2 * margin)
                 for line in lines:

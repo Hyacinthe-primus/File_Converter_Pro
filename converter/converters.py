@@ -213,42 +213,45 @@ class AdvancedConverterEngine(DocumentConverters, ImageConverters, MediaConverte
                 import shutil
 
                 tmp_dst = str(Path(tempfile.gettempdir()) / "pptx_com_out.pdf")
-                src_esc = src_abs.replace("\\", "\\\\").replace("'", "\\'")
-                dst_esc = tmp_dst.replace("\\", "\\\\")
+                _ps_env = os.environ.copy()
+                _ps_env["FCP_SRC"] = src_abs
+                _ps_env["FCP_DST"] = tmp_dst
 
-                ps_a = f"""
-$app = New-Object -ComObject PowerPoint.Application
-$app.Visible = -1
-try {{
-    $prs = $app.Presentations.Open('{src_esc}', 0, 0, -1)
-    $prs.SaveAs('{dst_esc}', 32)
-    $prs.Close()
-}} finally {{ $app.Quit() }}
-"""
+                ps_a = """
+                $app = New-Object -ComObject PowerPoint.Application
+                $app.Visible = -1
+                try {
+                    $prs = $app.Presentations.Open($env:FCP_SRC, 0, 0, -1)
+                    $prs.SaveAs($env:FCP_DST, 32)
+                    $prs.Close()
+                } finally { $app.Quit() }
+                """
                 subprocess.run(
                     ["powershell", "-NoProfile", "-NonInteractive",
-                     "-ExecutionPolicy", "Bypass", "-Command", ps_a],
+                    "-ExecutionPolicy", "Bypass", "-Command", ps_a],
                     capture_output=True, timeout=120,
                     creationflags=_NO_WINDOW,
+                    env=_ps_env,
                 )
                 if Path(tmp_dst).exists():
                     shutil.move(tmp_dst, dst_abs)
                     return Path(dst_abs).exists()
 
-                ps_b = f"""
-$app = New-Object -ComObject PowerPoint.Application
-$app.Visible = -1
-try {{
-    $prs = $app.Presentations.Open('{src_esc}', 0, 0, -1)
-    $prs.PrintOut(1, $prs.Slides.Count, '{dst_esc}', 0, 2)
-    $prs.Close()
-}} finally {{ $app.Quit() }}
-"""
+                ps_b = """
+                $app = New-Object -ComObject PowerPoint.Application
+                $app.Visible = -1
+                try {
+                    $prs = $app.Presentations.Open($env:FCP_SRC, 0, 0, -1)
+                    $prs.PrintOut(1, $prs.Slides.Count, $env:FCP_DST, 0, 2)
+                    $prs.Close()
+                } finally { $app.Quit() }
+                """
                 r2 = subprocess.run(
                     ["powershell", "-NoProfile", "-NonInteractive",
-                     "-ExecutionPolicy", "Bypass", "-Command", ps_b],
+                    "-ExecutionPolicy", "Bypass", "-Command", ps_b],
                     capture_output=True, timeout=120,
                     creationflags=_NO_WINDOW,
+                    env=_ps_env,
                 )
                 if Path(tmp_dst).exists():
                     shutil.move(tmp_dst, dst_abs)
@@ -550,9 +553,9 @@ try {{
 
         prs = Presentation(src)
         try:    sw = int(prs.slide_width)  or 9144000
-        except: sw = 9144000
+        except Exception: sw = 9144000
         try:    sh = int(prs.slide_height) or 6858000
-        except: sh = 6858000
+        except Exception: sh = 6858000
 
         ratio   = float(sh) / float(sw)
         pw      = landscape(A4)[0]
@@ -640,7 +643,7 @@ try {{
                         v = pt.find(f"{{{NS_C}}}v")
                         if v is not None:
                             try: vals.append(float(v.text))
-                            except: vals.append(0.0)
+                            except Exception: vals.append(0.0)
 
                     pt_colors = {}
                     for dpt in ser.findall(f"{{{NS_C}}}dPt"):
@@ -778,7 +781,7 @@ try {{
                     cells = []
                     for ci, cell in enumerate(row.cells):
                         try:   txt = cell.text.strip()
-                        except: txt = ""
+                        except Exception: txt = ""
                         ps = ST["th"] if ri == 0 else ST["td"]
                         cells.append(Paragraph(_safe(txt) or " ", ps))
                     rows_data.append(cells)
@@ -808,7 +811,7 @@ try {{
                         story.append(Spacer(1, 3))
                         continue
                     try:    level = int(para.level or 0)
-                    except: level = 0
+                    except Exception: level = 0
                     if level == 0:
                         is_bul = text[0] in BULLETS
                         ps     = ST["bul0"] if is_bul else default_sty
@@ -896,7 +899,7 @@ try {{
 
         def _safe_title(p):
             try: return p.slides[0].shapes.title.text or ""
-            except: return ""
+            except Exception: return ""
 
         SimpleDocTemplate(
             dst, pagesize=(pw, ph),
