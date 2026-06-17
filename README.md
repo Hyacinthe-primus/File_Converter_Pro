@@ -69,6 +69,7 @@ Windows 10 / 11 (64-bit). No Python, no dependencies. Just run the installer.
 git clone https://github.com/Hyacinthe-primus/File_Converter_Pro.git
 cd File_Converter_Pro
 pip install -r requirements.txt
+pip install -r requirements-dev.txt             # Dev/Build dependencies
 python main.py
 ```
 
