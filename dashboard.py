@@ -959,7 +959,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                                labelcolor=label_color)
             plt.setp(legend.get_title(), color=text_color)
 
-            self.chart_canvas.figure.tight_layout(rect=[0, 0, 0.8, 1])
+            self.chart_canvas.figure.tight_layout(rect=[0.18, 0, 0.8, 1])
 
             ops_label   = self.translate_text("\nOpérations")
             center_text = f"Total: {total}{ops_label}"
@@ -970,7 +970,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                 note = self.translate_text(
                     "•Les pourcentages < 10% ne sont affichés\nque dans la légende"
                 )
-                ax.text(0, -0.18, note, ha='center', va='center', fontsize=8,
+                ax.text(-1.9, 0, note, ha='center', va='center', fontsize=8,
                         color='#6b7280' if not dm else '#8b94a1', style='italic')
 
         elif chart_type == self.translate_text("Évolution des formats") and stats['top_formats']:
