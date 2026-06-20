@@ -35,7 +35,7 @@ Core philosophy: **ship nothing until it runs perfectly on a clean machine, with
 
 ---
 
-## ✨ Highlights
+## Highlights
 
 - **All-in-one**: documents, images, audio, video, batch supported
 - **100% offline & private**: no telemetry, no uploads, no internet required
@@ -48,7 +48,7 @@ Core philosophy: **ship nothing until it runs perfectly on a clean machine, with
 
 ---
 
-## 📥 Download
+## Download
 
 | | Link |
 |---|---|
@@ -63,7 +63,7 @@ Windows 10 / 11 (64-bit). No Python, no dependencies. Just run the installer.
 
 ---
 
-## 👨‍💻 Quick Start (Developers)
+## Quick Start (Developers)
 
 ```bash
 git clone https://github.com/Hyacinthe-primus/File_Converter_Pro.git
@@ -92,7 +92,7 @@ The donation dialog is also accessible anytime from **Left Tab → Support the p
 
 ---
 
-## 🤝 Contributing & Contributors
+## Contributing & Contributors
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)** for translations, bug reports, code fixes, and feature proposals.
 
@@ -100,7 +100,7 @@ See **[CONTRIBUTING.md](CONTRIBUTING.md)** for translations, bug reports, code f
 
 ---
 
-## 📄 License
+## License
 
 Dual licensed: **GPLv3** for open-source use · **Commercial License** for proprietary products.
 See [`LICENSE`](LICENSE/LICENSE.txt) and [COMMERCIAL LICENSE](COMMERCIALLICENSE.md).
