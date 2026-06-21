@@ -108,7 +108,7 @@ class OptimizationMixin:
             import fitz
             pdf_document = fitz.open(pdf_path)
             if compression_level == "very_reduced":
-                save_options = {'garbage': 4, 'deflate': True, 'clean': True, 'deflate_images': compress_images, 'deflate_fonts': True, 'optimize': True}
+                save_options = {'garbage': 3, 'deflate': True, 'clean': True, 'deflate_images': compress_images, 'deflate_fonts': True}
             elif compression_level == "high":
                 save_options = {'garbage': 3, 'deflate': True, 'clean': True, 'deflate_images': compress_images, 'deflate_fonts': True}
             else:
