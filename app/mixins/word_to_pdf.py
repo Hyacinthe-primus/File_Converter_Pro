@@ -134,10 +134,11 @@ class WordToPdfMixin:
 
         def _on_file_done(result):
             if result.get("success"):
-                fp  = result["input_path"]
-                out = result["output_path"]
+                fp  = result.get("input_path", "?")
+                out = result.get("output_path", "?")
                 fs  = result.get("file_size", 0)
                 ot  = result.get("operation_time", 0)
+                print(f"[ACHIEVEMENTS] word_to_pdf file_done: {fp} -> {out}, size={fs}")
                 self.achievement_system.record_conversion("word_to_pdf", fs, True)
                 self.achievement_system.mark_format_as_used("docx")
                 self.achievement_system.mark_format_as_used("pdf")

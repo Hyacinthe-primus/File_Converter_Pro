@@ -55,10 +55,17 @@ class AppLogicMixin(OptimizationMixin, ImageToPdfMixin, BatchMixin, PdfOperation
         self.config_manager = config_manager
         self.config = config_manager.load_config()
         self.current_language = self.config.get("language", "fr")
-        if self.config.get("use_system_theme", True):
+        self.current_theme = self.config.get("custom_theme", None)
+        if self.current_theme and self.current_theme not in ("dark", "light"):
+            from theme_manager import get_custom_theme_kind
+            self.dark_mode = get_custom_theme_kind(self.current_theme) == "dark"
+        elif self.config.get("use_system_theme", True):
             self.dark_mode = is_dark_mode_qt()
         else:
             self.dark_mode = self.config.get("dark_mode", False)
+
+        if not self.current_theme or self.current_theme in ("dark", "light"):
+            self.current_theme = "dark" if self.dark_mode else "light"
 
         self.translation_manager = TranslationManager()
         self.translation_manager.set_language(self.current_language)

@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from datetime import datetime
 
-from PySide6.QtWidgets import QFileDialog, QMessageBox
+from PySide6.QtWidgets import QMessageBox
 from PySide6.QtCore import Qt
 
 IMAGE_EXTENSIONS = (
@@ -58,7 +58,7 @@ class ImageToPdfMixin:
     def convert_images_to_separate_pdfs(self, image_files: list[str], selected_items: list) -> None:
         """Convert each image into a separate PDF in chosen directory."""
         num_images = len(image_files)
-        output_dir = QFileDialog.getExistingDirectory(self, self.translate_text("Sélectionner un dossier pour les PDFs"))
+        output_dir = self.get_output_directory()
         if not output_dir:
             return
 
@@ -87,6 +87,8 @@ class ImageToPdfMixin:
                 print(f"Image conversion error {file_path}: {e}")
 
         self.show_progress(False)
+        if self.config.get("enable_system_notifications", True):
+            self.system_notifier.send("image_to_pdf_s")
         QMessageBox.information(self, self.translate_text("Succès"),
                                 self.translate_text("images_converted_separate").format(success_count=success_count, num_images=num_images, output_dir=output_dir))
 
@@ -101,7 +103,7 @@ class ImageToPdfMixin:
 
             if is_merge:
                 default_filename = f"fusion_images_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-                output_file, _ = QFileDialog.getSaveFileName(self, self.translate_text("Save file"), default_filename, self.translate_text("PDF files (*.pdf)"))
+                output_file = self.get_output_directory(default_filename)
                 if not output_file:
                     self.show_progress(False)
                     return
@@ -128,7 +130,10 @@ class ImageToPdfMixin:
                 conversion_time = (datetime.now() - start_time).total_seconds()
                 total_size = sum(os.path.getsize(f) for f in image_files if os.path.exists(f))
                 self.db_manager.add_conversion_record(source_file=", ".join([Path(f).name for f in image_files]), source_format="Image", target_file=output_file, target_format="PDF", operation_type="image_to_pdf", file_size=total_size, conversion_time=conversion_time, success=True)
+                self.achievement_system.record_conversion("image_to_pdf", total_size, True)
                 self.show_progress(False)
+                if self.config.get("enable_system_notifications", True):
+                    self.system_notifier.send("image_to_pdf")
                 QMessageBox.information(self, self.translate_text("Succès"),
                                         self.translate_text("images_merged_success").format(num_images=num_images, conversion_time=conversion_time))
 
@@ -140,7 +145,11 @@ class ImageToPdfMixin:
                     return
                 img = self._open_image_for_pdf(file_path)
                 img.save(output_file, format='PDF')
+                file_size = os.path.getsize(file_path)
+                self.achievement_system.record_conversion("image_to_pdf", file_size, True)
                 self.show_progress(False)
+                if self.config.get("enable_system_notifications", True):
+                    self.system_notifier.send("image_to_pdf")
                 QMessageBox.information(self, self.translate_text("Succès"),
                                         self.translate_text("image_to_pdf_success").format(time=0))
         except Exception as e:

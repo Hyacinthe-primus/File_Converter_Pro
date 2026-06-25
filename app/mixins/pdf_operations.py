@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from datetime import datetime
 
-from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QDialog, QMessageBox
 from PySide6.QtCore import Qt
 
 class PdfOperationsMixin:
@@ -35,7 +35,7 @@ class PdfOperationsMixin:
         ordered_files = dialog.get_ordered_files()
 
         default_filename = f"fusion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        output_file, _ = QFileDialog.getSaveFileName(self, self.translate_text("Enregistrer le PDF fusionné"), default_filename, self.translate_text("PDF files (*.pdf)"))
+        output_file = self.get_output_directory(default_filename)
         if not output_file:
             return
 
@@ -54,7 +54,13 @@ class PdfOperationsMixin:
             conversion_time = (datetime.now() - start_time).total_seconds()
             self.db_manager.add_conversion_record(source_file=", ".join([Path(f).name for f in ordered_files]), source_format="PDF", target_file=output_file, target_format="PDF", operation_type="merge_pdf", file_size=total_size, conversion_time=conversion_time, success=True)
             self.achievement_system.record_conversion("merge_pdf", total_size, True)
+            import fitz
+            merged_doc = fitz.open(output_file)
+            self.achievement_system.record_pdf_merge(len(merged_doc))
+            merged_doc.close()
             self.show_progress(False)
+            if self.config.get("enable_system_notifications", True):
+                self.system_notifier.send("merge_pdf")
             QMessageBox.information(self, self.translate_text("Succès"),
                                     self.translate_text("pdf_merge_success").format(count=len(ordered_files), time=f"{conversion_time:.1f}"))
         except Exception as e:
@@ -82,7 +88,7 @@ class PdfOperationsMixin:
             return
 
         default_filename = f"fusion_word_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-        output_file, _ = QFileDialog.getSaveFileName(self, self.translate_text("Enregistrer le document Word fusionné"), default_filename, "Word Files (*.docx)")
+        output_file = self.get_output_directory(default_filename)
         if not output_file:
             return
 
@@ -94,6 +100,8 @@ class PdfOperationsMixin:
                 composer.append(Document(wf))
             composer.save(output_file)
             self.show_progress(False)
+            if self.config.get("enable_system_notifications", True):
+                self.system_notifier.send("merge_word")
             QMessageBox.information(self, self.translate_text("Succès"),
                                     self.translate_text("word_merge_success").format(count=len(word_files), time="0"))
         except Exception as e:
@@ -139,7 +147,7 @@ class PdfOperationsMixin:
                 return
 
         if not output_dir:
-            output_dir = QFileDialog.getExistingDirectory(self, self.translate_text("Sélectionner le dossier de sortie"))
+            output_dir = self.get_output_directory()
             if not output_dir:
                 return
 
@@ -178,7 +186,11 @@ class PdfOperationsMixin:
                 success_count = 1
 
             pdf_document.close()
+            self.achievement_system.record_pdf_split(total_pages)
+            self.achievement_system.record_conversion("split_pdf", 0, True)
             if not silent:
+                if self.config.get("enable_system_notifications", True):
+                    self.system_notifier.send("split_pdf")
                 QMessageBox.information(self, self.translate_text("Succès"),
                                         self.translate_text("pdf_split_into_files").format(total_pages=success_count))
         except Exception as e:
@@ -214,7 +226,7 @@ class PdfOperationsMixin:
                                 self.translate_text("Mot de passe requis"))
             return
 
-        output_dir = QFileDialog.getExistingDirectory(self, self.translate_text("Sélectionner le dossier de sortie"))
+        output_dir = self.get_output_directory()
         if not output_dir:
             return
 
@@ -234,5 +246,7 @@ class PdfOperationsMixin:
                 print(f"Protection error {pdf_file}: {e}")
 
         self.show_progress(False)
+        if success_count > 0:
+            self.achievement_system.record_pdf_protection(success_count, len(password))
         QMessageBox.information(self, self.translate_text("Succès"),
                                 self.translate_text("all_pdfs_protected").format(success_count=success_count, total_time="0"))

@@ -313,9 +313,9 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         mode_layout = QVBoxLayout(mode_group)
         mode_layout.setSpacing(6)
 
-        radio_compress = QRadioButton("🗜  " + self.translate_text("Compression  —  réduit la taille du fichier"))
-        radio_clean    = QRadioButton("🧹  " + self.translate_text("Nettoyage  —  supprime uniquement les métadonnées"))
-        radio_both     = QRadioButton("⚡  " + self.translate_text("Compression + Nettoyage  —  recommandé"))
+        radio_compress = QRadioButton("🗜  " + self.translate_text("Compression  –  réduit la taille du fichier"))
+        radio_clean    = QRadioButton("🧹  " + self.translate_text("Nettoyage  –  supprime uniquement les métadonnées"))
+        radio_both     = QRadioButton("⚡  " + self.translate_text("Compression + Nettoyage  –  recommandé"))
         radio_both.setChecked(True)
 
         for r in (radio_compress, radio_clean, radio_both):

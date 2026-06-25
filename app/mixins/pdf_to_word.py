@@ -1038,16 +1038,27 @@ class PdfToWordMixin:
         ]
         from conversion_worker import ConversionWorker
         self._pdf_to_word_worker = ConversionWorker(tasks, _run_pdf_to_word)
-        self._pdf_to_word_worker.file_done.connect(lambda r: None)
-        self._pdf_to_word_worker.finished.connect(lambda s: (
-            self.show_progress(False),
-            self._set_ui_enabled(True),
+        self._pdf_to_word_worker.file_done.connect(self._on_pdf_to_word_file_done)
+
+        def _on_pdf_to_word_finished(s):
+            self.show_progress(False)
+            self._set_ui_enabled(True)
+            if s['success_count'] > 0 and self.config.get("enable_system_notifications", True):
+                self.system_notifier.send("pdf_to_word")
             QMessageBox.information(self, self.translate_text("Succès"),
                 self.translate_text("pdf_to_word_success_sum").format(s['success_count'], s['total'], f"{s['total_time']:.1f}"))
-        ))
+
+        self._pdf_to_word_worker.finished.connect(_on_pdf_to_word_finished)
         self._pdf_to_word_worker.error.connect(lambda e: (
             self.show_progress(False),
             self._set_ui_enabled(True),
             QMessageBox.critical(self, self.translate_text("Erreur"), str(e))
         ))
         self._pdf_to_word_worker.start()
+
+    def _on_pdf_to_word_file_done(self, result):
+        if result.get("success"):
+            fs = result.get("file_size", 0)
+            self.achievement_system.record_conversion("pdf_to_word", fs, True)
+            self.achievement_system.mark_format_as_used("pdf")
+            self.achievement_system.mark_format_as_used("docx")

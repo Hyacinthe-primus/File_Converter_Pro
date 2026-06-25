@@ -4,7 +4,7 @@ import time
 
 from PySide6.QtWidgets import (QGroupBox, QPushButton, QLabel, QCheckBox)
 
-from qss_helpers import _load_qss
+from qss_helpers import _load_qss, set_theme, get_current_theme
 
 
 class ThemeLanguageMixin:
@@ -15,6 +15,7 @@ class ThemeLanguageMixin:
 
     def _toggle_theme_actual(self):
         self.config["use_system_theme"] = False
+        self.config.pop("custom_theme", None)
         self.config_manager.save_config(self.config)
         if self.dark_mode:
             self.dark_mode_timer_start = time.time()
@@ -25,6 +26,7 @@ class ThemeLanguageMixin:
                 self.dark_mode_timer_start = None
 
         self.dark_mode = not self.dark_mode
+        self.current_theme = "dark" if self.dark_mode else "light"
         self.apply_theme(self.dark_mode)
         self.theme_action.setText("☀️ " + self.translate_text("Mode Clair") if self.dark_mode else "🌙 " + self.translate_text("Mode Sombre"))
 
@@ -120,4 +122,10 @@ class ThemeLanguageMixin:
         self.setup_tooltips_with_shortcuts()
 
     def apply_theme(self, dark: bool) -> None:
-        self.setStyleSheet(_load_qss("style.qss", "dark" if dark else "light"))
+        current = getattr(self, "current_theme", None)
+        if current and current not in ("dark", "light"):
+            theme_name = current
+        else:
+            theme_name = "dark" if dark else "light"
+        set_theme(theme_name)
+        self.setStyleSheet(_load_qss("style.qss", theme_name))

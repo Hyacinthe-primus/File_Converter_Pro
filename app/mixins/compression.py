@@ -325,6 +325,11 @@ class CompressionMixin(ArchiveEnginesMixin):
                 success=True,
                 notes=notes
             )
+            self.achievement_system.record_conversion("compression", total_size, True)
+            if password:
+                self.achievement_system.record_archive_protection(1, len(password), archive_format)
+            if self.config.get("enable_system_notifications", True):
+                self.system_notifier.send("file_compression")
 
     def compress_folders_with_structure(self, folders, additional_files, output_dir, archive_name,
                                         archive_format, compression_level, password, delete_originals, split_size):
@@ -398,6 +403,16 @@ class CompressionMixin(ArchiveEnginesMixin):
                 message += self.translate_text("fmt_ar").format(archive_format, Path(archive_path).name, self.format_size(compressed_size))
 
                 QMessageBox.information(self, self.translate_text("Succès"), self.translate_text(message))
+
+                total_size = 0
+                for folder in folders:
+                    total_size += self.calculate_folder_size(folder)
+                for f in additional_files:
+                    if os.path.isfile(f):
+                        total_size += os.path.getsize(f)
+                self.achievement_system.record_conversion("compression", total_size, True)
+                if password:
+                    self.achievement_system.record_archive_protection(1, len(password), archive_format)
 
                 if self.config.get("enable_system_notifications", True):
                     self.system_notifier.send("file_compression")

@@ -80,6 +80,7 @@ class OptimizationMixin:
                         operation_type="office_optimization", file_size=original_size,
                         conversion_time=operation_time, success=True,
                         notes=f"Type: {optimization_type}, Quality: {quality_level}")
+                    self.achievement_system.record_conversion("office_optimization", original_size, True)
                     success_count += 1
                 self.progress_bar.setValue(int((i + 1) / len(office_files) * 100))
             except Exception as e:

@@ -82,6 +82,8 @@ class BatchMixin:
         def _on_finished(summary):
             self.show_progress(False)
             total_time = (datetime.now() - start_time).total_seconds()
+            self.achievement_system.record_batch_conversion(len(files))
+            self.achievement_system.record_conversion("batch_conversion", 0, True)
             QMessageBox.information(self, self.translate_text("Succès"),
                                     self.translate_text("pdf_to_word_success_sum").format(success_count, len(files), f"{total_time:.1f}"))
 

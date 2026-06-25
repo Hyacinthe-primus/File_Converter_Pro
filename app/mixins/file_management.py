@@ -529,3 +529,5 @@ class FileManagementMixin:
             success=True,
             notes=f"Renamed {len(rename_plan)} files"
         )
+        if self.config.get("enable_system_notifications", True):
+            self.system_notifier.send("batch_rename")
