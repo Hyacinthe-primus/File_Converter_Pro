@@ -10,12 +10,15 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QWidget,
                                QScrollArea, QLabel, QFileDialog, QMessageBox,
                                QDialogButtonBox)
 from PySide6.QtCore import Qt, QTimer, QCoreApplication
-from qss_helpers import _load_qss, _apply_dialog_btn
+from qss_helpers import _load_qss, _apply_dialog_btn, get_current_theme
 from widgets import AnimatedCheckBox
 from .terms_dialog import TermsAndPrivacyDialog
 
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
+from theme_manager import (get_custom_themes, get_builtin_themes,
+                           import_theme, remove_theme, CUSTOM_THEMES_DIR)
+from PySide6.QtGui import QPixmap, QImage
 
 
 class SettingsDialog(TranslationMixin, QDialog):
@@ -254,6 +257,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.tab_widget.addTab(self._build_automation_tab(), self.translate_text("Automatisation"))
         self.tab_widget.addTab(privacy_tab,  self.translate_text("Confidentialité"))
         self.tab_widget.addTab(self._build_language_tab(), self.translate_text("Langue"))
+        self.tab_widget.addTab(self._build_theme_tab(), self.translate_text("Thème"))
 
         content_layout.addWidget(self.tab_widget)
 
@@ -285,7 +289,7 @@ class SettingsDialog(TranslationMixin, QDialog):
 
     def apply_scrollbar_style(self):
         dark = hasattr(self.parent(), 'dark_mode') and self.parent().dark_mode
-        self.setStyleSheet(self.styleSheet() + _load_qss("scrollbar.qss", "dark" if dark else "light"))
+        self.setStyleSheet(self.styleSheet() + _load_qss("scrollbar.qss", get_current_theme(dark)))
 
     def _lang_is_dark(self) -> bool:
         """Return True if the parent app is currently in dark mode."""
@@ -650,6 +654,453 @@ class SettingsDialog(TranslationMixin, QDialog):
                 self,
                 self.translate_text("Erreur"),
                 self.translate_text("lang_remove_err").format(error=error),
+            )
+
+    def _build_theme_tab(self) -> QWidget:
+        dark = self._lang_is_dark()
+
+        tab_bg = "#0d1117" if dark else "#f8f9fa"
+        group_bg = "#161b22" if dark else "#ffffff"
+        scroll_bg = "#161b22" if dark else "#ffffff"
+        text_primary = "#e6edf3" if dark else "#1c2526"
+        text_muted = "#8b949e" if dark else "#6b7280"
+        group_border = "#30363d" if dark else "#dee2e6"
+        active_green = "#3fb950" if dark else "#10B981"
+
+        tab = QWidget()
+        tab.setStyleSheet(f"background-color: {tab_bg};")
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(8, 10, 8, 10)
+        layout.setSpacing(12)
+
+        active_row = QHBoxLayout()
+        active_lbl_title = QLabel(self.translate_text("Thème actif:"))
+        active_lbl_title.setStyleSheet(f"color: {text_primary}; font-size: 12px;")
+        active_row.addWidget(active_lbl_title)
+        self._theme_active_lbl = QLabel()
+        self._theme_active_lbl.setStyleSheet(
+            f"font-weight: bold; font-size: 13px; color: {active_green};"
+        )
+        active_row.addWidget(self._theme_active_lbl)
+        active_row.addStretch()
+        layout.addLayout(active_row)
+
+        list_group = QGroupBox(self.translate_text("Thèmes installés"))
+        list_group.setStyleSheet(f"""
+            QGroupBox {{
+                color: {text_muted};
+                background-color: {group_bg};
+                border: 1px solid {group_border};
+                border-radius: 8px;
+                margin-top: 10px;
+                padding-top: 10px;
+                font-size: 11px;
+                font-weight: 600;
+            }}
+            QGroupBox::title {{
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 6px;
+                color: {text_muted};
+            }}
+        """)
+        list_layout = QVBoxLayout(list_group)
+        list_layout.setSpacing(6)
+        list_layout.setContentsMargins(8, 8, 8, 8)
+
+        self._theme_list = QScrollArea()
+        self._theme_list.setWidgetResizable(True)
+        self._theme_list.setFrameShape(QFrame.NoFrame)
+        self._theme_list.setMinimumHeight(250)
+        self._theme_list.setStyleSheet(_load_qss("lang_scroll.qss", get_current_theme(dark)))
+        self._theme_inner = QWidget()
+        self._theme_inner.setStyleSheet(f"background: {scroll_bg};")
+        self._theme_inner_layout = QVBoxLayout(self._theme_inner)
+        self._theme_inner_layout.setSpacing(6)
+        self._theme_inner_layout.setContentsMargins(4, 4, 4, 4)
+        self._theme_list.setWidget(self._theme_inner)
+        list_layout.addWidget(self._theme_list)
+        layout.addWidget(list_group)
+
+        import_btn = QPushButton("📥 " + self.translate_text("Installer un thème (.fctheme)"))
+        import_btn.setMinimumHeight(36)
+        _apply_dialog_btn(import_btn, "BtnIndigo")
+        import_btn.clicked.connect(self._import_theme_file)
+        layout.addWidget(import_btn)
+
+        hint = QLabel("ℹ️ " + self.translate_text(
+            "Les fichiers .fctheme sont des archives ZIP contenant les fichiers QSS/CSS du thème et un metadata.ini."
+        ))
+        hint.setWordWrap(True)
+        hint.setStyleSheet(
+            f"color: {text_muted}; font-size: 10px; font-style: italic;"
+        )
+        layout.addWidget(hint)
+        layout.addStretch()
+
+        self._refresh_theme_list()
+        return tab
+
+    def _refresh_theme_list(self) -> None:
+        dark = self._lang_is_dark()
+        text_muted = "#8b949e" if dark else "#6b7280"
+
+        while self._theme_inner_layout.count():
+            item = self._theme_inner_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        parent_app = self.parent()
+        current_theme = getattr(parent_app, "current_theme", "light") if parent_app else "light"
+        self._theme_active_lbl.setText(current_theme)
+
+        builtin = get_builtin_themes()
+        custom = get_custom_themes()
+
+        for name in builtin:
+            card = self._make_theme_card_builtins(name, current_theme)
+            self._theme_inner_layout.addWidget(card)
+
+        for meta in custom:
+            card = self._make_theme_card_custom(meta, current_theme)
+            self._theme_inner_layout.addWidget(card)
+
+        self._theme_inner_layout.addStretch()
+
+    def _make_theme_card_builtins(self, name: str, current_theme: str) -> QFrame:
+        dark = self._lang_is_dark()
+        is_active = name == current_theme
+
+        if dark:
+            card_bg = "#0f2a1e" if is_active else "#161b22"
+            border_col = "#3fb950" if is_active else "#30363d"
+            name_col = "#e6edf3"
+            meta_col = "#8b949e"
+        else:
+            card_bg = "#f0fdf4" if is_active else "#ffffff"
+            border_col = "#10B981" if is_active else "#dee2e6"
+            name_col = "#1c2526"
+            meta_col = "#6b7280"
+
+        card = QFrame()
+        card.setFrameShape(QFrame.StyledPanel)
+        card.setStyleSheet(f"""
+            QFrame {{
+                border: 2px solid {border_col};
+                border-radius: 8px;
+                background-color: {card_bg};
+                padding: 2px;
+            }}
+        """)
+
+        row = QHBoxLayout(card)
+        row.setContentsMargins(10, 8, 10, 8)
+        row.setSpacing(10)
+
+        if is_active:
+            badge_text = self.translate_text("lang_active_badge")
+            badge_bg = "#3fb950" if dark else "#10B981"
+        else:
+            badge_text = self.translate_text("Intégré")
+            badge_bg = "#388bfd" if dark else "#6366F1"
+        badge_fg = "#ffffff"
+
+        badge = QLabel(badge_text)
+        badge.setStyleSheet(f"""
+            background-color: {badge_bg};
+            color: {badge_fg};
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            border: none;
+        """)
+        row.addWidget(badge)
+
+        info_col = QVBoxLayout()
+        info_col.setSpacing(2)
+
+        display_name = name.capitalize()
+        name_lbl = QLabel(display_name)
+        name_lbl.setStyleSheet(
+            f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;"
+        )
+        info_col.addWidget(name_lbl)
+
+        meta_lbl = QLabel(self.translate_text("Thème intégré File Converter"))
+        meta_lbl.setStyleSheet(
+            f"color: {meta_col}; font-size: 10px; border: none;"
+        )
+        meta_lbl.setWordWrap(True)
+        info_col.addWidget(meta_lbl)
+        row.addLayout(info_col, 1)
+
+        if not is_active:
+            if dark:
+                apply_ss = """
+                    QPushButton {
+                        background-color: #1f3a6e; color: #79c0ff;
+                        border: 1px solid #388bfd; padding: 5px 10px;
+                        border-radius: 5px; font-size: 11px; font-weight: bold;
+                    }
+                    QPushButton:hover { background-color: #388bfd; color: #ffffff; }
+                    QPushButton:pressed { background-color: #1158c7; color: #ffffff; }
+                """
+            else:
+                apply_ss = """
+                    QPushButton {
+                        background-color: #eff6ff; color: #1d4ed8;
+                        border: 1px solid #93c5fd; padding: 5px 10px;
+                        border-radius: 5px; font-size: 11px; font-weight: bold;
+                    }
+                    QPushButton:hover { background-color: #1d4ed8; color: #ffffff; }
+                    QPushButton:pressed { background-color: #1e40af; color: #ffffff; }
+                """
+            apply_btn = QPushButton(self.translate_text("Appliquer"))
+            apply_btn.setFixedWidth(82)
+            apply_btn.setStyleSheet(apply_ss)
+            apply_btn.clicked.connect(lambda _, n=name: self._apply_theme(n))
+            row.addWidget(apply_btn)
+
+        return card
+
+    def _make_theme_card_custom(self, meta, current_theme: str) -> QFrame:
+        dark = self._lang_is_dark()
+        is_active = meta.folder_name == current_theme
+
+        if dark:
+            card_bg = "#0f2a1e" if is_active else "#1c2333"
+            border_col = "#3fb950" if is_active else "#30363d"
+            name_col = "#e6edf3"
+            meta_col = "#8b949e"
+            group_border = "#30363d"
+        else:
+            card_bg = "#f0fdf4" if is_active else "#ffffff"
+            border_col = "#10B981" if is_active else "#dee2e6"
+            name_col = "#1c2526"
+            meta_col = "#6b7280"
+            group_border = "#dee2e6"
+
+        card = QFrame()
+        card.setFrameShape(QFrame.StyledPanel)
+        card.setStyleSheet(f"""
+            QFrame {{
+                border: 2px solid {border_col};
+                border-radius: 8px;
+                background-color: {card_bg};
+                padding: 2px;
+            }}
+        """)
+
+        main_row = QHBoxLayout(card)
+        main_row.setContentsMargins(8, 5, 8, 5)
+        main_row.setSpacing(8)
+
+        preview_path = CUSTOM_THEMES_DIR / meta.folder_name / meta.preview if meta.preview else None
+        if preview_path and preview_path.exists():
+            img = QImage(str(preview_path))
+            if not img.isNull():
+                pixmap = QPixmap.fromImage(img).scaled(64, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                preview_lbl = QLabel()
+                preview_lbl.setPixmap(pixmap)
+                preview_lbl.setFixedSize(64, 48)
+                preview_lbl.setStyleSheet(f"""
+                    border: 1px solid {group_border};
+                    border-radius: 6px;
+                    background-color: {card_bg};
+                """)
+                main_row.addWidget(preview_lbl)
+
+        info_col = QVBoxLayout()
+        info_col.setSpacing(2)
+
+        if is_active:
+            badge_text = self.translate_text("lang_active_badge")
+            badge_bg = "#3fb950" if dark else "#10B981"
+        else:
+            badge_text = self.translate_text("Personnalisé")
+            badge_bg = "#f0a030" if dark else "#f59e0b"
+        badge_fg = "#ffffff" if dark else "#1c2526"
+
+        badge = QLabel(badge_text)
+        badge.setStyleSheet(f"""
+            background-color: {badge_bg};
+            color: {badge_fg};
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            border: none;
+        """)
+        info_col.addWidget(badge)
+
+        name_lbl = QLabel(meta.name)
+        name_lbl.setStyleSheet(
+            f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;"
+        )
+        info_col.addWidget(name_lbl)
+
+        meta_parts = []
+        if meta.author:
+            meta_parts.append(f"{self.translate_text('lang_author_label')} {meta.author}")
+        if meta.version:
+            meta_parts.append(f"v{meta.version}")
+        if meta.description:
+            meta_parts.append(meta.description)
+        meta_lbl = QLabel("  •  ".join(meta_parts) if meta_parts else "")
+        meta_lbl.setStyleSheet(
+            f"color: {meta_col}; font-size: 10px; border: none;"
+        )
+        meta_lbl.setWordWrap(True)
+        info_col.addWidget(meta_lbl)
+        main_row.addLayout(info_col, 1)
+
+        btn_col = QHBoxLayout()
+        btn_col.setSpacing(4)
+
+        if not is_active:
+            if dark:
+                apply_ss = """
+                    QPushButton {
+                        background-color: #1f3a6e; color: #79c0ff;
+                        border: 1px solid #388bfd; padding: 5px 10px;
+                        border-radius: 5px; font-size: 11px; font-weight: bold;
+                    }
+                    QPushButton:hover { background-color: #388bfd; color: #ffffff; }
+                    QPushButton:pressed { background-color: #1158c7; color: #ffffff; }
+                """
+            else:
+                apply_ss = """
+                    QPushButton {
+                        background-color: #eff6ff; color: #1d4ed8;
+                        border: 1px solid #93c5fd; padding: 5px 10px;
+                        border-radius: 5px; font-size: 11px; font-weight: bold;
+                    }
+                    QPushButton:hover { background-color: #1d4ed8; color: #ffffff; }
+                    QPushButton:pressed { background-color: #1e40af; color: #ffffff; }
+                """
+            apply_btn = QPushButton(self.translate_text("Appliquer"))
+            apply_btn.setFixedWidth(82)
+            apply_btn.setStyleSheet(apply_ss)
+            apply_btn.clicked.connect(lambda _, n=meta.folder_name: self._apply_theme(n))
+            btn_col.addWidget(apply_btn)
+
+        if not is_active:
+            if dark:
+                remove_ss = """
+                    QPushButton {
+                        background-color: #3d1a1a; color: #f85149;
+                        border: 1px solid #6e1a1a; padding: 4px;
+                        border-radius: 5px; font-size: 13px;
+                    }
+                    QPushButton:hover { background-color: #f85149; color: #ffffff; }
+                """
+            else:
+                remove_ss = """
+                    QPushButton {
+                        background-color: #fef2f2; color: #ef4444;
+                        border: 1px solid #fca5a5; padding: 4px;
+                        border-radius: 5px; font-size: 13px;
+                    }
+                    QPushButton:hover { background-color: #ef4444; color: #ffffff; }
+                """
+            remove_btn = QPushButton("🗑")
+            remove_btn.setFixedWidth(32)
+            remove_btn.setToolTip(self.translate_text("Supprimer"))
+            remove_btn.setStyleSheet(remove_ss)
+            remove_btn.clicked.connect(lambda _, n=meta.folder_name, nm=meta.name: self._remove_theme(n, nm))
+            btn_col.addWidget(remove_btn)
+
+        main_row.addLayout(btn_col)
+
+        return card
+
+    def _apply_theme(self, theme_name: str) -> None:
+        from theme_manager import get_custom_theme_kind
+
+        parent_app = self.parent()
+        if not parent_app:
+            return
+
+        parent_app.current_theme = theme_name
+        if theme_name in ("dark", "light"):
+            parent_app.config.pop("custom_theme", None)
+        else:
+            parent_app.config["custom_theme"] = theme_name
+        parent_app.config["use_system_theme"] = False
+
+        if theme_name in ("dark", "light"):
+            is_dark = theme_name == "dark"
+        else:
+            is_dark = get_custom_theme_kind(theme_name) == "dark"
+        parent_app.dark_mode = is_dark
+        parent_app.config["dark_mode"] = is_dark
+
+        parent_app.config_manager.save_config(parent_app.config)
+
+        if hasattr(self, 'use_system_theme_checkbox'):
+            self.use_system_theme_checkbox.setChecked(False)
+
+        parent_app.apply_theme(is_dark)
+        parent_app.update_texts()
+        self._refresh_theme_list()
+        self.apply_scrollbar_style()
+
+    def _import_theme_file(self) -> None:
+        filepath, _ = QFileDialog.getOpenFileName(
+            self,
+            self.translate_text("Choisir un fichier .fctheme"),
+            "",
+            self.translate_text("Thèmes (*.fctheme)"),
+        )
+        if not filepath:
+            return
+
+        ok, result = import_theme(filepath)
+        if ok:
+            QMessageBox.information(
+                self,
+                self.translate_text("Thème installé"),
+                self.translate_text("Thème «{}» installé avec succès.").format(result),
+            )
+            self._refresh_theme_list()
+        else:
+            QMessageBox.warning(
+                self,
+                self.translate_text("Erreur"),
+                self.translate_text("Impossible d'installer le thème : {}").format(result),
+            )
+
+    def _remove_theme(self, folder_name: str, display_name: str) -> None:
+        reply = QMessageBox.question(
+            self,
+            self.translate_text("Confirmation"),
+            self.translate_text("Supprimer le thème «{}» ?").format(display_name),
+            QMessageBox.Yes | QMessageBox.No,
+        )
+        if reply != QMessageBox.Yes:
+            return
+
+        ok, result = remove_theme(folder_name)
+        if ok:
+            parent_app = self.parent()
+            if parent_app and getattr(parent_app, "current_theme", None) == folder_name:
+                parent_app.current_theme = "light"
+                parent_app.config.pop("custom_theme", None)
+                parent_app.config_manager.save_config(parent_app.config)
+                parent_app.dark_mode = False
+                parent_app.apply_theme(False)
+            QMessageBox.information(
+                self,
+                self.translate_text("Thème supprimé"),
+                self.translate_text("Thème «{}» supprimé.").format(display_name),
+            )
+            self._refresh_theme_list()
+        else:
+            QMessageBox.warning(
+                self,
+                self.translate_text("Erreur"),
+                result,
             )
 
     def browse_output_folder(self):
