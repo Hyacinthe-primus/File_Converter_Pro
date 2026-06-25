@@ -320,9 +320,9 @@ class CreateTemplateDialog(QDialog):
         self.config_layout.addWidget(QLabel(tr("Mode d'optimisation")))
         self.optim_mode_combo = QComboBox()
         self.optim_mode_combo.addItems([
-            tr("Compression  —  réduit la taille du fichier"),
-            tr("Nettoyage  —  supprime uniquement les métadonnées"),
-            tr("Compression + Nettoyage  —  recommandé"),
+            tr("Compression  –  réduit la taille du fichier"),
+            tr("Nettoyage  –  supprime uniquement les métadonnées"),
+            tr("Compression + Nettoyage  –  recommandé"),
         ])
         self.optim_mode_combo.setCurrentIndex(2)
         self.config_layout.addWidget(self.optim_mode_combo)
@@ -411,9 +411,9 @@ class CreateTemplateDialog(QDialog):
             }
         elif template_type == self.parent_dialog.translate_text("Optimisation de fichiers"):
             _mode_map = {
-                self.parent_dialog.translate_text("Compression  —  réduit la taille du fichier"): 0,
-                self.parent_dialog.translate_text("Nettoyage  —  supprime uniquement les métadonnées"): 1,
-                self.parent_dialog.translate_text("Compression + Nettoyage  —  recommandé"): 2,
+                self.parent_dialog.translate_text("Compression  –  réduit la taille du fichier"): 0,
+                self.parent_dialog.translate_text("Nettoyage  –  supprime uniquement les métadonnées"): 1,
+                self.parent_dialog.translate_text("Compression + Nettoyage  –  recommandé"): 2,
             }
             config_data = {
                 'optimization_type': _mode_map.get(self.optim_mode_combo.currentText(), 2),

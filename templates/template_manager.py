@@ -249,9 +249,9 @@ class TemplateManager:
 
             elif t == "Optimisation de fichiers":
                 _mode_map = {
-                    "Compression  —  réduit la taille du fichier": 0,
-                    "Nettoyage  —  supprime uniquement les métadonnées": 1,
-                    "Compression + Nettoyage  —  recommandé": 2,
+                    "Compression  –  réduit la taille du fichier": 0,
+                    "Nettoyage  –  supprime uniquement les métadonnées": 1,
+                    "Compression + Nettoyage  –  recommandé": 2,
                     "Compression  —  reduces file size": 0,
                     "Cleaning  —  removes metadata only": 1,
                     "Compression + Cleaning  —  recommended": 2,
