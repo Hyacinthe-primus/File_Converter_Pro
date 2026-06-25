@@ -19,19 +19,59 @@ _ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 __all__ = ["_load_qss", "_apply_dialog_btn", "_ROOT_DIR"]
 
 _THEMES_DIR = os.path.join(_ROOT_DIR, "styles", "themes")
+_CUSTOM_THEMES_DIR = os.path.join(_ROOT_DIR, "styles", "custom_themes")
 
 
 def _load_qss(filename: str, theme: str | None = None) -> str:
-    """Load a QSS/CSS file from styles/themes/[theme/]filename.
+    """Load a QSS/CSS file from styles/themes/[theme/] or custom_themes/[theme/]filename.
 
-    Args:
-        filename : file name (e.g. "buttons.qss")
-        theme    : optional sub-folder ("dark", "light", or None for common files)
+    Fallback chain for custom themes:
+      1. custom_themes/{theme}/{filename}
+      2. custom_themes/{theme}/{theme}/{filename}
+      3. themes/{base_kind}/{filename}  (light or dark)
+      4. themes/{filename}              (root)
 
-    Returns an empty string silently when the file is absent so that callers
-    can always do ``widget.setStyleSheet(_load_qss(...))`` without guarding.
+    For builtin themes:
+      1. themes/{theme}/{filename}
+      2. themes/{filename}              (root)
     """
-    parts = [_THEMES_DIR, theme, filename] if theme else [_THEMES_DIR, filename]
+    if theme:
+        custom_path = os.path.join(_CUSTOM_THEMES_DIR, theme, filename)
+        try:
+            with open(custom_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except FileNotFoundError:
+            pass
+        custom_inner = os.path.join(_CUSTOM_THEMES_DIR, theme, theme, filename)
+        try:
+            with open(custom_inner, "r", encoding="utf-8") as f:
+                return f.read()
+        except FileNotFoundError:
+            pass
+        if theme not in ("dark", "light"):
+            from theme_manager import get_custom_theme_kind
+            base = get_custom_theme_kind(theme)
+            base_path = os.path.join(_THEMES_DIR, base, filename)
+            try:
+                with open(base_path, "r", encoding="utf-8") as f:
+                    return f.read()
+            except FileNotFoundError:
+                pass
+        else:
+            builtin_path = os.path.join(_THEMES_DIR, theme, filename)
+            try:
+                with open(builtin_path, "r", encoding="utf-8") as f:
+                    return f.read()
+            except FileNotFoundError:
+                pass
+        root_path = os.path.join(_THEMES_DIR, filename)
+        try:
+            with open(root_path, "r", encoding="utf-8") as f:
+                return f.read()
+        except FileNotFoundError:
+            pass
+        return ""
+    parts = [_THEMES_DIR, filename]
     path = os.path.join(*[p for p in parts if p])
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -45,7 +85,7 @@ _CURRENT_THEME: str | None = None
 
 
 def set_theme(theme: str | None) -> None:
-    """Set the active theme ("dark", "light", or None).
+    """Set the active theme ("dark", "light", or custom name).
 
     Resets the button stylesheet cache so that the next call to
     _apply_dialog_btn reloads buttons.qss from the new theme folder.
@@ -53,6 +93,13 @@ def set_theme(theme: str | None) -> None:
     global _CURRENT_THEME, _BUTTONS_QSS
     _CURRENT_THEME = theme
     _BUTTONS_QSS = None
+
+
+def get_current_theme(dark: bool) -> str:
+    """Return the active theme name, respecting custom themes."""
+    if _CURRENT_THEME and _CURRENT_THEME not in ("dark", "light"):
+        return _CURRENT_THEME
+    return "dark" if dark else "light"
 
 
 def _apply_dialog_btn(btn, object_name: str) -> None:
