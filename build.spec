@@ -199,6 +199,7 @@ SHARED_HIDDEN = [
     'special_events_manager', 'system_notifier',
     'context_menu', 'context_menu.window', 'context_menu.formats',
     'tasks', 'tasks.watcher', 'tasks.scheduler',
+    'theme_manager',
     'watchdog', 'watchdog.observers', 'watchdog.events',
     'apscheduler', 'apscheduler.schedulers.background',
     'apscheduler.triggers.cron', 'apscheduler.triggers.interval',
