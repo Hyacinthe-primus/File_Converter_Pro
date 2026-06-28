@@ -45,11 +45,17 @@ function Format-FileSize {
     else                    { return "{0:N0} bytes"  -f $Bytes }
 }
 
-function Format-PaddedText {
-    param([string]$Text, [int]$Width = 45)
-    if ($Text.Length -gt $Width) { $Text = $Text.Substring(0, $Width - 3) + "..." }
-    return $Text.PadRight($Width)
+function Format-Row {
+    param([string]$Label, [string]$Value)
+    $inner = "  $($Label.PadRight(20)): $Value"
+    $width = 73
+    if ($inner.Length -gt $width) { $inner = $inner.Substring(0, $width - 3) + "..." }
+    return "│$($inner.PadRight($width))│"
 }
+
+function Format-Sep   { return "│  $("─" * 68)   │" }
+function Format-Head  { param([string]$T) "│  $($T.PadRight(71))│" }
+function Format-Blank { return "│$(" " * 73)│" }
 
 function Get-CompressionRatio {
     param([long]$OriginalSize, [long]$CompressedSize)
@@ -248,18 +254,6 @@ if ($onedirOk) {
     Add-CheckResult "Onedir folder" $false "not found — run build.ps1 first"
 }
 
-Write-Step "Checking Quick Check executable..."
-$quickCheckExe = "$DistDir\Quick Check.exe"
-$quickCheckOk = Test-Path $quickCheckExe
-if ($quickCheckOk) {
-    $quickCheckSize = (Get-Item $quickCheckExe).Length
-    Write-Success "Quick Check.exe found: $(Format-FileSize $quickCheckSize)"
-    Add-CheckResult "Quick Check.exe" $true (Format-FileSize $quickCheckSize)
-} else {
-    Write-Warning "Quick Check.exe not found — run build_quick_check.ps1 first."
-    Add-CheckResult "Quick Check.exe" $false "not found — run build_quick_check.ps1 first"
-}
-
 if (-not $isccOk -or -not $issOk) {
     Write-BuildSummary
     Write-ErrorMsg "Critical prerequisites missing. Aborting."
@@ -414,133 +408,108 @@ Add-CheckResult "Installer produced" $true "$(Format-FileSize $InstallerSize)"
 
 Write-Title "FULL BUILD REPORT"
 
-$app_name_text      = Format-PaddedText $appName
-$app_ver_text       = Format-PaddedText $appVersion
-$app_pub_text       = Format-PaddedText $appPublisher
-$file_text          = Format-PaddedText $InstallerFile.Name
-$path_text          = Format-PaddedText $OutputDir
-$size_text          = Format-PaddedText (Format-FileSize $InstallerSize)
-$hash_text          = Format-PaddedText $InstallerHashShort
-$date_text          = Format-PaddedText $InstallerFile.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
-$compression_text   = Format-PaddedText $compression
-$solid_text         = Format-PaddedText $solidComp
-$iss_text           = Format-PaddedText $IssFile
-$min_ver_text       = Format-PaddedText $minVersion
-$arch_text          = Format-PaddedText $archMode
-$dist_files_text    = Format-PaddedText "$($DistInventory.FileCount) files in $DistDir\"
-$dist_size_text     = Format-PaddedText (Format-FileSize $DistInventory.TotalSize)
-$compile_dur_text   = Format-PaddedText ("{0:N2} seconds" -f $CompileDuration)
-$compile_min_text   = Format-PaddedText ("{0:N2} minutes" -f ($CompileDuration / 60))
-$start_time_text    = Format-PaddedText $CompileStart.ToString("HH:mm:ss")
-$end_time_text      = Format-PaddedText $CompileEnd.ToString("HH:mm:ss")
-$machine_text       = Format-PaddedText $SysInfo.Machine
-$os_text            = Format-PaddedText "$($SysInfo.OS)  (Build $($SysInfo.OSBuild))"
-$cpu_text           = Format-PaddedText $SysInfo.CPU
-$ram_text           = Format-PaddedText "$($SysInfo.TotalRAM_GB) GB total  /  $($SysInfo.FreeRAM_GB) GB free"
-$ps_text            = Format-PaddedText $SysInfo.PSVersion
+$border = "┌$("─" * 73)┐"
+$tsep   = "├$("─" * 73)┤"
+$bottom = "└$("─" * 73)┘"
+$title  = "│$("BUILD COMPILATION RESULTS".PadLeft(49).PadRight(73))│"
 
-$report = @"
-
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        BUILD COMPILATION RESULTS                        │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  APPLICATION                                                            │
-│  ────────────────────────────────────────────────────────────────────   │
-│  Name               : $app_name_text                                    │
-│  Version            : $app_ver_text                                     │
-│  Publisher          : $app_pub_text                                     │
-│  Min Windows ver    : $min_ver_text                                     │
-│  Architecture       : $arch_text                                        │
-│                                                                         │
-│  GENERATED INSTALLER                                                    │
-│  ────────────────────────────────────────────────────────────────────   │
-│  File               : $file_text                                        │
-│  Output path        : $path_text                                        │
-│  Size               : $size_text                                        │
-│  SHA256             : $hash_text                                        │
-│  Creation date      : $date_text                                        │
-│                                                                         │
-│  INNO SETUP CONFIGURATION                                               │
-│  ────────────────────────────────────────────────────────────────────   │
-│  Algorithm          : $compression_text                                 │
-│  Solid Compression  : $solid_text                                       │
-│  Script used        : $iss_text                                         │
-│                                                                         │
-│  DIST FOLDER STATS  (onedir)                                            │
-│  ────────────────────────────────────────────────────────────────────   │
-│  Contents           : $dist_files_text                                  │
-│  Total size         : $dist_size_text                                   │
-│                                                                         │
-"@
+$lines = @(
+    "", $border, $title, $tsep,
+    (Format-Blank),
+    (Format-Head "APPLICATION"),
+    (Format-Sep),
+    (Format-Row "Name            " $appName),
+    (Format-Row "Version         " $appVersion),
+    (Format-Row "Publisher       " $appPublisher),
+    (Format-Row "Min Windows ver " $minVersion),
+    (Format-Row "Architecture    " $archMode),
+    (Format-Blank),
+    (Format-Head "GENERATED INSTALLER"),
+    (Format-Sep),
+    (Format-Row "File            " $InstallerFile.Name),
+    (Format-Row "Output path     " $OutputDir),
+    (Format-Row "Size            " (Format-FileSize $InstallerSize)),
+    (Format-Row "SHA256          " $InstallerHashShort),
+    (Format-Row "Creation date   " $InstallerFile.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")),
+    (Format-Blank),
+    (Format-Head "INNO SETUP CONFIGURATION"),
+    (Format-Sep),
+    (Format-Row "Algorithm       " $compression),
+    (Format-Row "Solid Compress  " $solidComp),
+    (Format-Row "Script used     " $IssFile),
+    (Format-Blank),
+    (Format-Head "DIST FOLDER STATS  (onedir)"),
+    (Format-Sep),
+    (Format-Row "Contents        " "$($DistInventory.FileCount) files in $DistDir\"),
+    (Format-Row "Total size      " (Format-FileSize $DistInventory.TotalSize)),
+    (Format-Blank)
+)
 
 if ($DistFolderSize -gt 0) {
-    $overhead = $InstallerSize - $DistFolderSize
-    $diffSign = if ($overhead -gt 0) { "+" } else { "" }
-    $overheadPercent = Get-CompressionRatio -OriginalSize $DistFolderSize -CompressedSize $InstallerSize
-
-    $dist_folder_size_text = Format-PaddedText (Format-FileSize $DistFolderSize)
-    $dist_folder_files_text = Format-PaddedText "$($DistInventory.FileCount) files"
-    $installer_size_text   = Format-PaddedText (Format-FileSize $InstallerSize)
-    $overhead_text         = Format-PaddedText "$diffSign$(Format-FileSize ([Math]::Abs($overhead)))"
-    $overhead_pct_text     = Format-PaddedText $overheadPercent
-
-    $report += @"
-│  COMPARISON: INSTALLER vs. DIST FOLDER                                  │
-│  ────────────────────────────────────────────────────────────────────   │
-│  Dist folder        : $dist_folder_size_text                            │
-│  Dist file count    : $dist_folder_files_text                           │
-│  Installer          : $installer_size_text                              │
-│  Difference         : $overhead_text                                    │
-│  Compression ratio  : $overhead_pct_text                                │
-│                                                                         │
-"@
+    $overhead    = $InstallerSize - $DistFolderSize
+    $diffSign    = if ($overhead -gt 0) { "+" } else { "" }
+    $overheadPct = Get-CompressionRatio -OriginalSize $DistFolderSize -CompressedSize $InstallerSize
+    $lines += @(
+        (Format-Head "COMPARISON: INSTALLER vs. DIST FOLDER"),
+        (Format-Sep),
+        (Format-Row "Dist folder     " (Format-FileSize $DistFolderSize)),
+        (Format-Row "Dist file count " "$($DistInventory.FileCount) files"),
+        (Format-Row "Installer       " (Format-FileSize $InstallerSize)),
+        (Format-Row "Difference      " "$diffSign$(Format-FileSize ([Math]::Abs($overhead)))"),
+        (Format-Row "Compression ratio" $overheadPct),
+        (Format-Blank)
+    )
 }
 
-$report += @"
-│  BUILD TIMING                                                           │
-│  ────────────────────────────────────────────────────────────────────   │
-│  Duration           : $compile_dur_text                                 │
-│  Duration (min)     : $compile_min_text                                 │
-│  Start timestamp    : $start_time_text                                  │
-│  End timestamp      : $end_time_text                                    │
-│                                                                         │
-│  BUILD ENVIRONMENT                                                      │
-│  ────────────────────────────────────────────────────────────────────   │
-│  Machine            : $machine_text                                     │
-│  OS                 : $os_text                                          │
-│  CPU                : $cpu_text                                         │
-│  RAM                : $ram_text                                         │
-│  PowerShell         : $ps_text                                          │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+$lines += @(
+    (Format-Head "BUILD TIMING"),
+    (Format-Sep),
+    (Format-Row "Duration        " ("{0:N2} seconds" -f $CompileDuration)),
+    (Format-Row "Duration (min)  " ("{0:N2} minutes" -f ($CompileDuration / 60))),
+    (Format-Row "Start timestamp " $CompileStart.ToString("HH:mm:ss")),
+    (Format-Row "End timestamp   " $CompileEnd.ToString("HH:mm:ss")),
+    (Format-Blank),
+    (Format-Head "BUILD ENVIRONMENT"),
+    (Format-Sep),
+    (Format-Row "Machine         " $SysInfo.Machine),
+    (Format-Row "OS              " "$($SysInfo.OS)  (Build $($SysInfo.OSBuild))"),
+    (Format-Row "CPU             " $SysInfo.CPU),
+    (Format-Row "RAM             " "$($SysInfo.TotalRAM_GB) GB total  /  $($SysInfo.FreeRAM_GB) GB free"),
+    (Format-Row "PowerShell      " $SysInfo.PSVersion),
+    (Format-Blank),
+    $bottom, ""
+)
 
-"@
+$report = $lines -join "`n"
 
-Write-Host $report -ForegroundColor $ColorSuccess
-
-Write-Title "ADDITIONAL INFORMATION"
-
-Write-Host "💡 INNO SETUP COMPRESSION:" -ForegroundColor Cyan
-Write-Host "   • Algorithm : $compression" -ForegroundColor White
-Write-Host "   • This compression level is already optimal (LZMA Ultra)" -ForegroundColor Gray
-Write-Host "   • SolidCompression=$solidComp for better ratio" -ForegroundColor Gray
-
-Write-Host ""
-Write-Host "📦 INSTALLER CONTENTS (onedir):" -ForegroundColor Cyan
-Write-Host "   • All DLLs and binaries from dist\File Converter Pro\" -ForegroundColor White
-Write-Host "   • Resources (Assets, SFX, icons, fonts)" -ForegroundColor White
-Write-Host "   • Databases (achievements, stats, events)" -ForegroundColor White
-Write-Host "   • Licenses (EN/FR)" -ForegroundColor White
-Write-Host "   • Inno Setup installation engine" -ForegroundColor White
-
-Write-Host ""
-Write-Host "✅ INSTALLER FEATURES:" -ForegroundColor Cyan
-Write-Host "   • French / English language support" -ForegroundColor White
-Write-Host "   • Optional Windows Defender exclusion" -ForegroundColor White
-Write-Host "   • Complete uninstallation (app + LocalAppData data)" -ForegroundColor White
-Write-Host "   • Optional desktop icon" -ForegroundColor White
-Write-Host "   • Architecture : x64 only" -ForegroundColor White
+foreach ($line in $lines) {
+    if ($line -match "^[┌├└]") {
+        Write-Host $line -ForegroundColor DarkGray
+    } elseif ($line -match "BUILD COMPILATION RESULTS") {
+        Write-Host "│" -NoNewline -ForegroundColor DarkGray
+        Write-Host $line.Substring(1, $line.Length - 2) -NoNewline -ForegroundColor Cyan
+        Write-Host "│" -ForegroundColor DarkGray
+    } elseif ($line -match "^│\s+(APPLICATION|GENERATED INSTALLER|INNO SETUP CONFIGURATION|DIST FOLDER STATS|COMPARISON:|BUILD TIMING|BUILD ENVIRONMENT)") {
+        Write-Host "│" -NoNewline -ForegroundColor DarkGray
+        Write-Host $line.Substring(1, $line.Length - 2) -NoNewline -ForegroundColor Cyan
+        Write-Host "│" -ForegroundColor DarkGray
+    } elseif ($line -match "^│  ─") {
+        Write-Host $line -ForegroundColor DarkGray
+    } elseif ($line -match "^│\s*│$" -or $line -eq "│$(" " * 73)│") {
+        Write-Host $line -ForegroundColor DarkGray
+    } elseif ($line -match "^│(.+):(.+)│$") {
+        $inner = $line.Substring(1, $line.Length - 2)
+        $colon = $inner.IndexOf(":")
+        $label = $inner.Substring(0, $colon + 1)
+        $value = $inner.Substring($colon + 1)
+        Write-Host "│" -NoNewline -ForegroundColor DarkGray
+        Write-Host $label -NoNewline -ForegroundColor Gray
+        Write-Host $value -NoNewline -ForegroundColor White
+        Write-Host "│" -ForegroundColor DarkGray
+    } else {
+        Write-Host $line -ForegroundColor DarkGray
+    }
+}
 
 Write-BuildSummary
 
@@ -633,7 +602,7 @@ Write-Success "Statistics saved  ->  $JsonHistoryPath  (run #$runNumber)"
 if ($previousSizes.Count -gt 0) {
     $lastBuild = $previousSizes[$previousSizes.Count - 1]
     Write-Host ""
-    Write-Host "  📊 vs. previous build (run #$($lastBuild.Run)):" -ForegroundColor $ColorHighlight
+    Write-Host "  vs. previous build (run #$($lastBuild.Run)):" -ForegroundColor $ColorHighlight
     Write-Host "     Previous installer : $($lastBuild.InstallerSize)" -ForegroundColor $ColorDim
     Write-Host "     Current  installer : $(Format-FileSize $InstallerSize)" -ForegroundColor $ColorDim
     Write-Host "     Previous dist      : $($lastBuild.DistSize)" -ForegroundColor $ColorDim
@@ -641,10 +610,9 @@ if ($previousSizes.Count -gt 0) {
 }
 
 Write-Host ""
-Write-Host "📂 Installer available at:" -ForegroundColor $ColorInfo
-Write-Host "   $InstallerPath" -ForegroundColor $ColorHighlight
+Write-Host "  Installer : $InstallerPath" -ForegroundColor $ColorHighlight
 Write-Host ""
-Write-Host "📊 Statistics exported to: $JsonHistoryPath" -ForegroundColor $ColorInfo
+Write-Host "  Stats     : $JsonHistoryPath" -ForegroundColor $ColorDim
 Write-Host ""
 Write-Success "BUILD COMPLETED SUCCESSFULLY!"
 Write-Host ""
