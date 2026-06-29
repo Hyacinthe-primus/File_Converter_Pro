@@ -3,7 +3,7 @@
 # py -(your_python_version) -m pip install -r requirements-dev.txt
 
 # Testing
-pytest==9.1.0
+pytest==9.1.1
 
 # Exe Packager
 pyinstaller==6.16.0
