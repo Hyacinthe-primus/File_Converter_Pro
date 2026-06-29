@@ -6,7 +6,7 @@
 pytest==9.1.0
 
 # Exe Packager
-pyinstaller==6.16.0
+pyinstaller==6.21.0
 
 # Linux Only
 Appimage==1.0.0; sys_platform == "linux"
