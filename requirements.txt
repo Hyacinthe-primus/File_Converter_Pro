@@ -50,7 +50,7 @@ pyzipper==0.3.6
 cryptography==46.0.3
 
 # Charts/Visualization
-matplotlib==3.10.7
+matplotlib==3.10.9
 
 # Watchdog and Scheduling
 watchdog==6.0.0
