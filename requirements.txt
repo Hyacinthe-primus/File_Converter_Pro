@@ -36,7 +36,7 @@ ebooklib==0.20
 # Conversion utilities
 pypandoc==1.17
 weasyprint==68.1
-lxml==6.0.2
+lxml==6.1.1
 numpy==2.2.6
 
 # Video/Audio
