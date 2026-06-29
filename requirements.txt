@@ -44,7 +44,7 @@ ffmpeg-python==0.2.0
 playsound3==3.3.1
 
 # Archives
-pyzipper==0.3.6
+pyzipper==0.4.0
 
 # Config/Encryption
 cryptography==46.0.3
