@@ -54,7 +54,7 @@ matplotlib==3.10.7
 
 # Watchdog and Scheduling
 watchdog==6.0.0
-APScheduler==3.11.2
+APScheduler==3.11.3
 
 # Windows Only
 winotify==1.1.0
