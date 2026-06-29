@@ -2,8 +2,11 @@
 # Install with: pip install -r requirements-dev.txt or 
 # py -(your_python_version) -m pip install -r requirements-dev.txt
 
+# Testing
+pytest==9.1.0
+
 # Exe Packager
 pyinstaller==6.16.0
 
 # Linux Only
-Appimage==1.0.0
+Appimage==1.0.0; sys_platform == "linux"
