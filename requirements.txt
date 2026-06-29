@@ -20,7 +20,7 @@ python-docx==1.2.0
 docx2pdf==0.1.8
 python-pptx==1.0.2
 openpyxl==3.1.5
-docxcompose==2.1.0
+docxcompose==2.2.0
 
 #Images
 Pillow==12.0.0
