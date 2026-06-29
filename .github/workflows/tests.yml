@@ -18,7 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          grep -vE '^(pywin32|comtypes|winotify)' requirements.txt | pip install -r /dev/stdin
           pip install pytest
 
       - name: Run tests
