@@ -113,12 +113,12 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
                         break
 
             if not meta_name:
-                return False, "Fichier metadata.ini manquant dans le thème."
+                return False, "Metadata file missing in the theme."
 
             meta_content = zf.read(meta_prefix + meta_name).decode("utf-8")
             meta = _parse_metadata_content(meta_content)
             if not meta:
-                return False, "Impossible de lire metadata.ini."
+                return False, "Unable to read metadata.ini."
 
             folder_name = _sanitize_folder_name(meta.name)
             theme_dir = CUSTOM_THEMES_DIR / folder_name
@@ -174,20 +174,20 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
             if missing:
                 import shutil
                 shutil.rmtree(theme_dir)
-                return False, f"Fichiers manquants : {', '.join(sorted(missing))}"
+                return False, f"Missing files : {', '.join(sorted(missing))}"
 
             return True, meta.name
 
     except zipfile.BadZipFile:
-        return False, "Le fichier n'est pas un ZIP valide."
+        return False, "The file is not a valid ZIP archive."
     except Exception as e:
-        return False, f"Erreur lors de l'import : {e}"
+        return False, f"Error during import : {e}"
 
 
 def remove_theme(folder_name: str) -> tuple[bool, str]:
     theme_dir = CUSTOM_THEMES_DIR / folder_name
     if not theme_dir.exists():
-        return False, "Thème introuvable."
+        return False, "Theme not found."
     import shutil
     shutil.rmtree(theme_dir)
     return True, folder_name
@@ -213,7 +213,7 @@ def _parse_metadata_content(content: str, folder_name: str = "") -> ThemeMetadat
     if kind not in ("light", "dark"):
         kind = "light"
     return ThemeMetadata(
-        name=cp.get("theme", "name", fallback="Thème inconnu"),
+        name=cp.get("theme", "name", fallback="Unknown Theme"),
         author=cp.get("theme", "author", fallback=""),
         version=cp.get("theme", "version", fallback="1.0"),
         description=cp.get("theme", "description", fallback=""),
