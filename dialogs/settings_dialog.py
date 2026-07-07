@@ -903,7 +903,7 @@ class SettingsDialog(TranslationMixin, QDialog):
                 pixmap = QPixmap.fromImage(img).scaled(64, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                 preview_lbl = QLabel()
                 preview_lbl.setPixmap(pixmap)
-                preview_lbl.setFixedSize(64, 48)
+                preview_lbl.setFixedSize(68, 52)
                 preview_lbl.setStyleSheet(f"""
                     border: 1px solid {group_border};
                     border-radius: 6px;
