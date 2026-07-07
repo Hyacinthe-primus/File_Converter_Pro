@@ -127,7 +127,7 @@ FADEIN_DELAY        = 100
 STATUSBAR_DELAY     = 700
 SPLASH_DELETE_DELAY = 1100
 
-CLI_COMMANDS = frozenset({"status", "reset", "unlock", "reset-all", "-h", "--help", "help"})
+CLI_COMMANDS = frozenset({"status", "reset", "unlock", "reset-all", "-h", "--help", "help", "--version"})
 
 def get_dropped_files(argv: list[str]) -> list[str]:
     """
@@ -149,33 +149,20 @@ def get_dropped_files(argv: list[str]) -> list[str]:
                 or arg.startswith("--lang=")
                 or arg.startswith("--lang:")
                 or arg.startswith("--theme=")
-                or arg.startswith("--theme:")
-                or _is_lang_flag(arg)):
+                or arg.startswith("--theme:")):
             continue
         if os.path.exists(arg) and not arg.lower().endswith('.fcproj'):
             result.append(arg)
     return result
-
-def _is_lang_flag(arg: str) -> bool:
-    """Return True for  --fr  --en  --de  --en-revisited  etc."""
-    if not arg.startswith("--"):
-        return False
-    code = arg[2:].strip('"').strip("'")
-    return bool(code) and all(c.isalnum() or c in "-_." for c in code)
 
 def get_forced_language(argv: list[str]) -> str | None:
     """
     Parse a forced-language flag from the command line.
 
     Accepted forms
-
-    --fr                          → "fr"
-    --en                          → "en"
-    --en-revisited                → "en-revisited"
-    --"en revisited"              → "en revisited"   (name with space, quoted by shell)
-    --lang fr                     → "fr"             (installer / generic form)
-    --lang=fr                     → "fr"
-    --lang en-revisited           → "en-revisited"
+        --lang fr                     → "fr"
+        --lang=fr                     → "fr"
+        --lang en-revisited           → "en-revisited"
 
     The value is returned as-is (lowercased).  The caller decides whether it
     maps to a built-in code or a .lang file name.
@@ -201,11 +188,6 @@ def get_forced_language(argv: list[str]) -> str | None:
         if a == "--theme":
             i += 2
             continue
-        if a.startswith("--") and a not in CLI_COMMANDS:
-            code = a[2:].strip('"').strip("'").strip().lower()
-            if code and all(c.isalnum() or c in "-_. " for c in code):
-                return code
-
         i += 1
     return None
 
@@ -266,16 +248,17 @@ class CLIHandler:
         tbl.add_column("", style="dim cyan", no_wrap=True)
 
         rows = [
-            ("main.py",                                         "Launch GUI mode",                          ">>"),
-            ("main.py status",                                  "Show all achievement statuses",            "::"),
-            ("main.py reset [italic]<id>[/italic]",             "Reset a specific achievement",              "↺"),
-            ("main.py unlock [italic]<id>[/italic]",            "Force-unlock an achievement",               "★"),
-            ("main.py reset-all",                               "Nuke every achievement",                  "<!>"),
-            ("main.py help / -h / --help",                      "This glorious screen",                      "?"),
-            ("main.py --lang [italic]<code>[/italic]",          "Override UI language",                      "@"),
-            ("main.py --theme [italic]dark|light[/italic]",     "Override UI theme",                         "~"),
-            ("main.py --lang … --theme …",                      "Override both at once",                     "⚡"),
-            ("main.py --daemon",                                "Headless daemon mode",                      "&"),
+            ("main.py",                                     "Launch GUI mode",               "▶"),
+            ("main.py status",                              "Show all achievement statuses", "≡"),
+            ("main.py reset [italic]<id>[/italic]",         "Reset a specific achievement",  "↺"),
+            ("main.py unlock [italic]<id>[/italic]",        "Force-unlock an achievement",   "★"),
+            ("main.py reset-all",                           "Nuke every achievement",        "✖"),
+            ("main.py --version",                           "Show version info",             "ⓘ"),
+            ("main.py help / -h / --help",                  "This glorious screen",          "?"),
+            ("main.py --lang [italic]<code>[/italic]",      "Override UI language",          "≋"),
+            ("main.py --theme [italic]dark|light[/italic]", "Override UI theme",             "◐"),
+            ("main.py --lang … --theme …",                  "Override both at once",         "⊕"),
+            ("main.py --daemon",                            "Headless daemon mode",          "∞"),
         ]
         for cmd, desc, icon in rows:
             tbl.add_row(cmd, desc, icon)
@@ -334,6 +317,7 @@ class CLIHandler:
             "-h"       : self._cmd_help,
             "--help"   : self._cmd_help,
             "help"     : self._cmd_help,
+            "--version": self._cmd_version,
         }
 
         handler = dispatch.get(self.command)
@@ -400,9 +384,22 @@ class CLIHandler:
         _console.print(self._build_commands_table())
         _console.print()
         _console.print(self._build_context_panel())
-        _fcp_section("Examples", icon="◈")
+        _fcp_section("Examples", icon="❖")
         _console.print(self._build_examples_table())
         _console.print()
+
+    def _cmd_version(self) -> None:
+        from app import __version__
+        _console.print()
+        panel = Panel.fit(
+            f"[bold bright_cyan]File Converter Pro[/bold bright_cyan]\n"
+            f"[dim white]Version:[/dim white] [bright_white]{__version__}[/bright_white]\n"
+            f"[dim white]Build date:[/dim white] [bright_white]{datetime.now().strftime('%Y-%m-%d')}[/bright_white]",
+            border_style="cyan",
+            padding=(0, 2),
+        )
+
+        _console.print(Align.left(panel))
 
     def _require_arg(self, command: str) -> None:
         if len(self.argv) < 3:
@@ -501,7 +498,7 @@ class AppBootstrap:
     def _load_config(self) -> dict:
         config = self.config_manager.load_config()
 
-        # Forced language (--fr / --en / --en-revisited / --lang <code>)
+        # Forced language (--lang <code>)
         if self.forced_language:
             config["language"] = self.forced_language
             self.config_manager.save_config(config)
