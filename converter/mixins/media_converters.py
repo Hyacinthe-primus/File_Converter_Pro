@@ -11,6 +11,7 @@ _NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDO
 class MediaConverters:
     """Audio/video conversion methods for AdvancedConverterEngine."""
 
+    @staticmethod
     def _find_ffmpeg() -> str | None:
         """Locate ffmpeg binary in PATH or common install dirs."""
         import shutil
