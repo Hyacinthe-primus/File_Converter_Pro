@@ -1,22 +1,25 @@
-# Build output
+# directories
 dist/
 build/
 output/
+Checksum/
+styles/custom_themes
 
-# PyInstaller
+# Cache files
 __pycache__/
-*.pyc
-*.pyo
+.pytest_cache/
+.ruff_cache/
 
-# Local database
+
+# Some files
 *.db
-
-#keys
 *.dat
 *.key
+*.fctheme
+*.pyc
+*.db-wal
+*.db-shm
 
-# User config (contains personal encrypted data)
-config.json
 
 # Automatically generated reports
 sfx_report.txt
@@ -31,11 +34,6 @@ env/
 
 # IDE
 .vscode/
-.idea/
-
-# OneDrive temp files
-*.tmp
-~$*
 
 # Social preview files
 social-preview.png
