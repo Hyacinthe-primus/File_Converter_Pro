@@ -1,6 +1,6 @@
 # Commercial License — File Converter Pro
 
-**Copyright © 2026 Prime Enterprises (Hyacinthe). All rights reserved.**
+**Copyright © 2026 Prime Enterprises. All rights reserved.**
 
 ---
 
@@ -40,8 +40,8 @@ Commercial licensing is handled on a case-by-case basis depending on the intende
 
 To request a commercial license, contact:
 
-**Hyacinthe / Prime Enterprises**
-📧 [write a mail](mailto:prime.enterprises.dev@gmail.com)
+**Prime Enterprises**
+[write a mail](mailto:prime.enterprises.dev@gmail.com)
 
 Please include in your message:
 - A description of your intended use
@@ -54,7 +54,7 @@ Please include in your message:
 
 Regardless of the license type, the following attribution must be retained in your product documentation or about screen:
 
-> Powered by File Converter Pro — © 2026 Prime Enterprises (Hyacinthe)
+> Powered by File Converter Pro — © 2026 Prime Enterprises
 > Original project: https://github.com/Hyacinthe-primus/File_Converter_Pro
 
 ---

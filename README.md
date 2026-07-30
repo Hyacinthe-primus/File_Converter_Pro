@@ -105,10 +105,10 @@ See **[CONTRIBUTING.md](CONTRIBUTING.md)** for translations, bug reports, code f
 Dual licensed: **GPLv3** for open-source use · **Commercial License** for proprietary products.
 See [`LICENSE`](LICENSE/LICENSE.txt) and [COMMERCIAL LICENSE](COMMERCIALLICENSE.md).
 
-© 2026 Prime Enterprises (Hyacinthe). All rights reserved.
+© 2026 Prime Enterprises. All rights reserved.
 
 ---
 
 <div align="center">
-<sub>Built by Hyacinthe <em>because file conversion should actually feel good.</em></sub>
+<sub>Built by Prime Enterprises <em>because file conversion should actually feel good.</em></sub>
 </div>
