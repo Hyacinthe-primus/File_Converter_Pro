@@ -6,7 +6,7 @@ Thanks for taking the time to contribute! This project is maintained solo alongs
 
 ## What you can contribute
 
-### 🌐 Translations *(easiest entry point)*
+### Translations *(easiest entry point)*
 
 No coding required. Create a `.lang` file (UTF-8 JSON) and place it in `languages/`. The app auto-detects it on next launch.
 
@@ -46,13 +46,13 @@ Use the [Bug Report](.github/ISSUE_TEMPLATE/bug_report.md) template. Please incl
 
 ---
 
-### 💡 Feature Requests
+### Feature Requests
 
 Check [ROADMAP.md](ROADMAP.md) first, the feature may already be planned. If not, open an issue using the [Feature Request](.github/ISSUE_TEMPLATE/feature_request.md) template.
 
 ---
 
-###  Simple Code Contributions
+### Simple Code Contributions
 
 Small bug fixes, typo corrections, minor UI tweaks, adding a missing format to an existing pipeline  these are welcome as direct PRs.
 
