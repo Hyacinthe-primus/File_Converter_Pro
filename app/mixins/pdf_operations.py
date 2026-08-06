@@ -11,7 +11,7 @@ class PdfOperationsMixin:
     """Mixin: PDF merge, split, protect for FileConverterApp."""
 
     def merge_pdfs(self):
-        from app.ui import MergeOrderDialog
+        from dialogs.merge_order_dialog import MergeOrderDialog
         selected_items = self.files_list_widget.selectedItems()
         pdf_files = []
         if selected_items:
@@ -29,7 +29,7 @@ class PdfOperationsMixin:
             QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
             return
 
-        dialog = MergeOrderDialog(pdf_files, self, self.current_language)
+        dialog = MergeOrderDialog(pdf_files, ".pdf", language = self.current_language)
         if dialog.exec() != QDialog.Accepted:
             return
         ordered_files = dialog.get_ordered_files()
@@ -44,12 +44,12 @@ class PdfOperationsMixin:
         total_size = sum(os.path.getsize(f) for f in ordered_files)
 
         try:
-            from pypdf import PdfMerger
-            merger = PdfMerger()
+            from pypdf import PdfWriter
+            writer = PdfWriter()
             for file_path in ordered_files:
-                merger.append(file_path)
-            merger.write(output_file)
-            merger.close()
+                writer.append(file_path)
+            writer.write(output_file)
+            writer.close()
 
             conversion_time = (datetime.now() - start_time).total_seconds()
             self.db_manager.add_conversion_record(source_file=", ".join([Path(f).name for f in ordered_files]), source_format="PDF", target_file=output_file, target_format="PDF", operation_type="merge_pdf", file_size=total_size, conversion_time=conversion_time, success=True)
@@ -70,6 +70,7 @@ class PdfOperationsMixin:
 
     def merge_word_docs(self):
         from docxcompose import Composer
+        # from dialogs.word_to_pdf_dialog import WordToPdfOptionsDialog
         selected_items = self.files_list_widget.selectedItems()
         word_files = []
         if selected_items:
@@ -96,6 +97,7 @@ class PdfOperationsMixin:
         try:
             from docx import Document
             composer = Composer(Document(word_files[0]))
+            # composer = WordToPdfOptionsDialog(Document(word_files[0]))
             for wf in word_files[1:]:
                 composer.append(Document(wf))
             composer.save(output_file)
