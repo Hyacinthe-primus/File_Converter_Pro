@@ -114,6 +114,17 @@ class OptimizationMixin:
                 save_options = {'garbage': 3, 'deflate': True, 'clean': True, 'deflate_images': compress_images, 'deflate_fonts': True}
             else:
                 save_options = {'garbage': 2, 'deflate': True, 'clean': True}
+
+            if compress_images:
+                # deflate_images only recompresses streams losslessly, so it has little effect
+                # on scanned/image-only PDFs where images are already JPEG-compressed.
+                # Downsample and re-encode the raster images instead.
+                dpi_map = {"high": 150, "normal": 120, "very_reduced": 96}
+                quality_map = {"high": 85, "normal": 75, "very_reduced": 55}
+                target_dpi = dpi_map.get(compression_level, 120)
+                jpeg_quality = quality_map.get(compression_level, 75)
+                self._downsample_pdf_images(pdf_document, target_dpi, jpeg_quality)
+
             if remove_metadata:
                 pdf_document.set_metadata({})
             pdf_document.save(output_path, **save_options)
@@ -122,6 +133,103 @@ class OptimizationMixin:
         except Exception as e:
             print(f"PDF optimization error {pdf_path}: {e}")
             return False
+
+    def _downsample_pdf_images(self, pdf_document, target_dpi, jpeg_quality):
+        """Resample embedded raster images to target_dpi and re-encode as JPEG.
+
+        Effective DPI is based on the image's rendered size on the page, not its
+        raw pixel dimensions. Images already at or below target_dpi are left
+        unchanged. Vector content, masks (SMask/stencil), and CMYK images are
+        skipped to avoid rendering issues.
+        """
+
+        from PIL import Image as PILImage
+        import io as _io
+
+        seen_xrefs = set()
+
+        for page in pdf_document:
+            try:
+                img_list = page.get_images(full=True)
+            except Exception:
+                continue
+
+            for img in img_list:
+                xref = img[0]
+                if xref in seen_xrefs:
+                    continue
+                seen_xrefs.add(xref)
+
+                # Skip images used as soft/stencil masks elsewhere.
+                # img[1] is this image's SMask xref, but this xref may itself be used as a mask.
+                try:
+                    if pdf_document.xref_get_key(xref, "ImageMask")[1] == "true":
+                        continue
+                except Exception:
+                    pass
+
+                rects = page.get_image_rects(xref)
+                if not rects:
+                    continue
+                rect = rects[0]
+                disp_w_in = rect.width / 72.0
+                disp_h_in = rect.height / 72.0
+                if disp_w_in <= 0 or disp_h_in <= 0:
+                    continue
+
+                try:
+                    base_image = pdf_document.extract_image(xref)
+                except Exception:
+                    continue
+                if not base_image:
+                    continue
+
+                px_w = base_image.get("width")
+                px_h = base_image.get("height")
+                img_bytes = base_image.get("image")
+                if not px_w or not px_h or not img_bytes:
+                    continue
+                if base_image.get("smask"):
+                    # Preserve alpha/soft mask.
+                    continue
+
+                if base_image.get("colorspace") == 4:  # CMYK
+                    # Skip CMYK images.
+                    continue
+
+                current_dpi = px_w / disp_w_in
+
+                # Some PDFs embed images at 1 px = 1 pt, making huge images appear ~72 DPI.
+                # DPI-based checks alone would skip them, so also enforce an absolute pixel limit.
+                abs_max_px = target_dpi * 20  # Allows up to a 20" side at target DPI
+                dpi_over_target = current_dpi > target_dpi * 1.1
+                pixel_dims_excessive = max(px_w, px_h) > abs_max_px
+
+                if not dpi_over_target and not pixel_dims_excessive:
+                    continue
+
+                if dpi_over_target:
+                    scale = target_dpi / current_dpi
+                else:
+                    scale = abs_max_px / max(px_w, px_h)
+
+                new_w = max(1, int(px_w * scale))
+                new_h = max(1, int(px_h * scale))
+
+                try:
+                    with PILImage.open(_io.BytesIO(img_bytes)) as pil_img:
+                        if pil_img.mode in ('RGBA', 'P', 'LA'):
+                            pil_img = pil_img.convert('RGB')
+                        resized = pil_img.resize((new_w, new_h), PILImage.LANCZOS)
+                        buf = _io.BytesIO()
+                        resized.save(buf, format='JPEG', quality=jpeg_quality, optimize=True)
+                        new_bytes = buf.getvalue()
+
+                    if len(new_bytes) < len(img_bytes):
+                        page.replace_image(xref, stream=new_bytes)
+                except Exception as e:
+                    print(f"[pdf downsample] xref {xref} skipped: {e}")
+                    continue
 
     def optimize_word_file(self, word_path, output_path, compression_level, remove_metadata, compress_images):
         try:
