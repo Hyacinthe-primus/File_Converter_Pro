@@ -141,7 +141,7 @@ class RankPopup(TranslationMixin, QDialog):
         screen = self.screen().availableGeometry()
         self.move(screen.width() - self.width() - 20, 50)
         
-        font_path = os.path.join(_ROOT_DIR, "fonts", "Inter-Regular.ttf")
+        font_path = os.path.join(_ROOT_DIR, "fonts", "SF-Pro-Display-Medium.ttf")
         if os.path.exists(font_path):
             from PySide6.QtGui import QFontDatabase
             font_id = QFontDatabase.addApplicationFont(font_path)
