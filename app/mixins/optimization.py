@@ -120,7 +120,7 @@ class OptimizationMixin:
             # Ghostscript first: rebuilds the PDF from rendered content rather
             # than patching the existing object table, so it handles both
             # normal compression AND recovers files with corrupted xrefs in
-            # one pass — no need to detect corruption and branch separately.
+            # one pass - no need to detect corruption and branch separately.
             print(f"[optimize_pdf] '{pdf_path}': trying Ghostscript first")
             if self._ghostscript_compress(pdf_path, output_path, compression_level):
                 if os.path.getsize(output_path) < original_size:
