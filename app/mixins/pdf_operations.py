@@ -70,6 +70,7 @@ class PdfOperationsMixin:
 
     def merge_word_docs(self):
         from docxcompose import Composer
+        from dialogs.merge_order_dialog import MergeOrderDialog
         # from dialogs.word_to_pdf_dialog import WordToPdfOptionsDialog
         selected_items = self.files_list_widget.selectedItems()
         word_files = []
@@ -88,24 +89,34 @@ class PdfOperationsMixin:
                                 self.translate_text("Veuillez sélectionner au moins 2 fichiers Word"))
             return
 
+        dialog = MergeOrderDialog(word_files, ".docx", language = self.current_language)
+        if dialog.exec() != QDialog.Accepted:
+            return
+        ordered_files = dialog.get_ordered_files()
+
         default_filename = f"fusion_word_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
         output_file = self.get_output_directory(default_filename)
         if not output_file:
             return
 
         self.show_progress(True, self.translate_text("Fusion Word"))
+        start_time = datetime.now()
+        total_size = sum(os.path.getsize(f) for f in ordered_files)
+
         try:
             from docx import Document
             composer = Composer(Document(word_files[0]))
-            # composer = WordToPdfOptionsDialog(Document(word_files[0]))
             for wf in word_files[1:]:
                 composer.append(Document(wf))
             composer.save(output_file)
             self.show_progress(False)
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("merge_word")
+            conversion_time = (datetime.now() - start_time).total_seconds()
+            self.db_manager.add_conversion_record(source_file=", ".join([Path(f).name for f in ordered_files]), source_format="Word", target_file=output_file, target_format="Word", operation_type="merge_word", file_size=total_size, conversion_time=conversion_time, success=True)
+            self.achievement_system.record_conversion("merge_word", total_size, True)
             QMessageBox.information(self, self.translate_text("Succès"),
-                                    self.translate_text("word_merge_success").format(count=len(word_files), time="0"))
+                                    self.translate_text("word_merge_success").format(count=len(word_files), time=f"{conversion_time:.1f}"))
         except Exception as e:
             self.show_progress(False)
             QMessageBox.critical(self, self.translate_text("Erreur"),
