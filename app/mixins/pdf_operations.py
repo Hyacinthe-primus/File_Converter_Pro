@@ -11,7 +11,7 @@ class PdfOperationsMixin:
     """Mixin: PDF merge, split, protect for FileConverterApp."""
 
     def merge_pdfs(self):
-        from app.ui import MergeOrderDialog
+        from dialogs.merge_order_dialog import MergeOrderDialog
         selected_items = self.files_list_widget.selectedItems()
         pdf_files = []
         if selected_items:
@@ -29,7 +29,7 @@ class PdfOperationsMixin:
             QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
             return
 
-        dialog = MergeOrderDialog(pdf_files, self, self.current_language)
+        dialog = MergeOrderDialog(pdf_files, ".pdf", language = self.current_language)
         if dialog.exec() != QDialog.Accepted:
             return
         ordered_files = dialog.get_ordered_files()
@@ -44,12 +44,12 @@ class PdfOperationsMixin:
         total_size = sum(os.path.getsize(f) for f in ordered_files)
 
         try:
-            from pypdf import PdfMerger
-            merger = PdfMerger()
+            from pypdf import PdfWriter
+            writer = PdfWriter()
             for file_path in ordered_files:
-                merger.append(file_path)
-            merger.write(output_file)
-            merger.close()
+                writer.append(file_path)
+            writer.write(output_file)
+            writer.close()
 
             conversion_time = (datetime.now() - start_time).total_seconds()
             self.db_manager.add_conversion_record(source_file=", ".join([Path(f).name for f in ordered_files]), source_format="PDF", target_file=output_file, target_format="PDF", operation_type="merge_pdf", file_size=total_size, conversion_time=conversion_time, success=True)
@@ -69,7 +69,8 @@ class PdfOperationsMixin:
                                  self.translate_text("error_merge").format(error=str(e)))
 
     def merge_word_docs(self):
-        from docxcompose import Composer
+        from docxcompose.composer import Composer
+        from dialogs.merge_order_dialog import MergeOrderDialog
         selected_items = self.files_list_widget.selectedItems()
         word_files = []
         if selected_items:
@@ -87,12 +88,20 @@ class PdfOperationsMixin:
                                 self.translate_text("Veuillez sélectionner au moins 2 fichiers Word"))
             return
 
+        dialog = MergeOrderDialog(word_files, ".docx", language = self.current_language)
+        if dialog.exec() != QDialog.Accepted:
+            return
+        ordered_files = dialog.get_ordered_files()
+
         default_filename = f"fusion_word_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
         output_file = self.get_output_directory(default_filename)
         if not output_file:
             return
 
         self.show_progress(True, self.translate_text("Fusion Word"))
+        start_time = datetime.now()
+        total_size = sum(os.path.getsize(f) for f in ordered_files)
+
         try:
             from docx import Document
             composer = Composer(Document(word_files[0]))
@@ -102,8 +111,11 @@ class PdfOperationsMixin:
             self.show_progress(False)
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("merge_word")
+            conversion_time = (datetime.now() - start_time).total_seconds()
+            self.db_manager.add_conversion_record(source_file=", ".join([Path(f).name for f in ordered_files]), source_format="Word", target_file=output_file, target_format="Word", operation_type="merge_word", file_size=total_size, conversion_time=conversion_time, success=True)
+            self.achievement_system.record_conversion("merge_word", total_size, True)
             QMessageBox.information(self, self.translate_text("Succès"),
-                                    self.translate_text("word_merge_success").format(count=len(word_files), time="0"))
+                                    self.translate_text("word_merge_success").format(count=len(word_files), time=f"{conversion_time:.1f}"))
         except Exception as e:
             self.show_progress(False)
             QMessageBox.critical(self, self.translate_text("Erreur"),
