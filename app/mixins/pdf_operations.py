@@ -69,9 +69,8 @@ class PdfOperationsMixin:
                                  self.translate_text("error_merge").format(error=str(e)))
 
     def merge_word_docs(self):
-        from docxcompose import Composer
+        from docxcompose.composer import Composer
         from dialogs.merge_order_dialog import MergeOrderDialog
-        # from dialogs.word_to_pdf_dialog import WordToPdfOptionsDialog
         selected_items = self.files_list_widget.selectedItems()
         word_files = []
         if selected_items:
