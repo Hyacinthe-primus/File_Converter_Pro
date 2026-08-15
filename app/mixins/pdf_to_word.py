@@ -1,17 +1,28 @@
 """PdfToWordMixin — PDF → Word/DOCX conversion methods."""
 
 import os
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
 from datetime import datetime
+from pathlib import Path
 
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QMessageBox, QGroupBox,
-                               QLineEdit, QDialog, QDialogButtonBox, QTabWidget, QScrollArea)
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QScrollArea,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 try:
     from pdf2docx import Converter as _Converter
+
     Converter = _Converter
 except ImportError as _e:
     Converter = None
@@ -30,8 +41,8 @@ except ImportError as _e:
     Document = Inches = None
     print(f"[IMPORT] python-docx not available: {_e}")
 
-from widgets import AnimatedCheckBox
 from dialogs import PdfToWordDialog
+from widgets import AnimatedCheckBox
 
 
 class PdfToWordMixin:
@@ -40,6 +51,7 @@ class PdfToWordMixin:
     def check_pdf_has_images(self, pdf_path):
         try:
             import fitz
+
             doc = fitz.open(pdf_path)
             has_images = False
             for page in doc:
@@ -63,7 +75,9 @@ class PdfToWordMixin:
         else:
             message = self.translate_text(f"{len(encrypted_pdfs)} fichiers PDF sont protégés par mot de passe.")
 
-        message += "\n\n" + self.translate_text("Pour convertir ces fichiers en Word, vous devez fournir les mots de passe.\n\n")
+        message += "\n\n" + self.translate_text(
+            "Pour convertir ces fichiers en Word, vous devez fournir les mots de passe.\n\n"
+        )
         message += self.translate_text("Options :")
 
         info_label = QLabel(message)
@@ -190,15 +204,18 @@ class PdfToWordMixin:
         layout.addWidget(button_box)
 
         if dialog.exec() == QDialog.Accepted:
-            if hasattr(dialog, 'passwords') and dialog.passwords:
+            if hasattr(dialog, "passwords") and dialog.passwords:
                 return {
-                    'passwords': dialog.passwords,
-                    'keep_originals': dialog.keep_originals,
-                    'remove_passwords': dialog.remove_passwords
+                    "passwords": dialog.passwords,
+                    "keep_originals": dialog.keep_originals,
+                    "remove_passwords": dialog.remove_passwords,
                 }
             else:
-                QMessageBox.warning(self, self.translate_text("Avertissement"),
-                                self.translate_text("Aucun mot de passe fourni. La conversion sera annulée."))
+                QMessageBox.warning(
+                    self,
+                    self.translate_text("Avertissement"),
+                    self.translate_text("Aucun mot de passe fourni. La conversion sera annulée."),
+                )
                 return False
         else:
             return False
@@ -208,15 +225,15 @@ class PdfToWordMixin:
         success_count = 0
         failed_files = []
 
-        passwords = passwords_info.get('passwords', {})
-        keep_originals = passwords_info.get('keep_originals', True)
-        remove_passwords = passwords_info.get('remove_passwords', True)
+        passwords = passwords_info.get("passwords", {})
+        keep_originals = passwords_info.get("keep_originals", True)
+        remove_passwords = passwords_info.get("remove_passwords", True)
 
         self.show_progress(True, self.translate_text("Déchiffrement des PDF..."))
 
         for i, pdf_file in enumerate(pdf_files):
             try:
-                with open(pdf_file, 'rb') as f:
+                with open(pdf_file, "rb") as f:
                     pdf_reader = PdfReader(f)
 
                     if pdf_reader.is_encrypted:
@@ -224,9 +241,11 @@ class PdfToWordMixin:
 
                         if not password:
                             try:
-                                pdf_reader.decrypt('')
+                                pdf_reader.decrypt("")
                             except Exception:
-                                failed_files.append(f"{Path(pdf_file).name} - {self.translate_text('Mot de passe requis')}")
+                                failed_files.append(
+                                    f"{Path(pdf_file).name} - {self.translate_text('Mot de passe requis')}"
+                                )
                                 continue
                         else:
                             success = pdf_reader.decrypt(password)
@@ -241,30 +260,26 @@ class PdfToWordMixin:
                                         continue
 
                                 if not success:
-                                    failed_files.append(f"{Path(pdf_file).name} - {self.translate_text('Mot de passe incorrect')}")
+                                    failed_files.append(
+                                        f"{Path(pdf_file).name} - {self.translate_text('Mot de passe incorrect')}"
+                                    )
                                     continue
 
-                        pdf_writer = __import__('pypdf', fromlist=['PdfWriter']).PdfWriter()
+                        pdf_writer = __import__("pypdf", fromlist=["PdfWriter"]).PdfWriter()
 
                         for page in pdf_reader.pages:
                             pdf_writer.add_page(page)
 
                         original_stem = Path(pdf_file).stem
-                        temp_file = os.path.join(
-                            tempfile.gettempdir(),
-                            f"{original_stem}_decrypted.pdf"
-                        )
+                        temp_file = os.path.join(tempfile.gettempdir(), f"{original_stem}_decrypted.pdf")
 
                         counter = 1
                         while os.path.exists(temp_file):
-                            temp_file = os.path.join(
-                                tempfile.gettempdir(),
-                                f"{original_stem}_decrypted_{counter}.pdf"
-                            )
+                            temp_file = os.path.join(tempfile.gettempdir(), f"{original_stem}_decrypted_{counter}.pdf")
                             counter += 1
                         self.temp_files.append(temp_file)
 
-                        with open(temp_file, 'wb') as output_file:
+                        with open(temp_file, "wb") as output_file:
                             if remove_passwords:
                                 pdf_writer.write(output_file)
                             else:
@@ -293,7 +308,9 @@ class PdfToWordMixin:
         self.show_progress(False)
 
         if failed_files:
-            error_message = self.translate_text(f"{success_count}/{len(pdf_files)} PDF(s) déchiffré(s) avec succès.\n\n")
+            error_message = self.translate_text(
+                f"{success_count}/{len(pdf_files)} PDF(s) déchiffré(s) avec succès.\n\n"
+            )
             error_message += self.translate_text(f"Échecs ({len(failed_files)}):\n")
             error_message += "\n".join(failed_files[:3])
 
@@ -306,7 +323,7 @@ class PdfToWordMixin:
 
     def decrypt_single_pdf(self, pdf_path, password, output_path=None, remove_password=True):
         try:
-            with open(pdf_path, 'rb') as f:
+            with open(pdf_path, "rb") as f:
                 pdf_reader = PdfReader(f)
 
                 if not pdf_reader.is_encrypted:
@@ -326,7 +343,7 @@ class PdfToWordMixin:
                     if not success:
                         raise Exception(self.translate_text("Mot de passe incorrect"))
 
-                pdf_writer = __import__('pypdf', fromlist=['PdfWriter']).PdfWriter()
+                pdf_writer = __import__("pypdf", fromlist=["PdfWriter"]).PdfWriter()
 
                 for page in pdf_reader.pages:
                     pdf_writer.add_page(page)
@@ -334,7 +351,7 @@ class PdfToWordMixin:
                 if not output_path:
                     output_path = self.create_temp_file(suffix="_decrypted.pdf")
 
-                with open(output_path, 'wb') as output_file:
+                with open(output_path, "wb") as output_file:
                     if remove_password:
                         pdf_writer.write(output_file)
                     else:
@@ -387,7 +404,7 @@ class PdfToWordMixin:
                     file_size=file_size,
                     conversion_time=operation_time,
                     success=True,
-                    notes=f"Mode: {current_mode}"
+                    notes=f"Mode: {current_mode}",
                 )
 
                 success_count += 1
@@ -403,9 +420,13 @@ class PdfToWordMixin:
                     file_size=0,
                     conversion_time=0,
                     success=False,
-                    notes=f"Error: {str(e)}"
+                    notes=f"Error: {str(e)}",
                 )
-                QMessageBox.critical(self, self.translate_text("Erreur"), self.translate_text(f"Erreur avec {Path(file_path).name}: {str(e)}"))
+                QMessageBox.critical(
+                    self,
+                    self.translate_text("Erreur"),
+                    self.translate_text(f"Erreur avec {Path(file_path).name}: {str(e)}"),
+                )
 
         total_time = (datetime.now() - start_time).total_seconds()
         self.show_progress(False)
@@ -420,18 +441,19 @@ class PdfToWordMixin:
             self.achievement_system.check_speed_conversion(success_count, total_time)
 
         formatted_time = f"{total_time:.1f}"
-        message = self.translate_text("pdf_to_word_success_sum").format(success_count,len(pdf_files),formatted_time)
+        message = self.translate_text("pdf_to_word_success_sum").format(success_count, len(pdf_files), formatted_time)
         if self.config.get("enable_system_notifications", True):
             self.system_notifier.send("pdf_to_word")
         QMessageBox.information(self, self.translate_text("Succès"), self.translate_text(message))
 
     def _get_chart_regions(self, page):
-        MIN_PATHS   = 8
-        MIN_AREA    = 8000
-        PADDING     = 10
-        MERGE_GAP   = 20
+        MIN_PATHS = 8
+        MIN_AREA = 8000
+        PADDING = 10
+        MERGE_GAP = 20
 
         import fitz
+
         drawings = page.get_drawings()
         if not drawings:
             return []
@@ -446,13 +468,9 @@ class PdfToWordMixin:
         count = 1
 
         for r in path_rects[1:]:
-            expanded = fitz.Rect(cur.x0 - MERGE_GAP, cur.y0 - MERGE_GAP,
-                                 cur.x1 + MERGE_GAP, cur.y1 + MERGE_GAP)
+            expanded = fitz.Rect(cur.x0 - MERGE_GAP, cur.y0 - MERGE_GAP, cur.x1 + MERGE_GAP, cur.y1 + MERGE_GAP)
             if expanded.intersects(r):
-                cur = fitz.Rect(
-                    min(cur.x0, r.x0), min(cur.y0, r.y0),
-                    max(cur.x1, r.x1), max(cur.y1, r.y1)
-                )
+                cur = fitz.Rect(min(cur.x0, r.x0), min(cur.y0, r.y0), max(cur.x1, r.x1), max(cur.y1, r.y1))
                 count += 1
             else:
                 if count >= MIN_PATHS and cur.get_area() >= MIN_AREA:
@@ -467,8 +485,8 @@ class PdfToWordMixin:
         result = []
         for c in clusters:
             padded = fitz.Rect(
-                max(0,            c.x0 - PADDING),
-                max(0,            c.y0 - PADDING),
+                max(0, c.x0 - PADDING),
+                max(0, c.y0 - PADDING),
                 min(page_rect.x1, c.x1 + PADDING),
                 min(page_rect.y1, c.y1 + PADDING),
             )
@@ -478,22 +496,27 @@ class PdfToWordMixin:
 
     def _rasterize_region(self, page, rect, dpi=150):
         import fitz
-        zoom   = dpi / 72.0
+
+        zoom = dpi / 72.0
         matrix = fitz.Matrix(zoom, zoom)
         fitz.IRect(
-            int(rect.x0 * zoom), int(rect.y0 * zoom),
-            int(rect.x1 * zoom), int(rect.y1 * zoom),
+            int(rect.x0 * zoom),
+            int(rect.y0 * zoom),
+            int(rect.x1 * zoom),
+            int(rect.y1 * zoom),
         )
         pix = page.get_pixmap(matrix=matrix, clip=rect, alpha=False)
         return pix.tobytes("png")
 
     def _try_word_com_pdf_to_docx(self, pdf_path, docx_path):
         import sys
+
         if sys.platform != "win32":
             return False
 
         try:
             import winreg
+
             winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, "Word.Application")
         except (OSError, ImportError):
             print("[PDF→DOCX] Word not found in registry — skipping COM tier")
@@ -501,16 +524,18 @@ class PdfToWordMixin:
 
         import os
         import threading
-        pdf_path  = os.path.abspath(pdf_path)
+
+        pdf_path = os.path.abspath(pdf_path)
         docx_path = os.path.abspath(docx_path)
 
-        result      = {"ok": False}
-        stop_event  = threading.Event()
+        result = {"ok": False}
+        stop_event = threading.Event()
 
         def _dialog_dismisser():
             import ctypes
             import ctypes.wintypes
-            user32   = ctypes.windll.user32
+
+            user32 = ctypes.windll.user32
             BM_CLICK = 0x00F5
 
             DialogProc = ctypes.WINFUNCTYPE(
@@ -539,7 +564,7 @@ class PdfToWordMixin:
                 return found.value or None
 
             dialog_classes = ["#32770", "bosa_sdm_msword"]
-            target_title   = "Microsoft Word"
+            target_title = "Microsoft Word"
 
             while not stop_event.is_set():
                 for cls in dialog_classes:
@@ -558,26 +583,28 @@ class PdfToWordMixin:
                     else:
                         user32.SendMessageW(hwnd, 0x0111, 1, 0)
                 import time as _t
+
                 _t.sleep(0.3)
 
         def _worker():
             word = None
-            doc  = None
+            doc = None
             try:
-                import pythoncom
                 import comtypes.client
+                import pythoncom
+
                 pythoncom.CoInitialize()
-                word = comtypes.client.CreateObject('Word.Application')
-                word.Visible        = False
-                word.DisplayAlerts  = 0
+                word = comtypes.client.CreateObject("Word.Application")
+                word.Visible = False
+                word.DisplayAlerts = 0
                 word.AutomationSecurity = 3
 
                 doc = word.Documents.Open(
                     pdf_path,
-                    ConfirmConversions = False,
-                    ReadOnly           = True,
-                    AddToRecentFiles   = False,
-                    NoEncodingDialog   = True,
+                    ConfirmConversions=False,
+                    ReadOnly=True,
+                    AddToRecentFiles=False,
+                    NoEncodingDialog=True,
                 )
                 doc.SaveAs2(docx_path, FileFormat=16)
                 result["ok"] = True
@@ -586,15 +613,21 @@ class PdfToWordMixin:
                 print(f"[PDF→DOCX] Word COM failed: {e}")
             finally:
                 if doc is not None:
-                    try: doc.Close(False)
-                    except Exception: pass
+                    try:
+                        doc.Close(False)
+                    except Exception:
+                        pass
                 if word is not None:
-                    try: word.Quit()
-                    except Exception: pass
+                    try:
+                        word.Quit()
+                    except Exception:
+                        pass
                 try:
                     import pythoncom
+
                     pythoncom.CoUninitialize()
-                except Exception: pass
+                except Exception:
+                    pass
 
         dismisser = threading.Thread(target=_dialog_dismisser, daemon=True)
         dismisser.start()
@@ -610,6 +643,41 @@ class PdfToWordMixin:
             return False
 
         return result["ok"]
+
+    def _convert_pdf_to_docx_libreoffice(self, pdf_path, docx_path, timeout: int = 120) -> bool:
+        """Convert PDF → DOCX via LibreOffice headless. Returns True on success."""
+        import subprocess
+
+        from external_binaries import resolve_binary
+
+        soffice = resolve_binary("libreoffice")
+        if not soffice:
+            print("[PDF→DOCX] LibreOffice not found — skipping tier")
+            return False
+
+        output_dir = os.path.dirname(docx_path)
+        try:
+            result = subprocess.run(
+                [soffice, "--headless", "--convert-to", "docx", "--outdir", output_dir, pdf_path],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            expected_docx = os.path.join(output_dir, os.path.splitext(os.path.basename(pdf_path))[0] + ".docx")
+            if os.path.exists(expected_docx):
+                if os.path.abspath(expected_docx) != os.path.abspath(docx_path):
+                    os.replace(expected_docx, docx_path)
+                print(f"[PDF→DOCX] LibreOffice success: {docx_path}")
+                return True
+            print(f"[PDF→DOCX] LibreOffice failed: {result.stderr}")
+            return False
+        except subprocess.TimeoutExpired:
+            print("[PDF→DOCX] LibreOffice timed out")
+            return False
+        except Exception as e:
+            print(f"[PDF→DOCX] LibreOffice error: {e}")
+            return False
 
     def _try_pdf2docx(self, pdf_path, docx_path):
         if Converter is None:
@@ -627,36 +695,37 @@ class PdfToWordMixin:
 
     def _solid_fitz_fallback(self, pdf_path, docx_path):
         import io as _io
+
         import fitz
-        from docx.shared import Pt, Inches
         from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from docx.shared import Inches, Pt
 
         doc = Document()
 
         from docx.shared import Cm
+
         for section in doc.sections:
-            section.top_margin    = Cm(2.0)
+            section.top_margin = Cm(2.0)
             section.bottom_margin = Cm(2.0)
-            section.left_margin   = Cm(2.5)
-            section.right_margin  = Cm(2.5)
+            section.left_margin = Cm(2.5)
+            section.right_margin = Cm(2.5)
 
         pdf_doc = fitz.open(pdf_path)
 
         def _flag_to_style(flags, size, median_size):
-            is_bold   = bool(flags & 16)
+            is_bold = bool(flags & 16)
             is_italic = bool(flags & 2)
-            ratio     = size / median_size if median_size else 1.0
+            ratio = size / median_size if median_size else 1.0
             if ratio >= 1.6 and is_bold:
                 return "heading1"
             if ratio >= 1.3 and is_bold:
                 return "heading2"
             if ratio >= 1.1 and is_bold:
                 return "heading3"
-            return ("bold_body" if is_bold else
-                    "italic_body" if is_italic else "body")
+            return "bold_body" if is_bold else "italic_body" if is_italic else "body"
 
         def _apply_run_style(run, flags, size):
-            run.bold   = bool(flags & 16)
+            run.bold = bool(flags & 16)
             run.italic = bool(flags & 2)
             if size:
                 run.font.size = Pt(round(size, 1))
@@ -683,7 +752,7 @@ class PdfToWordMixin:
             if page_num > 0:
                 doc.add_page_break()
 
-            page     = pdf_doc.load_page(page_num)
+            page = pdf_doc.load_page(page_num)
             text_dict = page.get_text("dict", flags=fitz.TEXT_PRESERVE_WHITESPACE)
 
             all_sizes = []
@@ -730,12 +799,14 @@ class PdfToWordMixin:
                     if pix.width < 10 or pix.height < 10:
                         continue
                     img_bytes = pix.tobytes("png")
-                    images_on_page.append({
-                        "y0": bbox.y0,
-                        "y1": bbox.y1,
-                        "bytes": img_bytes,
-                        "width_pt": bbox.width,
-                    })
+                    images_on_page.append(
+                        {
+                            "y0": bbox.y0,
+                            "y1": bbox.y1,
+                            "bytes": img_bytes,
+                            "width_pt": bbox.width,
+                        }
+                    )
                     pix = None
                 except Exception as ie:
                     print(f"[fallback img xref={xref}] {ie}")
@@ -761,7 +832,6 @@ class PdfToWordMixin:
             img_inserted_xranges = set()
 
             for item_type, y0, obj in stream:
-
                 if item_type == "image":
                     key = round(y0 / 5) * 5
                     if key in img_inserted_xranges:
@@ -769,7 +839,7 @@ class PdfToWordMixin:
                     img_inserted_xranges.add(key)
                     try:
                         buf = _io.BytesIO(obj["bytes"])
-                        w_pt  = obj["width_pt"]
+                        w_pt = obj["width_pt"]
                         max_w = Inches(5.5)
                         width = min(Pt(w_pt), max_w)
                         p = doc.add_paragraph()
@@ -794,7 +864,7 @@ class PdfToWordMixin:
                             continue
                         dom = max(spans, key=lambda s: len(s.get("text", "")))
                         flags = dom.get("flags", 0)
-                        size  = dom.get("size", median_size)
+                        size = dom.get("size", median_size)
                         style_label = _flag_to_style(flags, size, median_size)
 
                         if style_label == "heading1":
@@ -810,8 +880,7 @@ class PdfToWordMixin:
                                 if not span_text:
                                     continue
                                 run = p.add_run(span_text)
-                                _apply_run_style(run, span.get("flags", 0),
-                                                 span.get("size", None))
+                                _apply_run_style(run, span.get("flags", 0), span.get("size", None))
 
         pdf_doc.close()
         doc.save(docx_path)
@@ -819,6 +888,7 @@ class PdfToWordMixin:
 
     def convert_pdf_to_docx_with_charts(self, pdf_path, docx_path):
         import io as _io
+
         import fitz
 
         if self._try_word_com_pdf_to_docx(pdf_path, docx_path):
@@ -829,11 +899,11 @@ class PdfToWordMixin:
         if base_ok:
             try:
                 pdf_doc = fitz.open(pdf_path)
-                docx    = Document(docx_path)
+                docx = Document(docx_path)
 
                 charts_per_page = {}
                 for page_num in range(len(pdf_doc)):
-                    page  = pdf_doc.load_page(page_num)
+                    page = pdf_doc.load_page(page_num)
                     rects = self._get_chart_regions(page)
                     if not rects:
                         continue
@@ -846,11 +916,12 @@ class PdfToWordMixin:
                 pdf_doc.close()
 
                 if charts_per_page:
-                    from docx.shared import Inches as _Inches
                     import copy
 
+                    from docx.shared import Inches as _Inches
+
                     def _add_picture_paragraph(docx_doc, img_buf, max_width_inches=5.5):
-                        p   = docx_doc.add_paragraph()
+                        p = docx_doc.add_paragraph()
                         p.alignment = 1
                         run = p.add_run()
                         run.add_picture(img_buf, width=_Inches(max_width_inches))
@@ -863,8 +934,10 @@ class PdfToWordMixin:
                     page_break_indices = []
                     for idx, para in enumerate(body_paras):
                         for run in para.runs:
-                            if (run._element.xml.find("w:lastRenderedPageBreak") != -1 or
-                                    run._element.xml.find("w:br") != -1):
+                            if (
+                                run._element.xml.find("w:lastRenderedPageBreak") != -1
+                                or run._element.xml.find("w:br") != -1
+                            ):
                                 page_break_indices.append(idx)
                                 break
 
@@ -874,10 +947,10 @@ class PdfToWordMixin:
                             for img_buf in imgs:
                                 _add_picture_paragraph(docx, img_buf)
                         else:
-                            ref_idx  = page_break_indices[page_num - 1]
+                            ref_idx = page_break_indices[page_num - 1]
                             ref_para = body_paras[ref_idx]
                             for img_buf in reversed(imgs):
-                                tmp_doc  = Document()
+                                tmp_doc = Document()
                                 pic_para = _add_picture_paragraph(tmp_doc, img_buf)
                                 _insert_para_after(ref_para, copy.deepcopy(pic_para._element))
 
@@ -895,13 +968,14 @@ class PdfToWordMixin:
     def convert_pdf_to_docx_text_only(self, pdf_path, docx_path):
         try:
             import fitz
+
             doc = Document()
             pdf_document = fitz.open(pdf_path)
             for page_num in range(len(pdf_document)):
                 page = pdf_document.load_page(page_num)
                 text = page.get_text("text")
                 if text.strip():
-                    lines = text.split('\n')
+                    lines = text.split("\n")
                     for line in lines:
                         line = line.strip()
                         if line:
@@ -921,6 +995,7 @@ class PdfToWordMixin:
             self._solid_fitz_fallback(pdf_path, docx_path)
         except Exception:
             import fitz
+
             doc = Document()
             pdf_document = fitz.open(pdf_path)
             doc.add_heading(f"Conversion de: {Path(pdf_path).name}", level=1)
@@ -935,18 +1010,18 @@ class PdfToWordMixin:
             doc.save(docx_path)
 
     def convert_pdf_to_word(self):
-        if not (hasattr(self, 'active_templates') and 'pdf_to_word' in self.active_templates):
-            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template('Conversion PDF→Word')
+        if not (hasattr(self, "active_templates") and "pdf_to_word" in self.active_templates):
+            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template("Conversion PDF→Word")
             if _def_id:
                 (self._ensure_template_manager() or object()).apply_template(_def_id, self)
 
-        if hasattr(self, 'active_templates') and 'word_to_pdf' in self.active_templates:
-            template = self.active_templates['word_to_pdf']
-            template.get('page_format_value', 'a4')
-            template.get('orientation_value', 'portrait')
-            template.get('quality_value', 150)
-            template.get('include_metadata', True)
-            template.get('compress', True)
+        if hasattr(self, "active_templates") and "word_to_pdf" in self.active_templates:
+            template = self.active_templates["word_to_pdf"]
+            template.get("page_format_value", "a4")
+            template.get("orientation_value", "portrait")
+            template.get("quality_value", 150)
+            template.get("include_metadata", True)
+            template.get("compress", True)
 
         selected_items = self.files_list_widget.selectedItems()
         files_to_process = []
@@ -956,18 +1031,22 @@ class PdfToWordMixin:
                 if item.isSelected():
                     files_to_process.append(item.data(Qt.UserRole))
         else:
-            files_to_process = [f for f in self.files_list if f.lower().endswith('.pdf')]
+            files_to_process = [f for f in self.files_list if f.lower().endswith(".pdf")]
 
-        pdf_files = [f for f in files_to_process if f.lower().endswith('.pdf')]
+        pdf_files = [f for f in files_to_process if f.lower().endswith(".pdf")]
         if not pdf_files:
-            msg = self.translate_text("Veuillez sélectionner au moins un fichier PDF") if selected_items else self.translate_text("La liste doit contenir au moins un fichier PDF")
+            msg = (
+                self.translate_text("Veuillez sélectionner au moins un fichier PDF")
+                if selected_items
+                else self.translate_text("La liste doit contenir au moins un fichier PDF")
+            )
             QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
             return
 
         encrypted_pdfs = []
         for pdf_file in pdf_files:
             try:
-                with open(pdf_file, 'rb') as f:
+                with open(pdf_file, "rb") as f:
                     pdf_reader = PdfReader(f)
                     if pdf_reader.is_encrypted:
                         encrypted_pdfs.append(pdf_file)
@@ -995,8 +1074,8 @@ class PdfToWordMixin:
             self.convert_pdfs_without_images(pdf_files)
             return
 
-        if hasattr(self, 'active_templates') and 'pdf_to_word' in self.active_templates:
-            conversion_mode = self.active_templates['pdf_to_word'].get('mode', 'with_images')
+        if hasattr(self, "active_templates") and "pdf_to_word" in self.active_templates:
+            conversion_mode = self.active_templates["pdf_to_word"].get("mode", "with_images")
         else:
             current_mode = self.config.get("pdf_to_word_mode", "with_images")
             dialog = PdfToWordDialog(self, self.current_language, current_mode, has_images=True)
@@ -1012,48 +1091,60 @@ class PdfToWordMixin:
         self.show_progress(True, message)
         self._set_ui_enabled(False)
 
-        _mode   = conversion_mode
+        _mode = conversion_mode
         _outdir = output_dir
 
         def _run_pdf_to_word(task):
-            import os, time as _time
+            import os
+            import time as _time
+
             t0 = _time.perf_counter()
             fp = task["input_path"]
             out = task["output_path"]
-            fs  = os.path.getsize(fp) if os.path.exists(fp) else 0
+            fs = os.path.getsize(fp) if os.path.exists(fp) else 0
             if _mode == "with_images":
                 self.convert_pdf_to_docx_improved(fp, out)
             elif _mode == "text_only":
                 self.convert_pdf_to_docx_text_only(fp, out)
             else:
                 self.convert_pdf_to_docx_with_image_text(fp, out)
-            return {"success": True, "error": "",
-                    "file_size": fs, "operation_time": _time.perf_counter() - t0}
+            return {"success": True, "error": "", "file_size": fs, "operation_time": _time.perf_counter() - t0}
 
         tasks = [
-            {"index": i, "total": len(pdf_files),
-             "input_path": fp,
-             "output_path": os.path.join(_outdir, f"{Path(fp).stem}.docx")}
+            {
+                "index": i,
+                "total": len(pdf_files),
+                "input_path": fp,
+                "output_path": os.path.join(_outdir, f"{Path(fp).stem}.docx"),
+            }
             for i, fp in enumerate(pdf_files)
         ]
         from conversion_worker import ConversionWorker
+
         self._pdf_to_word_worker = ConversionWorker(tasks, _run_pdf_to_word)
         self._pdf_to_word_worker.file_done.connect(self._on_pdf_to_word_file_done)
 
         def _on_pdf_to_word_finished(s):
             self.show_progress(False)
             self._set_ui_enabled(True)
-            if s['success_count'] > 0 and self.config.get("enable_system_notifications", True):
+            if s["success_count"] > 0 and self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("pdf_to_word")
-            QMessageBox.information(self, self.translate_text("Succès"),
-                self.translate_text("pdf_to_word_success_sum").format(s['success_count'], s['total'], f"{s['total_time']:.1f}"))
+            QMessageBox.information(
+                self,
+                self.translate_text("Succès"),
+                self.translate_text("pdf_to_word_success_sum").format(
+                    s["success_count"], s["total"], f"{s['total_time']:.1f}"
+                ),
+            )
 
         self._pdf_to_word_worker.finished.connect(_on_pdf_to_word_finished)
-        self._pdf_to_word_worker.error.connect(lambda e: (
-            self.show_progress(False),
-            self._set_ui_enabled(True),
-            QMessageBox.critical(self, self.translate_text("Erreur"), str(e))
-        ))
+        self._pdf_to_word_worker.error.connect(
+            lambda e: (
+                self.show_progress(False),
+                self._set_ui_enabled(True),
+                QMessageBox.critical(self, self.translate_text("Erreur"), str(e)),
+            )
+        )
         self._pdf_to_word_worker.start()
 
     def _on_pdf_to_word_file_done(self, result):
