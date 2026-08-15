@@ -745,18 +745,19 @@ class AppUIMixin(
         sidebar_layout.addWidget(div0)
         sidebar_layout.addSpacing(8)
 
-        def _nav_btn(icon, tip):
+        def _nav_btn(icon, tip_key):
             b = QPushButton(icon)
             b.setFixedSize(48, 48)
-            b.setToolTip(tip)
+            b.setToolTip(self.translate_text(tip_key))
+            b.setProperty("i18n_tip", tip_key)
             b.setObjectName("NavBtn")
             return b
 
-        self.nav_dashboard_btn = _nav_btn("📊", self.translate_text("Tableau de Bord"))
-        self.nav_history_btn = _nav_btn("📋", self.translate_text("Historique"))
-        self.nav_templates_btn = _nav_btn("🎨", self.translate_text("Modèles"))
-        self.nav_achievements_btn = _nav_btn("🏆", self.translate_text("Trophées"))
-        self.nav_donate_btn = _nav_btn("❤️", self.translate_text("Soutenir le développement"))
+        self.nav_dashboard_btn = _nav_btn("📊", "Tableau de Bord")
+        self.nav_history_btn = _nav_btn("📋", "Historique")
+        self.nav_templates_btn = _nav_btn("🎨", "Modèles")
+        self.nav_achievements_btn = _nav_btn("🏆", "Trophées")
+        self.nav_donate_btn = _nav_btn("❤️", "Soutenir le développement")
 
         for b in [
             self.nav_dashboard_btn,
@@ -769,7 +770,7 @@ class AppUIMixin(
 
         sidebar_layout.addStretch()
 
-        self.nav_settings_btn = _nav_btn("⚙️", self.translate_text("Paramètres"))
+        self.nav_settings_btn = _nav_btn("⚙️", "Paramètres")
         sidebar_layout.addWidget(self.nav_settings_btn, alignment=Qt.AlignHCenter)
         sidebar_layout.addSpacing(12)
 
