@@ -43,6 +43,26 @@ def _get_languages_dir() -> str:
 _LANGUAGES_DIR = _get_languages_dir()
 
 
+def _starts_with_flag(name: str) -> bool:
+    """True if the name already begins with a flag emoji (two regional indicators)."""
+    count = 0
+    for char in name:
+        code = ord(char)
+        if 0x1F1E6 <= code <= 0x1F1FF:
+            count += 1
+        else:
+            break
+    return count >= 2
+
+
+def decorate_language_name(name: str) -> str:
+    """Return the name, prefixed with a globe if it does not already carry a flag."""
+    name = name or ""
+    if _starts_with_flag(name):
+        return name
+    return "🌐 " + name
+
+
 def _load_builtin_translations() -> dict:
     """Load built-in FR and EN translations from JSON files."""
     translations = {}
@@ -75,7 +95,7 @@ class TranslationManager:
         result = [
             {
                 "code": "fr",
-                "name": "Français",
+                "name": "🇫🇷 Français",
                 "builtin": True,
                 "author": "Hyacinthe",
                 "version": "1.0",
@@ -83,7 +103,7 @@ class TranslationManager:
             },
             {
                 "code": "en",
-                "name": "English",
+                "name": "🇬🇧 English",
                 "builtin": True,
                 "author": "Hyacinthe",
                 "version": "1.0",
