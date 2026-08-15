@@ -1,4 +1,4 @@
-# 🗺️ Roadmap for File Converter Pro
+# Roadmap for File Converter Pro
 
 This roadmap outlines planned features and improvements for future versions of File Converter Pro.
 Items are grouped by category and are not listed in order of priority or release date.
@@ -33,6 +33,10 @@ Example: *"Convert everything in this folder every Monday at 9:00 AM."*
 ### Watch Folder
 Monitor a folder and automatically convert any file dropped into it, using a predefined output format and template. Zero interaction required once configured.
 
+### System Notifications
+
+Windows toast notifications are fully supported for long-running conversions. Users can switch to another app while a batch is running and receive a notification as soon as it completes.
+
 ### Reduced Build Size
 Investigate selective PyInstaller bundling and optional module lazy-loading to bring the compiled size below 300 MB without dropping any features.
 
@@ -54,9 +58,6 @@ Support for multiple independent profiles on the same machine, each with their o
 - Saved templates
 - Conversion history
 
-### System Notifications (Extended)
-Windows toast notifications are already supported for certain events. The next step is extending them to **long-running conversions** — so users can switch to another app while a heavy batch runs and still get notified the moment it's done.
-
 ### Conversion Queue with Priorities
 A visible queue panel where users can reorder pending conversions, pause individual items, or cancel specific tasks without killing the whole batch. Useful when converting dozens of files at once and something more urgent comes up.
 
@@ -69,12 +70,6 @@ The `.lang` system is already in place. Adding community-contributed translation
 ---
 
 ## Dashboard & Stats
-
-### Achievement Progress Graph
-Visualize your achievement unlocks over time, see exactly when each one was earned and track your overall progression curve.
-
-### PDF Dashboard Export
-Print or export a full stats report as a PDF, useful for a personal recap or just for fun.
 
 ### Period Comparison
 Compare your activity between two time ranges directly in the dashboard.
@@ -94,15 +89,16 @@ Contextual labels on achievements showing how far along most users get. e.g. *"M
 Allow users to add custom converters via external Python scripts, without modifying the core codebase. A defined plugin interface would let the community (or power users) extend File Converter Pro with new formats or conversion pipelines.
 
 ### Local REST API
-Expose conversion functionality via a lightweight local HTTP API, enabling integration with external tools — shell scripts, Zapier workflows, or any automation layer that can make HTTP requests.
+Expose conversion functionality via a lightweight local HTTP API, enabling integration with external tools like shell scripts, Zapier workflows, or any automation layer that can make HTTP requests.
 Everything stays local: the API binds to `localhost` only and never opens an external port.
 
 
 ### More Format Support
 Expand the supported format matrix over time. Candidates include:
 - **Markdown → PDF / DOCX** via Pandoc
-- **SVG → PNG / PDF** via CairoSVG
-- **ODT / ODS / ODP** (LibreOffice native formats)
+- **Markdown → HTML** / **HTML →  Markdown**
+- **ODT / ODS / ODP → Word**
+- **Word → ODT / ODS / ODP** (LibreOffice native formats)
 - **MP4 → GIF** / **GIF → WebP** for quick web-ready exports
 ### Conversion Engine Versioning
 Track which engine version produced a given output (e.g. `ffmpeg 6.1`, `LibreOffice 24.8`). Useful for reproducing or debugging quality differences across machines or after an update.
