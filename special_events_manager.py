@@ -1,33 +1,53 @@
 """
-Special Events Manager 
+Special Events Manager
 
 """
 
-import os
-import sys
 import math
+import os
 import random
 import sqlite3
+import sys
 from datetime import date
 from pathlib import Path
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
-    QDateEdit, QMessageBox, QWidget, QSizePolicy, QGraphicsOpacityEffect)
-from PySide6.QtCore import (
-    Qt, QTimer, QPropertyAnimation, QEasingCurve, QUrl,
-    Signal, Property, QPointF, QRectF)
+from PySide6.QtCore import Property, QEasingCurve, QPointF, QPropertyAnimation, QRectF, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import (
-    QPixmap, QFont, QFontDatabase, QColor, QPainter, QPainterPath,
-    QBrush, QPen, QConicalGradient, QRadialGradient,
-    QTransform, QGuiApplication)
+    QBrush,
+    QColor,
+    QConicalGradient,
+    QFont,
+    QFontDatabase,
+    QGuiApplication,
+    QPainter,
+    QPainterPath,
+    QPen,
+    QPixmap,
+    QRadialGradient,
+    QTransform,
+)
+from PySide6.QtWidgets import (
+    QDateEdit,
+    QDialog,
+    QFrame,
+    QGraphicsOpacityEffect,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
 from translations import TranslationManager
 from widgets import AnimatedCheckBox
 
+
 def _make_tm(language: str) -> TranslationManager:
     from utils import make_tm
+
     return make_tm(language)
 
 
@@ -44,9 +64,18 @@ class PerlinNoise:
     """
 
     _GRAD3: List[Tuple[int, int, int]] = [
-        (1, 1, 0), (-1, 1, 0), (1, -1, 0), (-1, -1, 0),
-        (1, 0, 1), (-1, 0, 1), (1, 0, -1), (-1, 0, -1),
-        (0, 1, 1), (0, -1, 1), (0, 1, -1), (0, -1, -1),
+        (1, 1, 0),
+        (-1, 1, 0),
+        (1, -1, 0),
+        (-1, -1, 0),
+        (1, 0, 1),
+        (-1, 0, 1),
+        (1, 0, -1),
+        (-1, 0, -1),
+        (0, 1, 1),
+        (0, -1, 1),
+        (0, 1, -1),
+        (0, -1, -1),
     ]
 
     def __init__(self, seed: Optional[int] = None):
@@ -89,26 +118,34 @@ class PerlinNoise:
 
         u, v, w = self._fade(xf), self._fade(yf), self._fade(zf)
 
-        A  = p[X]     + Y;  AA = p[A]     + Z;  AB = p[A + 1] + Z
-        B  = p[X + 1] + Y;  BA = p[B]     + Z;  BB = p[B + 1] + Z
+        A = p[X] + Y
+        AA = p[A] + Z
+        AB = p[A + 1] + Z
+        B = p[X + 1] + Y
+        BA = p[B] + Z
+        BB = p[B + 1] + Z
 
-        return self._lerp(w,
-            self._lerp(v,
-                self._lerp(u, self._grad3(p[AA],     xf,       yf,       zf      ),
-                              self._grad3(p[BA],     xf - 1.0, yf,       zf      )),
-                self._lerp(u, self._grad3(p[AB],     xf,       yf - 1.0, zf      ),
-                              self._grad3(p[BB],     xf - 1.0, yf - 1.0, zf      ))),
-            self._lerp(v,
-                self._lerp(u, self._grad3(p[AA + 1], xf,       yf,       zf - 1.0),
-                              self._grad3(p[BA + 1], xf - 1.0, yf,       zf - 1.0)),
-                self._lerp(u, self._grad3(p[AB + 1], xf,       yf - 1.0, zf - 1.0),
-                              self._grad3(p[BB + 1], xf - 1.0, yf - 1.0, zf - 1.0))))
+        return self._lerp(
+            w,
+            self._lerp(
+                v,
+                self._lerp(u, self._grad3(p[AA], xf, yf, zf), self._grad3(p[BA], xf - 1.0, yf, zf)),
+                self._lerp(u, self._grad3(p[AB], xf, yf - 1.0, zf), self._grad3(p[BB], xf - 1.0, yf - 1.0, zf)),
+            ),
+            self._lerp(
+                v,
+                self._lerp(u, self._grad3(p[AA + 1], xf, yf, zf - 1.0), self._grad3(p[BA + 1], xf - 1.0, yf, zf - 1.0)),
+                self._lerp(
+                    u,
+                    self._grad3(p[AB + 1], xf, yf - 1.0, zf - 1.0),
+                    self._grad3(p[BB + 1], xf - 1.0, yf - 1.0, zf - 1.0),
+                ),
+            ),
+        )
 
-    def fbm(self,
-            x: float, y: float, z: float = 0.0,
-            octaves: int = 4,
-            persistence: float = 0.5,
-            lacunarity: float = 2.0) -> float:
+    def fbm(
+        self, x: float, y: float, z: float = 0.0, octaves: int = 4, persistence: float = 0.5, lacunarity: float = 2.0
+    ) -> float:
         """
         Fractional Brownian Motion — layered noise for organic detail.
 
@@ -124,7 +161,7 @@ class PerlinNoise:
         max_value = 0.0
 
         for _ in range(octaves):
-            value     += self.noise3D(x * frequency, y * frequency, z * frequency) * amplitude
+            value += self.noise3D(x * frequency, y * frequency, z * frequency) * amplitude
             max_value += amplitude
             amplitude *= persistence
             frequency *= lacunarity
@@ -134,11 +171,10 @@ class PerlinNoise:
 
 class Particle:
     """Single floating particle for celebration effects."""
-    __slots__ = ("x", "y", "vx", "vy", "size", "life", "max_life",
-                 "color", "shape", "rotation", "rot_speed")
 
-    def __init__(self, x: float, y: float, palette: List[QColor],
-                 shapes: List[str] = ("circle", "star", "rect")):
+    __slots__ = ("x", "y", "vx", "vy", "size", "life", "max_life", "color", "shape", "rotation", "rot_speed")
+
+    def __init__(self, x: float, y: float, palette: List[QColor], shapes: List[str] = ("circle", "star", "rect")):
         self.x, self.y = x, y
         angle = random.uniform(0, math.tau)
         speed = random.uniform(0.3, 1.8)
@@ -160,8 +196,8 @@ class Particle:
         return int(255 * min(progress / 0.1, 1.0))
 
     def update(self):
-        self.x  += self.vx
-        self.y  += self.vy
+        self.x += self.vx
+        self.y += self.vy
         self.vy += 0.04
         self.vx *= 0.99
         self.rotation += self.rot_speed
@@ -170,6 +206,7 @@ class Particle:
     @property
     def alive(self) -> bool:
         return self.life > 0
+
 
 class ParticleSystem:
     """Manages a pool of particles and emits new ones at a capped rate."""
@@ -184,9 +221,7 @@ class ParticleSystem:
     def emit(self, x: float, y: float, count: int = 3):
         remaining = self.MAX_PARTICLES - len(self.particles)
         for _ in range(min(count, remaining)):
-            self.particles.append(Particle(x + random.uniform(-10, 10),
-                                           y + random.uniform(-5, 5),
-                                           self.palette))
+            self.particles.append(Particle(x + random.uniform(-10, 10), y + random.uniform(-5, 5), self.palette))
 
     def update(self):
         self.particles = [p for p in self.particles if p.alive]
@@ -214,9 +249,9 @@ class ParticleSystem:
                 path = QPainterPath()
                 for i in range(5):
                     a_out = math.radians(i * 72 - 90)
-                    a_in  = math.radians(i * 72 - 90 + 36)
+                    a_in = math.radians(i * 72 - 90 + 36)
                     ox, oy = math.cos(a_out) * s, math.sin(a_out) * s
-                    ix, iy = math.cos(a_in)  * s * 0.4, math.sin(a_in) * s * 0.4
+                    ix, iy = math.cos(a_in) * s * 0.4, math.sin(a_in) * s * 0.4
                     if i == 0:
                         path.moveTo(ox, oy)
                     else:
@@ -233,20 +268,20 @@ class EventTheme:
     """Defines color personality for a specific event type."""
 
     BIRTHDAY = "birthday"
-    NEW_YEAR  = "new_year"
+    NEW_YEAR = "new_year"
 
     _THEMES = {
         BIRTHDAY: {
-            "hue_start":  35.0,
-            "hue_range":  80.0,
+            "hue_start": 35.0,
+            "hue_range": 80.0,
             "saturation": 0.92,
             "glow_color": (255, 180, 40),
             "particle_palette": [
-                QColor(255, 215,  50),
-                QColor(255, 140,  60),
-                QColor(255,  90, 120),
+                QColor(255, 215, 50),
+                QColor(255, 140, 60),
+                QColor(255, 90, 120),
                 QColor(255, 200, 100),
-                QColor(220,  80, 200),
+                QColor(220, 80, 200),
             ],
         },
         NEW_YEAR: {
@@ -255,10 +290,10 @@ class EventTheme:
             "saturation": 0.95,
             "glow_color": (80, 200, 255),
             "particle_palette": [
-                QColor( 80, 220, 255),
-                QColor(140,  80, 255),
+                QColor(80, 220, 255),
+                QColor(140, 80, 255),
                 QColor(200, 240, 255),
-                QColor( 40, 160, 255),
+                QColor(40, 160, 255),
                 QColor(180, 100, 255),
             ],
         },
@@ -268,18 +303,26 @@ class EventTheme:
         self._data = self._THEMES.get(event_type, self._THEMES[self.NEW_YEAR])
 
     @property
-    def hue_start(self)       -> float:              return self._data["hue_start"]
-    @property
-    def hue_range(self)       -> float:              return self._data["hue_range"]
-    @property
-    def saturation(self)      -> float:              return self._data["saturation"]
-    @property
-    def glow_color(self)      -> Tuple[int, int, int]: return self._data["glow_color"]
-    @property
-    def particle_palette(self) -> List[QColor]:      return self._data["particle_palette"]
+    def hue_start(self) -> float:
+        return self._data["hue_start"]
 
-    def cyclic_color(self, hue_offset: float, local_offset: float = 0.0,
-                     time: float = 0.0) -> QColor:
+    @property
+    def hue_range(self) -> float:
+        return self._data["hue_range"]
+
+    @property
+    def saturation(self) -> float:
+        return self._data["saturation"]
+
+    @property
+    def glow_color(self) -> Tuple[int, int, int]:
+        return self._data["glow_color"]
+
+    @property
+    def particle_palette(self) -> List[QColor]:
+        return self._data["particle_palette"]
+
+    def cyclic_color(self, hue_offset: float, local_offset: float = 0.0, time: float = 0.0) -> QColor:
         """
         Returns a smooth perceptual color from this theme's hue band.
         `hue_offset` drives the animation cycle; `local_offset` spreads
@@ -303,17 +346,16 @@ class LiquidBorderWidget(QWidget):
     • Countdown arc showing remaining display time
     """
 
-    def __init__(self, parent=None, event_type: str = EventTheme.NEW_YEAR,
-                 duration_ms: int = 60000):
+    def __init__(self, parent=None, event_type: str = EventTheme.NEW_YEAR, duration_ms: int = 60000):
         super().__init__(parent)
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
 
         self.noise = PerlinNoise(seed=42)
 
-        self.time        = 0.0
-        self.hue_offset  = 0.0
-        self.flow_speed  = 0.022
-        self.wave_scale  = 11.0
+        self.time = 0.0
+        self.hue_offset = 0.0
+        self.flow_speed = 0.022
+        self.wave_scale = 11.0
         self.border_width = 5.0
         self.path_smoothness = 0.82
 
@@ -322,8 +364,8 @@ class LiquidBorderWidget(QWidget):
         self.particles = ParticleSystem(self.theme.particle_palette)
         self._spawn_tick = 0
 
-        self.duration_ms   = duration_ms
-        self.elapsed_ms    = 0
+        self.duration_ms = duration_ms
+        self.elapsed_ms = 0
         self._countdown_ms = duration_ms
 
         self._cached_path: Optional[QPainterPath] = None
@@ -334,8 +376,8 @@ class LiquidBorderWidget(QWidget):
         self._timer.start(16)
 
     def _tick(self):
-        self.time       += self.flow_speed
-        self.hue_offset  = (self.hue_offset + 1.4) % self.theme.hue_range
+        self.time += self.flow_speed
+        self.hue_offset = (self.hue_offset + 1.4) % self.theme.hue_range
         self.elapsed_ms += 16
         self._countdown_ms = max(0, self.duration_ms - self.elapsed_ms)
 
@@ -343,10 +385,14 @@ class LiquidBorderWidget(QWidget):
         if self._spawn_tick % 8 == 0:
             w, h = self.width(), self.height()
             side = random.randint(0, 3)
-            if side == 0:   px, py = random.uniform(0, w), 8.0
-            elif side == 1: px, py = w - 8.0, random.uniform(0, h)
-            elif side == 2: px, py = random.uniform(0, w), h - 8.0
-            else:           px, py = 8.0, random.uniform(0, h)
+            if side == 0:
+                px, py = random.uniform(0, w), 8.0
+            elif side == 1:
+                px, py = w - 8.0, random.uniform(0, h)
+            elif side == 2:
+                px, py = random.uniform(0, w), h - 8.0
+            else:
+                px, py = 8.0, random.uniform(0, h)
             self.particles.emit(px, py, count=random.randint(1, 3))
 
         self.particles.update()
@@ -354,14 +400,17 @@ class LiquidBorderWidget(QWidget):
 
     def _organic_offset(self, position: float, edge_id: float) -> float:
         """FBM-based offset — single call replaces 4 noise instances."""
-        return self.noise.fbm(
-            x=position * 0.018,
-            y=edge_id  * 3.5,
-            z=self.time,
-            octaves=4,
-            persistence=0.52,
-            lacunarity=2.15,
-        ) * self.wave_scale
+        return (
+            self.noise.fbm(
+                x=position * 0.018,
+                y=edge_id * 3.5,
+                z=self.time,
+                octaves=4,
+                persistence=0.52,
+                lacunarity=2.15,
+            )
+            * self.wave_scale
+        )
 
     def _build_liquid_path(self) -> QPainterPath:
         rect = self.rect().adjusted(7, 7, -7, -7)
@@ -370,17 +419,13 @@ class LiquidBorderWidget(QWidget):
         pts: List[QPointF] = []
 
         for i in range(0, w + step, step):
-            pts.append(QPointF(rect.x() + i,
-                               rect.y() + self._organic_offset(i, 0.0)))
+            pts.append(QPointF(rect.x() + i, rect.y() + self._organic_offset(i, 0.0)))
         for i in range(0, h + step, step):
-            pts.append(QPointF(rect.x() + w + self._organic_offset(i, 1.0),
-                               rect.y() + i))
+            pts.append(QPointF(rect.x() + w + self._organic_offset(i, 1.0), rect.y() + i))
         for i in range(w, -step, -step):
-            pts.append(QPointF(rect.x() + i,
-                               rect.y() + h + self._organic_offset(i, 2.0)))
+            pts.append(QPointF(rect.x() + i, rect.y() + h + self._organic_offset(i, 2.0)))
         for i in range(h, -step, -step):
-            pts.append(QPointF(rect.x() + self._organic_offset(i, 3.0),
-                               rect.y() + i))
+            pts.append(QPointF(rect.x() + self._organic_offset(i, 3.0), rect.y() + i))
 
         return self._catmull_rom(pts)
 
@@ -395,8 +440,7 @@ class LiquidBorderWidget(QWidget):
         s = self.path_smoothness
 
         def tangent(a: QPointF, b: QPointF) -> QPointF:
-            return QPointF((b.x() - a.x()) * 0.5 * s,
-                           (b.y() - a.y()) * 0.5 * s)
+            return QPointF((b.x() - a.x()) * 0.5 * s, (b.y() - a.y()) * 0.5 * s)
 
         for i in range(n - 1):
             p0 = pts[max(i - 1, 0)]
@@ -421,8 +465,7 @@ class LiquidBorderWidget(QWidget):
 
         bg = QPainterPath()
         bg.addRoundedRect(QRectF(self.rect().adjusted(3, 3, -3, -3)), 17, 17)
-        grad = QRadialGradient(self.rect().center(),
-                               max(self.width(), self.height()) * 0.75)
+        grad = QRadialGradient(self.rect().center(), max(self.width(), self.height()) * 0.75)
         grad.setColorAt(0.0, QColor(24, 29, 40, 246))
         grad.setColorAt(0.6, QColor(17, 21, 30, 251))
         grad.setColorAt(1.0, QColor(11, 14, 20, 255))
@@ -436,9 +479,7 @@ class LiquidBorderWidget(QWidget):
         cg = QConicalGradient(self.rect().center(), self.hue_offset)
         offsets = [0.0, 0.14, 0.28, 0.42, 0.57, 0.71, 0.85, 1.0]
         for pos in offsets:
-            c = self.theme.cyclic_color(self.hue_offset,
-                                         pos * self.theme.hue_range,
-                                         self.time)
+            c = self.theme.cyclic_color(self.hue_offset, pos * self.theme.hue_range, self.time)
             c.setAlpha(215)
             cg.setColorAt(pos, c)
 
@@ -483,7 +524,7 @@ class LiquidBorderWidget(QWidget):
 
         r = 10
         margin = 10
-        cx = self.width()  - margin - r
+        cx = self.width() - margin - r
         cy = self.height() - margin - r
         rect = QRectF(cx - r, cy - r, r * 2, r * 2)
 
@@ -507,26 +548,35 @@ class _AnimBase(QDialog):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._scale    = 1.0
+        self._scale = 1.0
         self._rotation = 0.0
-        self._glow     = 0.0
+        self._glow = 0.0
 
-    def _get_scale(self)      -> float: return self._scale
+    def _get_scale(self) -> float:
+        return self._scale
+
     def _set_scale(self, v: float):
         self._scale = v
         self.update()
+
     scale_factor = Property(float, _get_scale, _set_scale)
 
-    def _get_rotation(self)   -> float: return self._rotation
+    def _get_rotation(self) -> float:
+        return self._rotation
+
     def _set_rotation(self, v: float):
         self._rotation = v
         self.update()
+
     rotation_angle = Property(float, _get_rotation, _set_rotation)
 
-    def _get_glow(self)       -> float: return self._glow
+    def _get_glow(self) -> float:
+        return self._glow
+
     def _set_glow(self, v: float):
         self._glow = v
         self.update()
+
     glow_intensity = Property(float, _get_glow, _set_glow)
 
 
@@ -542,20 +592,26 @@ class SpecialEventPopup(_AnimBase):
 
     closed_by_user = Signal()
 
-    def __init__(self, title: str, subtitle: str, message: str,
-                 icon_path: str, sound_path: str,
-                 event_type: str = EventTheme.NEW_YEAR,
-                 duration_ms: int = 60000,
-                 parent=None):
+    def __init__(
+        self,
+        title: str,
+        subtitle: str,
+        message: str,
+        icon_path: str,
+        sound_path: str,
+        event_type: str = EventTheme.NEW_YEAR,
+        duration_ms: int = 60000,
+        parent=None,
+    ):
         super().__init__(parent)
 
-        self.sound_path  = sound_path
+        self.sound_path = sound_path
         self.duration_ms = duration_ms
-        self.event_type  = event_type
-        self.theme       = EventTheme(event_type)
-        self.media_player  = None
-        self.audio_output  = None
-        self.custom_font   = self._load_font()
+        self.event_type = event_type
+        self.theme = EventTheme(event_type)
+        self.media_player = None
+        self.audio_output = None
+        self.custom_font = self._load_font()
 
         self._build_ui(title, subtitle, message, icon_path)
         self._setup_animations()
@@ -577,14 +633,12 @@ class SpecialEventPopup(_AnimBase):
                         return QFont(families[0], 12)
         return QFont("Segoe UI", 12)
 
-    def _build_ui(self, title: str, subtitle: str,
-                  message: str, icon_path: str):
+    def _build_ui(self, title: str, subtitle: str, message: str, icon_path: str):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(470, 265)
 
-        self.border_widget = LiquidBorderWidget(
-            self, event_type=self.event_type, duration_ms=self.duration_ms)
+        self.border_widget = LiquidBorderWidget(self, event_type=self.event_type, duration_ms=self.duration_ms)
         self.border_widget.setGeometry(0, 0, 470, 265)
 
         self.container = QFrame(self)
@@ -613,7 +667,7 @@ class SpecialEventPopup(_AnimBase):
             QFrame {{
                 background: qradialgradient(
                     cx:0.5, cy:0.5, radius:0.8,
-                    stop:0 rgba({r},{g},{b},28), stop:1 rgba({r//2},{g//2},{b//2},10));
+                    stop:0 rgba({r},{g},{b},28), stop:1 rgba({r // 2},{g // 2},{b // 2},10));
                 border-radius: 9px;
                 border: 1px solid rgba({r},{g},{b},55);
             }}
@@ -686,8 +740,7 @@ class SpecialEventPopup(_AnimBase):
                 final.fill(Qt.transparent)
                 p = QPainter(final)
                 p.setRenderHint(QPainter.Antialiasing)
-                p.drawPixmap((76 - scaled.width()) // 2,
-                              (76 - scaled.height()) // 2, scaled)
+                p.drawPixmap((76 - scaled.width()) // 2, (76 - scaled.height()) // 2, scaled)
                 p.end()
                 self.icon_label.setPixmap(final)
                 return
@@ -695,8 +748,7 @@ class SpecialEventPopup(_AnimBase):
         self.icon_label.setText(emoji)
         self.icon_label.setFont(QFont(self.custom_font.family(), 40))
         r, g, b = self.theme.glow_color
-        self.icon_label.setStyleSheet(
-            f"color:rgb({r},{g},{b}); background:transparent;")
+        self.icon_label.setStyleSheet(f"color:rgb({r},{g},{b}); background:transparent;")
 
     def _setup_animations(self):
         self.opacity_effect = QGraphicsOpacityEffect(self)
@@ -749,8 +801,7 @@ class SpecialEventPopup(_AnimBase):
             painter.setCompositionMode(QPainter.CompositionMode_Plus)
             gr = self.rect().adjusted(-15, -15, 15, 15)
             rr, gg, bb = self.theme.glow_color
-            g = QRadialGradient(gr.center(),
-                                max(gr.width(), gr.height()) / 2.3)
+            g = QRadialGradient(gr.center(), max(gr.width(), gr.height()) / 2.3)
             a = int(105 * self._glow)
             g.setColorAt(0.0, QColor(rr, gg, bb, a))
             g.setColorAt(0.55, QColor(rr // 2, gg // 2, bb, a // 2))
@@ -766,7 +817,8 @@ class SpecialEventPopup(_AnimBase):
         if not self.sound_path or not os.path.exists(self.sound_path):
             return
         try:
-            from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput  # lazy — codecs loaded on first sound
+            from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer  # lazy — codecs loaded on first sound
+
             self.media_player = QMediaPlayer()
             self.audio_output = QAudioOutput()
             self.media_player.setAudioOutput(self.audio_output)
@@ -799,6 +851,7 @@ class SpecialEventPopup(_AnimBase):
     def closeEvent(self, event):
         self._stop_sound()
         event.accept()
+
 
 def _draw_close_btn(widget: QWidget, _event):
     p = QPainter(widget)
@@ -833,21 +886,21 @@ class BirthdayInputDialog(QDialog):
         self._apply_style()
 
     _KEY_MAP = {
-        "title_win":  "bday_title_win",
-        "heading":    "bday_heading",
-        "desc":       "bday_desc",
-        "lbl_date":   "bday_lbl_date",
-        "hint_age":   "bday_hint_age",
+        "title_win": "bday_title_win",
+        "heading": "bday_heading",
+        "desc": "bday_desc",
+        "lbl_date": "bday_lbl_date",
+        "hint_age": "bday_hint_age",
         "btn_cancel": "bday_btn_cancel",
-        "btn_save":   "bday_btn_save",
-        "err_title":  "bday_err_title",
-        "err_old":    "bday_err_old",
-        "err_young":  "bday_err_young",
+        "btn_save": "bday_btn_save",
+        "err_title": "bday_err_title",
+        "err_old": "bday_err_old",
+        "err_young": "bday_err_young",
     }
 
     def _t(self, key: str) -> str:
         lang = getattr(self.parent(), "current_language", "fr") if self.parent() else "fr"
-        tm   = _make_tm(lang)
+        tm = _make_tm(lang)
         return tm.translate_text(self._KEY_MAP.get(key, key))
 
     def _load_font(self) -> QFont:
@@ -877,8 +930,7 @@ class BirthdayInputDialog(QDialog):
         self.date_edit.setFont(QFont(self.custom_font.family(), 10))
         self.date_edit.setCalendarPopup(True)
         today = date.today()
-        self.date_edit.setDateRange(date(1900, 1, 1),
-                                    today.replace(year=today.year - 3))
+        self.date_edit.setDateRange(date(1900, 1, 1), today.replace(year=today.year - 3))
         self.date_edit.setDate(today.replace(year=today.year - 25))
         self.date_edit.setMinimumHeight(38)
         row.addWidget(lbl)
@@ -891,8 +943,6 @@ class BirthdayInputDialog(QDialog):
         self.hint_label.setAlignment(Qt.AlignRight)
         self.hint_label.setVisible(False)
         layout.addWidget(self.hint_label)
-
-
 
         btns = QHBoxLayout()
         self.cancel_btn = QPushButton(self._t("btn_cancel"))
@@ -918,25 +968,25 @@ class BirthdayInputDialog(QDialog):
 
     def _apply_style(self):
         dark = getattr(self.parent(), "dark_mode", True) if self.parent() else True
-        arr  = _resource_path(os.path.join("Assets", "down-arrow.svg")).replace("\\", "/")
+        arr = _resource_path(os.path.join("Assets", "down-arrow.svg")).replace("\\", "/")
         arrH = _resource_path(os.path.join("Assets", "down-arrow-hover.svg")).replace("\\", "/")
-        ff   = self.custom_font.family()
+        ff = self.custom_font.family()
 
         if dark:
-            bg_dlg  = "qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 rgba(28,35,46,.95), stop:1 rgba(20,26,36,.95))"
-            fg      = "#E4E8EE"
-            btn_bg  = "rgba(55,60,65,.65)"
+            bg_dlg = "qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 rgba(28,35,46,.95), stop:1 rgba(20,26,36,.95))"
+            fg = "#E4E8EE"
+            btn_bg = "rgba(55,60,65,.65)"
             btn_bdr = "rgba(90,95,100,.8)"
-            inp_bg  = "rgba(38,43,50,.85)"
+            inp_bg = "rgba(38,43,50,.85)"
             inp_bdr = "rgba(90,95,100,.8)"
             cal_btn = "rgba(55,60,65,.65)"
             cal_bdr = "rgba(90,95,100,.5)"
         else:
-            bg_dlg  = "qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 rgba(255,255,255,.96), stop:1 rgba(238,240,243,.96))"
-            fg      = "#1C1F24"
-            btn_bg  = "rgba(238,240,243,.85)"
+            bg_dlg = "qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 rgba(255,255,255,.96), stop:1 rgba(238,240,243,.96))"
+            fg = "#1C1F24"
+            btn_bg = "rgba(238,240,243,.85)"
             btn_bdr = "rgba(210,214,218,.85)"
-            inp_bg  = "rgba(255,255,255,.85)"
+            inp_bg = "rgba(255,255,255,.85)"
             inp_bdr = "rgba(210,214,218,.85)"
             cal_btn = "rgba(238,240,243,.85)"
             cal_bdr = "rgba(210,214,218,.5)"
@@ -1002,7 +1052,7 @@ class BirthdayInputDialog(QDialog):
         self.submit_btn.setObjectName("submit")
 
     def _validate(self):
-        bd    = self.date_edit.date().toPython()
+        bd = self.date_edit.date().toPython()
         today = date.today()
         min_d = today.replace(year=today.year - 120)
         max_d = today.replace(year=today.year - 3)
@@ -1025,6 +1075,7 @@ class BirthdayInputDialog(QDialog):
 def _resource_path(relative: str) -> str:
     """Resolves asset paths for both dev mode and PyInstaller .exe."""
     from utils import resource_path as _rp
+
     p = _rp(relative)
     if os.path.exists(p):
         return p
@@ -1034,6 +1085,7 @@ def _resource_path(relative: str) -> str:
             return str(alt)
 
     return p
+
 
 def _load_app_font(size: int = 11) -> QFont:
     """Load SF-Pro-Display-Medium (shared across dialogs)."""
@@ -1058,16 +1110,18 @@ class SpecialEventsManager:
     """
 
     def __init__(self, app_instance):
-        self.app       = app_instance
-        self.db_path   = self._get_db_path()
+        self.app = app_instance
+        self.db_path = self._get_db_path()
         self.birthdate: Optional[date] = None
         self._init_db()
         QTimer.singleShot(5000, self._check_and_prompt)
 
     def _get_db_path(self) -> str:
-        base = (os.path.dirname(sys.executable)
-                if getattr(sys, "frozen", False)
-                else os.path.dirname(os.path.abspath(__file__)))
+        base = (
+            os.path.dirname(sys.executable)
+            if getattr(sys, "frozen", False)
+            else os.path.dirname(os.path.abspath(__file__))
+        )
         return os.path.join(base, "special_events.db")
 
     def _init_db(self):
@@ -1082,21 +1136,18 @@ class SpecialEventsManager:
         today = date.today().isoformat()
         with sqlite3.connect(self.db_path) as conn:
             row = conn.execute(
-                "SELECT 1 FROM events WHERE event_type=? AND last_triggered_date=?",
-                (etype, today)).fetchone()
+                "SELECT 1 FROM events WHERE event_type=? AND last_triggered_date=?", (etype, today)
+            ).fetchone()
         return row is not None
 
     def _mark_triggered(self, etype: str):
         today = date.today().isoformat()
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
-                "INSERT OR REPLACE INTO events VALUES (?,?)",
-                (etype, today))
+            conn.execute("INSERT OR REPLACE INTO events VALUES (?,?)", (etype, today))
 
     def _get_birthdate(self) -> Optional[date]:
         with sqlite3.connect(self.db_path) as conn:
-            row = conn.execute(
-                "SELECT value FROM user_info WHERE key='birthdate'").fetchone()
+            row = conn.execute("SELECT value FROM user_info WHERE key='birthdate'").fetchone()
         if row and row[0]:
             try:
                 return date.fromisoformat(row[0])
@@ -1106,8 +1157,7 @@ class SpecialEventsManager:
 
     def _save_birthdate(self, bd: date):
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("INSERT OR REPLACE INTO user_info VALUES ('birthdate',?)",
-                         (bd.isoformat(),))
+            conn.execute("INSERT OR REPLACE INTO user_info VALUES ('birthdate',?)", (bd.isoformat(),))
         self.birthdate = bd
 
     def _save_user_info(self, key: str, value: str):
@@ -1116,8 +1166,7 @@ class SpecialEventsManager:
 
     def _get_user_info(self, key: str):
         with sqlite3.connect(self.db_path) as conn:
-            row = conn.execute(
-                "SELECT value FROM user_info WHERE key=?", (key,)).fetchone()
+            row = conn.execute("SELECT value FROM user_info WHERE key=?", (key,)).fetchone()
         return row[0] if row else None
 
     def _check_and_prompt(self):
@@ -1148,22 +1197,26 @@ class SpecialEventsManager:
         if not self.birthdate:
             return
         today = date.today()
-        if (today.month == self.birthdate.month and
-                today.day == self.birthdate.day and
-                not self._triggered_today("birthday")):
+        if (
+            today.month == self.birthdate.month
+            and today.day == self.birthdate.day
+            and not self._triggered_today("birthday")
+        ):
             self._fire_birthday(today.year - self.birthdate.year)
 
     def _fire_new_year(self):
-        lang  = getattr(self.app, "current_language", "fr")
-        year  = date.today().year
-        tm    = _make_tm(lang)
+        lang = getattr(self.app, "current_language", "fr")
+        year = date.today().year
+        tm = _make_tm(lang)
 
-        title    = tm.translate_text("new_year_title")
+        title = tm.translate_text("new_year_title")
         subtitle = str(year)
-        message  = tm.translate_text("new_year_message")
+        message = tm.translate_text("new_year_message")
 
         popup = SpecialEventPopup(
-            title=title, subtitle=subtitle, message=message,
+            title=title,
+            subtitle=subtitle,
+            message=message,
             icon_path=_resource_path(os.path.join("Assets", "new_year.png")),
             sound_path=_resource_path(os.path.join("SFX", "new_year.wav")),
             event_type=EventTheme.NEW_YEAR,
@@ -1176,18 +1229,20 @@ class SpecialEventsManager:
 
     def _fire_birthday(self, age: int):
         lang = getattr(self.app, "current_language", "fr")
-        tm   = _make_tm(lang)
+        tm = _make_tm(lang)
 
-        title   = tm.translate_text("birthday_title")
+        title = tm.translate_text("birthday_title")
         message = tm.translate_text("birthday_message")
         if lang == "fr":
             subtitle = f"{age} ans"
         else:
-            suffix   = "st" if age==1 else "nd" if age==2 else "rd" if age==3 else "th"
+            suffix = "st" if age == 1 else "nd" if age == 2 else "rd" if age == 3 else "th"
             subtitle = f"{age}{suffix} Birthday"
 
         popup = SpecialEventPopup(
-            title=title, subtitle=subtitle, message=message,
+            title=title,
+            subtitle=subtitle,
+            message=message,
             icon_path=_resource_path(os.path.join("Assets", "birthday.png")),
             sound_path=_resource_path(os.path.join("SFX", "birthday.wav")),
             event_type=EventTheme.BIRTHDAY,
