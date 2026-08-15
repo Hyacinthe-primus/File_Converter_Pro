@@ -1,9 +1,8 @@
 """PdfToWordDialog — Options for PDF to Word conversion mode selection."""
 
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QGroupBox, QRadioButton,
-                               QLabel, QDialogButtonBox, QButtonGroup)
-from qss_helpers import _apply_dialog_btn
+from PySide6.QtWidgets import QButtonGroup, QDialog, QDialogButtonBox, QGroupBox, QLabel, QRadioButton, QVBoxLayout
 
+from qss_helpers import _apply_dialog_btn
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
 
@@ -27,7 +26,9 @@ class PdfToWordDialog(TranslationMixin, QDialog):
 
         self.mode_group = QButtonGroup(self)
 
-        self.with_images_radio = QRadioButton(self.translate_text("Conserver les images et la mise en page (recommandé)"))
+        self.with_images_radio = QRadioButton(
+            self.translate_text("Conserver les images et la mise en page (recommandé)")
+        )
         self.text_only_radio = QRadioButton(self.translate_text("Texte brut uniquement (plus rapide)"))
         self.text_with_image_text_radio = QRadioButton(self.translate_text("Texte complet (texte + texte des images)"))
 
@@ -47,7 +48,11 @@ class PdfToWordDialog(TranslationMixin, QDialog):
 
         if self.has_images:
             mode_layout.addWidget(self.text_with_image_text_radio)
-            self.image_info_label = QLabel(self.translate_text("ℹ️ Ce PDF contient des images. L'option 'Texte complet' extraira le texte des images."))
+            self.image_info_label = QLabel(
+                self.translate_text(
+                    "ℹ️ Ce PDF contient des images. L'option 'Texte complet' extraira le texte des images."
+                )
+            )
             self.image_info_label.setStyleSheet("color: #007acc; font-size: 11px; margin-top: 10px;")
             self.image_info_label.setWordWrap(True)
             mode_layout.addWidget(self.image_info_label)
