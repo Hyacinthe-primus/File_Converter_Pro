@@ -1,10 +1,20 @@
 """PdfProtectionDialog — Dialog for PDF protection options."""
 
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-                               QComboBox, QLineEdit, QGroupBox, QFormLayout,
-                               QPushButton, QMessageBox)
-from translations import TranslationManager
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QFormLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+)
+
 from qss_helpers import _apply_dialog_btn
+from translations import TranslationManager
 from widgets import AnimatedCheckBox
 
 
@@ -29,10 +39,12 @@ class PdfProtectionDialog(QDialog):
         mode_lay = QHBoxLayout()
         mode_lay.addWidget(QLabel(self.tr_("Mode:")))
         self.mode_combo = QComboBox()
-        self.mode_combo.addItems([
-            self.tr_("Basique (restrictions uniquement)"),
-            self.tr_("Avancé (mot de passe + restrictions)"),
-        ])
+        self.mode_combo.addItems(
+            [
+                self.tr_("Basique (restrictions uniquement)"),
+                self.tr_("Avancé (mot de passe + restrictions)"),
+            ]
+        )
         self.mode_combo.currentIndexChanged.connect(self._on_mode_changed)
         mode_lay.addWidget(self.mode_combo)
         lay.addLayout(mode_lay)
@@ -105,6 +117,7 @@ class PdfProtectionDialog(QDialog):
 
     def get_permissions(self):
         from pypdf.constants import UserAccessPermissions
+
         flag = UserAccessPermissions(0)
         if self.allow_print_check.isChecked():
             flag |= UserAccessPermissions.PRINT
@@ -127,11 +140,9 @@ class PdfProtectionDialog(QDialog):
         if self.is_advanced():
             pwd = self.password_input.text()
             if not pwd:
-                QMessageBox.warning(self, self.tr_("Erreur"),
-                                    self.tr_("Veuillez entrer un mot de passe"))
+                QMessageBox.warning(self, self.tr_("Erreur"), self.tr_("Veuillez entrer un mot de passe"))
                 return
             if self.password_input.text() != self.confirm_input.text():
-                QMessageBox.warning(self, self.tr_("Erreur"),
-                                    self.tr_("Les mots de passe ne correspondent pas"))
+                QMessageBox.warning(self, self.tr_("Erreur"), self.tr_("Les mots de passe ne correspondent pas"))
                 return
         self.accept()
