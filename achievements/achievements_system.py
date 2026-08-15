@@ -10,12 +10,13 @@ Achievements System
 import json
 import os
 import sqlite3
-from datetime import datetime, timedelta
-from PySide6.QtCore import QObject, Signal, QTimer
 import sys
 import traceback
+from datetime import datetime, timedelta
 
-_PKG_DIR  = os.path.dirname(os.path.abspath(__file__))
+from PySide6.QtCore import QObject, QTimer, Signal
+
+_PKG_DIR = os.path.dirname(os.path.abspath(__file__))
 _ROOT_DIR = os.path.dirname(_PKG_DIR)
 
 if _ROOT_DIR not in sys.path:
@@ -23,8 +24,10 @@ if _ROOT_DIR not in sys.path:
 
 from translations import TranslationManager
 
+
 class AchievementSystem(QObject):
     """Achievement management system"""
+
     achievement_unlocked = Signal(dict)
     rank_unlocked = Signal(dict)
 
@@ -35,8 +38,8 @@ class AchievementSystem(QObject):
         self.translation_manager = TranslationManager()
         self.achievements_data = None
         self.stats = {}
-        
-        if getattr(sys, 'frozen', False):
+
+        if getattr(sys, "frozen", False):
             app_dir = os.path.dirname(sys.executable)
         else:
             app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,7 +47,7 @@ class AchievementSystem(QObject):
         self.db_path = os.path.join(app_dir, "achievements.db")
         if not os.path.exists(self.db_path):
             print("[INFO] Creating achievements database...")
-        
+
         self.load_achievements_data()
         self.init_database()
         self.initialize_achievements()
@@ -60,7 +63,7 @@ class AchievementSystem(QObject):
             ("Master", "Maître"),
             ("Grand Master", "Grand Maître"),
             ("Legendary", "Légendaire"),
-            ("Mythic", "Mythique")
+            ("Mythic", "Mythique"),
         ]
         self.rank_colors = [
             "#B0BEC5",  # Rookie
@@ -68,11 +71,11 @@ class AchievementSystem(QObject):
             "#4CAF50",  # Adept
             "#FF9800",  # Veteran
             "#E91E63",  # Elite
-            "#9C27B0",  # Champion 
+            "#9C27B0",  # Champion
             "#FF5722",  # Master
             "#795548",  # Grand Master
             "#FFD600",  # Legendary
-            "#FF1744"   # Mythic
+            "#FF1744",  # Mythic
         ]
         self.current_rank_index = 0
         self.last_rank_index = -1
@@ -84,7 +87,7 @@ class AchievementSystem(QObject):
         unlocked_count = self.get_unlocked_count()
         print(f"[DEBUG] {unlocked_count} achievements unlocked at startup")
         print(f"[DEBUG] Rank at startup: {_startup_rank_index} ({self.ranks[_startup_rank_index][0]})")
-        
+
         self.save_timer = QTimer()
         self.save_timer.timeout.connect(self.save_stats)
         self.save_timer.start(30000)
@@ -96,7 +99,7 @@ class AchievementSystem(QObject):
                      (e.g. File Converter Pro_internal/)
         Dev mode:    assets are at the project root (_ROOT_DIR)
         """
-        meipass = getattr(sys, '_MEIPASS', None)
+        meipass = getattr(sys, "_MEIPASS", None)
         if meipass:
             path = os.path.join(meipass, relative_path)
             if os.path.exists(path):
@@ -128,38 +131,23 @@ class AchievementSystem(QObject):
                             "tpl_architecte",
                             "tpl_maitre_presets",
                             "tpl_le_rituel",
-                        ]
+                        ],
                     },
                     "ultimate_tier": {
                         "sfx": "ultimate_epic.wav",
-                        "achievements": [
-                            "file_industrial",
-                            "file_god",
-                            "eternal_loyalty",
-                            "absolute_perfection"
-                        ]
+                        "achievements": ["file_industrial", "file_god", "eternal_loyalty", "absolute_perfection"],
                     },
                     "security_sounds": {
                         "sfx": "security_lock.wav",
-                        "achievements": [
-                            "data_guardian",
-                            "impenetrable_fortress",
-                            "master_key"
-                        ]
+                        "achievements": ["data_guardian", "impenetrable_fortress", "master_key"],
                     },
                     "compression_sounds": {
                         "sfx": "compress_zip.wav",
-                        "achievements": [
-                            "titanic_compressor",
-                            "royal_archivist"
-                        ]
+                        "achievements": ["titanic_compressor", "royal_archivist"],
                     },
                     "pdf_tools_sounds": {
                         "sfx": "pdf_action.wav",
-                        "achievements": [
-                            "division_blade",
-                            "eternal_librarian"
-                        ]
+                        "achievements": ["division_blade", "eternal_librarian"],
                     },
                     "legendary_sounds": {
                         "sfx": "legendary_unlock.wav",
@@ -169,7 +157,7 @@ class AchievementSystem(QObject):
                             "absolute_perfection",
                             "adv_la_machine",
                             "adv_collectionneur",
-                        ]
+                        ],
                     },
                     "conversion_sounds": {
                         "sfx": "conversion_done.wav",
@@ -187,7 +175,7 @@ class AchievementSystem(QObject):
                             "tpl_automatiste",
                             "tpl_archiviste",
                             "tpl_importateur",
-                        ]
+                        ],
                     },
                     "technical_sounds": {
                         "sfx": "tech_achievement.wav",
@@ -203,27 +191,23 @@ class AchievementSystem(QObject):
                             "tpl_perfectionniste",
                             "tpl_reference_absolue",
                             "tpl_collectionneur_workflows",
-                        ]
+                        ],
                     },
                     "fun_sounds": {
                         "sfx": "fun_unlock.wav",
-                        "achievements": [
-                            "night_owl",
-                            "flash_gordon",
-                            "adv_heic_hunter"
-                        ]
+                        "achievements": ["night_owl", "flash_gordon", "adv_heic_hunter"],
                     },
                     "unique_sounds": {
                         "first_adventure": "first_step.wav",
                         "night_knight": "dark_mode.wav",
-                        "cosmic_orb": "cosmic_unlock.wav"
-                    }
+                        "cosmic_orb": "cosmic_unlock.wav",
+                    },
                 },
                 "achievements": {},
                 "categories": {},
-                "tiers": {}
+                "tiers": {},
             }
-            
+
             achievements = {
                 "first_adventure": {
                     "id": "first_adventure",
@@ -232,15 +216,12 @@ class AchievementSystem(QObject):
                     "icon": "smiling_smile.png",
                     "category": "progression",
                     "tier": "starter",
-                    "requirement": {
-                        "type": "conversions_total",
-                        "value": 1
-                    },
+                    "requirement": {"type": "conversions_total", "value": 1},
                     "reward_xp": 10,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "apprentice": {
                     "id": "apprentice",
@@ -249,15 +230,12 @@ class AchievementSystem(QObject):
                     "icon": "bronze_trophy.png",
                     "category": "progression",
                     "tier": "bronze",
-                    "requirement": {
-                        "type": "conversions_total",
-                        "value": 100
-                    },
+                    "requirement": {"type": "conversions_total", "value": 100},
                     "reward_xp": 100,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "steel_warrior": {
                     "id": "steel_warrior",
@@ -266,15 +244,12 @@ class AchievementSystem(QObject):
                     "icon": "steel_trophy.png",
                     "category": "progression",
                     "tier": "steel",
-                    "requirement": {
-                        "type": "conversions_total",
-                        "value": 500
-                    },
+                    "requirement": {"type": "conversions_total", "value": 500},
                     "reward_xp": 300,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "format_expert": {
                     "id": "format_expert",
@@ -283,15 +258,12 @@ class AchievementSystem(QObject):
                     "icon": "silver_trophy.png",
                     "category": "progression",
                     "tier": "silver",
-                    "requirement": {
-                        "type": "conversions_total",
-                        "value": 1000
-                    },
+                    "requirement": {"type": "conversions_total", "value": 1000},
                     "reward_xp": 500,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "platinum_master": {
                     "id": "platinum_master",
@@ -300,15 +272,12 @@ class AchievementSystem(QObject):
                     "icon": "Electrum_trophy.png",
                     "category": "progression",
                     "tier": "platinum_tier",
-                    "requirement": {
-                        "type": "conversions_total",
-                        "value": 5000
-                    },
+                    "requirement": {"type": "conversions_total", "value": 5000},
                     "reward_xp": 1500,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "file_industrial": {
                     "id": "file_industrial",
@@ -317,15 +286,12 @@ class AchievementSystem(QObject):
                     "icon": "gold_trophy.png",
                     "category": "progression",
                     "tier": "gold",
-                    "requirement": {
-                        "type": "conversions_total",
-                        "value": 10000
-                    },
+                    "requirement": {"type": "conversions_total", "value": 10000},
                     "reward_xp": 2000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "file_god": {
                     "id": "file_god",
@@ -334,15 +300,12 @@ class AchievementSystem(QObject):
                     "icon": "100%_platinium.png",
                     "category": "ultimate",
                     "tier": "platinum",
-                    "requirement": {
-                        "type": "all_achievements",
-                        "value": True
-                    },
+                    "requirement": {"type": "all_achievements", "value": True},
                     "reward_xp": 10000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "titanic_compressor": {
                     "id": "titanic_compressor",
@@ -351,15 +314,12 @@ class AchievementSystem(QObject):
                     "icon": "Titan's_hammer.png",
                     "category": "compression",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "compressed_data_gb",
-                        "value": 100
-                    },
+                    "requirement": {"type": "compressed_data_gb", "value": 100},
                     "reward_xp": 800,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "division_blade": {
                     "id": "division_blade",
@@ -368,15 +328,12 @@ class AchievementSystem(QObject):
                     "icon": "Legendary_sword.png",
                     "category": "pdf_tools",
                     "tier": "legendary",
-                    "requirement": {
-                        "type": "pdf_split_max_pages",
-                        "value": 1000
-                    },
+                    "requirement": {"type": "pdf_split_max_pages", "value": 1000},
                     "reward_xp": 1000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "visual_alchemist": {
                     "id": "visual_alchemist",
@@ -385,15 +342,12 @@ class AchievementSystem(QObject):
                     "icon": "magic_potion.png",
                     "category": "conversion",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "images_to_pdf_total",
-                        "value": 5000
-                    },
+                    "requirement": {"type": "images_to_pdf_total", "value": 5000},
                     "reward_xp": 1200,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "eternal_librarian": {
                     "id": "eternal_librarian",
@@ -402,15 +356,12 @@ class AchievementSystem(QObject):
                     "icon": "Ancient_scroll(papyrus).png",
                     "category": "pdf_tools",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "pdf_merge_max_pages",
-                        "value": 500
-                    },
+                    "requirement": {"type": "pdf_merge_max_pages", "value": 500},
                     "reward_xp": 800,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "royal_archivist": {
                     "id": "royal_archivist",
@@ -419,15 +370,12 @@ class AchievementSystem(QObject):
                     "icon": "treasure_chest.png",
                     "category": "compression",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "archives_created",
-                        "value": 500
-                    },
+                    "requirement": {"type": "archives_created", "value": 500},
                     "reward_xp": 900,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "processing_king": {
                     "id": "processing_king",
@@ -436,15 +384,12 @@ class AchievementSystem(QObject):
                     "icon": "royal_crown.png",
                     "category": "conversion",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "word_pdf_conversions",
-                        "value": 2000
-                    },
+                    "requirement": {"type": "word_pdf_conversions", "value": 2000},
                     "reward_xp": 1000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "data_guardian": {
                     "id": "data_guardian",
@@ -453,15 +398,12 @@ class AchievementSystem(QObject):
                     "icon": "Protector's_shield.png",
                     "category": "security",
                     "tier": "rare",
-                    "requirement": {
-                        "type": "pdf_protected",
-                        "value": 50
-                    },
+                    "requirement": {"type": "pdf_protected", "value": 50},
                     "reward_xp": 400,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "impenetrable_fortress": {
                     "id": "impenetrable_fortress",
@@ -473,15 +415,13 @@ class AchievementSystem(QObject):
                     "requirement": {
                         "type": "batch_protect_complex",
                         "value": 100,
-                        "extra": {
-                            "min_password_length": 12
-                        }
+                        "extra": {"min_password_length": 12},
                     },
                     "reward_xp": 800,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "master_key": {
                     "id": "master_key",
@@ -490,15 +430,12 @@ class AchievementSystem(QObject):
                     "icon": "golden_key.png",
                     "category": "security",
                     "tier": "rare",
-                    "requirement": {
-                        "type": "protected_files_converted",
-                        "value": 50
-                    },
+                    "requirement": {"type": "protected_files_converted", "value": 50},
                     "reward_xp": 500,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "night_knight": {
                     "id": "night_knight",
@@ -507,15 +444,12 @@ class AchievementSystem(QObject):
                     "icon": "silver_shield.png",
                     "category": "usage",
                     "tier": "rare",
-                    "requirement": {
-                        "type": "dark_mode_hours",
-                        "value": 100
-                    },
+                    "requirement": {"type": "dark_mode_hours", "value": 100},
                     "reward_xp": 600,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "dragon_breath": {
                     "id": "dragon_breath",
@@ -524,15 +458,12 @@ class AchievementSystem(QObject):
                     "icon": "red_dragon.png",
                     "category": "technical",
                     "tier": "legendary",
-                    "requirement": {
-                        "type": "batch_max_files",
-                        "value": 500
-                    },
+                    "requirement": {"type": "batch_max_files", "value": 500},
                     "reward_xp": 1500,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "all_seeing_eye": {
                     "id": "all_seeing_eye",
@@ -541,15 +472,12 @@ class AchievementSystem(QObject):
                     "icon": "cyclop.png",
                     "category": "technical",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "ocr_pages_total",
-                        "value": 1000
-                    },
+                    "requirement": {"type": "ocr_pages_total", "value": 1000},
                     "reward_xp": 1000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "visionary": {
                     "id": "visionary",
@@ -558,15 +486,12 @@ class AchievementSystem(QObject):
                     "icon": "clairvoyance_crystal.png",
                     "category": "usage",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "previews_used",
-                        "value": 2000
-                    },
+                    "requirement": {"type": "previews_used", "value": 2000},
                     "reward_xp": 900,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "universal_traveler": {
                     "id": "universal_traveler",
@@ -578,22 +503,13 @@ class AchievementSystem(QObject):
                     "requirement": {
                         "type": "all_formats_used",
                         "value": True,
-                        "formats": [
-                            "pdf",
-                            "docx",
-                            "jpg",
-                            "png",
-                            "zip",
-                            "rar",
-                            "tar",
-                            "gz"
-                        ]
+                        "formats": ["pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"],
                     },
                     "reward_xp": 1000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "eternal_loyalty": {
                     "id": "eternal_loyalty",
@@ -602,32 +518,26 @@ class AchievementSystem(QObject):
                     "icon": "eternal_diamond.png",
                     "category": "ultimate",
                     "tier": "diamond",
-                    "requirement": {
-                        "type": "unique_days_used",
-                        "value": 365
-                    },
+                    "requirement": {"type": "unique_days_used", "value": 365},
                     "reward_xp": 3000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "absolute_perfection": {
                     "id": "absolute_perfection",
                     "name": "La Perfection Absolue",
-                    "description": "Réaliser une série de 500 conversions consécutives sans aucune erreur ni annulation",
+                    "description": "Réaliser une série de 500 conversions consécutives sans aucune erreur ni annulation",  # noqa: E501
                     "icon": "medal_of_excellence.png",
                     "category": "ultimate",
                     "tier": "legendary",
-                    "requirement": {
-                        "type": "consecutive_success",
-                        "value": 500
-                    },
+                    "requirement": {"type": "consecutive_success", "value": 500},
                     "reward_xp": 5000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "night_owl": {
                     "id": "night_owl",
@@ -639,16 +549,13 @@ class AchievementSystem(QObject):
                     "requirement": {
                         "type": "night_conversions",
                         "value": 100,
-                        "extra": {
-                            "time_start": "00:00",
-                            "time_end": "06:00"
-                        }
+                        "extra": {"time_start": "00:00", "time_end": "06:00"},
                     },
                     "reward_xp": 500,
                     "secret": True,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "flash_gordon": {
                     "id": "flash_gordon",
@@ -657,18 +564,12 @@ class AchievementSystem(QObject):
                     "icon": "Fast_as_lightning.png",
                     "category": "fun",
                     "tier": "rare",
-                    "requirement": {
-                        "type": "speed_conversion",
-                        "value": 50,
-                        "extra": {
-                            "max_time_seconds": 300
-                        }
-                    },
+                    "requirement": {"type": "speed_conversion", "value": 50, "extra": {"max_time_seconds": 300}},
                     "reward_xp": 600,
                     "secret": True,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 # Advanced Conversions
                 "adv_data_architect": {
@@ -678,15 +579,12 @@ class AchievementSystem(QObject):
                     "icon": "blueprint.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_doc_conversions",
-                        "value": 50
-                    },
+                    "requirement": {"type": "adv_doc_conversions", "value": 50},
                     "reward_xp": 300,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_csv_sorcier": {
                     "id": "adv_csv_sorcier",
@@ -695,15 +593,12 @@ class AchievementSystem(QObject):
                     "icon": "spellbook.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_csv_json_conversions",
-                        "value": 25
-                    },
+                    "requirement": {"type": "adv_csv_json_conversions", "value": 25},
                     "reward_xp": 350,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_office_slayer": {
                     "id": "adv_office_slayer",
@@ -712,15 +607,12 @@ class AchievementSystem(QObject):
                     "icon": "bow_and_arrow.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_office_slayer",
-                        "value": 20
-                    },
+                    "requirement": {"type": "adv_office_slayer", "value": 20},
                     "reward_xp": 450,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_web_harvester": {
                     "id": "adv_web_harvester",
@@ -729,15 +621,12 @@ class AchievementSystem(QObject):
                     "icon": "spider.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_html_to_pdf",
-                        "value": 20
-                    },
+                    "requirement": {"type": "adv_html_to_pdf", "value": 20},
                     "reward_xp": 350,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_bibliotheque": {
                     "id": "adv_bibliotheque",
@@ -746,15 +635,12 @@ class AchievementSystem(QObject):
                     "icon": "scroll.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_epub_to_pdf",
-                        "value": 15
-                    },
+                    "requirement": {"type": "adv_epub_to_pdf", "value": 15},
                     "reward_xp": 400,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_icon_forge": {
                     "id": "adv_icon_forge",
@@ -763,15 +649,12 @@ class AchievementSystem(QObject):
                     "icon": "anvil.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_image_to_ico",
-                        "value": 25
-                    },
+                    "requirement": {"type": "adv_image_to_ico", "value": 25},
                     "reward_xp": 350,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_format_nomade": {
                     "id": "adv_format_nomade",
@@ -780,15 +663,12 @@ class AchievementSystem(QObject):
                     "icon": "compass.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_image_types_used",
-                        "value": 13
-                    },
+                    "requirement": {"type": "adv_image_types_used", "value": 13},
                     "reward_xp": 500,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_heic_hunter": {
                     "id": "adv_heic_hunter",
@@ -797,15 +677,12 @@ class AchievementSystem(QObject):
                     "icon": "telescope.png",
                     "category": "fun",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_heic_conversions",
-                        "value": 20
-                    },
+                    "requirement": {"type": "adv_heic_conversions", "value": 20},
                     "reward_xp": 400,
                     "secret": True,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_pixel_perfect": {
                     "id": "adv_pixel_perfect",
@@ -814,15 +691,12 @@ class AchievementSystem(QObject):
                     "icon": "potions.png",
                     "category": "advanced_conversions",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "adv_image_conversions",
-                        "value": 100
-                    },
+                    "requirement": {"type": "adv_image_conversions", "value": 100},
                     "reward_xp": 600,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_extracteur_pro": {
                     "id": "adv_extracteur_pro",
@@ -831,15 +705,12 @@ class AchievementSystem(QObject):
                     "icon": "eagle_shield.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_video_to_audio",
-                        "value": 30
-                    },
+                    "requirement": {"type": "adv_video_to_audio", "value": 30},
                     "reward_xp": 450,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_codec_master": {
                     "id": "adv_codec_master",
@@ -848,15 +719,12 @@ class AchievementSystem(QObject):
                     "icon": "mechanical_raven.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
-                    "requirement": {
-                        "type": "adv_video_types_used",
-                        "value": 9
-                    },
+                    "requirement": {"type": "adv_video_types_used", "value": 9},
                     "reward_xp": 500,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_studio_underground": {
                     "id": "adv_studio_underground",
@@ -865,32 +733,26 @@ class AchievementSystem(QObject):
                     "icon": "lyre.png",
                     "category": "advanced_conversions",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "adv_audio_conversions",
-                        "value": 75
-                    },
+                    "requirement": {"type": "adv_audio_conversions", "value": 75},
                     "reward_xp": 600,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_all_rounder": {
                     "id": "adv_all_rounder",
                     "name": "⚡ All-Rounder",
-                    "description": "Avoir ≥20 conversions réussies dans chacune des 3 catégories (document, image, audio/vidéo) des Conversions Avancées",
+                    "description": "Avoir ≥20 conversions réussies dans chacune des 3 catégories (document, image, audio/vidéo) des Conversions Avancées",  # noqa: E501
                     "icon": "scarab.png",
                     "category": "advanced_conversions",
                     "tier": "epic",
-                    "requirement": {
-                        "type": "adv_all_rounder",
-                        "value": 20
-                    },
+                    "requirement": {"type": "adv_all_rounder", "value": 20},
                     "reward_xp": 800,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_la_machine": {
                     "id": "adv_la_machine",
@@ -899,15 +761,12 @@ class AchievementSystem(QObject):
                     "icon": "gauntlet.png",
                     "category": "advanced_conversions",
                     "tier": "legendary",
-                    "requirement": {
-                        "type": "adv_total_conversions",
-                        "value": 250
-                    },
+                    "requirement": {"type": "adv_total_conversions", "value": 250},
                     "reward_xp": 1500,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 "adv_collectionneur": {
                     "id": "adv_collectionneur",
@@ -916,15 +775,12 @@ class AchievementSystem(QObject):
                     "icon": "treasure.png",
                     "category": "advanced_conversions",
                     "tier": "legendary",
-                    "requirement": {
-                        "type": "adv_all_types_used",
-                        "value": 41
-                    },
+                    "requirement": {"type": "adv_all_types_used", "value": 41},
                     "reward_xp": 2000,
                     "secret": False,
                     "unlocked": False,
                     "unlock_date": None,
-                    "progress": 0
+                    "progress": 0,
                 },
                 # Templates achievements
                 "tpl_architecte": {
@@ -936,7 +792,10 @@ class AchievementSystem(QObject):
                     "tier": "rare",
                     "requirement": {"type": "tpl_created_total", "value": 10},
                     "reward_xp": 300,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_maitre_presets": {
                     "id": "tpl_maitre_presets",
@@ -947,18 +806,24 @@ class AchievementSystem(QObject):
                     "tier": "epic",
                     "requirement": {"type": "tpl_created_total", "value": 25},
                     "reward_xp": 600,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_reference_absolue": {
                     "id": "tpl_reference_absolue",
                     "name": "📋 Référence Absolue",
-                    "description": "Avoir 5 templates différents marqués comme défaut simultanément (un par type d'opération)",
+                    "description": "Avoir 5 templates différents marqués comme défaut simultanément (un par type d'opération)",  # noqa: E501
                     "icon": "tarot_cards.png",
                     "category": "templates",
                     "tier": "epic",
                     "requirement": {"type": "tpl_defaults_count", "value": 5},
                     "reward_xp": 700,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_automatiste": {
                     "id": "tpl_automatiste",
@@ -969,7 +834,10 @@ class AchievementSystem(QObject):
                     "tier": "rare",
                     "requirement": {"type": "tpl_applied_total", "value": 50},
                     "reward_xp": 400,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_le_rituel": {
                     "id": "tpl_le_rituel",
@@ -980,7 +848,10 @@ class AchievementSystem(QObject):
                     "tier": "rare",
                     "requirement": {"type": "tpl_single_max_applied", "value": 25},
                     "reward_xp": 500,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_collectionneur_workflows": {
                     "id": "tpl_collectionneur_workflows",
@@ -991,7 +862,10 @@ class AchievementSystem(QObject):
                     "tier": "epic",
                     "requirement": {"type": "tpl_all_categories", "value": 9},
                     "reward_xp": 800,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_polyvalent": {
                     "id": "tpl_polyvalent",
@@ -1002,7 +876,10 @@ class AchievementSystem(QObject):
                     "tier": "rare",
                     "requirement": {"type": "tpl_types_session", "value": 5},
                     "reward_xp": 350,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_archiviste": {
                     "id": "tpl_archiviste",
@@ -1013,7 +890,10 @@ class AchievementSystem(QObject):
                     "tier": "advanced",
                     "requirement": {"type": "tpl_exported", "value": 1},
                     "reward_xp": 200,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_importateur": {
                     "id": "tpl_importateur",
@@ -1024,7 +904,10 @@ class AchievementSystem(QObject):
                     "tier": "advanced",
                     "requirement": {"type": "tpl_imported", "value": 1},
                     "reward_xp": 200,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
                 },
                 "tpl_perfectionniste": {
                     "id": "tpl_perfectionniste",
@@ -1035,144 +918,51 @@ class AchievementSystem(QObject):
                     "tier": "rare",
                     "requirement": {"type": "tpl_edited_total", "value": 10},
                     "reward_xp": 400,
-                    "secret": False, "unlocked": False, "unlock_date": None, "progress": 0
-                }
+                    "secret": False,
+                    "unlocked": False,
+                    "unlock_date": None,
+                    "progress": 0,
+                },
             }
-            
+
             self.achievements_data["achievements"] = achievements
-            
+
             categories = {
-                "progression": {
-                    "name": "Progression Globale",
-                    "icon": "trophy_icon.png",
-                    "color": "#FFD700"
-                },
-                "conversion": {
-                    "name": "Conversion",
-                    "icon": "convert_icon.png",
-                    "color": "#4dabf7"
-                },
-                "pdf_tools": {
-                    "name": "Outils PDF",
-                    "icon": "pdf_icon.png",
-                    "color": "#FF6B6B"
-                },
-                "compression": {
-                    "name": "Compression",
-                    "icon": "compress_icon.png",
-                    "color": "#51CF66"
-                },
-                "security": {
-                    "name": "Sécurité",
-                    "icon": "security_icon.png",
-                    "color": "#FFA94D"
-                },
-                "technical": {
-                    "name": "Exploits Techniques",
-                    "icon": "tech_icon.png",
-                    "color": "#CC5DE8"
-                },
-                "usage": {
-                    "name": "Utilisation",
-                    "icon": "usage_icon.png",
-                    "color": "#339AF0"
-                },
-                "completion": {
-                    "name": "Complétude",
-                    "icon": "completion_icon.png",
-                    "color": "#20C997"
-                },
-                "ultimate": {
-                    "name": "Ultime",
-                    "icon": "ultimate_icon.png",
-                    "color": "#9775FA"
-                },
-                "fun": {
-                    "name": "Fun & Easter Eggs",
-                    "icon": "fun_icon.png",
-                    "color": "#FF8787"
-                },
-                "advanced_conversions": {
-                    "name": "Conversions Avancées",
-                    "icon": "tech_icon.png",
-                    "color": "#22d3ee"
-                },
-                "templates": {
-                    "name": "Templates",
-                    "icon": "tech_icon.png",
-                    "color": "#a78bfa"
-                }
+                "progression": {"name": "Progression Globale", "icon": "trophy_icon.png", "color": "#FFD700"},
+                "conversion": {"name": "Conversion", "icon": "convert_icon.png", "color": "#4dabf7"},
+                "pdf_tools": {"name": "Outils PDF", "icon": "pdf_icon.png", "color": "#FF6B6B"},
+                "compression": {"name": "Compression", "icon": "compress_icon.png", "color": "#51CF66"},
+                "security": {"name": "Sécurité", "icon": "security_icon.png", "color": "#FFA94D"},
+                "technical": {"name": "Exploits Techniques", "icon": "tech_icon.png", "color": "#CC5DE8"},
+                "usage": {"name": "Utilisation", "icon": "usage_icon.png", "color": "#339AF0"},
+                "completion": {"name": "Complétude", "icon": "completion_icon.png", "color": "#20C997"},
+                "ultimate": {"name": "Ultime", "icon": "ultimate_icon.png", "color": "#9775FA"},
+                "fun": {"name": "Fun & Easter Eggs", "icon": "fun_icon.png", "color": "#FF8787"},
+                "advanced_conversions": {"name": "Conversions Avancées", "icon": "tech_icon.png", "color": "#22d3ee"},
+                "templates": {"name": "Templates", "icon": "tech_icon.png", "color": "#a78bfa"},
             }
-            
+
             self.achievements_data["categories"] = categories
-            
+
             tiers = {
-                "starter": {
-                    "name": "Débutant",
-                    "color": "#A8DADC",
-                    "order": 1
-                },
-                "bronze": {
-                    "name": "Bronze",
-                    "color": "#CD7F32",
-                    "order": 2
-                },
-                "steel": {
-                    "name": "Acier",
-                    "color": "#71797E",
-                    "order": 3
-                },
-                "silver": {
-                    "name": "Argent",
-                    "color": "#C0C0C0",
-                    "order": 4
-                },
-                "platinum_tier": {
-                    "name": "Electrum",
-                    "color": "#C18D30",
-                    "order": 5
-                },
-                "gold": {
-                    "name": "Or",
-                    "color": "#FFD700",
-                    "order": 6
-                },
-                "rare": {
-                    "name": "Rare",
-                    "color": "#4169E1",
-                    "order": 7
-                },
-                "epic": {
-                    "name": "Épique",
-                    "color": "#9370DB",
-                    "order": 8
-                },
-                "legendary": {
-                    "name": "Légendaire",
-                    "color": "#FF8C00",
-                    "order": 9
-                },
-                "diamond": {
-                    "name": "Diamant",
-                    "color": "#B9F2FF",
-                    "order": 10
-                },
-                "platinum": {
-                    "name": "Platine Ultime",
-                    "color": "#E5E4E2",
-                    "order": 11
-                },
-                "advanced": {
-                    "name": "Avancé",
-                    "color": "#22d3ee",
-                    "order": 7
-                }
+                "starter": {"name": "Débutant", "color": "#A8DADC", "order": 1},
+                "bronze": {"name": "Bronze", "color": "#CD7F32", "order": 2},
+                "steel": {"name": "Acier", "color": "#71797E", "order": 3},
+                "silver": {"name": "Argent", "color": "#C0C0C0", "order": 4},
+                "platinum_tier": {"name": "Electrum", "color": "#C18D30", "order": 5},
+                "gold": {"name": "Or", "color": "#FFD700", "order": 6},
+                "rare": {"name": "Rare", "color": "#4169E1", "order": 7},
+                "epic": {"name": "Épique", "color": "#9370DB", "order": 8},
+                "legendary": {"name": "Légendaire", "color": "#FF8C00", "order": 9},
+                "diamond": {"name": "Diamant", "color": "#B9F2FF", "order": 10},
+                "platinum": {"name": "Platine Ultime", "color": "#E5E4E2", "order": 11},
+                "advanced": {"name": "Avancé", "color": "#22d3ee", "order": 7},
             }
-            
+
             self.achievements_data["tiers"] = tiers
-            
+
             self.initialize_achievements()
-        
+
         except Exception as e:
             print(f"Error loading achievements data: {e}")
 
@@ -1180,8 +970,8 @@ class AchievementSystem(QObject):
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute('''
+
+            cursor.execute("""
             CREATE TABLE IF NOT EXISTS achievements (
                 id TEXT PRIMARY KEY,
                 name TEXT,
@@ -1199,36 +989,36 @@ class AchievementSystem(QObject):
                 progress REAL,
                 max_progress REAL
             )
-            ''')
-            
-            cursor.execute('''
+            """)
+
+            cursor.execute("""
             CREATE TABLE IF NOT EXISTS stats (
                 key TEXT PRIMARY KEY,
                 value REAL,
                 last_updated TEXT
             )
-            ''')
-            
-            cursor.execute('''
+            """)
+
+            cursor.execute("""
             CREATE TABLE IF NOT EXISTS daily_stats (
                 date TEXT PRIMARY KEY,
                 conversions INTEGER DEFAULT 0,
                 previews INTEGER DEFAULT 0,
                 dark_mode_minutes INTEGER DEFAULT 0
             )
-            ''')
-            
-            cursor.execute('''
+            """)
+
+            cursor.execute("""
             CREATE TABLE IF NOT EXISTS used_formats (
                 format TEXT PRIMARY KEY,
                 used BOOLEAN DEFAULT FALSE
             )
-            ''')
-            
+            """)
+
             conn.commit()
             conn.close()
             print(f"[DB OK] Database created/updated: {self.db_path}")
-        
+
         except Exception as e:
             print(f"[DB ERROR] Cannot access {self.db_path}: {e}")
             traceback.print_exc()
@@ -1237,50 +1027,56 @@ class AchievementSystem(QObject):
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             for achievement_id, achievement in self.achievements_data["achievements"].items():
-                cursor.execute('''
-                INSERT OR IGNORE INTO achievements 
-                (id, name, description, icon, category, tier, requirement_type, 
-                 requirement_value, requirement_extra, reward_xp, secret, 
+                cursor.execute(
+                    """
+                INSERT OR IGNORE INTO achievements
+                (id, name, description, icon, category, tier, requirement_type,
+                 requirement_value, requirement_extra, reward_xp, secret,
                  unlocked, unlock_date, progress, max_progress)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    achievement["id"],
-                    json.dumps(achievement["name"]),
-                    json.dumps(achievement["description"]),
-                    achievement["icon"],
-                    achievement["category"],
-                    achievement["tier"],
-                    achievement["requirement"]["type"],
-                    achievement["requirement"]["value"],
-                    json.dumps(achievement["requirement"].get("extra", {})),
-                    achievement["reward_xp"],
-                    achievement["secret"],
-                    achievement["unlocked"],
-                    achievement["unlock_date"],
-                    achievement["progress"],
-                    achievement["requirement"]["value"]
-                ))
+                """,
+                    (
+                        achievement["id"],
+                        json.dumps(achievement["name"]),
+                        json.dumps(achievement["description"]),
+                        achievement["icon"],
+                        achievement["category"],
+                        achievement["tier"],
+                        achievement["requirement"]["type"],
+                        achievement["requirement"]["value"],
+                        json.dumps(achievement["requirement"].get("extra", {})),
+                        achievement["reward_xp"],
+                        achievement["secret"],
+                        achievement["unlocked"],
+                        achievement["unlock_date"],
+                        achievement["progress"],
+                        achievement["requirement"]["value"],
+                    ),
+                )
 
-                cursor.execute('''
+                cursor.execute(
+                    """
                 UPDATE achievements
                 SET requirement_value = ?,
                     max_progress      = ?
                 WHERE id       = ?
                   AND unlocked = FALSE
-                ''', (
-                    achievement["requirement"]["value"],
-                    achievement["requirement"]["value"],
-                    achievement["id"],
-                ))
+                """,
+                    (
+                        achievement["requirement"]["value"],
+                        achievement["requirement"]["value"],
+                        achievement["id"],
+                    ),
+                )
             formats = ["pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"]
             for fmt in formats:
-                cursor.execute('INSERT OR IGNORE INTO used_formats (format, used) VALUES (?, ?)', (fmt, False))
-            
+                cursor.execute("INSERT OR IGNORE INTO used_formats (format, used) VALUES (?, ?)", (fmt, False))
+
             conn.commit()
             conn.close()
-        
+
         except Exception as e:
             print(f"Error initializing achievements: {e}")
 
@@ -1288,13 +1084,13 @@ class AchievementSystem(QObject):
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute('SELECT key, value FROM stats')
+
+            cursor.execute("SELECT key, value FROM stats")
             rows = cursor.fetchall()
-            
+
             for key, value in rows:
                 self.stats[key] = value
-            
+
             default_stats = {
                 "total_conversions": 0,
                 "images_to_pdf": 0,
@@ -1362,16 +1158,18 @@ class AchievementSystem(QObject):
                 "tpl_single_max_applied": 0,
                 "tpl_types_session": 0,
             }
-            
+
             for key, default_value in default_stats.items():
                 if key not in self.stats:
                     self.stats[key] = default_value
-                    cursor.execute('INSERT OR REPLACE INTO stats (key, value, last_updated) VALUES (?, ?, ?)',
-                                  (key, default_value, datetime.now().isoformat()))
-            
+                    cursor.execute(
+                        "INSERT OR REPLACE INTO stats (key, value, last_updated) VALUES (?, ?, ?)",
+                        (key, default_value, datetime.now().isoformat()),
+                    )
+
             conn.commit()
             conn.close()
-        
+
         except Exception as e:
             print(f"Error loading stats: {e}")
 
@@ -1379,29 +1177,31 @@ class AchievementSystem(QObject):
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             for key, value in self.stats.items():
-                cursor.execute('INSERT OR REPLACE INTO stats (key, value, last_updated) VALUES (?, ?, ?)',
-                              (key, value, datetime.now().isoformat()))
-            
+                cursor.execute(
+                    "INSERT OR REPLACE INTO stats (key, value, last_updated) VALUES (?, ?, ?)",
+                    (key, value, datetime.now().isoformat()),
+                )
+
             conn.commit()
             conn.close()
-        
+
         except Exception as e:
             print(f"Error saving stats: {e}")
 
     def update_all_progress(self):
         if not self.achievements_data or "achievements" not in self.achievements_data:
             return
-        
+
         for ach_id, achievement in self.achievements_data["achievements"].items():
             if achievement["unlocked"]:
                 achievement["progress"] = achievement["requirement"]["value"]
                 continue
-            
+
             req_type = achievement["requirement"]["type"]
             progress = 0
-            
+
             if req_type == "conversions_total":
                 progress = self.stats.get("total_conversions", 0)
             elif req_type == "images_to_pdf_total":
@@ -1432,20 +1232,20 @@ class AchievementSystem(QObject):
                 try:
                     conn = sqlite3.connect(self.db_path)
                     cursor = conn.cursor()
-                    
-                    cursor.execute('SELECT COUNT(*) FROM used_formats WHERE used = TRUE')
+
+                    cursor.execute("SELECT COUNT(*) FROM used_formats WHERE used = TRUE")
                     used_count = cursor.fetchone()[0]
-                    
-                    cursor.execute('SELECT COUNT(*) FROM used_formats')
+
+                    cursor.execute("SELECT COUNT(*) FROM used_formats")
                     total_count = cursor.fetchone()[0]
-                    
+
                     conn.close()
-                    
+
                     if total_count > 0:
                         achievement["progress"] = used_count
                     else:
                         achievement["progress"] = 0
-                        
+
                 except Exception:
                     achievement["progress"] = 0
             elif req_type == "batch_max_files":
@@ -1485,16 +1285,12 @@ class AchievementSystem(QObject):
                     achievement["progress"] = progress
                     continue
                 elif req_type == "adv_office_slayer":
-                    progress = min(
-                        self.stats.get("adv_xlsx_to_pdf", 0),
-                        self.stats.get("adv_pptx_to_pdf", 0)
-                    )
+                    progress = min(self.stats.get("adv_xlsx_to_pdf", 0), self.stats.get("adv_pptx_to_pdf", 0))
                 elif req_type == "adv_all_rounder":
                     progress = min(
                         self.stats.get("adv_doc_conversions", 0),
                         self.stats.get("adv_image_conversions", 0),
-                        self.stats.get("adv_audio_conversions", 0) +
-                        self.stats.get("adv_video_conversions", 0)
+                        self.stats.get("adv_audio_conversions", 0) + self.stats.get("adv_video_conversions", 0),
                     )
             # Templates
             elif req_type == "tpl_created_total":
@@ -1516,48 +1312,48 @@ class AchievementSystem(QObject):
                 progress = achievement.get("progress", 0)
             elif req_type == "tpl_all_categories":
                 progress = achievement.get("progress", 0)
-            
+
             achievement["progress"] = progress
 
     def mark_format_as_used(self, file_format):
         if not file_format:
             return
-        
-        file_format = file_format.lower().strip().replace('.', '')
-        
+
+        file_format = file_format.lower().strip().replace(".", "")
+
         valid_formats = ["pdf", "docx", "jpg", "jpeg", "png", "zip", "rar", "tar", "gz"]
-        
+
         if file_format not in valid_formats:
             print(f"[ACHIEVEMENTS] Format ignored (invalid): {file_format}")
             return
-        
+
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute('SELECT used FROM used_formats WHERE format = ?', (file_format,))
+
+            cursor.execute("SELECT used FROM used_formats WHERE format = ?", (file_format,))
             result = cursor.fetchone()
             was_used = result[0] if result else False
-            
+
             if was_used:
                 print(f"[ACHIEVEMENTS] Format {file_format} already counted.")
                 conn.close()
                 return
-            
-            cursor.execute('UPDATE used_formats SET used = TRUE WHERE format = ?', (file_format,))
-            
-            cursor.execute('SELECT used FROM used_formats WHERE format = ?', (file_format,))
+
+            cursor.execute("UPDATE used_formats SET used = TRUE WHERE format = ?", (file_format,))
+
+            cursor.execute("SELECT used FROM used_formats WHERE format = ?", (file_format,))
             result_after = cursor.fetchone()
             is_now_used = result_after[0] if result_after else False
-            
+
             conn.commit()
             conn.close()
-            
+
             print(f"[ACHIEVEMENTS] Format {file_format} marked as used (Before: {was_used}, After: {is_now_used})")
-            
+
             self.update_all_progress()
-            self.check_all_formats_used() 
-        
+            self.check_all_formats_used()
+
         except Exception as e:
             print(f"[ACHIEVEMENTS] Error marking format {file_format}: {e}")
 
@@ -1582,41 +1378,44 @@ class AchievementSystem(QObject):
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute('''
-            SELECT id, requirement_type, requirement_value, unlocked 
-            FROM achievements 
+
+            cursor.execute(
+                """
+            SELECT id, requirement_type, requirement_value, unlocked
+            FROM achievements
             WHERE requirement_type = ?
-            ''', (stat_key,))
-            
+            """,
+                (stat_key,),
+            )
+
             achievements = cursor.fetchall()
-            
+
             for ach_id, req_type, req_value, unlocked in achievements:
                 if not unlocked:
                     check_value = stat_value
                     if req_type == "dark_mode_hours" and stat_key == "dark_mode_minutes":
                         check_value = stat_value / 60
-                        
+
                     if check_value >= req_value:
                         self.unlock_achievement(ach_id)
-            
+
             conn.close()
-        
+
         except Exception as e:
             print(f"Error checking achievements: {e}")
 
     def check_achievement(self, achievement_id):
         try:
             achievement = self.achievements_data["achievements"][achievement_id]
-            
+
             if achievement["unlocked"]:
                 return
-            
+
             req_type = achievement["requirement"]["type"]
             req_value = achievement["requirement"]["value"]
-            
+
             unlocked = False
-            
+
             if req_type == "conversions_total":
                 unlocked = self.stats.get("total_conversions", 0) >= req_value
             elif req_type == "images_to_pdf_total":
@@ -1639,29 +1438,29 @@ class AchievementSystem(QObject):
                 unlocked = self.stats.get("consecutive_success", 0) >= req_value
             elif req_type == "night_conversions":
                 unlocked = self.stats.get("night_conversions", 0) >= req_value
-            
+
             elif req_type == "unique_days_used":
                 unlocked = self.stats.get("unique_days", 0) >= req_value
             elif req_type == "all_formats_used":
                 try:
                     conn = sqlite3.connect(self.db_path)
                     cursor = conn.cursor()
-                    
-                    cursor.execute('SELECT COUNT(*) FROM used_formats WHERE used = TRUE')
+
+                    cursor.execute("SELECT COUNT(*) FROM used_formats WHERE used = TRUE")
                     used_count = cursor.fetchone()[0]
-                    
-                    cursor.execute('SELECT COUNT(*) FROM used_formats')
+
+                    cursor.execute("SELECT COUNT(*) FROM used_formats")
                     total_count = cursor.fetchone()[0]
-                    
+
                     conn.close()
-                    
+
                     if total_count > 0:
                         achievement["progress"] = used_count
                     else:
                         achievement["progress"] = 0
                     if used_count == total_count:
                         unlocked = True
-                
+
                 except Exception as e:
                     print(f"Error check_all_formats_used: {e}")
             elif req_type == "batch_max_files":
@@ -1672,7 +1471,7 @@ class AchievementSystem(QObject):
                 unlocked = False
             elif req_type == "speed_conversion":
                 files_done = self.stats.get("recent_batch_files", 0)
-                time_taken = self.stats.get("recent_batch_time", float('inf'))
+                time_taken = self.stats.get("recent_batch_time", float("inf"))
                 max_allowed = achievement["requirement"]["extra"].get("max_time_seconds", 300)
                 required_files = achievement["requirement"]["value"]
                 unlocked = (files_done >= required_files) and (time_taken <= max_allowed)
@@ -1706,13 +1505,14 @@ class AchievementSystem(QObject):
             elif req_type == "adv_video_types_used":
                 unlocked = self.stats.get("adv_video_types_used", 0) >= req_value
             elif req_type == "adv_office_slayer":
-                unlocked = (self.stats.get("adv_xlsx_to_pdf", 0) >= 10 and
-                            self.stats.get("adv_pptx_to_pdf", 0) >= 10)
+                unlocked = self.stats.get("adv_xlsx_to_pdf", 0) >= 10 and self.stats.get("adv_pptx_to_pdf", 0) >= 10
             elif req_type == "adv_all_rounder":
-                unlocked = (self.stats.get("adv_doc_conversions", 0) >= req_value and
-                            self.stats.get("adv_image_conversions", 0) >= req_value and
-                            (self.stats.get("adv_audio_conversions", 0) +
-                             self.stats.get("adv_video_conversions", 0)) >= req_value)
+                unlocked = (
+                    self.stats.get("adv_doc_conversions", 0) >= req_value
+                    and self.stats.get("adv_image_conversions", 0) >= req_value
+                    and (self.stats.get("adv_audio_conversions", 0) + self.stats.get("adv_video_conversions", 0))
+                    >= req_value
+                )
             elif req_type == "adv_all_types_used":
                 all_flags = [v[2] for v in self._ADV_TYPE_MAP.values() if v[2]]
                 used_count = sum(1 for f in all_flags if self.stats.get(f, 0) > 0)
@@ -1737,10 +1537,10 @@ class AchievementSystem(QObject):
                 unlocked = achievement.get("progress", 0) >= req_value
             elif req_type == "tpl_all_categories":
                 unlocked = achievement.get("progress", 0) >= req_value
-            
+
             if unlocked:
                 self.unlock_achievement(achievement_id)
-        
+
         except Exception as e:
             print(f"Error checking achievement {achievement_id}: {e}")
 
@@ -1748,23 +1548,23 @@ class AchievementSystem(QObject):
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute('''
+
+            cursor.execute("""
             SELECT id, unlocked, unlock_date, progress
             FROM achievements
-            ''')
-            
+            """)
+
             rows = cursor.fetchall()
-            
+
             for row in rows:
                 achievement_id, unlocked, unlock_date, progress = row
-                
+
                 if achievement_id in self.achievements_data["achievements"]:
                     self.achievements_data["achievements"][achievement_id]["unlocked"] = bool(unlocked)
                     self.achievements_data["achievements"][achievement_id]["unlock_date"] = unlock_date
-            
+
             conn.close()
-        
+
         except Exception as e:
             print(f"[ERROR] Cannot load achievements from DB: {e}")
 
@@ -1779,35 +1579,38 @@ class AchievementSystem(QObject):
     def unlock_achievement(self, achievement_id):
         try:
             achievement = self.achievements_data["achievements"][achievement_id]
-            
+
             if achievement["unlocked"]:
                 return
-            
+
             achievement["unlocked"] = True
             achievement["unlock_date"] = datetime.now().isoformat()
             achievement["progress"] = achievement["requirement"]["value"]
-            
+
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute('''
-            UPDATE achievements 
+
+            cursor.execute(
+                """
+            UPDATE achievements
             SET unlocked = ?, unlock_date = ?, progress = ?
             WHERE id = ?
-            ''', (True, achievement["unlock_date"], achievement["progress"], achievement_id))
-            
+            """,
+                (True, achievement["unlock_date"], achievement["progress"], achievement_id),
+            )
+
             conn.commit()
             conn.close()
-            
+
             self.achievement_unlocked.emit(achievement)
             if achievement_id == "flash_gordon":
                 self.update_stat("recent_batch_files", 0)
-                self.update_stat("recent_batch_time", float('inf'))
+                self.update_stat("recent_batch_time", float("inf"))
             print(f"[ACHIEVEMENT] {achievement_id} unlocked!")
-            
+
             self.check_all_achievements_unlocked()
             self.check_rank_up()
-        
+
         except Exception as e:
             print(f"[ERROR] Unlocking achievement {achievement_id}: {e}")
 
@@ -1816,7 +1619,7 @@ class AchievementSystem(QObject):
         current_index, _, _ = self.get_current_rank()
         if current_index != self.last_rank_index:
             self.last_rank_index = current_index
-            if hasattr(self, 'rank_unlocked'):
+            if hasattr(self, "rank_unlocked"):
                 self.rank_unlocked.emit(self.get_rank_data_for_popup())
 
     def get_rank_data_for_popup(self):
@@ -1828,24 +1631,24 @@ class AchievementSystem(QObject):
             "name": fr_name,  # FR key = translation key
             "icon": f"{rank_key}.png",
             "color": color,
-            "sound": f"{rank_key}.wav"
+            "sound": f"{rank_key}.wav",
         }
 
     def check_all_achievements_unlocked(self):
         try:
             all_unlocked = True
-            
+
             for achievement_id, achievement in self.achievements_data["achievements"].items():
                 if achievement_id == "file_god":
                     continue
-                    
+
                 if not achievement["unlocked"]:
                     all_unlocked = False
                     break
-            
+
             if all_unlocked:
                 self.unlock_achievement("file_god")
-        
+
         except Exception as e:
             print(f"Error checking all achievements: {e}")
 
@@ -1858,9 +1661,9 @@ class AchievementSystem(QObject):
                 else:
                     if achievement_id in group_data.get("achievements", []):
                         return group_data["sfx"]
-            
+
             return "trophy_progression.wav"
-            
+
         except Exception as e:
             print(f"Error retrieving achievement sound: {e}")
             return "trophy_progression.wav"
@@ -1868,7 +1671,7 @@ class AchievementSystem(QObject):
     def get_achievement_icon_path(self, icon_name):
         try:
             possible_paths = []
-            meipass = getattr(sys, '_MEIPASS', None)
+            meipass = getattr(sys, "_MEIPASS", None)
             if meipass:
                 possible_paths.append(os.path.join(meipass, "Assets", icon_name))
             # Dev
@@ -1893,7 +1696,7 @@ class AchievementSystem(QObject):
         try:
             possible_paths = []
             # PyInstaller: _MEIPASS first
-            meipass = getattr(sys, '_MEIPASS', None)
+            meipass = getattr(sys, "_MEIPASS", None)
             if meipass:
                 possible_paths.append(os.path.join(meipass, "SFX", sound_name))
             # Dev
@@ -1964,39 +1767,35 @@ class AchievementSystem(QObject):
 
     def get_category_stats(self):
         category_stats = {}
-        
+
         for category_id in self.achievements_data["categories"]:
-            category_stats[category_id] = {
-                "total": 0,
-                "unlocked": 0,
-                "percentage": 0
-            }
-        
+            category_stats[category_id] = {"total": 0, "unlocked": 0, "percentage": 0}
+
         for achievement in self.achievements_data["achievements"].values():
             category = achievement["category"]
             if category in category_stats:
                 category_stats[category]["total"] += 1
                 if achievement["unlocked"]:
                     category_stats[category]["unlocked"] += 1
-        
+
         for category_id, stats in category_stats.items():
             if stats["total"] > 0:
                 stats["percentage"] = (stats["unlocked"] / stats["total"]) * 100
-        
+
         return category_stats
 
     def record_conversion(self, conversion_type, file_size=0, success=True, night_time=False):
         try:
             type_str = str(conversion_type).lower()
-            
+
             self.increment_stat("total_conversions")
             self.increment_stat("conversions_today")
-            
+
             if night_time:
                 self.increment_stat("night_conversions")
-            
+
             formats_to_mark = []
-            
+
             if "pdf_to_word" in type_str or "pdf_to_docx" in type_str:
                 self.increment_stat("word_pdf_conversions")
                 formats_to_mark.append("docx")
@@ -2018,7 +1817,7 @@ class AchievementSystem(QObject):
                         formats_to_mark.append("gz")
                 elif "gz" in type_str:
                     formats_to_mark.append("gz")
-            
+
             if "image" in type_str:
                 formats_to_mark.append("jpg")
                 formats_to_mark.append("png")
@@ -2030,34 +1829,34 @@ class AchievementSystem(QObject):
                 formats_to_mark.append("docx")
             elif "pdf" in type_str:
                 formats_to_mark.append("pdf")
-            
+
             unique_formats = set(formats_to_mark)
             for fmt in unique_formats:
                 if fmt:
                     self.record_format_usage(fmt)
-            
+
             if success:
                 self.increment_stat("consecutive_success")
             else:
                 self.update_stat("consecutive_success", 0)
-            
+
             self.check_progression_achievements()
-            
+
         except Exception as e:
             print(f"[ERROR] record_conversion: {e}")
 
     def check_progression_achievements(self):
         total = self.stats.get("total_conversions", 0)
-        
+
         thresholds = [
             (1, "first_adventure"),
             (100, "apprentice"),
             (500, "steel_warrior"),
             (1000, "format_expert"),
             (5000, "platinum_master"),
-            (10000, "file_industrial")
+            (10000, "file_industrial"),
         ]
-        
+
         for threshold, achievement_id in thresholds:
             if total >= threshold:
                 self.check_achievement(achievement_id)
@@ -2086,7 +1885,7 @@ class AchievementSystem(QObject):
         """
         print(f"[ACHIEVEMENTS] Recording protected file converted: {count} ({file_type})")
         self.increment_stat("protected_files_converted", count)
-        
+
         if self.stats.get("protected_files_converted", 0) >= 50:
             self.unlock_achievement("master_key")
 
@@ -2095,13 +1894,15 @@ class AchievementSystem(QObject):
         Records archive protection (Impenetrable Fortress achievement).
         Only works on ZIP/RAR with a complex password.
         """
-        print(f"[ACHIEVEMENTS] Recording archive protection: {count}, Pwd len: {password_length}, Format: {archive_format}")
-        
+        print(
+            f"[ACHIEVEMENTS] Recording archive protection: {count}, Pwd len: {password_length}, Format: {archive_format}"  # noqa: E501
+        )
+
         # Only process ZIP and RAR for "Impenetrable Fortress"
         if archive_format.lower() in ["zip", "rar"]:
             if password_length >= 12:
                 self.increment_stat("batch_protect_complex_count", count)
-                
+
                 if self.stats.get("batch_protect_complex_count", 0) >= 100:
                     self.unlock_achievement("impenetrable_fortress")
 
@@ -2111,9 +1912,9 @@ class AchievementSystem(QObject):
         Removed: Master Key achievement (handled by record_protected_file_conversion).
         """
         print(f"[ACHIEVEMENTS] Recording PDF protection: {files_count} files")
-        
+
         self.increment_stat("pdf_protected", files_count)
-        
+
         if self.stats.get("pdf_protected", 0) >= 50:
             self.unlock_achievement("data_guardian")
 
@@ -2126,86 +1927,105 @@ class AchievementSystem(QObject):
     def record_pdf_split(self, pages_count):
         if pages_count > self.stats.get("max_pdf_split_pages", 0):
             self.update_stat("max_pdf_split_pages", pages_count)
-        
+
         if pages_count >= 1000:
             self.check_achievement("division_blade")
 
     def record_pdf_merge(self, pages_count):
         if pages_count > self.stats.get("max_pdf_merge_pages", 0):
             self.update_stat("max_pdf_merge_pages", pages_count)
-        
+
         if pages_count >= 500:
             self.check_achievement("eternal_librarian")
 
     # Advanced conversions tracking
     _ADV_TYPE_MAP = {
         # Documents (13 types)
-        "txt_to_pdf":    ("adv_doc_conversions",   None,                    "adv_txt_to_pdf"),
-        "rtf_to_pdf":    ("adv_doc_conversions",   None,                    "adv_rtf_to_pdf"),
-        "txt_to_docx":   ("adv_doc_conversions",   None,                    "adv_txt_to_docx"),
-        "rtf_to_docx":   ("adv_doc_conversions",   None,                    "adv_rtf_to_docx"),
-        "csv_to_json":   ("adv_doc_conversions",   "adv_csv_json_conversions", "adv_csv_to_json"),
-        "json_to_csv":   ("adv_doc_conversions",   "adv_csv_json_conversions", "adv_json_to_csv"),
-        "xlsx_to_pdf":   ("adv_doc_conversions",   "adv_xlsx_to_pdf",       "adv_xlsx_to_pdf_flag"),
-        "xlsx_to_json":  ("adv_doc_conversions",   None,                    "adv_xlsx_to_json"),
-        "xlsx_to_csv":   ("adv_doc_conversions",   None,                    "adv_xlsx_to_csv"),
-        "pptx_to_pdf":   ("adv_doc_conversions",   "adv_pptx_to_pdf",       "adv_pptx_to_pdf_flag"),
-        "html_to_pdf":   ("adv_doc_conversions",   "adv_html_to_pdf",       "adv_html_to_pdf_flag"),
-        "pdf_to_html":   ("adv_doc_conversions",   None,                    "adv_pdf_to_html"),
-        "epub_to_pdf":   ("adv_doc_conversions",   "adv_epub_to_pdf",       "adv_epub_to_pdf_flag"),
+        "txt_to_pdf": ("adv_doc_conversions", None, "adv_txt_to_pdf"),
+        "rtf_to_pdf": ("adv_doc_conversions", None, "adv_rtf_to_pdf"),
+        "txt_to_docx": ("adv_doc_conversions", None, "adv_txt_to_docx"),
+        "rtf_to_docx": ("adv_doc_conversions", None, "adv_rtf_to_docx"),
+        "csv_to_json": ("adv_doc_conversions", "adv_csv_json_conversions", "adv_csv_to_json"),
+        "json_to_csv": ("adv_doc_conversions", "adv_csv_json_conversions", "adv_json_to_csv"),
+        "xlsx_to_pdf": ("adv_doc_conversions", "adv_xlsx_to_pdf", "adv_xlsx_to_pdf_flag"),
+        "xlsx_to_json": ("adv_doc_conversions", None, "adv_xlsx_to_json"),
+        "xlsx_to_csv": ("adv_doc_conversions", None, "adv_xlsx_to_csv"),
+        "pptx_to_pdf": ("adv_doc_conversions", "adv_pptx_to_pdf", "adv_pptx_to_pdf_flag"),
+        "html_to_pdf": ("adv_doc_conversions", "adv_html_to_pdf", "adv_html_to_pdf_flag"),
+        "pdf_to_html": ("adv_doc_conversions", None, "adv_pdf_to_html"),
+        "epub_to_pdf": ("adv_doc_conversions", "adv_epub_to_pdf", "adv_epub_to_pdf_flag"),
         # Images (13 types unified image_to_* keys matching CATEGORY_MAP)
-        "image_to_png":  ("adv_image_conversions", None,                    "adv_image_to_png"),
-        "image_to_jpeg": ("adv_image_conversions", None,                    "adv_image_to_jpeg"),
-        "image_to_jpg":  ("adv_image_conversions", None,                    "adv_image_to_jpg"),
-        "image_to_bmp":  ("adv_image_conversions", None,                    "adv_image_to_bmp"),
-        "image_to_heic": ("adv_image_conversions", "adv_heic_conversions",  "adv_image_to_heic"),
-        "image_to_webp": ("adv_image_conversions", None,                    "adv_image_to_webp"),
-        "image_to_tiff": ("adv_image_conversions", None,                    "adv_image_to_tiff"),
-        "image_to_psd":  ("adv_image_conversions", None,                    "adv_image_to_psd"),
-        "image_to_svg":  ("adv_image_conversions", None,                    "adv_image_to_svg"),
-        "image_to_avif": ("adv_image_conversions", None,                    "adv_image_to_avif"),
-        "image_to_j2k":  ("adv_image_conversions", None,                    "adv_image_to_j2k"),
-        "image_to_dng":  ("adv_image_conversions", None,                    "adv_image_to_dng"),
-        "image_to_ico":  ("adv_image_conversions", "adv_image_to_ico",      "adv_image_to_ico_flag"),
+        "image_to_png": ("adv_image_conversions", None, "adv_image_to_png"),
+        "image_to_jpeg": ("adv_image_conversions", None, "adv_image_to_jpeg"),
+        "image_to_jpg": ("adv_image_conversions", None, "adv_image_to_jpg"),
+        "image_to_bmp": ("adv_image_conversions", None, "adv_image_to_bmp"),
+        "image_to_heic": ("adv_image_conversions", "adv_heic_conversions", "adv_image_to_heic"),
+        "image_to_webp": ("adv_image_conversions", None, "adv_image_to_webp"),
+        "image_to_tiff": ("adv_image_conversions", None, "adv_image_to_tiff"),
+        "image_to_psd": ("adv_image_conversions", None, "adv_image_to_psd"),
+        "image_to_svg": ("adv_image_conversions", None, "adv_image_to_svg"),
+        "image_to_avif": ("adv_image_conversions", None, "adv_image_to_avif"),
+        "image_to_j2k": ("adv_image_conversions", None, "adv_image_to_j2k"),
+        "image_to_dng": ("adv_image_conversions", None, "adv_image_to_dng"),
+        "image_to_ico": ("adv_image_conversions", "adv_image_to_ico", "adv_image_to_ico_flag"),
         # Video (9 types video_to_* keys matching CATEGORY_MAP)
-        "video_to_mp4":  ("adv_video_conversions", None,                    "adv_video_to_mp4"),
-        "video_to_webm": ("adv_video_conversions", None,                    "adv_video_to_webm"),
-        "video_to_mkv":  ("adv_video_conversions", None,                    "adv_video_to_mkv"),
-        "video_to_mov":  ("adv_video_conversions", None,                    "adv_video_to_mov"),
-        "video_to_avi":  ("adv_video_conversions", None,                    "adv_video_to_avi"),
-        "video_to_mp3":  ("adv_audio_conversions", "adv_video_to_audio",    "adv_video_to_mp3"),
-        "video_to_wav":  ("adv_audio_conversions", "adv_video_to_audio",    "adv_video_to_wav"),
-        "video_to_aac":  ("adv_audio_conversions", "adv_video_to_audio",    "adv_video_to_aac"),
-        "video_to_flac": ("adv_audio_conversions", "adv_video_to_audio",    "adv_video_to_flac"),
+        "video_to_mp4": ("adv_video_conversions", None, "adv_video_to_mp4"),
+        "video_to_webm": ("adv_video_conversions", None, "adv_video_to_webm"),
+        "video_to_mkv": ("adv_video_conversions", None, "adv_video_to_mkv"),
+        "video_to_mov": ("adv_video_conversions", None, "adv_video_to_mov"),
+        "video_to_avi": ("adv_video_conversions", None, "adv_video_to_avi"),
+        "video_to_mp3": ("adv_audio_conversions", "adv_video_to_audio", "adv_video_to_mp3"),
+        "video_to_wav": ("adv_audio_conversions", "adv_video_to_audio", "adv_video_to_wav"),
+        "video_to_aac": ("adv_audio_conversions", "adv_video_to_audio", "adv_video_to_aac"),
+        "video_to_flac": ("adv_audio_conversions", "adv_video_to_audio", "adv_video_to_flac"),
         # Audio (6 types)
-        "wav_to_mp3":    ("adv_audio_conversions", None,                    "adv_wav_to_mp3"),
-        "mp3_to_wav":    ("adv_audio_conversions", None,                    "adv_mp3_to_wav"),
-        "acc_to_mp3":    ("adv_audio_conversions", None,                    "adv_aac_to_mp3"),
-        "mp3_to_acc":    ("adv_audio_conversions", None,                    "adv_mp3_to_aac"),
-        "flac_to_mp3":   ("adv_audio_conversions", None,                    "adv_flac_to_mp3"),
-        "ogg_to_mp3":    ("adv_audio_conversions", None,                    "adv_ogg_to_mp3"),
+        "wav_to_mp3": ("adv_audio_conversions", None, "adv_wav_to_mp3"),
+        "mp3_to_wav": ("adv_audio_conversions", None, "adv_mp3_to_wav"),
+        "acc_to_mp3": ("adv_audio_conversions", None, "adv_aac_to_mp3"),
+        "mp3_to_acc": ("adv_audio_conversions", None, "adv_mp3_to_aac"),
+        "flac_to_mp3": ("adv_audio_conversions", None, "adv_flac_to_mp3"),
+        "ogg_to_mp3": ("adv_audio_conversions", None, "adv_ogg_to_mp3"),
     }
 
     # 13 image type flags — one per image_to_* conversion type
     _ADV_IMG_TYPE_FLAGS = [
-        "adv_image_to_png",  "adv_image_to_jpeg", "adv_image_to_jpg",
-        "adv_image_to_bmp",  "adv_image_to_heic", "adv_image_to_webp",
-        "adv_image_to_tiff", "adv_image_to_psd",  "adv_image_to_svg",
-        "adv_image_to_avif", "adv_image_to_j2k",  "adv_image_to_dng",
+        "adv_image_to_png",
+        "adv_image_to_jpeg",
+        "adv_image_to_jpg",
+        "adv_image_to_bmp",
+        "adv_image_to_heic",
+        "adv_image_to_webp",
+        "adv_image_to_tiff",
+        "adv_image_to_psd",
+        "adv_image_to_svg",
+        "adv_image_to_avif",
+        "adv_image_to_j2k",
+        "adv_image_to_dng",
         "adv_image_to_ico_flag",
     ]
     # 9 video type flags — video_to_mp4/webm/mkv/mov/avi + video_to_mp3/wav/aac/flac
     _ADV_VID_TYPE_FLAGS = [
-        "adv_video_to_mp4",  "adv_video_to_webm", "adv_video_to_mkv",
-        "adv_video_to_mov",  "adv_video_to_avi",
-        "adv_video_to_mp3",  "adv_video_to_wav",  "adv_video_to_aac",
+        "adv_video_to_mp4",
+        "adv_video_to_webm",
+        "adv_video_to_mkv",
+        "adv_video_to_mov",
+        "adv_video_to_avi",
+        "adv_video_to_mp3",
+        "adv_video_to_wav",
+        "adv_video_to_aac",
         "adv_video_to_flac",
     ]
 
     _TPL_CATEGORIES = {
-        "Conversion PDF→Word", "Conversion Word→PDF", "Conversion Images→PDF",
-        "Fusion PDF", "Fusion Word", "Division PDF",
-        "Protection PDF", "Compression", "Préréglages de qualité",
+        "Conversion PDF→Word",
+        "Conversion Word→PDF",
+        "Conversion Images→PDF",
+        "Fusion PDF",
+        "Fusion Word",
+        "Division PDF",
+        "Protection PDF",
+        "Compression",
+        "Préréglages de qualité",
     }
 
     def record_template_created(self, template_type: str = ""):
@@ -2224,7 +2044,7 @@ class AchievementSystem(QObject):
         key = f"tpl_usage_{template_id}"
         self.increment_stat(key)
         current_max = self.stats.get("tpl_single_max_applied", 0)
-        this_count  = self.stats.get(key, 0)
+        this_count = self.stats.get(key, 0)
         if this_count > current_max:
             self.update_stat("tpl_single_max_applied", this_count)
         self.check_achievement("tpl_le_rituel")
@@ -2232,8 +2052,7 @@ class AchievementSystem(QObject):
         session_key = f"tpl_session_{template_type}"
         if self.stats.get(session_key, 0) == 0:
             self.update_stat(session_key, 1)
-            used = sum(1 for cat in self._TPL_CATEGORIES
-                       if self.stats.get(f"tpl_session_{cat}", 0) > 0)
+            used = sum(1 for cat in self._TPL_CATEGORIES if self.stats.get(f"tpl_session_{cat}", 0) > 0)
             self.update_stat("tpl_types_session", used)
         self.check_achievement("tpl_polyvalent")
 
@@ -2259,8 +2078,7 @@ class AchievementSystem(QObject):
             return
         try:
             defaults = sum(
-                1 for tpl in template_manager.current_templates.values()
-                if tpl['config'].get('is_default', False)
+                1 for tpl in template_manager.current_templates.values() if tpl["config"].get("is_default", False)
             )
             ach = self.achievements_data["achievements"].get("tpl_reference_absolue")
             if ach:
@@ -2277,15 +2095,20 @@ class AchievementSystem(QObject):
         """
         try:
             from templates import TemplateManager
+
             if new_type:
                 normalized = TemplateManager.normalize_type(new_type)
                 if normalized in self._TPL_CATEGORIES:
-                    stat_key = "tpl_cat_" + normalized.replace(' ', '_').replace('→', '_').replace('é', 'e').replace('è', 'e').replace('ê', 'e').replace('â', 'a')
+                    stat_key = "tpl_cat_" + normalized.replace(" ", "_").replace("→", "_").replace("é", "e").replace(
+                        "è", "e"
+                    ).replace("ê", "e").replace("â", "a")
                     self.update_stat(stat_key, 1)
 
             covered = 0
             for cat in self._TPL_CATEGORIES:
-                stat_key = "tpl_cat_" + cat.replace(' ', '_').replace('→', '_').replace('é', 'e').replace('è', 'e').replace('ê', 'e').replace('â', 'a')
+                stat_key = "tpl_cat_" + cat.replace(" ", "_").replace("→", "_").replace("é", "e").replace(
+                    "è", "e"
+                ).replace("ê", "e").replace("â", "a")
                 if self.stats.get(stat_key, 0) >= 1:
                     covered += 1
 
@@ -2329,6 +2152,7 @@ class AchievementSystem(QObject):
         self.update_stat("adv_video_types_used", vid_types_used)
 
         from datetime import datetime as _dt
+
         _hour = _dt.now().hour
         _night = 0 <= _hour < 6
 
@@ -2342,12 +2166,29 @@ class AchievementSystem(QObject):
         # Mark the output format as used for universal_traveler
         _ext = conversion_type.split("_to_", 1)[-1].lower() if "_to_" in conversion_type else ""
         _ext_norm = {
-            "jpeg": "jpg", "doc": "docx", "tiff": "png", "bmp": "png",
-            "tgz": "gz",   "gzip": "gz",  "webp": "png", "gif": "png",
-            "heic": "png", "psd": "png",  "svg": "png",  "avif": "png",
-            "j2k": "png",  "dng": "png",  "ico": "png",
-            "webm": "mp4", "mkv": "mp4",  "mov": "mp4",  "avi": "mp4",
-            "mp3": "mp3",  "wav": "mp3",  "aac": "mp3",  "flac": "mp3",
+            "jpeg": "jpg",
+            "doc": "docx",
+            "tiff": "png",
+            "bmp": "png",
+            "tgz": "gz",
+            "gzip": "gz",
+            "webp": "png",
+            "gif": "png",
+            "heic": "png",
+            "psd": "png",
+            "svg": "png",
+            "avif": "png",
+            "j2k": "png",
+            "dng": "png",
+            "ico": "png",
+            "webm": "mp4",
+            "mkv": "mp4",
+            "mov": "mp4",
+            "avi": "mp4",
+            "mp3": "mp3",
+            "wav": "mp3",
+            "aac": "mp3",
+            "flac": "mp3",
         }.get(_ext, _ext)
         if _ext_norm in ("pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"):
             self.record_format_usage(_ext_norm)
@@ -2366,11 +2207,21 @@ class AchievementSystem(QObject):
         self.check_achievement("absolute_perfection")
 
         adv_ids = [
-            "adv_data_architect", "adv_csv_sorcier", "adv_office_slayer",
-            "adv_web_harvester", "adv_bibliotheque", "adv_icon_forge",
-            "adv_format_nomade", "adv_heic_hunter", "adv_pixel_perfect",
-            "adv_extracteur_pro", "adv_codec_master", "adv_studio_underground",
-            "adv_all_rounder", "adv_la_machine", "adv_collectionneur",
+            "adv_data_architect",
+            "adv_csv_sorcier",
+            "adv_office_slayer",
+            "adv_web_harvester",
+            "adv_bibliotheque",
+            "adv_icon_forge",
+            "adv_format_nomade",
+            "adv_heic_hunter",
+            "adv_pixel_perfect",
+            "adv_extracteur_pro",
+            "adv_codec_master",
+            "adv_studio_underground",
+            "adv_all_rounder",
+            "adv_la_machine",
+            "adv_collectionneur",
         ]
         for ach_id in adv_ids:
             self.check_achievement(ach_id)
@@ -2378,36 +2229,36 @@ class AchievementSystem(QObject):
     def record_format_usage(self, format_type):
         try:
             norm = {
-                'jpeg': 'jpg',
-                'doc': 'docx',
-                'tiff': 'png',
-                'bmp': 'png',
-                'tar.gz': 'gz',
-                'tgz': 'gz',
-                'gzip': 'gz',
-                'zip': 'zip',
-                'rar': 'rar',
-                'tar': 'tar',
-                'png': 'png',
-                'jpg': 'jpg',
-                'pdf': 'pdf',
-                'docx': 'docx'
+                "jpeg": "jpg",
+                "doc": "docx",
+                "tiff": "png",
+                "bmp": "png",
+                "tar.gz": "gz",
+                "tgz": "gz",
+                "gzip": "gz",
+                "zip": "zip",
+                "rar": "rar",
+                "tar": "tar",
+                "png": "png",
+                "jpg": "jpg",
+                "pdf": "pdf",
+                "docx": "docx",
             }
             fmt = norm.get(format_type.lower(), format_type.lower())
-            
-            if fmt == 'gz' and format_type.lower() in ['tar.gz', 'tgz']:
+
+            if fmt == "gz" and format_type.lower() in ["tar.gz", "tgz"]:
                 conn = sqlite3.connect(self.db_path)
                 cursor = conn.cursor()
-                cursor.execute('UPDATE used_formats SET used = TRUE WHERE format = ?', ('tar',))
+                cursor.execute("UPDATE used_formats SET used = TRUE WHERE format = ?", ("tar",))
                 conn.commit()
                 conn.close()
-            
+
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            cursor.execute('INSERT OR REPLACE INTO used_formats (format, used) VALUES (?, TRUE)', (fmt,))
+            cursor.execute("INSERT OR REPLACE INTO used_formats (format, used) VALUES (?, TRUE)", (fmt,))
             conn.commit()
             conn.close()
-            
+
             self.update_all_progress()
             self.check_all_formats_used()
         except Exception as e:
@@ -2416,31 +2267,33 @@ class AchievementSystem(QObject):
     def check_all_formats_used(self):
         try:
             required_formats = ["pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"]
-            
+
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             all_ok = True
             missing = []
-            
+
             for fmt in required_formats:
-                cursor.execute('SELECT used FROM used_formats WHERE format = ?', (fmt,))
+                cursor.execute("SELECT used FROM used_formats WHERE format = ?", (fmt,))
                 result = cursor.fetchone()
-                
+
                 if not result or result[0] == 0:
                     all_ok = False
                     missing.append(fmt)
                 else:
                     pass
-            
+
             conn.close()
-            
+
             if all_ok:
-                print(f"✅ SUCCESS: All formats validated ({len(required_formats)}/{len(required_formats)}). Unlocking Universal Traveller!")
+                print(
+                    f"✅ SUCCESS: All formats validated ({len(required_formats)}/{len(required_formats)}). Unlocking Universal Traveller!"  # noqa: E501
+                )
                 self.check_achievement("universal_traveler")
             else:
                 print(f"⏳ Waiting... Missing formats: {missing}")
-        
+
         except Exception as e:
             print(f"Critical error check_all_formats_used: {e}")
 
@@ -2448,67 +2301,73 @@ class AchievementSystem(QObject):
         try:
             today = datetime.now().date().isoformat()
             last_launch = self.stats.get("last_launch_date")
-            
+
             if last_launch != today:
                 self.stats["last_launch_date"] = today
-                
+
                 self.save_daily_stats()
-                
+
                 self.stats["conversions_today"] = 0
                 self.stats["previews_today"] = 0
                 self.stats["dark_mode_today"] = 0
-                
+
                 self.increment_stat("unique_days")
-                
+
                 self.check_achievement("eternal_loyalty")
-        
+
         except Exception as e:
             print(f"Error recording app launch: {e}")
 
     def save_daily_stats(self):
         try:
             yesterday = (datetime.now().date()).isoformat()
-            
+
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute('''
-            INSERT OR REPLACE INTO daily_stats 
+
+            cursor.execute(
+                """
+            INSERT OR REPLACE INTO daily_stats
             (date, conversions, previews, dark_mode_minutes)
             VALUES (?, ?, ?, ?)
-            ''', (
-                yesterday,
-                self.stats.get("conversions_today", 0),
-                self.stats.get("previews_today", 0),
-                self.stats.get("dark_mode_today", 0)
-            ))
-            
+            """,
+                (
+                    yesterday,
+                    self.stats.get("conversions_today", 0),
+                    self.stats.get("previews_today", 0),
+                    self.stats.get("dark_mode_today", 0),
+                ),
+            )
+
             conn.commit()
             conn.close()
-        
+
         except Exception as e:
             print(f"Error saving daily stats: {e}")
 
     def get_daily_stats(self, days=30):
         try:
             end_date = datetime.now().date()
-            start_date = end_date - timedelta(days=days-1)
-            
+            start_date = end_date - timedelta(days=days - 1)
+
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute('''
+
+            cursor.execute(
+                """
             SELECT date, conversions, previews, dark_mode_minutes
             FROM daily_stats
             WHERE date BETWEEN ? AND ?
             ORDER BY date
-            ''', (start_date.isoformat(), end_date.isoformat()))
-            
+            """,
+                (start_date.isoformat(), end_date.isoformat()),
+            )
+
             stats = cursor.fetchall()
             conn.close()
-            
+
             return stats
-        
+
         except Exception as e:
             print(f"Error retrieving daily stats: {e}")
             return []
