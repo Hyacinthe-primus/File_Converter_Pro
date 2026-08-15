@@ -8,6 +8,6 @@ Exports:
 """
 
 from .advanced_db import AdvancedDatabaseManager
-from .converters  import AdvancedConverterEngine
+from .converters import AdvancedConverterEngine
 
 __all__ = ["AdvancedDatabaseManager", "AdvancedConverterEngine"]
