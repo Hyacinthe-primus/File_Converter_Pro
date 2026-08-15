@@ -1,15 +1,13 @@
 """SplitDialog — PDF splitting options (pages, ranges)."""
 
-from PySide6.QtWidgets import (QDialog, QFormLayout, QComboBox, QSpinBox,
-                               QDialogButtonBox)
-from qss_helpers import _apply_dialog_btn
+from PySide6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QFormLayout, QSpinBox
 
+from qss_helpers import _apply_dialog_btn
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
 
 
 class SplitDialog(TranslationMixin, QDialog):
-
     def __init__(self, total_pages, parent=None, language="fr"):
         super().__init__(parent)
         self.total_pages = total_pages
@@ -22,11 +20,13 @@ class SplitDialog(TranslationMixin, QDialog):
         layout = QFormLayout(self)
 
         self.split_method = QComboBox()
-        self.split_method.addItems([
-            self.translate_text("Par pages"),
-            self.translate_text("Toutes les pages"),
-            self.translate_text("Plage de pages")
-        ])
+        self.split_method.addItems(
+            [
+                self.translate_text("Par pages"),
+                self.translate_text("Toutes les pages"),
+                self.translate_text("Plage de pages"),
+            ]
+        )
 
         self.page_interval = QSpinBox()
         self.page_interval.setMinimum(1)
