@@ -39,8 +39,8 @@ if IS_WINDOWS:
     try:
         import subprocess as _winotify_subprocess
 
-        from winotify import Notification as WinotifyNotification
         import winotify as _winotify_module
+        from winotify import Notification as WinotifyNotification
 
         def _run_ps_isolated(*, file: str = "", command: str = "") -> None:
             """Replacement for winotify._run_ps.
