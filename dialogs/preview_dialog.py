@@ -5,11 +5,20 @@ import tempfile
 from pathlib import Path
 
 import fitz
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QScrollArea,
-                               QWidget, QPushButton, QTableWidget,
-                               QTableWidgetItem, QHeaderView, QTabWidget)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import (
+    QDialog,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
@@ -71,39 +80,76 @@ class PreviewDialog(TranslationMixin, QDialog):
     def load_preview(self):
         ext = Path(self.file_path).suffix.lower()
         try:
-            if ext == '.pdf':
+            if ext == ".pdf":
                 self.preview_pdf()
             elif ext in (
-                '.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.gif',
-                '.svg', '.ico', '.avif', '.heic', '.heif', '.webp', '.jfif',
-                '.psd', '.j2k', '.jp2', '.jpx', '.dng', '.cr2',
-                '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf',
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".bmp",
+                ".tiff",
+                ".tif",
+                ".gif",
+                ".svg",
+                ".ico",
+                ".avif",
+                ".heic",
+                ".heif",
+                ".webp",
+                ".jfif",
+                ".psd",
+                ".j2k",
+                ".jp2",
+                ".jpx",
+                ".dng",
+                ".cr2",
+                ".cr3",
+                ".nef",
+                ".arw",
+                ".orf",
+                ".rw2",
+                ".raf",
             ):
                 self.preview_image()
-            elif ext in ('.docx', '.doc'):
+            elif ext in (".docx", ".doc"):
                 self.preview_word()
-            elif ext in ('.txt', '.log', '.md', '.py', '.js', '.ts', '.css', '.xml', '.yaml', '.yml', '.ini', '.cfg', '.bat', '.sh'):
+            elif ext in (
+                ".txt",
+                ".log",
+                ".md",
+                ".py",
+                ".js",
+                ".ts",
+                ".css",
+                ".xml",
+                ".yaml",
+                ".yml",
+                ".ini",
+                ".cfg",
+                ".bat",
+                ".sh",
+            ):
                 self.preview_text(syntax=ext)
-            elif ext == '.rtf':
+            elif ext == ".rtf":
                 self.preview_rtf()
-            elif ext == '.csv':
+            elif ext == ".csv":
                 self.preview_csv()
-            elif ext == '.json':
+            elif ext == ".json":
                 self.preview_json()
-            elif ext in ('.xlsx', '.xls'):
+            elif ext in (".xlsx", ".xls"):
                 self.preview_xlsx()
-            elif ext in ('.html', '.htm'):
+            elif ext in (".html", ".htm"):
                 self.preview_html()
-            elif ext == '.epub':
+            elif ext == ".epub":
                 self.preview_epub()
-            elif ext in ('.mp3', '.wav', '.flac', '.ogg', '.m4a', '.aac', '.wma'):
+            elif ext in (".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".wma"):
                 self.preview_audio()
-            elif ext in ('.mp4', '.avi', '.mkv', '.mov', '.webm', '.wmv', '.flv'):
+            elif ext in (".mp4", ".avi", ".mkv", ".mov", ".webm", ".wmv", ".flv"):
                 self.preview_video()
             else:
                 self.preview_unsupported()
         except Exception as e:
-            translated_msg = self.translate_text('Erreur lors du chargement de l\'aperçu:')
+            translated_msg = self.translate_text("Erreur lors du chargement de l'aperçu:")
             self._show_error(f"{translated_msg}\n{e}")
 
     def preview_pdf(self):
@@ -123,7 +169,7 @@ class PreviewDialog(TranslationMixin, QDialog):
             for i in range(max_pages):
                 page = pdf_document.load_page(i)
                 pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
-                tmp = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+                tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
                 tmp.close()
                 pix.save(tmp.name)
                 pixmap = QPixmap(tmp.name)
@@ -151,9 +197,17 @@ class PreviewDialog(TranslationMixin, QDialog):
         except Exception as e:
             self._show_error(f"{self.translate_text('Erreur PDF:')} {e}")
 
-    _QPIXMAP_NATIVE = frozenset({
-        ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp", ".ico",
-    })
+    _QPIXMAP_NATIVE = frozenset(
+        {
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".bmp",
+            ".gif",
+            ".webp",
+            ".ico",
+        }
+    )
 
     def _load_pixmap(self, path: str) -> "QPixmap":
         """
@@ -168,6 +222,7 @@ class PreviewDialog(TranslationMixin, QDialog):
           7. QPixmap fallback          — last resort (returns null if unsupported)
         """
         from PySide6.QtGui import QImage
+
         ext = Path(path).suffix.lower()
 
         if ext in self._QPIXMAP_NATIVE:
@@ -177,13 +232,14 @@ class PreviewDialog(TranslationMixin, QDialog):
 
         if ext == ".svg":
             try:
-                from PySide6.QtSvg import QSvgRenderer
                 from PySide6.QtGui import QPainter
+                from PySide6.QtSvg import QSvgRenderer
+
                 renderer = QSvgRenderer(path)
                 sz = renderer.defaultSize()
                 if not sz.isValid():
                     sz = renderer.viewBox().size()
-                w = max(sz.width(),  1)
+                w = max(sz.width(), 1)
                 h = max(sz.height(), 1)
                 img = QImage(w, h, QImage.Format_ARGB32)
                 img.fill(0)
@@ -197,8 +253,10 @@ class PreviewDialog(TranslationMixin, QDialog):
         if ext in (".heic", ".heif"):
             try:
                 from pillow_heif import register_heif_opener
+
                 register_heif_opener()
                 from PIL import Image
+
                 img = Image.open(path).convert("RGBA")
                 data = img.tobytes("raw", "RGBA")
                 qi = QImage(data, img.width, img.height, QImage.Format_RGBA8888)
@@ -209,6 +267,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         if ext in (".dng", ".cr2", ".cr3", ".nef", ".arw", ".orf", ".rw2", ".raf"):
             try:
                 import rawpy
+
                 with rawpy.imread(path) as raw:
                     rgb = raw.postprocess(use_camera_wb=True, output_bps=8)
                 h, w, _ = rgb.shape
@@ -220,6 +279,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         if ext == ".psd":
             try:
                 from psd_tools import PSDImage
+
                 psd = PSDImage.open(path)
                 img = psd.composite().convert("RGBA")
                 data = img.tobytes("raw", "RGBA")
@@ -230,6 +290,7 @@ class PreviewDialog(TranslationMixin, QDialog):
 
         try:
             from PIL import Image
+
             img = Image.open(path)
             try:
                 img.seek(0)
@@ -267,8 +328,10 @@ class PreviewDialog(TranslationMixin, QDialog):
     def preview_word(self):
         try:
             from docx import Document as _DocxDocument
+
             doc = _DocxDocument(self.file_path)
             from PySide6.QtWidgets import QTextEdit
+
             te = QTextEdit()
             te.setReadOnly(True)
             html_parts = []
@@ -294,9 +357,10 @@ class PreviewDialog(TranslationMixin, QDialog):
 
     def preview_text(self, syntax=""):
         try:
-            from PySide6.QtWidgets import QTextEdit
             from PySide6.QtGui import QFont
-            with open(self.file_path, 'r', encoding='utf-8', errors='replace') as f:
+            from PySide6.QtWidgets import QTextEdit
+
+            with open(self.file_path, "r", encoding="utf-8", errors="replace") as f:
                 content = f.read(200_000)
             te = QTextEdit()
             te.setReadOnly(True)
@@ -318,7 +382,8 @@ class PreviewDialog(TranslationMixin, QDialog):
     def preview_csv(self):
         try:
             import csv
-            with open(self.file_path, 'r', encoding='utf-8', errors='replace', newline='') as f:
+
+            with open(self.file_path, "r", encoding="utf-8", errors="replace", newline="") as f:
                 reader = csv.reader(f)
                 rows = [r for _, r in zip(range(200), reader)]
 
@@ -330,7 +395,7 @@ class PreviewDialog(TranslationMixin, QDialog):
             table = QTableWidget(len(rows), ncols)
             table.setHorizontalHeader
             header_row = rows[0]
-            table.setHorizontalHeaderLabels(header_row + [''] * (ncols - len(header_row)))
+            table.setHorizontalHeaderLabels(header_row + [""] * (ncols - len(header_row)))
             for ri, row in enumerate(rows[1:], 0):
                 for ci, val in enumerate(row):
                     table.setItem(ri, ci, QTableWidgetItem(val))
@@ -345,9 +410,11 @@ class PreviewDialog(TranslationMixin, QDialog):
     def preview_json(self):
         try:
             import json
+
+            from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
             from PySide6.QtWidgets import QTextEdit
-            from PySide6.QtGui import QFont, QColor, QTextCharFormat, QSyntaxHighlighter
-            with open(self.file_path, 'r', encoding='utf-8', errors='replace') as f:
+
+            with open(self.file_path, "r", encoding="utf-8", errors="replace") as f:
                 raw = f.read(500_000)
             try:
                 parsed = json.loads(raw)
@@ -363,18 +430,23 @@ class PreviewDialog(TranslationMixin, QDialog):
             class _JsonHL(QSyntaxHighlighter):
                 def highlightBlock(self, text):
                     import re
-                    fmt_key   = QTextCharFormat(); fmt_key.setForeground(QColor("#569cd6"))
-                    fmt_str   = QTextCharFormat(); fmt_str.setForeground(QColor("#ce9178"))
-                    fmt_num   = QTextCharFormat(); fmt_num.setForeground(QColor("#b5cea8"))
-                    fmt_kw    = QTextCharFormat(); fmt_kw.setForeground(QColor("#569cd6"))
+
+                    fmt_key = QTextCharFormat()
+                    fmt_key.setForeground(QColor("#569cd6"))
+                    fmt_str = QTextCharFormat()
+                    fmt_str.setForeground(QColor("#ce9178"))
+                    fmt_num = QTextCharFormat()
+                    fmt_num.setForeground(QColor("#b5cea8"))
+                    fmt_kw = QTextCharFormat()
+                    fmt_kw.setForeground(QColor("#569cd6"))
                     for m in re.finditer(r'"[^"\\]*(?:\\.[^"\\]*)*"\s*:', text):
-                        self.setFormat(m.start(), m.end()-m.start(), fmt_key)
+                        self.setFormat(m.start(), m.end() - m.start(), fmt_key)
                     for m in re.finditer(r'(?<!\w)"[^"\\]*(?:\\.[^"\\]*)*"', text):
-                        self.setFormat(m.start(), m.end()-m.start(), fmt_str)
-                    for m in re.finditer(r'\b-?\d+\.?\d*([eE][+-]?\d+)?\b', text):
-                        self.setFormat(m.start(), m.end()-m.start(), fmt_num)
-                    for m in re.finditer(r'\b(true|false|null)\b', text):
-                        self.setFormat(m.start(), m.end()-m.start(), fmt_kw)
+                        self.setFormat(m.start(), m.end() - m.start(), fmt_str)
+                    for m in re.finditer(r"\b-?\d+\.?\d*([eE][+-]?\d+)?\b", text):
+                        self.setFormat(m.start(), m.end() - m.start(), fmt_num)
+                    for m in re.finditer(r"\b(true|false|null)\b", text):
+                        self.setFormat(m.start(), m.end() - m.start(), fmt_kw)
 
             _JsonHL(te.document())
             self._clear_content()
@@ -385,6 +457,7 @@ class PreviewDialog(TranslationMixin, QDialog):
     def preview_xlsx(self):
         try:
             import openpyxl
+
             wb = openpyxl.load_workbook(self.file_path, read_only=True, data_only=True)
             tabs = QTabWidget()
             for sheet_name in wb.sheetnames[:6]:
@@ -394,7 +467,7 @@ class PreviewDialog(TranslationMixin, QDialog):
                     continue
                 ncols = max((len(r) for r in rows), default=0)
                 table = QTableWidget(len(rows), ncols)
-                table.setHorizontalHeaderLabels([str(i+1) for i in range(ncols)])
+                table.setHorizontalHeaderLabels([str(i + 1) for i in range(ncols)])
                 for ri, row in enumerate(rows):
                     for ci, val in enumerate(row):
                         table.setItem(ri, ci, QTableWidgetItem(str(val) if val is not None else ""))
@@ -412,8 +485,8 @@ class PreviewDialog(TranslationMixin, QDialog):
 
     def preview_html(self):
         try:
-            from PySide6.QtWebEngineWidgets import QWebEngineView
             from PySide6.QtCore import QUrl
+            from PySide6.QtWebEngineWidgets import QWebEngineView
 
             view = QWebEngineView()
             view.setUrl(QUrl.fromLocalFile(str(Path(self.file_path).resolve())))
@@ -435,12 +508,13 @@ class PreviewDialog(TranslationMixin, QDialog):
         (HTML + inline CSS in <style> + inline JS in <script>)
         and an explicit warning banner for the user.
         """
-        from PySide6.QtWidgets import QTextEdit, QLabel
-        from PySide6.QtGui import QFont, QColor, QTextCharFormat, QSyntaxHighlighter
         import re
 
+        from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
+        from PySide6.QtWidgets import QLabel, QTextEdit
+
         try:
-            with open(self.file_path, 'r', encoding='utf-8', errors='replace') as f:
+            with open(self.file_path, "r", encoding="utf-8", errors="replace") as f:
                 source = f.read(500_000)
         except Exception as e:
             self._show_error(f"Erreur lecture HTML : {e}")
@@ -466,56 +540,129 @@ class PreviewDialog(TranslationMixin, QDialog):
                 def _fmt(hex_color, bold=False, italic=False):
                     f = QTextCharFormat()
                     f.setForeground(QColor(hex_color))
-                    if bold:   f.setFontWeight(700)
-                    if italic: f.setFontItalic(True)
+                    if bold:
+                        f.setFontWeight(700)
+                    if italic:
+                        f.setFontItalic(True)
                     return f
 
                 # HTML
-                self._html_tag     = _fmt("#569cd6", bold=True)
-                self._html_attr    = _fmt("#9cdcfe")
-                self._html_val     = _fmt("#ce9178")
+                self._html_tag = _fmt("#569cd6", bold=True)
+                self._html_attr = _fmt("#9cdcfe")
+                self._html_val = _fmt("#ce9178")
                 self._html_comment = _fmt("#6a9955", italic=True)
                 self._html_doctype = _fmt("#c586c0")
-                self._html_entity  = _fmt("#f0a070")
+                self._html_entity = _fmt("#f0a070")
 
                 # CSS
                 self._css_selector = _fmt("#d7ba7d", bold=True)
-                self._css_prop     = _fmt("#9cdcfe")
-                self._css_val      = _fmt("#ce9178")
-                self._css_atrule   = _fmt("#c586c0", bold=True)
-                self._css_comment  = _fmt("#6a9955", italic=True)
-                self._css_number   = _fmt("#b5cea8")
+                self._css_prop = _fmt("#9cdcfe")
+                self._css_val = _fmt("#ce9178")
+                self._css_atrule = _fmt("#c586c0", bold=True)
+                self._css_comment = _fmt("#6a9955", italic=True)
+                self._css_number = _fmt("#b5cea8")
 
                 # JS
-                self._js_keyword   = _fmt("#569cd6", bold=True)
-                self._js_builtin   = _fmt("#4ec9b0")
-                self._js_string    = _fmt("#ce9178")
-                self._js_template  = _fmt("#ce9178")
-                self._js_number    = _fmt("#b5cea8")
-                self._js_comment   = _fmt("#6a9955", italic=True)
-                self._js_regex     = _fmt("#d16969")
-                self._js_operator  = _fmt("#d4d4d4")
+                self._js_keyword = _fmt("#569cd6", bold=True)
+                self._js_builtin = _fmt("#4ec9b0")
+                self._js_string = _fmt("#ce9178")
+                self._js_template = _fmt("#ce9178")
+                self._js_number = _fmt("#b5cea8")
+                self._js_comment = _fmt("#6a9955", italic=True)
+                self._js_regex = _fmt("#d16969")
+                self._js_operator = _fmt("#d4d4d4")
 
                 self._JS_KEYWORDS = {
-                    "var","let","const","function","class","return","if","else",
-                    "for","while","do","switch","case","break","continue","new",
-                    "delete","typeof","instanceof","in","of","try","catch",
-                    "finally","throw","async","await","import","export","from",
-                    "default","extends","super","this","static","yield","void",
-                    "null","undefined","true","false","debugger","with",
+                    "var",
+                    "let",
+                    "const",
+                    "function",
+                    "class",
+                    "return",
+                    "if",
+                    "else",
+                    "for",
+                    "while",
+                    "do",
+                    "switch",
+                    "case",
+                    "break",
+                    "continue",
+                    "new",
+                    "delete",
+                    "typeof",
+                    "instanceof",
+                    "in",
+                    "of",
+                    "try",
+                    "catch",
+                    "finally",
+                    "throw",
+                    "async",
+                    "await",
+                    "import",
+                    "export",
+                    "from",
+                    "default",
+                    "extends",
+                    "super",
+                    "this",
+                    "static",
+                    "yield",
+                    "void",
+                    "null",
+                    "undefined",
+                    "true",
+                    "false",
+                    "debugger",
+                    "with",
                 }
                 self._JS_BUILTINS = {
-                    "console","document","window","Array","Object","String",
-                    "Number","Boolean","Math","Date","JSON","Promise","fetch",
-                    "setTimeout","setInterval","clearTimeout","clearInterval",
-                    "parseInt","parseFloat","isNaN","isFinite","encodeURI",
-                    "decodeURI","Map","Set","WeakMap","WeakSet","Symbol",
-                    "Proxy","Reflect","Error","TypeError","RangeError",
-                    "localStorage","sessionStorage","navigator","location",
-                    "history","screen","alert","confirm","prompt",
+                    "console",
+                    "document",
+                    "window",
+                    "Array",
+                    "Object",
+                    "String",
+                    "Number",
+                    "Boolean",
+                    "Math",
+                    "Date",
+                    "JSON",
+                    "Promise",
+                    "fetch",
+                    "setTimeout",
+                    "setInterval",
+                    "clearTimeout",
+                    "clearInterval",
+                    "parseInt",
+                    "parseFloat",
+                    "isNaN",
+                    "isFinite",
+                    "encodeURI",
+                    "decodeURI",
+                    "Map",
+                    "Set",
+                    "WeakMap",
+                    "WeakSet",
+                    "Symbol",
+                    "Proxy",
+                    "Reflect",
+                    "Error",
+                    "TypeError",
+                    "RangeError",
+                    "localStorage",
+                    "sessionStorage",
+                    "navigator",
+                    "location",
+                    "history",
+                    "screen",
+                    "alert",
+                    "confirm",
+                    "prompt",
                 }
 
-                self._style_ranges  = []
+                self._style_ranges = []
                 self._script_ranges = []
                 if source_text:
                     self._compute_ranges_from_source(source_text)
@@ -532,8 +679,8 @@ class PreviewDialog(TranslationMixin, QDialog):
                     return text[:pos].count("\n")
 
                 for open_pat, close_pat, target in [
-                    (r'<style[^>]*>',  r'</style\s*>',  self._style_ranges),
-                    (r'<script[^>]*>', r'</script\s*>', self._script_ranges),
+                    (r"<style[^>]*>", r"</style\s*>", self._style_ranges),
+                    (r"<script[^>]*>", r"</script\s*>", self._script_ranges),
                 ]:
                     for mo in re.finditer(open_pat, text, re.IGNORECASE):
                         inner_start = mo.end()
@@ -550,7 +697,7 @@ class PreviewDialog(TranslationMixin, QDialog):
 
             def highlightBlock(self, text):
                 bn = self.currentBlock().blockNumber()
-                in_style  = self._in_range(bn, self._style_ranges)
+                in_style = self._in_range(bn, self._style_ranges)
                 in_script = self._in_range(bn, self._script_ranges)
 
                 if in_style:
@@ -562,51 +709,46 @@ class PreviewDialog(TranslationMixin, QDialog):
 
             # HTML
             def _highlight_html(self, text):
-                self._apply(text, r'<!--.*?-->', self._html_comment)
-                self._apply(text, r'<!DOCTYPE[^>]*>', self._html_doctype, re.IGNORECASE)
-                self._apply(text, r'</?[\w\-:.]+', self._html_tag)
-                self._apply(text, r'\b[\w\-:]+=', self._html_attr)
-                for m in re.finditer(r'\b([\w\-:]+)=', text):
+                self._apply(text, r"<!--.*?-->", self._html_comment)
+                self._apply(text, r"<!DOCTYPE[^>]*>", self._html_doctype, re.IGNORECASE)
+                self._apply(text, r"</?[\w\-:.]+", self._html_tag)
+                self._apply(text, r"\b[\w\-:]+=", self._html_attr)
+                for m in re.finditer(r"\b([\w\-:]+)=", text):
                     self.setFormat(m.start(1), len(m.group(1)), self._html_attr)
                 self._apply(text, r'(["\'])(?:(?!\1).)*\1', self._html_val)
-                self._apply(text, r'&(?:#\d+|#x[\da-fA-F]+|[a-zA-Z]\w*);', self._html_entity)
+                self._apply(text, r"&(?:#\d+|#x[\da-fA-F]+|[a-zA-Z]\w*);", self._html_entity)
 
             # CSS
             def _highlight_css(self, text):
-                self._apply(text, r'/\*.*?\*/', self._css_comment)
-                self._apply(text, r'@[\w-]+', self._css_atrule)
-                self._apply(text, r'[\w-]+(?=\s*:)', self._css_prop)
-                self._apply(text, r'-?\d+\.?\d*(?:%|px|em|rem|vh|vw|vmin|vmax|pt|cm|mm|s|ms)?',
-                            self._css_number)
+                self._apply(text, r"/\*.*?\*/", self._css_comment)
+                self._apply(text, r"@[\w-]+", self._css_atrule)
+                self._apply(text, r"[\w-]+(?=\s*:)", self._css_prop)
+                self._apply(text, r"-?\d+\.?\d*(?:%|px|em|rem|vh|vw|vmin|vmax|pt|cm|mm|s|ms)?", self._css_number)
                 self._apply(text, r'(["\'])(?:(?!\1).)*\1', self._css_val)
-                self._apply(text, r'#[0-9a-fA-F]{3,8}\b', self._css_val)
-                if re.search(r'\{', text) or (not re.search(r':', text)):
-                    self._apply(text, r'[.#]?[\w][\w-]*(?=[^:]*\{)', self._css_selector)
+                self._apply(text, r"#[0-9a-fA-F]{3,8}\b", self._css_val)
+                if re.search(r"\{", text) or (not re.search(r":", text)):
+                    self._apply(text, r"[.#]?[\w][\w-]*(?=[^:]*\{)", self._css_selector)
 
             # JS
             def _highlight_js(self, text):
-                self._apply(text, r'//.*', self._js_comment)
-                self._apply(text, r'/\*.*?\*/', self._js_comment)
-                self._apply(text, r'`(?:[^`\\]|\\.)*`', self._js_template)
+                self._apply(text, r"//.*", self._js_comment)
+                self._apply(text, r"/\*.*?\*/", self._js_comment)
+                self._apply(text, r"`(?:[^`\\]|\\.)*`", self._js_template)
                 self._apply(text, r'(["\'])(?:(?!\1|\\).|\\.)*\1', self._js_string)
-                self._apply(text, r'\b0[xX][\da-fA-F]+\b|\b\d+\.?\d*(?:[eE][+-]?\d+)?\b',
-                            self._js_number)
-                for m in re.finditer(r'\b([a-zA-Z_$][\w$]*)\b', text):
+                self._apply(text, r"\b0[xX][\da-fA-F]+\b|\b\d+\.?\d*(?:[eE][+-]?\d+)?\b", self._js_number)
+                for m in re.finditer(r"\b([a-zA-Z_$][\w$]*)\b", text):
                     word = m.group(1)
                     if word in self._JS_KEYWORDS:
                         self.setFormat(m.start(), len(word), self._js_keyword)
                     elif word in self._JS_BUILTINS:
                         self.setFormat(m.start(), len(word), self._js_builtin)
-                self._apply(text, r'(?<![<\w\d])/(?:[^/\\\n]|\\.)+/[gimsuy]*', self._js_regex)
+                self._apply(text, r"(?<![<\w\d])/(?:[^/\\\n]|\\.)+/[gimsuy]*", self._js_regex)
 
         _HtmlCssJsHL(te.document(), source)
         te.setPlainText(source)
 
         warn = QLabel(self.translate_text("preview_unavailable"))
-        warn.setStyleSheet(
-            "background:#2d2400; color:#ffcc00; "
-            "padding:6px 12px; font-size:12px; border-radius:4px;"
-        )
+        warn.setStyleSheet("background:#2d2400; color:#ffcc00; padding:6px 12px; font-size:12px; border-radius:4px;")
         warn.setWordWrap(True)
 
         self._clear_content()
@@ -618,11 +760,12 @@ class PreviewDialog(TranslationMixin, QDialog):
             import ebooklib
             from ebooklib import epub
             from PySide6.QtWidgets import QTextEdit
+
             book = epub.read_epub(self.file_path)
             html_parts = []
             for item in book.get_items():
                 if item.get_type() == ebooklib.ITEM_DOCUMENT:
-                    html_parts.append(item.get_content().decode('utf-8', errors='replace'))
+                    html_parts.append(item.get_content().decode("utf-8", errors="replace"))
                     if len(html_parts) >= 3:
                         break
             if not html_parts:
@@ -641,9 +784,9 @@ class PreviewDialog(TranslationMixin, QDialog):
 
     def preview_audio(self):
         try:
-            from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
             from PySide6.QtCore import QUrl
-            from PySide6.QtWidgets import QSlider, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton
+            from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
+            from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout, QWidget
 
             player = QMediaPlayer()
             audio_out = QAudioOutput()
@@ -675,9 +818,9 @@ class PreviewDialog(TranslationMixin, QDialog):
             hbox = QHBoxLayout(ctrl)
             hbox.setSpacing(12)
 
-            play_btn  = QPushButton("▶  " + self.translate_text("Lire"))
+            play_btn = QPushButton("▶  " + self.translate_text("Lire"))
             pause_btn = QPushButton("⏸  " + self.translate_text("Pause"))
-            stop_btn  = QPushButton("⏹  " + self.translate_text("Arrêter"))
+            stop_btn = QPushButton("⏹  " + self.translate_text("Arrêter"))
             for btn in (play_btn, pause_btn, stop_btn):
                 btn.setFixedHeight(34)
                 hbox.addWidget(btn)
@@ -700,16 +843,18 @@ class PreviewDialog(TranslationMixin, QDialog):
             def _on_duration(dur):
                 seek_slider.setRange(0, dur)
                 secs = dur // 1000
-                time_lbl.setText(f"0:00 / {secs//60}:{secs%60:02d}")
+                time_lbl.setText(f"0:00 / {secs // 60}:{secs % 60:02d}")
 
             def _on_position(pos):
                 seek_slider.blockSignals(True)
                 seek_slider.setValue(pos)
                 seek_slider.blockSignals(False)
                 dur = player.duration()
+
                 def _fmt(ms):
                     s = ms // 1000
-                    return f"{s//60}:{s%60:02d}"
+                    return f"{s // 60}:{s % 60:02d}"
+
                 time_lbl.setText(f"{_fmt(pos)} / {_fmt(dur)}")
 
             def _on_seek(val):
@@ -730,10 +875,10 @@ class PreviewDialog(TranslationMixin, QDialog):
 
     def preview_video(self):
         try:
-            from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
-            from PySide6.QtMultimediaWidgets import QVideoWidget
             from PySide6.QtCore import QUrl
-            from PySide6.QtWidgets import QSlider, QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton
+            from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
+            from PySide6.QtMultimediaWidgets import QVideoWidget
+            from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout, QWidget
 
             player = QMediaPlayer()
             audio_out = QAudioOutput()
@@ -764,9 +909,9 @@ class PreviewDialog(TranslationMixin, QDialog):
             hbox = QHBoxLayout(ctrl)
             hbox.setSpacing(10)
 
-            play_btn  = QPushButton("▶  " + self.translate_text("Lire"))
+            play_btn = QPushButton("▶  " + self.translate_text("Lire"))
             pause_btn = QPushButton("⏸  " + self.translate_text("Pause"))
-            stop_btn  = QPushButton("⏹  " + self.translate_text("Arrêter"))
+            stop_btn = QPushButton("⏹  " + self.translate_text("Arrêter"))
             for btn in (play_btn, pause_btn, stop_btn):
                 btn.setFixedHeight(32)
                 hbox.addWidget(btn)
@@ -793,9 +938,11 @@ class PreviewDialog(TranslationMixin, QDialog):
                 seek_slider.blockSignals(True)
                 seek_slider.setValue(pos)
                 seek_slider.blockSignals(False)
+
                 def _fmt(ms):
                     s = ms // 1000
-                    return f"{s//60}:{s%60:02d}"
+                    return f"{s // 60}:{s % 60:02d}"
+
                 time_lbl.setText(f"{_fmt(pos)} / {_fmt(player.duration())}")
 
             player.durationChanged.connect(_on_duration)
