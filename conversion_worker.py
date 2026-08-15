@@ -19,6 +19,7 @@ Usage (from app.py):
 
 from PySide6.QtCore import QThread, Signal
 
+
 class ConversionWorker(QThread):
     """
     Generic background worker for file conversions.
@@ -34,9 +35,9 @@ class ConversionWorker(QThread):
 
     def __init__(self, tasks: list, runner_fn, parent=None):
         super().__init__(parent)
-        self._tasks     = tasks
+        self._tasks = tasks
         self._runner_fn = runner_fn
-        self._abort     = False
+        self._abort = False
 
     def abort(self):
         """Request a graceful stop after the current file finishes."""
@@ -44,10 +45,11 @@ class ConversionWorker(QThread):
 
     def run(self):
         import time
-        t0            = time.perf_counter()
-        total         = len(self._tasks)
+
+        t0 = time.perf_counter()
+        total = len(self._tasks)
         success_count = 0
-        failed        = []
+        failed = []
 
         for task in self._tasks:
             if self._abort:
@@ -62,18 +64,22 @@ class ConversionWorker(QThread):
             if result.get("success"):
                 success_count += 1
             else:
-                failed.append({
-                    "name":  task.get("input_path", "?"),
-                    "error": result.get("error", "unknown error"),
-                })
+                failed.append(
+                    {
+                        "name": task.get("input_path", "?"),
+                        "error": result.get("error", "unknown error"),
+                    }
+                )
 
             idx = task.get("index", 0)
             self.progress.emit(int((idx + 1) / total * 100))
             self.file_done.emit(result)
 
-        self.finished.emit({
-            "success_count": success_count,
-            "total":         total,
-            "failed":        failed,
-            "total_time":    time.perf_counter() - t0,
-        })
+        self.finished.emit(
+            {
+                "success_count": success_count,
+                "total": total,
+                "failed": failed,
+                "total_time": time.perf_counter() - t0,
+            }
+        )
