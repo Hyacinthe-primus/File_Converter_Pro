@@ -6,40 +6,47 @@ and a live-updating preview panel that reflects the selected mode.
 """
 
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QGroupBox, QButtonGroup, QLabel,
-    QFormLayout, QComboBox, QDialogButtonBox, QTextEdit, QSizePolicy
+    QButtonGroup,
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QGroupBox,
+    QLabel,
+    QSizePolicy,
+    QTextEdit,
+    QVBoxLayout,
 )
 
-from widgets import AnimatedCheckBox
-from qss_helpers import _load_qss, _apply_dialog_btn
-
+from qss_helpers import _apply_dialog_btn, _load_qss
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
+from widgets import AnimatedCheckBox
 
 _DARK = {
-    "preview_bg":    "#0d1117",
-    "preview_fg":    "#c9d1d9",
-    "sb_bg":         "#161b22",
-    "sb_handle":     "#30363d",
-    "sb_handle_hv":  "#4dabf7",
-    "title_active":  "#4dabf7",
-    "title_accent":  "#74c0fc",
-    "title_muted":   "#6c757d",
+    "preview_bg": "#0d1117",
+    "preview_fg": "#c9d1d9",
+    "sb_bg": "#161b22",
+    "sb_handle": "#30363d",
+    "sb_handle_hv": "#4dabf7",
+    "title_active": "#4dabf7",
+    "title_accent": "#74c0fc",
+    "title_muted": "#6c757d",
     "bullet_active": "#c9d1d9",
-    "bullet_muted":  "#495057",
+    "bullet_muted": "#495057",
 }
 
 _LIGHT = {
-    "preview_bg":    "#f8f9fa",
-    "preview_fg":    "#212529",
-    "sb_bg":         "#e9ecef",
-    "sb_handle":     "#ced4da",
-    "sb_handle_hv":  "#4dabf7",
-    "title_active":  "#1971c2",
-    "title_accent":  "#339af0",
-    "title_muted":   "#adb5bd",
+    "preview_bg": "#f8f9fa",
+    "preview_fg": "#212529",
+    "sb_bg": "#e9ecef",
+    "sb_handle": "#ced4da",
+    "sb_handle_hv": "#4dabf7",
+    "title_active": "#1971c2",
+    "title_accent": "#339af0",
+    "title_muted": "#adb5bd",
     "bullet_active": "#343a40",
-    "bullet_muted":  "#ced4da",
+    "bullet_muted": "#ced4da",
 }
 
 
@@ -57,9 +64,9 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
     def __init__(self, parent=None, language: str = "fr", has_content: bool = False):
         super().__init__(parent)
 
-        self.language     = language
-        self.has_content  = has_content
-        self._tm          = make_tm(language)
+        self.language = language
+        self.has_content = has_content
+        self._tm = make_tm(language)
         self.is_dark_mode: bool = getattr(parent, "dark_mode", False) if parent else False
 
         self.setWindowTitle(self.translate_text("Options de conversion Word vers PDF"))
@@ -81,7 +88,7 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
 
     def _build_mode_group(self) -> QGroupBox:
         """Create the conversion-mode section (radio buttons + advanced sub-group)."""
-        group  = QGroupBox(self.translate_text("Mode de conversion"))
+        group = QGroupBox(self.translate_text("Mode de conversion"))
         layout = QVBoxLayout(group)
         layout.setSpacing(6)
 
@@ -92,18 +99,14 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         )
         self.preserve_all_radio.setChecked(True)
 
-        self.text_only_radio = AnimatedCheckBox(
-            self.translate_text("📝 Texte seulement (plus rapide)")
-        )
+        self.text_only_radio = AnimatedCheckBox(self.translate_text("📝 Texte seulement (plus rapide)"))
 
         self.mode_group.addButton(self.preserve_all_radio, 1)
-        self.mode_group.addButton(self.text_only_radio,    2)
+        self.mode_group.addButton(self.text_only_radio, 2)
 
         info_text = self.translate_text("📋 Sélectionnez le mode de conversion :")
         if self.has_content:
-            info_text += "\n" + self.translate_text(
-                "ℹ️ Ce document contient du contenu formaté, images, tableaux, etc."
-            )
+            info_text += "\n" + self.translate_text("ℹ️ Ce document contient du contenu formaté, images, tableaux, etc.")
 
         info_label = QLabel(info_text)
         info_label.setWordWrap(True)
@@ -125,18 +128,18 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         group.setCheckable(True)
         group.setChecked(False)
 
-        group.setStyleSheet(
-            _load_qss("advanced_group.qss", "dark" if self.is_dark_mode else "light")
-        )
+        group.setStyleSheet(_load_qss("advanced_group.qss", "dark" if self.is_dark_mode else "light"))
 
         form = QFormLayout(group)
 
         self.quality_combo = QComboBox()
-        self.quality_combo.addItems([
-            self.translate_text("Haute qualité (300 DPI)"),
-            self.translate_text("Qualité standard (150 DPI)"),
-            self.translate_text("Optimisé (96 DPI)"),
-        ])
+        self.quality_combo.addItems(
+            [
+                self.translate_text("Haute qualité (300 DPI)"),
+                self.translate_text("Qualité standard (150 DPI)"),
+                self.translate_text("Optimisé (96 DPI)"),
+            ]
+        )
 
         self.compress_checkbox = AnimatedCheckBox(self.translate_text("Compresser les images"))
         self.compress_checkbox.setChecked(True)
@@ -174,35 +177,35 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         c = _DARK if self.is_dark_mode else _LIGHT
         return f"""
             QTextEdit {{
-                background-color: {c['preview_bg']};
-                color: {c['preview_fg']};
+                background-color: {c["preview_bg"]};
+                color: {c["preview_fg"]};
                 border: none;
                 border-radius: 8px;
                 padding: 8px;
                 font-size: 12px;
             }}
             QScrollBar:vertical {{
-                background: {c['sb_bg']}; width: 8px;
+                background: {c["sb_bg"]}; width: 8px;
                 border-radius: 4px; margin: 0;
             }}
             QScrollBar::handle:vertical {{
-                background: {c['sb_handle']};
+                background: {c["sb_handle"]};
                 border-radius: 4px; min-height: 24px;
             }}
-            QScrollBar::handle:vertical:hover  {{ background: {c['sb_handle_hv']}; }}
+            QScrollBar::handle:vertical:hover  {{ background: {c["sb_handle_hv"]}; }}
             QScrollBar::add-line:vertical,
             QScrollBar::sub-line:vertical      {{ height: 0; }}
             QScrollBar::add-page:vertical,
             QScrollBar::sub-page:vertical      {{ background: none; }}
             QScrollBar:horizontal {{
-                background: {c['sb_bg']}; height: 8px;
+                background: {c["sb_bg"]}; height: 8px;
                 border-radius: 4px; margin: 0;
             }}
             QScrollBar::handle:horizontal {{
-                background: {c['sb_handle']};
+                background: {c["sb_handle"]};
                 border-radius: 4px; min-width: 24px;
             }}
-            QScrollBar::handle:horizontal:hover {{ background: {c['sb_handle_hv']}; }}
+            QScrollBar::handle:horizontal:hover {{ background: {c["sb_handle_hv"]}; }}
             QScrollBar::add-line:horizontal,
             QScrollBar::sub-line:horizontal     {{ width: 0; }}
             QScrollBar::add-page:horizontal,
@@ -232,11 +235,11 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
 
     def _update_preview_html(self) -> None:
         """Rebuild the preview HTML, visually highlighting the active mode."""
-        c           = _DARK if self.is_dark_mode else _LIGHT
+        c = _DARK if self.is_dark_mode else _LIGHT
         is_preserve = self.preserve_all_radio.isChecked()
 
-        title_keep   = self.translate_text("Mode 'Conserver tout'")
-        title_text   = self.translate_text("Mode 'Texte seulement'")
+        title_keep = self.translate_text("Mode 'Conserver tout'")
+        title_text = self.translate_text("Mode 'Texte seulement'")
 
         keep_bullets = [
             self.translate_text("• Garde toutes les images, tableaux, couleurs"),
@@ -250,29 +253,25 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         ]
 
         if is_preserve:
-            color_keep,  color_text   = c["title_active"], c["title_accent"]
+            color_keep, color_text = c["title_active"], c["title_accent"]
             bullets_keep, bullets_text = c["bullet_active"], c["bullet_active"]
             prefix_text = ""
         else:
-            color_keep,  color_text   = c["title_muted"], c["title_active"]
+            color_keep, color_text = c["title_muted"], c["title_active"]
             bullets_keep, bullets_text = c["bullet_muted"], c["bullet_active"]
             prefix_text = "▶ "
 
         def _section(title: str, color: str, bullets: list, bc: str, bottom_gap: str = "10px") -> str:
             """Helper that renders one labeled bullet section."""
-            rows = "".join(
-                f'<p style="margin:0 0 2px 0; color:{bc};">{b}</p>'
-                for b in bullets
-            )
+            rows = "".join(f'<p style="margin:0 0 2px 0; color:{bc};">{b}</p>' for b in bullets)
             return (
                 f'<p style="margin:0 0 6px 0; color:{color}; font-weight:bold;">{title}</p>'
-                f'{rows}'
+                f"{rows}"
                 f'<p style="margin:0 0 {bottom_gap} 0;"></p>'
             )
 
-        html = (
-            _section(title_keep, color_keep, keep_bullets, bullets_keep)
-            + _section(prefix_text + title_text, color_text, text_bullets, bullets_text, bottom_gap="0")
+        html = _section(title_keep, color_keep, keep_bullets, bullets_keep) + _section(
+            prefix_text + title_text, color_text, text_bullets, bullets_text, bottom_gap="0"
         )
 
         self.preview_text.setHtml(html)
@@ -289,8 +288,8 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
                 include_metadata (bool): whether metadata inclusion is enabled
         """
         return {
-            "mode":             "preserve_all" if self.preserve_all_radio.isChecked() else "text_only",
-            "quality":          self.quality_combo.currentText(),
-            "compress_images":  self.compress_checkbox.isChecked(),
+            "mode": "preserve_all" if self.preserve_all_radio.isChecked() else "text_only",
+            "quality": self.quality_combo.currentText(),
+            "compress_images": self.compress_checkbox.isChecked(),
             "include_metadata": self.include_metadata_checkbox.isChecked(),
         }
