@@ -62,6 +62,7 @@ def make_tm(language: str) -> "TranslationManager":
     needs translation support.
     """
     from translations import TranslationManager
+
     tm = TranslationManager()
     tm.set_language(language)
     return tm
