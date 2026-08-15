@@ -5,7 +5,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from converter.converters import AdvancedConverterEngine, ConversionResult, CATEGORY_MAP
+from converter.converters import CATEGORY_MAP, AdvancedConverterEngine, ConversionResult
 
 
 def test_conversion_result_attributes():
