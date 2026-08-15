@@ -4,12 +4,12 @@
 ; Complete uninstallation support
 
 #define MyAppName "File Converter Pro"
-#define MyAppVersion "1.0.6"
+#define MyAppVersion "1.0.7"
 #define MyAppPublisher "Prime Enterprises"
 #define MyAppURL "https://github.com/Hyacinthe-primus/File-Converter-Pro"
-#define MyAppExeName "File Converter Pro.exe"
+#define MyAppExeName "FCP.exe"
 #define MyAppId "{{C1E31023-8141-4243-96B2-D3AAC59CAC6F}}"
-#define MyDistDir "dist\File Converter Pro"
+#define MyDistDir "dist\FCP"
 
 [Setup]
 AppId={#MyAppId}
@@ -25,14 +25,14 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={autopf}\FCP
 DefaultGroupName={#MyAppName}
 OutputDir=Output
 OutputBaseFilename=FileConverterPro_Setup_v{#MyAppVersion}
 SetupIconFile=icon.ico
 UninstallDisplayIcon={app}\icon.ico
 WizardStyle=modern
-WizardSmallImageFile=installer_banner.bmp
+WizardSmallImageFile=installer_banner.png
 Compression=lzma2/ultra64
 SolidCompression=yes
 PrivilegesRequired=lowest
@@ -72,6 +72,51 @@ french.ConvertWithFCP=Convertir avec FCP
 english.ConvertWithFCP=Convert with FCP
 italian.ConvertWithFCP=Convertire con FCP
 russian.ConvertWithFCP=Конвертировать с FCP
+
+french.MergeOrder=Fusionner (ordre)
+english.MergeOrder=Merge (order)
+italian.MergeOrder=Unisci (ordine)
+russian.MergeOrder=Объединить (порядок)
+
+french.MergeAZ=Fusionner A→Z
+english.MergeAZ=Merge A→Z
+italian.MergeAZ=Unisci A→Z
+russian.MergeAZ=Объединить А→Я
+
+french.MergeZA=Fusionner Z→A
+english.MergeZA=Merge Z→A
+italian.MergeZA=Unisci Z→A
+russian.MergeZA=Объединить Я→А
+
+french.MergeNumAsc=Fusionner 1→9
+english.MergeNumAsc=Merge 1→9
+italian.MergeNumAsc=Unisci 1→9
+russian.MergeNumAsc=Объединить 1→9
+
+french.MergeNumDesc=Fusionner 9→1
+english.MergeNumDesc=Merge 9→1
+italian.MergeNumDesc=Unisci 9→1
+russian.MergeNumDesc=Объединить 9→1
+
+french.MergeOldest=Fusionner les plus anciens
+english.MergeOldest=Merge oldest
+italian.MergeOldest=Unisci dal più vecchio
+russian.MergeOldest=Объединить сначала старые
+
+french.MergeNewest=Fusionner les plus récents
+english.MergeNewest=Merge newest
+italian.MergeNewest=Unisci dal più recente
+russian.MergeNewest=Объединить сначала новые
+
+french.ImagesToPdfMerged=Images → PDF (fusionné)
+english.ImagesToPdfMerged=Images → PDF (merged)
+italian.ImagesToPdfMerged=Immagini → PDF (unite)
+russian.ImagesToPdfMerged=Изображения → PDF (объединено)
+
+french.Requires64Bit=Cette application nécessite Windows 64 bits.
+english.Requires64Bit=This application requires Windows 64-bit.
+italian.Requires64Bit=Questa applicazione richiede Windows a 64 bit.
+russian.Requires64Bit=Это приложение требует 64-разрядную версию Windows.
 
 [Tasks]
 Name: "desktopicon";   Description: "{cm:CreateDesktopIcon}";    GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
@@ -297,7 +342,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'arw' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -313,7 +358,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'avi' then begin
     AddConversion(SubKey, '01_to_mp4', 'Video → MP4', 'video_to_mp4');
     AddConversion(SubKey, '02_to_mkv', 'Video → MKV', 'video_to_mkv');
@@ -338,7 +383,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'bmp' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -354,7 +399,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'cr2' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -370,7 +415,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'cr3' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -386,7 +431,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'csv' then begin
     AddConversion(SubKey, '01_to_json', 'CSV → JSON', 'csv_to_json');
   end else if Ext = 'dng' then begin
@@ -404,25 +449,25 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'doc' then begin
     AddConversion(SubKey, '01_to_pdf', 'Word → PDF', 'docx_to_pdf');
-    AddConversion(SubKey, '02_merge_none', 'Merge (order)', 'merge_docx_none');
-    AddConversion(SubKey, '03_merge_alpha_asc', 'Merge A→Z', 'merge_docx_alpha_asc');
-    AddConversion(SubKey, '04_merge_alpha_desc', 'Merge Z→A', 'merge_docx_alpha_desc');
-    AddConversion(SubKey, '05_merge_num_asc', 'Merge 1→9', 'merge_docx_num_asc');
-    AddConversion(SubKey, '06_merge_num_desc', 'Merge 9→1', 'merge_docx_num_desc');
-    AddConversion(SubKey, '07_merge_date_asc', 'Merge oldest', 'merge_docx_date_asc');
-    AddConversion(SubKey, '08_merge_date_desc', 'Merge newest', 'merge_docx_date_desc');
+    AddConversion(SubKey, '02_merge_none', ExpandConstant('{cm:MergeOrder}'), 'merge_docx_none');
+    AddConversion(SubKey, '03_merge_alpha_asc', ExpandConstant('{cm:MergeAZ}'), 'merge_docx_alpha_asc');
+    AddConversion(SubKey, '04_merge_alpha_desc', ExpandConstant('{cm:MergeZA}'), 'merge_docx_alpha_desc');
+    AddConversion(SubKey, '05_merge_num_asc', ExpandConstant('{cm:MergeNumAsc}'), 'merge_docx_num_asc');
+    AddConversion(SubKey, '06_merge_num_desc', ExpandConstant('{cm:MergeNumDesc}'), 'merge_docx_num_desc');
+    AddConversion(SubKey, '07_merge_date_asc', ExpandConstant('{cm:MergeOldest}'), 'merge_docx_date_asc');
+    AddConversion(SubKey, '08_merge_date_desc', ExpandConstant('{cm:MergeNewest}'), 'merge_docx_date_desc');
   end else if Ext = 'docx' then begin
     AddConversion(SubKey, '01_to_pdf', 'Word → PDF', 'docx_to_pdf');
-    AddConversion(SubKey, '02_merge_none', 'Merge (order)', 'merge_docx_none');
-    AddConversion(SubKey, '03_merge_alpha_asc', 'Merge A→Z', 'merge_docx_alpha_asc');
-    AddConversion(SubKey, '04_merge_alpha_desc', 'Merge Z→A', 'merge_docx_alpha_desc');
-    AddConversion(SubKey, '05_merge_num_asc', 'Merge 1→9', 'merge_docx_num_asc');
-    AddConversion(SubKey, '06_merge_num_desc', 'Merge 9→1', 'merge_docx_num_desc');
-    AddConversion(SubKey, '07_merge_date_asc', 'Merge oldest', 'merge_docx_date_asc');
-    AddConversion(SubKey, '08_merge_date_desc', 'Merge newest', 'merge_docx_date_desc');
+    AddConversion(SubKey, '02_merge_none', ExpandConstant('{cm:MergeOrder}'), 'merge_docx_none');
+    AddConversion(SubKey, '03_merge_alpha_asc', ExpandConstant('{cm:MergeAZ}'), 'merge_docx_alpha_asc');
+    AddConversion(SubKey, '04_merge_alpha_desc', ExpandConstant('{cm:MergeZA}'), 'merge_docx_alpha_desc');
+    AddConversion(SubKey, '05_merge_num_asc', ExpandConstant('{cm:MergeNumAsc}'), 'merge_docx_num_asc');
+    AddConversion(SubKey, '06_merge_num_desc', ExpandConstant('{cm:MergeNumDesc}'), 'merge_docx_num_desc');
+    AddConversion(SubKey, '07_merge_date_asc', ExpandConstant('{cm:MergeOldest}'), 'merge_docx_date_asc');
+    AddConversion(SubKey, '08_merge_date_desc', ExpandConstant('{cm:MergeNewest}'), 'merge_docx_date_desc');
   end else if Ext = 'epub' then begin
     AddConversion(SubKey, '01_to_pdf', 'ePub → PDF', 'epub_to_pdf');
   end else if Ext = 'flac' then begin
@@ -445,7 +490,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'heic' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -461,7 +506,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'heif' then begin
     AddConversion(SubKey, '01_to_png', 'Image → PNG', 'image_to_png');
     AddConversion(SubKey, '02_to_jpg', 'Image → JPG', 'image_to_jpg');
@@ -471,7 +516,7 @@ begin
     AddConversion(SubKey, '06_to_svg', 'Image → SVG', 'image_to_svg');
     AddConversion(SubKey, '07_to_ico', 'Image → ICO', 'image_to_ico');
     AddConversion(SubKey, '08_to_pdf', 'Image → PDF', 'image_to_pdf');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'html' then begin
     AddConversion(SubKey, '01_to_pdf', 'HTML → PDF', 'html_to_pdf');
   end else if Ext = 'j2k' then begin
@@ -489,7 +534,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'jfif' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -505,7 +550,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'jp2' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -521,7 +566,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'jpeg' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -537,7 +582,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'jpg' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -553,7 +598,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'jpx' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -569,7 +614,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'json' then begin
     AddConversion(SubKey, '01_to_csv', 'JSON → CSV', 'json_to_csv');
   end else if Ext = 'm4a' then begin
@@ -625,7 +670,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'ogg' then begin
     AddConversion(SubKey, '01_to_mp3', 'Audio → MP3', 'audio_to_mp3');
     AddConversion(SubKey, '02_to_wav', 'Audio → WAV', 'audio_to_wav');
@@ -646,17 +691,17 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'pdf' then begin
     AddConversion(SubKey, '01_to_docx', 'PDF → Word', 'pdf_to_docx');
     AddConversion(SubKey, '02_to_html', 'PDF → HTML', 'pdf_to_html');
-    AddConversion(SubKey, '03_merge_none', 'Merge (order)', 'merge_pdf_none');
-    AddConversion(SubKey, '04_merge_alpha_asc', 'Merge A→Z', 'merge_pdf_alpha_asc');
-    AddConversion(SubKey, '05_merge_alpha_desc', 'Merge Z→A', 'merge_pdf_alpha_desc');
-    AddConversion(SubKey, '06_merge_num_asc', 'Merge 1→9', 'merge_pdf_num_asc');
-    AddConversion(SubKey, '07_merge_num_desc', 'Merge 9→1', 'merge_pdf_num_desc');
-    AddConversion(SubKey, '08_merge_date_asc', 'Merge oldest', 'merge_pdf_date_asc');
-    AddConversion(SubKey, '09_merge_date_desc', 'Merge newest', 'merge_pdf_date_desc');
+    AddConversion(SubKey, '03_merge_none', ExpandConstant('{cm:MergeOrder}'), 'merge_pdf_none');
+    AddConversion(SubKey, '04_merge_alpha_asc', ExpandConstant('{cm:MergeAZ}'), 'merge_pdf_alpha_asc');
+    AddConversion(SubKey, '05_merge_alpha_desc', ExpandConstant('{cm:MergeZA}'), 'merge_pdf_alpha_desc');
+    AddConversion(SubKey, '06_merge_num_asc', ExpandConstant('{cm:MergeNumAsc}'), 'merge_pdf_num_asc');
+    AddConversion(SubKey, '07_merge_num_desc', ExpandConstant('{cm:MergeNumDesc}'), 'merge_pdf_num_desc');
+    AddConversion(SubKey, '08_merge_date_asc', ExpandConstant('{cm:MergeOldest}'), 'merge_pdf_date_asc');
+    AddConversion(SubKey, '09_merge_date_desc', ExpandConstant('{cm:MergeNewest}'), 'merge_pdf_date_desc');
   end else if Ext = 'png' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -672,7 +717,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'pptx' then begin
     AddConversion(SubKey, '01_to_pdf', 'PPTX → PDF', 'pptx_to_pdf');
   end else if Ext = 'psd' then begin
@@ -690,7 +735,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'raf' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -706,7 +751,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'raw' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -722,7 +767,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'rtf' then begin
     AddConversion(SubKey, '01_to_pdf', 'RTF → PDF', 'rtf_to_pdf');
     AddConversion(SubKey, '02_to_docx', 'RTF → Word', 'rtf_to_docx');
@@ -741,7 +786,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'svg' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -757,7 +802,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'tif' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -773,7 +818,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'tiff' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');
@@ -789,7 +834,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'txt' then begin
     AddConversion(SubKey, '01_to_pdf', 'TXT → PDF', 'txt_to_pdf');
     AddConversion(SubKey, '02_to_docx', 'TXT → Word', 'txt_to_docx');
@@ -823,7 +868,7 @@ begin
     AddConversion(SubKey, '12_to_dng', 'Image → DNG', 'image_to_dng');
     AddConversion(SubKey, '13_to_j2k', 'Image → J2K', 'image_to_j2k');
     AddConversion(SubKey, '14_to_png', 'Image → PNG', 'image_to_png');
-    AddConversion(SubKey, '15_to_pdf_merged', 'Images → PDF (merged)', 'images_to_pdf_merged');
+    AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'xlsx' then begin
     AddConversion(SubKey, '01_to_pdf', 'Excel → PDF', 'xlsx_to_pdf');
     AddConversion(SubKey, '02_to_csv', 'Excel → CSV', 'xlsx_to_csv');
@@ -850,7 +895,7 @@ var
   ResultCode: Integer;
 begin
   Result := '';
-  Exec('taskkill.exe', '/f /im "File Converter Pro.exe"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill.exe', '/f /im "FCP.exe"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   Sleep(500);
 
   if DirExists(ExpandConstant('{app}')) then
@@ -864,7 +909,7 @@ function InitializeSetup(): Boolean;
 begin
   Result := True;
   if not IsWin64 then begin
-    MsgBox('This application requires Windows 64-bit.', mbError, MB_OK);
+    MsgBox(CustomMessage('Requires64Bit'), mbError, MB_OK);
     Result := False;
   end;
 end;
