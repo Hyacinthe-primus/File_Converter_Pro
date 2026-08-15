@@ -14,6 +14,7 @@ def collect_data_files():
         ('fonts', 'fonts'),
         ('legal', 'legal'),
         ('styles', 'styles'),
+        ('config', 'config'),
     ]
 
     filtered_datas = []
@@ -170,7 +171,7 @@ SHARED_HIDDEN = [
     'lxml', 'lxml.etree', 'lxml._elementpath', 'lxml.html', 'ebooklib',
     'pillow_heif', 'weasyprint',
     'rawpy',
-    'config', 'database', 'translations', 'widgets',
+    'config', 'database', 'translations', 'widgets', 'external_binaries',
     'utils', 'utils.translation_mixin',
     'dialogs', 'dialogs.terms_dialog', 'dialogs.word_to_pdf_dialog',
     'dialogs.pdf_to_word_dialog', 'dialogs.splash_screen', 'dialogs.preview_dialog',
@@ -188,10 +189,17 @@ SHARED_HIDDEN = [
     'app.mixins.compression', 'app.mixins.archive_engines', 'app.mixins.file_management',
     'app.mixins.panels', 'app.mixins.project_management',
     'app.mixins.theme_language',
+    'app.mixins.pdf_optimizer', 'app.mixins.office_optimizer',
+    'app.mixins.media_optimizer', 'app.mixins.web_optimizer',
+    'app.mixins.epub_optimizer', 'app.mixins.image_optimizer',
     'converter', 'converter.converters', 'converter.advanced_db',
     'converter.html_inline',
     'converter.mixins', 'converter.mixins.document_converters',
     'converter.mixins.image_converters', 'converter.mixins.media_converters',
+    'converter.mixins.office_com', 'converter.mixins.rtf_native',
+    'converter.mixins.pptx_native', 'converter.mixins.html_renderers',
+    'converter.mixins.pdf_renderers', 'converter.mixins.epub_renderers',
+    'converter.helpers', 'converter.registry',
     'advanced_conversions', 'donate',
     'achievements', 'achievements.achievements_system',
     'achievements.achievements_ui', 'achievements.achievements_popup',
@@ -264,7 +272,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='File Converter Pro',
+    name='FCP',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -287,10 +295,10 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=UPX_EXCLUDE,
-    name='File Converter Pro',
+    name='FCP',
 )
 
-dist_dir = os.path.join(DISTPATH, 'File Converter Pro', '_internal')
+dist_dir = os.path.join(DISTPATH, 'FCP', '_internal')
 
 for d in glob.glob(os.path.join(dist_dir, '*.dist-info')):
     shutil.rmtree(d)
@@ -304,7 +312,7 @@ for pyc in glob.glob(os.path.join(dist_dir, '**', '*.pyc'), recursive=True):
 for cache in glob.glob(os.path.join(dist_dir, '**', '__pycache__'), recursive=True):
     shutil.rmtree(cache, ignore_errors=True)
 
-comtypes_cache = os.path.join(DISTPATH, 'File Converter Pro', '_internal', 'comtypes', 'gen')
+comtypes_cache = os.path.join(DISTPATH, 'FCP', '_internal', 'comtypes', 'gen')
 if os.path.exists(comtypes_cache):
     shutil.rmtree(comtypes_cache)
     os.makedirs(comtypes_cache)
@@ -325,5 +333,5 @@ old_ffmpeg = os.path.join(dist_dir, 'cv2', 'opencv_videoio_ffmpeg4100_64.dll')
 if os.path.exists(old_ffmpeg):
     os.remove(old_ffmpeg)
 
-automation_dir = os.path.join(DISTPATH, 'File Converter Pro', 'automation')
+automation_dir = os.path.join(DISTPATH, 'FCP', 'automation')
 os.makedirs(automation_dir, exist_ok=True)
