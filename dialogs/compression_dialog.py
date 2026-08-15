@@ -1,15 +1,25 @@
 """CompressionDialog — Archive settings (ZIP/RAR/TAR, split, encrypt)."""
 
 import os
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-                               QComboBox, QLineEdit, QSpinBox, QGroupBox,
-                               QDialogButtonBox, QMessageBox)
-from PySide6.QtCore import Qt
-from qss_helpers import _apply_dialog_btn
-from widgets import AnimatedCheckBox
 
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QSpinBox,
+    QVBoxLayout,
+)
+
+from qss_helpers import _apply_dialog_btn
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
+from widgets import AnimatedCheckBox
 
 
 class CompressionDialog(TranslationMixin, QDialog):
@@ -39,11 +49,13 @@ class CompressionDialog(TranslationMixin, QDialog):
         level_layout = QHBoxLayout()
         level_layout.addWidget(QLabel(self.translate_text("Niveau de compression:")))
         self.compression_level = QComboBox()
-        self.compression_level.addItems([
-            self.translate_text("Normal"),
-            self.translate_text("Haute compression"),
-            self.translate_text("Compression maximale")
-        ])
+        self.compression_level.addItems(
+            [
+                self.translate_text("Normal"),
+                self.translate_text("Haute compression"),
+                self.translate_text("Compression maximale"),
+            ]
+        )
         level_layout.addWidget(self.compression_level)
         layout.addLayout(level_layout)
 
@@ -64,7 +76,9 @@ class CompressionDialog(TranslationMixin, QDialog):
         self.split_checkbox.setChecked(False)
         self.split_checkbox.stateChanged.connect(self.on_split_changed)
 
-        self.delete_original_checkbox = AnimatedCheckBox(self.translate_text("Supprimer les fichiers originaux après compression"))
+        self.delete_original_checkbox = AnimatedCheckBox(
+            self.translate_text("Supprimer les fichiers originaux après compression")
+        )
 
         QLabel(self.translate_text("Taille par partie:"))
 
@@ -76,15 +90,17 @@ class CompressionDialog(TranslationMixin, QDialog):
         self.split_size_spin.valueChanged.connect(self.on_split_size_changed)
 
         self.split_preset_combo = QComboBox()
-        self.split_preset_combo.addItems([
-            "10 MB (Email)",
-            "25 MB (Email)",
-            self.translate_text("100 MB (Partage web)"),
-            "700 MB (CD)",
-            "4.7 GB (DVD)",
-            self.translate_text("8.5 GB (Double couche DVD)"),
-            self.translate_text("Personnalisé")
-        ])
+        self.split_preset_combo.addItems(
+            [
+                "10 MB (Email)",
+                "25 MB (Email)",
+                self.translate_text("100 MB (Partage web)"),
+                "700 MB (CD)",
+                "4.7 GB (DVD)",
+                self.translate_text("8.5 GB (Double couche DVD)"),
+                self.translate_text("Personnalisé"),
+            ]
+        )
         self.split_preset_combo.setEnabled(False)
         self.split_preset_combo.setCurrentIndex(2)
 
@@ -115,10 +131,12 @@ class CompressionDialog(TranslationMixin, QDialog):
         self.split_note_label = QLabel()
         self.split_note_label.setStyleSheet("font-size: 10px; color: #dc3545; font-style: italic;")
         self.split_note_label.setWordWrap(True)
-        self.split_note_label.setText(self.translate_text(
-            "Note: Le fractionnement n'est disponible que pour les formats ZIP et RAR. "
-            "Les archives TAR/TAR.GZ ne peuvent pas être fractionnées."
-        ))
+        self.split_note_label.setText(
+            self.translate_text(
+                "Note: Le fractionnement n'est disponible que pour les formats ZIP et RAR. "
+                "Les archives TAR/TAR.GZ ne peuvent pas être fractionnées."
+            )
+        )
         self.split_note_label.setVisible(False)
         layout.addWidget(self.split_note_label)
 
@@ -154,7 +172,7 @@ class CompressionDialog(TranslationMixin, QDialog):
 
     def apply_theme_style(self):
         parent = self.parent()
-        if hasattr(parent, 'dark_mode'):
+        if hasattr(parent, "dark_mode"):
             if parent.dark_mode:
                 self.setStyleSheet("""
                     QDialog { background-color: #1e2229; }
@@ -223,7 +241,9 @@ class CompressionDialog(TranslationMixin, QDialog):
                 """)
 
     def on_split_size_changed(self, value):
-        if self.split_checkbox.isChecked() and self.split_preset_combo.currentText() == self.translate_text("Personnalisé"):
+        if self.split_checkbox.isChecked() and self.split_preset_combo.currentText() == self.translate_text(
+            "Personnalisé"
+        ):
             template = self.translate_text("split_info_custom")
             message = template.format(value)
             self.split_info_label.setText(message)
@@ -246,7 +266,7 @@ class CompressionDialog(TranslationMixin, QDialog):
                 "100 MB (Partage web)": 100,
                 "700 MB (CD)": 700,
                 "4.7 GB (DVD)": 4700,
-                "8.5 GB (Double couche DVD)": 8500
+                "8.5 GB (Double couche DVD)": 8500,
             }
 
             if preset_text in preset_sizes:
@@ -263,7 +283,7 @@ class CompressionDialog(TranslationMixin, QDialog):
                 template = self.translate_text("split_info_custom")
                 message = template.format(size_value)
             else:
-                size_name = preset_text.split(' ')[0]
+                size_name = preset_text.split(" ")[0]
                 template = self.translate_text("split_info_preset")
                 message = template.format(size_value, size_name)
 
@@ -294,7 +314,7 @@ class CompressionDialog(TranslationMixin, QDialog):
 
                 if self.split_preset_combo.currentIndex() > 0:
                     preset_text = self.split_preset_combo.currentText()
-                    size_name = preset_text.split(' ')[0]
+                    size_name = preset_text.split(" ")[0]
                     size_value = self.split_size_spin.value()
                     template = self.translate_text("split_info_preset")
                     self.split_info_label.setText(template.format(size_value, size_name))
@@ -302,7 +322,7 @@ class CompressionDialog(TranslationMixin, QDialog):
     def on_encryption_changed(self, state):
         if state == Qt.Checked:
             parent = self.parent()
-            if hasattr(parent, 'files_list'):
+            if hasattr(parent, "files_list"):
                 total_size = sum(os.path.getsize(f) for f in parent.files_list if os.path.exists(f))
                 total_size_mb = total_size / (1024 * 1024)
 
@@ -324,16 +344,20 @@ class CompressionDialog(TranslationMixin, QDialog):
                     "pip install pyzipper"
                 )
 
-            QMessageBox.information(self,
-                                    self.translate_text("Information sur le chiffrement"),
-                                    message)
+            QMessageBox.information(self, self.translate_text("Information sur le chiffrement"), message)
 
     def update_format_info(self):
         format_info = {
-            "ZIP": self.translate_text("Format universel, compatible avec tous les systèmes. Supporte le chiffrement et le fractionnement."),
-            "RAR": self.translate_text("Meilleure compression mais nécessite WinRAR/7-Zip pour décompresser. Supporte le fractionnement."),
+            "ZIP": self.translate_text(
+                "Format universel, compatible avec tous les systèmes. Supporte le chiffrement et le fractionnement."
+            ),
+            "RAR": self.translate_text(
+                "Meilleure compression mais nécessite WinRAR/7-Zip pour décompresser. Supporte le fractionnement."
+            ),
             "TAR.GZ": self.translate_text("Standard Unix/Linux, bonne compression. Ne supporte PAS le fractionnement."),
-            "TAR": self.translate_text("Archive non compressée, préférable pour sauvegarde rapide. Ne supporte PAS le fractionnement.")
+            "TAR": self.translate_text(
+                "Archive non compressée, préférable pour sauvegarde rapide. Ne supporte PAS le fractionnement."
+            ),
         }
 
         current_format = self.format_combo.currentText()
@@ -347,9 +371,7 @@ class CompressionDialog(TranslationMixin, QDialog):
     def get_compression_settings(self):
         is_split_enabled = self.split_checkbox.isChecked()
         current_format = self.format_combo.currentText()
-        is_split_supported = current_format in ["ZIP", "RAR",
-                                                self.translate_text("ZIP"),
-                                                self.translate_text("RAR")]
+        is_split_supported = current_format in ["ZIP", "RAR", self.translate_text("ZIP"), self.translate_text("RAR")]
 
         split_size = 0
         if is_split_enabled and is_split_supported:
@@ -358,13 +380,13 @@ class CompressionDialog(TranslationMixin, QDialog):
                 split_size = 100
 
         settings = {
-            'format': current_format,
-            'level': self.compression_level.currentText(),
-            'name': self.filename_input.text().strip() or "archive_compressee",
-            'password': self.encryption_checkbox.isChecked(),
-            'split': is_split_enabled and is_split_supported,
-            'split_size': split_size,
-            'delete_originals': self.delete_original_checkbox.isChecked()
+            "format": current_format,
+            "level": self.compression_level.currentText(),
+            "name": self.filename_input.text().strip() or "archive_compressee",
+            "password": self.encryption_checkbox.isChecked(),
+            "split": is_split_enabled and is_split_supported,
+            "split_size": split_size,
+            "delete_originals": self.delete_original_checkbox.isChecked(),
         }
 
         return settings
