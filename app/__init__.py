@@ -14,20 +14,22 @@ Inheritance chain (MRO):
 
 """
 
-__version__ = "1.0.6"
+__version__ = "1.0.7"
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QTimer
 from PySide6.QtWidgets import QMainWindow
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QTimer
 
 from app.ui import AppUIMixin
 
 
 class FileConverterApp(AppUIMixin, QMainWindow):
     """Main application window — combines UI and logic mixins."""
+
     pass
 
 
 class FadingMainWindow(FileConverterApp):
     """Version of FileConverterApp with fade-in support"""
+
     def __init__(self, config_manager):
         """Initialize the fading window with fade-in animation support.
 
@@ -48,4 +50,4 @@ class FadingMainWindow(FileConverterApp):
         self.fade_animation.start()
 
 
-__all__ = ['FileConverterApp', 'FadingMainWindow']
+__all__ = ["FileConverterApp", "FadingMainWindow"]
