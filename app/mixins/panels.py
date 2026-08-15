@@ -1,9 +1,18 @@
 """PanelsMixin — Left and right panel creation methods."""
 
-from PySide6.QtWidgets import (QGroupBox, QVBoxLayout, QHBoxLayout, QPushButton,
-                               QLabel, QScrollArea, QFrame, QWidget, QCheckBox,
-                               QListWidget)
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 from widgets import DraggableListWidget
 
@@ -48,10 +57,10 @@ class PanelsMixin:
             b.setObjectName(name)
             return b
 
-        self.add_files_btn   = _file_btn("📁 " + self.translate_text("Ajouter Fichiers"), "BtnFileAdd")
-        self.add_folder_btn  = _file_btn("📂 " + self.translate_text("Ajouter Dossier"), "BtnFileFolder")
-        self.remove_file_btn = _file_btn("🗑 "  + self.translate_text("Supprimer"), "BtnFileDel")
-        self.clear_all_btn   = _file_btn("🧹 " + self.translate_text("Tout Effacer"), "BtnFileClear")
+        self.add_files_btn = _file_btn("➕📄 " + self.translate_text("Ajouter Fichiers"), "BtnFileAdd")
+        self.add_folder_btn = _file_btn("➕📂 " + self.translate_text("Ajouter Dossier"), "BtnFileFolder")
+        self.remove_file_btn = _file_btn("❌ " + self.translate_text("Supprimer"), "BtnFileDel")
+        self.clear_all_btn = _file_btn("🧹 " + self.translate_text("Tout Effacer"), "BtnFileClear")
         self.add_files_btn.setProperty("i18n_key", "Ajouter Fichiers")
         self.add_folder_btn.setProperty("i18n_key", "Ajouter Dossier")
         self.remove_file_btn.setProperty("i18n_key", "Supprimer")
@@ -102,9 +111,9 @@ class PanelsMixin:
 
         conv_grid = QHBoxLayout()
         conv_grid.setSpacing(7)
-        self.pdf_to_word_btn   = _btn("📄→📝 " + self.translate_text("PDF → Word"), "BtnBlue")
-        self.word_to_pdf_btn   = _btn("📝→📄 " + self.translate_text("Word → PDF"), "BtnBlue")
-        self.image_to_pdf_btn  = _btn("🖼→📄 "  + self.translate_text("Images → PDF"), "BtnBlue")
+        self.pdf_to_word_btn = _btn("📄→📝 " + self.translate_text("PDF → Word"), "BtnBlue")
+        self.word_to_pdf_btn = _btn("📝→📄 " + self.translate_text("Word → PDF"), "BtnBlue")
+        self.image_to_pdf_btn = _btn("🖼️​→📄 " + self.translate_text("Images → PDF"), "BtnBlue")
         self.pdf_to_word_btn.setProperty("i18n_key", "PDF → Word")
         self.word_to_pdf_btn.setProperty("i18n_key", "Word → PDF")
         self.image_to_pdf_btn.setProperty("i18n_key", "Images → PDF")
@@ -112,7 +121,7 @@ class PanelsMixin:
             conv_grid.addWidget(b)
         conv_lay.addLayout(conv_grid)
 
-        self.more_conversions_btn = QPushButton("✦  " + self.translate_text("Plus de conversions"))
+        self.more_conversions_btn = QPushButton("➕​  " + self.translate_text("Plus de conversions"))
         self.more_conversions_btn.setProperty("i18n_key", "Plus de conversions")
         self.more_conversions_btn.setMinimumHeight(32)
         self.more_conversions_btn.setObjectName("BtnMoreConv")
@@ -124,7 +133,7 @@ class PanelsMixin:
         merge_card.setProperty("i18n_key", "Fusion de Fichiers")
         merge_row = QHBoxLayout()
         merge_row.setSpacing(7)
-        self.merge_pdf_btn  = _btn("🔗 " + self.translate_text("Fusionner PDF"), "BtnTeal")
+        self.merge_pdf_btn = _btn("🔗 " + self.translate_text("Fusionner PDF"), "BtnTeal")
         self.merge_word_btn = _btn("🔗 " + self.translate_text("Fusionner Word"), "BtnTeal")
         self.merge_pdf_btn.setProperty("i18n_key", "Fusionner PDF")
         self.merge_word_btn.setProperty("i18n_key", "Fusionner Word")
@@ -137,9 +146,9 @@ class PanelsMixin:
         adv_card.setProperty("i18n_key", "Fonctionnalités Avancées")
         adv_row = QHBoxLayout()
         adv_row.setSpacing(7)
-        self.split_pdf_btn      = _btn("✂️ " + self.translate_text("Diviser PDF"), "BtnOrange")
-        self.protect_pdf_btn    = _btn("🔒 " + self.translate_text("Protéger PDF"), "BtnOrange")
-        self.compress_files_btn = _btn("🗜 "  + self.translate_text("Compresser Fichiers"), "BtnOrange")
+        self.split_pdf_btn = _btn("✂️ " + self.translate_text("Diviser PDF"), "BtnOrange")
+        self.protect_pdf_btn = _btn("🔒 " + self.translate_text("Protéger PDF"), "BtnOrange")
+        self.compress_files_btn = _btn("📦 " + self.translate_text("Compresser Fichiers"), "BtnOrange")
         self.split_pdf_btn.setProperty("i18n_key", "Diviser PDF")
         self.protect_pdf_btn.setProperty("i18n_key", "Protéger PDF")
         self.compress_files_btn.setProperty("i18n_key", "Compresser Fichiers")
@@ -152,8 +161,8 @@ class PanelsMixin:
         batch_card.setProperty("i18n_key", "Opérations par Lots")
         batch_row = QHBoxLayout()
         batch_row.setSpacing(7)
-        self.batch_convert_btn = _btn("🔄 " + self.translate_text("Conversion par Lot"), "BtnViolet")
-        self.batch_rename_btn  = _btn("📝 " + self.translate_text("Renommer par Lot"), "BtnViolet")
+        self.batch_convert_btn = _btn("🔁 " + self.translate_text("Conversion par Lot"), "BtnViolet")
+        self.batch_rename_btn = _btn("✏️ " + self.translate_text("Renommer par Lot"), "BtnViolet")
         self.batch_convert_btn.setProperty("i18n_key", "Conversion par Lot")
         self.batch_rename_btn.setProperty("i18n_key", "Renommer par Lot")
         batch_row.addWidget(self.batch_convert_btn)
@@ -168,9 +177,9 @@ class PanelsMixin:
         self.settings_btn.setObjectName("BtnSettings")
         right_layout.addWidget(self.settings_btn)
 
-        self.dashboard_btn    = self.nav_dashboard_btn
-        self.history_btn      = self.nav_history_btn
-        self.templates_btn    = self.nav_templates_btn
+        self.dashboard_btn = self.nav_dashboard_btn
+        self.history_btn = self.nav_history_btn
+        self.templates_btn = self.nav_templates_btn
         self.achievements_btn = self.nav_achievements_btn
         self._apply_achievements_btn_state()
 
