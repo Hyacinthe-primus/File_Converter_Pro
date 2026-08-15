@@ -4,7 +4,7 @@
 $UPX_PATH = "C:\....\.....\Your_path\....\upx.exe" # <-- SET THIS TO YOUR UPX PATH
 
 # Output destination inside the onedir build
-$OnedirFolder = "dist\File Converter Pro"
+$OnedirFolder = "dist\FCP"
 $SpecFile     = "quick_check.spec"
 $OutputExe    = "dist\Quick Check.exe"
 $DestExe      = "$OnedirFolder\Quick Check.exe"
