@@ -11,16 +11,18 @@ from pathlib import Path
 
 LOG_MAX_LINES = 200
 
+
 def _get_base_dir() -> Path:
     if getattr(sys, "frozen", False):
         return Path(sys.executable).parent
     return Path(__file__).resolve().parent
 
-BASE_DIR       = _get_base_dir()
+
+BASE_DIR = _get_base_dir()
 AUTOMATION_DIR = BASE_DIR / "automation"
-LOG_FILE       = AUTOMATION_DIR / "daemon.log"
-RELOAD_FLAG    = AUTOMATION_DIR / ".reload"
-STOP_FLAG      = AUTOMATION_DIR / ".stop"
+LOG_FILE = AUTOMATION_DIR / "daemon.log"
+RELOAD_FLAG = AUTOMATION_DIR / ".reload"
+STOP_FLAG = AUTOMATION_DIR / ".stop"
 
 
 def _setup_logging() -> None:
@@ -39,7 +41,7 @@ def _trim_log_if_clean() -> None:
         return
     try:
         lines = LOG_FILE.read_text(encoding="utf-8").splitlines()
-        if len(lines) > LOG_MAX_LINES and not any("[ERROR]" in l for l in lines):
+        if len(lines) > LOG_MAX_LINES and not any("[ERROR]" in line for line in lines):
             LOG_FILE.write_text("", encoding="utf-8")
     except Exception:
         pass
@@ -48,10 +50,9 @@ def _trim_log_if_clean() -> None:
 def set_autostart(enabled: bool, exe_path: str | None = None) -> None:
     try:
         import winreg
+
         key = winreg.OpenKey(
-            winreg.HKEY_CURRENT_USER,
-            r"Software\Microsoft\Windows\CurrentVersion\Run",
-            0, winreg.KEY_SET_VALUE
+            winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_SET_VALUE
         )
         if enabled:
             if exe_path:
@@ -74,10 +75,8 @@ def set_autostart(enabled: bool, exe_path: str | None = None) -> None:
 def is_autostart_enabled() -> bool:
     try:
         import winreg
-        key = winreg.OpenKey(
-            winreg.HKEY_CURRENT_USER,
-            r"Software\Microsoft\Windows\CurrentVersion\Run"
-        )
+
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run")
         winreg.QueryValueEx(key, "FileConverterProDaemon")
         winreg.CloseKey(key)
         return True
@@ -86,9 +85,10 @@ def is_autostart_enabled() -> bool:
 
 
 def run_daemon_mode() -> None:
-    from PySide6.QtWidgets import QApplication
-    from PySide6.QtCore import QTimer
     import signal
+
+    from PySide6.QtCore import QTimer
+    from PySide6.QtWidgets import QApplication
 
     _setup_logging()
     _trim_log_if_clean()
@@ -97,9 +97,10 @@ def run_daemon_mode() -> None:
 
     signal.signal(signal.SIGINT, lambda *_: _app.quit())
 
-    from tasks.watcher   import WatcherManager
     from tasks.scheduler import SchedulerManager
-    watcher   = WatcherManager()
+    from tasks.watcher import WatcherManager
+
+    watcher = WatcherManager()
     scheduler = SchedulerManager()
     watcher.start()
     scheduler.start()
@@ -109,21 +110,27 @@ def run_daemon_mode() -> None:
     def _poll():
         nonlocal last_mtimes
         if STOP_FLAG.exists():
-            try: STOP_FLAG.unlink()
-            except OSError: pass
+            try:
+                STOP_FLAG.unlink()
+            except OSError:
+                pass
             watcher.stop()
             scheduler.stop()
             _app.quit()
             return
         if RELOAD_FLAG.exists():
-            try: RELOAD_FLAG.unlink()
-            except OSError: pass
-            watcher.reload(); scheduler.reload()
+            try:
+                RELOAD_FLAG.unlink()
+            except OSError:
+                pass
+            watcher.reload()
+            scheduler.reload()
             last_mtimes = _get_toml_mtimes()
             return
         current = _get_toml_mtimes()
         if current != last_mtimes:
-            watcher.reload(); scheduler.reload()
+            watcher.reload()
+            scheduler.reload()
             last_mtimes = current
         _trim_log_if_clean()
 
@@ -150,17 +157,17 @@ def main() -> None:
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))
 
-    from tasks.watcher   import WatcherManager
     from tasks.scheduler import SchedulerManager
+    from tasks.watcher import WatcherManager
 
-    watcher   = WatcherManager()
+    watcher = WatcherManager()
     scheduler = SchedulerManager()
     watcher.start()
     scheduler.start()
 
-    last_mtimes   = _get_toml_mtimes()
+    last_mtimes = _get_toml_mtimes()
     POLL_INTERVAL = 5
-    trim_counter  = 0
+    trim_counter = 0
 
     try:
         while True:
@@ -192,6 +199,7 @@ def main() -> None:
     finally:
         watcher.stop()
         scheduler.stop()
+
 
 if __name__ == "__main__":
     main()
