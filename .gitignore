@@ -4,6 +4,7 @@ build/
 output/
 Checksum/
 styles/custom_themes
+Wiki/
 
 # Cache files
 __pycache__/
