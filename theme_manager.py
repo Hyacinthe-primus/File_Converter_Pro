@@ -1,7 +1,7 @@
 """ThemeManager — Handle custom .fctheme files (ZIP format)."""
 
-import zipfile
 import configparser
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -10,9 +10,16 @@ THEMES_DIR = ROOT_DIR / "styles" / "themes"
 CUSTOM_THEMES_DIR = ROOT_DIR / "styles" / "custom_themes"
 
 REQUIRED_FILES = {
-    "style.qss", "advanced_conversions.qss", "advanced_group.qss",
-    "contact_links.css", "dashboard.qss", "lang_scroll.qss",
-    "scrollbar.qss", "templates.qss", "terms_html.css", "terms.qss",
+    "style.qss",
+    "advanced_conversions.qss",
+    "advanced_group.qss",
+    "contact_links.css",
+    "dashboard.qss",
+    "lang_scroll.qss",
+    "scrollbar.qss",
+    "templates.qss",
+    "terms_html.css",
+    "terms.qss",
 }
 
 METADATA_FILE = "metadata.ini"
@@ -92,7 +99,9 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
             if qss_dirs:
                 theme_dir_name = next(iter(qss_dirs))
                 inner_prefix = theme_dir_name + "/"
-                inner_names = [n[len(inner_prefix):] for n in names if n.startswith(inner_prefix) and n != inner_prefix]
+                inner_names = [
+                    n[len(inner_prefix) :] for n in names if n.startswith(inner_prefix) and n != inner_prefix
+                ]
             else:
                 theme_dir_name = ""
                 inner_prefix = ""
@@ -125,6 +134,7 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
 
             if theme_dir.exists():
                 import shutil
+
                 counter = 2
                 while (CUSTOM_THEMES_DIR / f"{folder_name}_{counter}").exists():
                     counter += 1
@@ -145,7 +155,7 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
 
                 basename = Path(n).name
 
-                if basename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                if basename.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
                     full_path = inner_prefix + n
                     dest = theme_dir / basename
                     with zf.open(full_path) as src, open(dest, "wb") as dst:
@@ -162,7 +172,7 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
 
             for n in names:
                 basename = Path(n).name
-                if basename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                if basename.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
                     if n.startswith(inner_prefix) and inner_prefix:
                         continue
                     full_path = n
@@ -173,6 +183,7 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
             missing = REQUIRED_FILES - qss_files_found
             if missing:
                 import shutil
+
                 shutil.rmtree(theme_dir)
                 return False, f"Missing files : {', '.join(sorted(missing))}"
 
@@ -189,6 +200,7 @@ def remove_theme(folder_name: str) -> tuple[bool, str]:
     if not theme_dir.exists():
         return False, "Theme not found."
     import shutil
+
     shutil.rmtree(theme_dir)
     return True, folder_name
 
@@ -225,8 +237,9 @@ def _parse_metadata_content(content: str, folder_name: str = "") -> ThemeMetadat
 
 def _sanitize_folder_name(name: str) -> str:
     import re
-    s = re.sub(r'[^\w\s-]', '', name)
-    s = re.sub(r'\s+', '_', s.strip())
+
+    s = re.sub(r"[^\w\s-]", "", name)
+    s = re.sub(r"\s+", "_", s.strip())
     return s[:50] or "custom_theme"
 
 
