@@ -2,9 +2,9 @@
 
 import time
 
-from PySide6.QtWidgets import (QGroupBox, QPushButton, QLabel, QCheckBox)
+from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton
 
-from qss_helpers import _load_qss, set_theme, get_current_theme
+from qss_helpers import _load_qss, set_theme
 
 
 class ThemeLanguageMixin:
@@ -28,7 +28,9 @@ class ThemeLanguageMixin:
         self.dark_mode = not self.dark_mode
         self.current_theme = "dark" if self.dark_mode else "light"
         self.apply_theme(self.dark_mode)
-        self.theme_action.setText("☀️ " + self.translate_text("Mode Clair") if self.dark_mode else "🌙 " + self.translate_text("Mode Sombre"))
+        self.theme_action.setText(
+            "☀️ " + self.translate_text("Mode Clair") if self.dark_mode else "🌙 " + self.translate_text("Mode Sombre")
+        )
 
         self.config["dark_mode"] = self.dark_mode
         self.config_manager.save_config(self.config)
@@ -77,7 +79,7 @@ class ThemeLanguageMixin:
         self.current_language = new_language
         self.translation_manager.set_language(new_language)
         self.system_notifier.set_language(new_language)
-        if hasattr(self, 'files_list_widget'):
+        if hasattr(self, "files_list_widget"):
             self.files_list_widget.set_language(new_language)
 
         self.config["language"] = new_language
@@ -115,7 +117,9 @@ class ThemeLanguageMixin:
             if key:
                 widget.setText(self.translate_text(key))
 
-        self.theme_action.setText(("☀️ " if self.dark_mode else "🌙 ") + self.translate_text("Mode Clair" if self.dark_mode else "Mode Sombre"))
+        self.theme_action.setText(
+            ("☀️ " if self.dark_mode else "🌙 ") + self.translate_text("Mode Clair" if self.dark_mode else "Mode Sombre")
+        )
         self.new_action.setText("🆕 " + self.translate_text("Nouveau Projet"))
         self.open_action.setText("📂 " + self.translate_text("Ouvrir Projet"))
         self.save_action.setText("💾 " + self.translate_text("Enregistrer Projet"))
