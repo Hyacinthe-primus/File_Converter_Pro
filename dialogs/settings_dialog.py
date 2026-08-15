@@ -1,24 +1,38 @@
 """SettingsDialog — Application preferences and configuration (multi-tab)."""
 
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QWidget,
-                               QGroupBox, QFormLayout, QComboBox, QSpinBox,
-                               QLineEdit, QPushButton, QTabWidget, QFrame,
-                               QScrollArea, QLabel, QFileDialog, QMessageBox,
-                               QDialogButtonBox)
-from PySide6.QtCore import Qt, QTimer, QCoreApplication
-from qss_helpers import _load_qss, _apply_dialog_btn, get_current_theme
-from widgets import AnimatedCheckBox
-from .terms_dialog import TermsAndPrivacyDialog
+from PySide6.QtCore import QCoreApplication, Qt, QTimer
+from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QFileDialog,
+    QFormLayout,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSpinBox,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
+from qss_helpers import _apply_dialog_btn, _load_qss, get_current_theme
+from theme_manager import CUSTOM_THEMES_DIR, get_builtin_themes, get_custom_themes, import_theme, remove_theme
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
-from theme_manager import (get_custom_themes, get_builtin_themes,
-                           import_theme, remove_theme, CUSTOM_THEMES_DIR)
-from PySide6.QtGui import QPixmap, QImage
+from widgets import AnimatedCheckBox
+
+from .terms_dialog import TermsAndPrivacyDialog
 
 
 class SettingsDialog(TranslationMixin, QDialog):
@@ -126,7 +140,9 @@ class SettingsDialog(TranslationMixin, QDialog):
         interface_layout = QFormLayout(interface_group)
         interface_layout.setVerticalSpacing(10)
 
-        self.auto_open_checkbox = AnimatedCheckBox(self.translate_text("Ouvrir automatiquement le dernier projet au démarrage"))
+        self.auto_open_checkbox = AnimatedCheckBox(
+            self.translate_text("Ouvrir automatiquement le dernier projet au démarrage")
+        )
         self.auto_open_checkbox.setChecked(self.config.get("auto_open_last_project", False))
 
         self.notifications_checkbox = AnimatedCheckBox(self.translate_text("Activer les notifications"))
@@ -144,7 +160,9 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.show_dashboard_checkbox = AnimatedCheckBox(self.translate_text("Afficher le tableau de bord au démarrage"))
         self.show_dashboard_checkbox.setChecked(self.config.get("show_dashboard_on_startup", True))
 
-        self.separate_image_pdfs_checkbox = AnimatedCheckBox(self.translate_text("Créer un PDF séparé par image (au lieu de fusionner)"))
+        self.separate_image_pdfs_checkbox = AnimatedCheckBox(
+            self.translate_text("Créer un PDF séparé par image (au lieu de fusionner)")
+        )
         self.separate_image_pdfs_checkbox.setChecked(self.config.get("separate_image_pdfs", False))
 
         interface_layout.addRow(self.auto_open_checkbox)
@@ -165,34 +183,54 @@ class SettingsDialog(TranslationMixin, QDialog):
         conversion_layout.setHorizontalSpacing(15)
 
         self.quality_combo = QComboBox()
-        self.quality_combo.addItems([
-            self.translate_text("Haute qualité"),
-            self.translate_text("Qualité standard"),
-            self.translate_text("Compressé")
-        ])
+        self.quality_combo.addItems(
+            [
+                self.translate_text("Haute qualité"),
+                self.translate_text("Qualité standard"),
+                self.translate_text("Compressé"),
+            ]
+        )
         quality_map = {"high": 0, "standard": 1, "compressed": 2}
         current_quality = self.config.get("conversion_quality", "standard")
         self.quality_combo.setCurrentIndex(quality_map.get(current_quality, 1))
 
         self.compression_level_combo = QComboBox()
-        self.compression_level_combo.addItems([
-            self.translate_text("Normal"),
-            self.translate_text("Haute compression"),
-            self.translate_text("Compression maximale")
-        ])
+        self.compression_level_combo.addItems(
+            [
+                self.translate_text("Normal"),
+                self.translate_text("Haute compression"),
+                self.translate_text("Compression maximale"),
+            ]
+        )
         compression_map = {"normal": 0, "high": 1, "maximum": 2}
         current_compression = self.config.get("compression_level", "normal")
         self.compression_level_combo.setCurrentIndex(compression_map.get(current_compression, 0))
 
         self.pdf_to_word_mode_combo = QComboBox()
-        self.pdf_to_word_mode_combo.addItems([
-            self.translate_text("Conserver les images et la mise en page"),
-            self.translate_text("Texte brut uniquement"),
-            self.translate_text("Texte complet (texte + texte des images)")
-        ])
+        self.pdf_to_word_mode_combo.addItems(
+            [
+                self.translate_text("Conserver les images et la mise en page"),
+                self.translate_text("Texte brut uniquement"),
+                self.translate_text("Texte complet (texte + texte des images)"),
+            ]
+        )
         mode_map = {"with_images": 0, "text_only": 1, "text_with_image_text": 2}
         current_mode = self.config.get("pdf_to_word_mode", "with_images")
         self.pdf_to_word_mode_combo.setCurrentIndex(mode_map.get(current_mode, 0))
+
+        self.icon_layer_combo = QComboBox()
+        self.icon_layer_combo.addItem(self.translate_text("Multi-calque"), "multi")
+        self.icon_layer_combo.addItem("256 x 256", "256")
+        self.icon_layer_combo.addItem("128 x 128", "128")
+        self.icon_layer_combo.addItem("64 x 64", "64")
+        self.icon_layer_combo.addItem("48 x 48", "48")
+        self.icon_layer_combo.addItem("32 x 32", "32")
+        self.icon_layer_combo.addItem("16 x 16", "16")
+        current_icon_layer = self.config.get("image_to_icon_layer", "multi")
+        for idx in range(self.icon_layer_combo.count()):
+            if self.icon_layer_combo.itemData(idx) == current_icon_layer:
+                self.icon_layer_combo.setCurrentIndex(idx)
+                break
 
         self.default_output_input = QLineEdit()
         self.default_output_input.setText(self.config.get("default_output_folder", ""))
@@ -205,7 +243,9 @@ class SettingsDialog(TranslationMixin, QDialog):
         output_layout.addWidget(self.browse_btn, 1)
         output_layout.setSpacing(10)
 
-        self.auto_clean_checkbox = AnimatedCheckBox(self.translate_text("Nettoyer automatiquement les fichiers temporaires"))
+        self.auto_clean_checkbox = AnimatedCheckBox(
+            self.translate_text("Nettoyer automatiquement les fichiers temporaires")
+        )
         self.auto_clean_checkbox.setChecked(self.config.get("auto_clean_temp_files", True))
 
         self.backup_checkbox = AnimatedCheckBox(self.translate_text("Créer une sauvegarde avant conversion"))
@@ -215,19 +255,22 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.keep_history_days_spin.setRange(1, 3650)
         self.keep_history_days_spin.setValue(self.config.get("keep_history_days", 365))
 
-        self.auto_save_templates_check = AnimatedCheckBox(self.translate_text("Sauvegarder automatiquement les configurations fréquentes"))
+        self.auto_save_templates_check = AnimatedCheckBox(
+            self.translate_text("Sauvegarder automatiquement les configurations fréquentes")
+        )
         self.auto_save_templates_check.setChecked(self.config.get("auto_save_templates", True))
 
         conversion_layout.addRow(self.translate_text("Qualité par défaut:"), self.quality_combo)
         conversion_layout.addRow(self.translate_text("Niveau compression:"), self.compression_level_combo)
         conversion_layout.addRow(self.translate_text("Mode PDF→Word:"), self.pdf_to_word_mode_combo)
+        conversion_layout.addRow(self.translate_text("Image → ICO (calques):"), self.icon_layer_combo)
         conversion_layout.addRow(self.translate_text("Dossier de sortie par défaut:"), output_layout)
         conversion_layout.addRow(self.translate_text("Conserver l'historique (jours):"), self.keep_history_days_spin)
         conversion_layout.addRow(self.auto_clean_checkbox)
         conversion_layout.addRow(self.backup_checkbox)
         conversion_layout.addRow(self.auto_save_templates_check)
 
-        conversion_group.setMaximumHeight(400)
+        conversion_group.setMaximumHeight(600)
 
         general_layout.addWidget(interface_group)
         general_layout.addWidget(conversion_group)
@@ -253,11 +296,11 @@ class SettingsDialog(TranslationMixin, QDialog):
         privacy_layout.addWidget(privacy_group)
         privacy_layout.addStretch()
 
-        self.tab_widget.addTab(general_tab,  self.translate_text("Général"))
+        self.tab_widget.addTab(general_tab, self.translate_text("Général"))
         self.tab_widget.addTab(self._build_automation_tab(), self.translate_text("Automatisation"))
-        self.tab_widget.addTab(privacy_tab,  self.translate_text("Confidentialité"))
-        self.tab_widget.addTab(self._build_language_tab(), self.translate_text("Langue"))
+        self.tab_widget.addTab(privacy_tab, self.translate_text("Confidentialité"))
         self.tab_widget.addTab(self._build_theme_tab(), self.translate_text("Thème"))
+        self.tab_widget.addTab(self._build_language_tab(), self.translate_text("Langue"))
 
         content_layout.addWidget(self.tab_widget)
 
@@ -288,7 +331,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.apply_scrollbar_style()
 
     def apply_scrollbar_style(self):
-        dark = hasattr(self.parent(), 'dark_mode') and self.parent().dark_mode
+        dark = hasattr(self.parent(), "dark_mode") and self.parent().dark_mode
         self.setStyleSheet(self.styleSheet() + _load_qss("scrollbar.qss", get_current_theme(dark)))
 
     def _lang_is_dark(self) -> bool:
@@ -300,13 +343,13 @@ class SettingsDialog(TranslationMixin, QDialog):
         """Build the Language settings tab with installed-language list + import."""
         dark = self._lang_is_dark()
 
-        tab_bg        = "#0d1117" if dark else "#f8f9fa"
-        group_bg      = "#161b22" if dark else "#ffffff"
-        scroll_bg     = "#161b22" if dark else "#ffffff"
-        text_primary  = "#e6edf3" if dark else "#1c2526"
-        text_muted    = "#8b949e" if dark else "#6b7280"
-        group_border  = "#30363d" if dark else "#dee2e6"
-        active_green  = "#3fb950" if dark else "#10B981"
+        tab_bg = "#0d1117" if dark else "#f8f9fa"
+        group_bg = "#161b22" if dark else "#ffffff"
+        scroll_bg = "#161b22" if dark else "#ffffff"
+        text_primary = "#e6edf3" if dark else "#1c2526"
+        text_muted = "#8b949e" if dark else "#6b7280"
+        group_border = "#30363d" if dark else "#dee2e6"
+        active_green = "#3fb950" if dark else "#10B981"
 
         tab = QWidget()
         tab.setStyleSheet(f"background-color: {tab_bg};")
@@ -319,9 +362,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         active_lbl_title.setStyleSheet(f"color: {text_primary}; font-size: 12px;")
         active_row.addWidget(active_lbl_title)
         self._lang_active_lbl = QLabel()
-        self._lang_active_lbl.setStyleSheet(
-            f"font-weight: bold; font-size: 13px; color: {active_green};"
-        )
+        self._lang_active_lbl.setStyleSheet(f"font-weight: bold; font-size: 13px; color: {active_green};")
         active_row.addWidget(self._lang_active_lbl)
         active_row.addStretch()
         layout.addLayout(active_row)
@@ -371,9 +412,7 @@ class SettingsDialog(TranslationMixin, QDialog):
 
         hint = QLabel("ℹ️ " + self.translate_text("lang_restart_hint"))
         hint.setWordWrap(True)
-        hint.setStyleSheet(
-            f"color: {text_muted}; font-size: 10px; font-style: italic;"
-        )
+        hint.setStyleSheet(f"color: {text_muted}; font-size: 10px; font-style: italic;")
         layout.addWidget(hint)
         layout.addStretch()
 
@@ -396,8 +435,8 @@ class SettingsDialog(TranslationMixin, QDialog):
             tm = TranslationManager()
 
         current = getattr(parent_app, "current_language", "fr")
-        langs   = tm.get_available_languages()
-        active_name = next((l["name"] for l in langs if l["code"] == current), current)
+        langs = tm.get_available_languages()
+        active_name = next((lang["name"] for lang in langs if lang["code"] == current), current)
         self._lang_active_lbl.setText(active_name)
 
         for lang in langs:
@@ -410,31 +449,31 @@ class SettingsDialog(TranslationMixin, QDialog):
         """Build one language card — fully theme-aware."""
         dark = self._lang_is_dark()
 
-        is_active  = lang["code"] == current_code
+        is_active = lang["code"] == current_code
         is_builtin = lang.get("builtin", False)
 
         if dark:
             if is_active:
-                card_bg     = "#0f2a1e"
-                border_col  = "#3fb950"
-                name_col    = "#e6edf3"
-                meta_col    = "#8b949e"
+                card_bg = "#0f2a1e"
+                border_col = "#3fb950"
+                name_col = "#e6edf3"
+                meta_col = "#8b949e"
             else:
-                card_bg     = "#1c2333"
-                border_col  = "#30363d"
-                name_col    = "#c9d1d9"
-                meta_col    = "#8b949e"
+                card_bg = "#1c2333"
+                border_col = "#30363d"
+                name_col = "#c9d1d9"
+                meta_col = "#8b949e"
         else:
             if is_active:
-                card_bg     = "#f0fdf4"
-                border_col  = "#10B981"
-                name_col    = "#064e3b"
-                meta_col    = "#6b7280"
+                card_bg = "#f0fdf4"
+                border_col = "#10B981"
+                name_col = "#064e3b"
+                meta_col = "#6b7280"
             else:
-                card_bg     = "#ffffff"
-                border_col  = "#dee2e6"
-                name_col    = "#1c2526"
-                meta_col    = "#6b7280"
+                card_bg = "#ffffff"
+                border_col = "#dee2e6"
+                name_col = "#1c2526"
+                meta_col = "#6b7280"
 
         card = QFrame()
         card.setFrameShape(QFrame.StyledPanel)
@@ -452,17 +491,17 @@ class SettingsDialog(TranslationMixin, QDialog):
         row.setSpacing(10)
 
         if is_active:
-            badge_text  = self.translate_text("lang_active_badge")
-            badge_bg    = "#3fb950" if dark else "#10B981"
-            badge_fg    = "#ffffff"
+            badge_text = self.translate_text("lang_active_badge")
+            badge_bg = "#3fb950" if dark else "#10B981"
+            badge_fg = "#ffffff"
         elif is_builtin:
-            badge_text  = self.translate_text("lang_builtin_badge")
-            badge_bg    = "#388bfd" if dark else "#6366F1"
-            badge_fg    = "#ffffff"
+            badge_text = self.translate_text("lang_builtin_badge")
+            badge_bg = "#388bfd" if dark else "#6366F1"
+            badge_fg = "#ffffff"
         else:
-            badge_text  = self.translate_text("lang_external_badge")
-            badge_bg    = "#f0a030" if dark else "#f59e0b"
-            badge_fg    = "#ffffff" if dark else "#1c2526"
+            badge_text = self.translate_text("lang_external_badge")
+            badge_bg = "#f0a030" if dark else "#f59e0b"
+            badge_fg = "#ffffff" if dark else "#1c2526"
 
         badge = QLabel(badge_text)
         badge.setStyleSheet(f"""
@@ -480,27 +519,19 @@ class SettingsDialog(TranslationMixin, QDialog):
         info_col.setSpacing(2)
 
         name_lbl = QLabel(lang["name"])
-        name_lbl.setStyleSheet(
-            f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;"
-        )
+        name_lbl.setStyleSheet(f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;")
         info_col.addWidget(name_lbl)
 
         meta_parts = []
         if lang.get("author"):
-            meta_parts.append(
-                f"{self.translate_text('lang_author_label')} {lang['author']}"
-            )
+            meta_parts.append(f"{self.translate_text('lang_author_label')} {lang['author']}")
         if lang.get("version"):
-            meta_parts.append(
-                f"{self.translate_text('lang_version_label')} {lang['version']}"
-            )
+            meta_parts.append(f"{self.translate_text('lang_version_label')} {lang['version']}")
         desc = lang.get("description") or self.translate_text("lang_no_desc")
         meta_parts.append(desc)
 
         meta_lbl = QLabel("  •  ".join(meta_parts))
-        meta_lbl.setStyleSheet(
-            f"color: {meta_col}; font-size: 10px; border: none;"
-        )
+        meta_lbl.setStyleSheet(f"color: {meta_col}; font-size: 10px; border: none;")
         meta_lbl.setWordWrap(True)
         info_col.addWidget(meta_lbl)
         row.addLayout(info_col, 1)
@@ -558,9 +589,7 @@ class SettingsDialog(TranslationMixin, QDialog):
             remove_btn.setStyleSheet(remove_ss)
             code = lang["code"]
             name = lang["name"]
-            remove_btn.clicked.connect(
-                lambda _, c=code, n=name: self._remove_language(c, n)
-            )
+            remove_btn.clicked.connect(lambda _, c=code, n=name: self._remove_language(c, n))
             row.addWidget(remove_btn)
 
         return card
@@ -581,6 +610,7 @@ class SettingsDialog(TranslationMixin, QDialog):
             tm = parent_app.translation_manager
         else:
             from translations import TranslationManager
+
             tm = TranslationManager()
 
         ok, result = tm.load_lang_file(filepath)
@@ -619,7 +649,7 @@ class SettingsDialog(TranslationMixin, QDialog):
                 parent_app.language_action.setText("🇫🇷 Français")
             else:
                 langs = parent_app.translation_manager.get_available_languages()
-                name  = next((l["name"] for l in langs if l["code"] == code), code)
+                name = next((lang["name"] for lang in langs if lang["code"] == code), code)
                 parent_app.language_action.setText(f"🌐 {name}")
         self._refresh_lang_list()
 
@@ -639,6 +669,7 @@ class SettingsDialog(TranslationMixin, QDialog):
             tm = parent_app.translation_manager
         else:
             from translations import TranslationManager
+
             tm = TranslationManager()
 
         ok, error = tm.remove_lang_file(code)
@@ -678,9 +709,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         active_lbl_title.setStyleSheet(f"color: {text_primary}; font-size: 12px;")
         active_row.addWidget(active_lbl_title)
         self._theme_active_lbl = QLabel()
-        self._theme_active_lbl.setStyleSheet(
-            f"font-weight: bold; font-size: 13px; color: {active_green};"
-        )
+        self._theme_active_lbl.setStyleSheet(f"font-weight: bold; font-size: 13px; color: {active_green};")
         active_row.addWidget(self._theme_active_lbl)
         active_row.addStretch()
         layout.addLayout(active_row)
@@ -728,13 +757,14 @@ class SettingsDialog(TranslationMixin, QDialog):
         import_btn.clicked.connect(self._import_theme_file)
         layout.addWidget(import_btn)
 
-        hint = QLabel("ℹ️ " + self.translate_text(
-            "Les fichiers .fctheme sont des archives ZIP contenant les fichiers QSS/CSS du thème et un metadata.ini."
-        ))
-        hint.setWordWrap(True)
-        hint.setStyleSheet(
-            f"color: {text_muted}; font-size: 10px; font-style: italic;"
+        hint = QLabel(
+            "ℹ️ "
+            + self.translate_text(
+                "Les fichiers .fctheme sont des archives ZIP contenant les fichiers QSS/CSS du thème et un metadata.ini."  # noqa: E501
+            )
         )
+        hint.setWordWrap(True)
+        hint.setStyleSheet(f"color: {text_muted}; font-size: 10px; font-style: italic;")
         layout.addWidget(hint)
         layout.addStretch()
 
@@ -742,9 +772,6 @@ class SettingsDialog(TranslationMixin, QDialog):
         return tab
 
     def _refresh_theme_list(self) -> None:
-        dark = self._lang_is_dark()
-        text_muted = "#8b949e" if dark else "#6b7280"
-
         while self._theme_inner_layout.count():
             item = self._theme_inner_layout.takeAt(0)
             if item.widget():
@@ -822,15 +849,11 @@ class SettingsDialog(TranslationMixin, QDialog):
 
         display_name = name.capitalize()
         name_lbl = QLabel(display_name)
-        name_lbl.setStyleSheet(
-            f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;"
-        )
+        name_lbl.setStyleSheet(f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;")
         info_col.addWidget(name_lbl)
 
         meta_lbl = QLabel(self.translate_text("Thème intégré File Converter"))
-        meta_lbl.setStyleSheet(
-            f"color: {meta_col}; font-size: 10px; border: none;"
-        )
+        meta_lbl.setStyleSheet(f"color: {meta_col}; font-size: 10px; border: none;")
         meta_lbl.setWordWrap(True)
         info_col.addWidget(meta_lbl)
         row.addLayout(info_col, 1)
@@ -935,9 +958,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         info_col.addWidget(badge)
 
         name_lbl = QLabel(meta.name)
-        name_lbl.setStyleSheet(
-            f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;"
-        )
+        name_lbl.setStyleSheet(f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;")
         info_col.addWidget(name_lbl)
 
         meta_parts = []
@@ -948,9 +969,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         if meta.description:
             meta_parts.append(meta.description)
         meta_lbl = QLabel("  •  ".join(meta_parts) if meta_parts else "")
-        meta_lbl.setStyleSheet(
-            f"color: {meta_col}; font-size: 10px; border: none;"
-        )
+        meta_lbl.setStyleSheet(f"color: {meta_col}; font-size: 10px; border: none;")
         meta_lbl.setWordWrap(True)
         info_col.addWidget(meta_lbl)
         main_row.addLayout(info_col, 1)
@@ -1038,7 +1057,7 @@ class SettingsDialog(TranslationMixin, QDialog):
 
         parent_app.config_manager.save_config(parent_app.config)
 
-        if hasattr(self, 'use_system_theme_checkbox'):
+        if hasattr(self, "use_system_theme_checkbox"):
             self.use_system_theme_checkbox.setChecked(False)
 
         parent_app.apply_theme(is_dark)
@@ -1104,7 +1123,9 @@ class SettingsDialog(TranslationMixin, QDialog):
             )
 
     def browse_output_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, self.translate_text("Sélectionner le dossier de sortie par défaut"))
+        folder = QFileDialog.getExistingDirectory(
+            self, self.translate_text("Sélectionner le dossier de sortie par défaut")
+        )
         if folder:
             self.default_output_input.setText(folder)
 
@@ -1130,7 +1151,7 @@ class SettingsDialog(TranslationMixin, QDialog):
 
     def process_terms_result(self, result, dialog):
         parent_app = self.parent()
-        if not hasattr(parent_app, 'config_manager'):
+        if not hasattr(parent_app, "config_manager"):
             return
 
         config = parent_app.config_manager.load_config()
@@ -1141,10 +1162,14 @@ class SettingsDialog(TranslationMixin, QDialog):
 
             if config.get("terms_acceptance_timestamp") is not None:
                 config["terms_reacceptance_timestamp"] = datetime.now().isoformat()
-                print(f"[TERMS DEBUG] Re-acceptance detected - terms_reacceptance_timestamp added: {config['terms_reacceptance_timestamp']}")
+                print(
+                    f"[TERMS DEBUG] Re-acceptance detected - terms_reacceptance_timestamp added: {config['terms_reacceptance_timestamp']}"  # noqa: E501
+                )
             else:
                 config["terms_acceptance_timestamp"] = datetime.now().isoformat()
-                print(f"[TERMS DEBUG] First acceptance - terms_acceptance_timestamp set: {config['terms_acceptance_timestamp']}")
+                print(
+                    f"[TERMS DEBUG] First acceptance - terms_acceptance_timestamp set: {config['terms_acceptance_timestamp']}"  # noqa: E501
+                )
 
             parent_app.config_manager.save_config(config)
             parent_app.config.update(config)
@@ -1153,7 +1178,7 @@ class SettingsDialog(TranslationMixin, QDialog):
             QMessageBox.information(
                 self,
                 self.translate_text("Succès"),
-                self.translate_text("Conditions et politique acceptées avec succès.")
+                self.translate_text("Conditions et politique acceptées avec succès."),
             )
 
             self.accept()
@@ -1168,7 +1193,7 @@ class SettingsDialog(TranslationMixin, QDialog):
             QMessageBox.warning(
                 self,
                 self.translate_text("Attention"),
-                self.translate_text("Vous avez refusé les conditions. L'application va se fermer.")
+                self.translate_text("Vous avez refusé les conditions. L'application va se fermer."),
             )
 
             QTimer.singleShot(1500, QCoreApplication.quit)
@@ -1183,6 +1208,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.quality_combo.setCurrentIndex(1)
         self.compression_level_combo.setCurrentIndex(0)
         self.pdf_to_word_mode_combo.setCurrentIndex(0)
+        self.icon_layer_combo.setCurrentIndex(0)
         self.default_output_input.clear()
         self.keep_history_days_spin.setValue(365)
         self.auto_clean_checkbox.setChecked(True)
@@ -1194,10 +1220,10 @@ class SettingsDialog(TranslationMixin, QDialog):
     def _build_automation_tab(self) -> QWidget:
         dark = self._lang_is_dark()
 
-        tab_bg       = "#0d1117" if dark else "#f8f9fa"
-        group_bg     = "#161b22" if dark else "#ffffff"
+        tab_bg = "#0d1117" if dark else "#f8f9fa"
+        group_bg = "#161b22" if dark else "#ffffff"
         group_border = "#30363d" if dark else "#dee2e6"
-        text_muted   = "#8b949e" if dark else "#6b7280"
+        text_muted = "#8b949e" if dark else "#6b7280"
 
         tab = QWidget()
         tab.setStyleSheet(f"background-color: {tab_bg};")
@@ -1229,11 +1255,15 @@ class SettingsDialog(TranslationMixin, QDialog):
         self._autostart_check.setChecked(is_autostart_enabled())
         self._autostart_check.stateChanged.connect(self._on_autostart_toggled)
 
-        hint = QLabel("ℹ️ " + self.translate_text(
-            "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée."
-        ))
-        hint.setProperty("i18n_key",
-            "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée."
+        hint = QLabel(
+            "ℹ️ "
+            + self.translate_text(
+                "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée."
+            )
+        )
+        hint.setProperty(
+            "i18n_key",
+            "Le démon surveille vos dossiers et exécute les tâches planifiées même si l'application est fermée.",
         )
         hint.setWordWrap(True)
         hint.setStyleSheet(f"color: {text_muted}; font-size: 10px; font-style: italic; background: transparent;")
@@ -1289,15 +1319,15 @@ class SettingsDialog(TranslationMixin, QDialog):
 
     def _refresh_automation_tab(self) -> None:
         """Reload watch folders and scheduled tasks from automation/*.toml."""
-        from tasks.watcher   import get_all_watch_folder_configs
         from tasks.scheduler import get_all_scheduled_task_configs
+        from tasks.watcher import get_all_watch_folder_configs
 
-        dark         = self._lang_is_dark()
-        card_bg      = "#1c2333" if dark else "#ffffff"
-        card_border  = "#30363d" if dark else "#dee2e6"
+        dark = self._lang_is_dark()
+        card_bg = "#1c2333" if dark else "#ffffff"
+        card_border = "#30363d" if dark else "#dee2e6"
         text_primary = "#c9d1d9" if dark else "#1c2526"
-        text_muted   = "#8b949e" if dark else "#6b7280"
-        active_col   = "#3fb950" if dark else "#10B981"
+        text_muted = "#8b949e" if dark else "#6b7280"
+        active_col = "#3fb950" if dark else "#10B981"
         inactive_col = "#8b949e" if dark else "#9ca3af"
 
         def _clear(layout):
@@ -1329,9 +1359,7 @@ class SettingsDialog(TranslationMixin, QDialog):
             info.setSpacing(1)
             status_text = self.translate_text("Actif") if enabled else self.translate_text("Inactif")
             name_lbl = QLabel(f"{name}  –  {status_text}")
-            name_lbl.setStyleSheet(
-                f"font-weight: bold; font-size: 12px; color: {text_primary}; border: none;"
-            )
+            name_lbl.setStyleSheet(f"font-weight: bold; font-size: 12px; color: {text_primary}; border: none;")
             name_lbl.setWordWrap(True)
             path_lbl = QLabel(path + (f"  {extra_label}" if extra_label else ""))
             path_lbl.setStyleSheet(f"font-size: 10px; color: {text_muted}; border: none;")
@@ -1352,7 +1380,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         else:
             for cfg in wf_configs:
                 rules_summary = ", ".join(
-                    f".{ext}→{','.join(r['fmt'] if r['kind'] == 'convert' else r['action'] for r in fmts) if isinstance(fmts, list) else fmts}"
+                    f".{ext}→{','.join(r['fmt'] if r['kind'] == 'convert' else r['action'] for r in fmts) if isinstance(fmts, list) else fmts}"  # noqa: E501
                     for ext, fmts in cfg["rules"].items()
                 )
                 card = _make_card(cfg["name"], cfg["path"], cfg["enabled"], f"({rules_summary})")
@@ -1369,15 +1397,16 @@ class SettingsDialog(TranslationMixin, QDialog):
             for cfg in st_configs:
                 t = cfg["trigger"]
                 trigger_str = (
-                    f"cron – {t.get('day_of_week','*')} {t.get('hour',0):02d}:{t.get('minute',0):02d}"
+                    f"cron – {t.get('day_of_week', '*')} {t.get('hour', 0):02d}:{t.get('minute', 0):02d}"
                     if t.get("type") == "cron"
-                    else f"interval – every {t.get('hours',0)}h {t.get('minutes',0)}min"
+                    else f"interval – every {t.get('hours', 0)}h {t.get('minutes', 0)}min"
                 )
                 card = _make_card(cfg["name"], cfg["path"], cfg["enabled"], f"[{trigger_str}]")
                 self._st_inner_layout.addWidget(card)
 
     def _on_autostart_toggled(self, state: int) -> None:
         import subprocess
+
         from daemon import set_autostart
 
         enabled = bool(state)
@@ -1395,12 +1424,15 @@ class SettingsDialog(TranslationMixin, QDialog):
             subprocess.Popen(cmd, creationflags=flags)
         else:
             from daemon import AUTOMATION_DIR
+
             stop_flag = AUTOMATION_DIR / ".stop"
             stop_flag.touch()
 
     def _open_automation_dir(self) -> None:
         import subprocess
+
         from tasks.watcher import _get_automation_dir
+
         path = _get_automation_dir()
         path.mkdir(exist_ok=True)
         subprocess.Popen(["explorer", str(path)])
@@ -1419,11 +1451,12 @@ class SettingsDialog(TranslationMixin, QDialog):
             "conversion_quality": quality_map[self.quality_combo.currentIndex()],
             "compression_level": compression_map[self.compression_level_combo.currentIndex()],
             "pdf_to_word_mode": mode_map[self.pdf_to_word_mode_combo.currentIndex()],
+            "image_to_icon_layer": self.icon_layer_combo.currentData(),
             "default_output_folder": self.default_output_input.text(),
             "keep_history_days": self.keep_history_days_spin.value(),
             "auto_clean_temp_files": self.auto_clean_checkbox.isChecked(),
             "backup_before_conversion": self.backup_checkbox.isChecked(),
             "auto_save_templates": self.auto_save_templates_check.isChecked(),
             "separate_image_pdfs": self.separate_image_pdfs_checkbox.isChecked(),
-            "use_system_theme": self.use_system_theme_checkbox.isChecked()
+            "use_system_theme": self.use_system_theme_checkbox.isChecked(),
         }
