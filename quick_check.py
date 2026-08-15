@@ -5,127 +5,127 @@ Uses tkinter (stdlib) to keep the exe lightweight.
 
 """
 
-import sys
 import os
-import time
+import sys
 import threading
-from pathlib import Path
+import time
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 
-if getattr(sys, 'frozen', False):
+if getattr(sys, "frozen", False):
     BASE_DIR = Path(sys.executable).parent
 else:
     BASE_DIR = Path(__file__).parent
 
 CHECKS_CORE = [
-    ("Main executable",               "File Converter Pro.exe",                        "file"),
-    ("icon.ico",                      "_internal/icon.ico",                            "file"),
-    ("icon.png",                      "_internal/icon.png",                            "file"),
-    ("base_library.zip",              "_internal/base_library.zip",                    "file"),
-    ("ucrtbase.dll",                  "_internal/ucrtbase.dll",                        "file"),
-    ("libffi-8.dll",                  "_internal/libffi-8.dll",                        "file"),
-    ("sqlite3.dll",                   "_internal/sqlite3.dll",                         "file"),
-    ("libcrypto-3-x64.dll",           "_internal/libcrypto-3-x64.dll",                 "file"),
-    ("libssl-3-x64.dll",              "_internal/libssl-3-x64.dll",                    "file"),
-    ("python3.dll",                   "_internal/python3.dll",                         "file"),
-    ("vcruntime140.dll",              "_internal/vcruntime140.dll",                    "file"),
-    ("vcruntime140_1.dll",            "_internal/vcruntime140_1.dll",                  "file"),
+    ("Main executable", "File Converter Pro.exe", "file"),
+    ("icon.ico", "_internal/icon.ico", "file"),
+    ("icon.png", "_internal/icon.png", "file"),
+    ("base_library.zip", "_internal/base_library.zip", "file"),
+    ("ucrtbase.dll", "_internal/ucrtbase.dll", "file"),
+    ("libffi-8.dll", "_internal/libffi-8.dll", "file"),
+    ("sqlite3.dll", "_internal/sqlite3.dll", "file"),
+    ("libcrypto-3-x64.dll", "_internal/libcrypto-3-x64.dll", "file"),
+    ("libssl-3-x64.dll", "_internal/libssl-3-x64.dll", "file"),
+    ("python3.dll", "_internal/python3.dll", "file"),
+    ("vcruntime140.dll", "_internal/vcruntime140.dll", "file"),
+    ("vcruntime140_1.dll", "_internal/vcruntime140_1.dll", "file"),
 ]
 
 CHECKS_MODULES = [
-    ("_bz2.pyd",                          "_internal/_bz2.pyd",                          "file"),
-    ("_ctypes.pyd",                       "_internal/_ctypes.pyd",                       "file"),
-    ("_decimal.pyd",                      "_internal/_decimal.pyd",                      "file"),
-    ("_elementtree.pyd",                  "_internal/_elementtree.pyd",                  "file"),
-    ("_hashlib.pyd",                      "_internal/_hashlib.pyd",                      "file"),
-    ("_lzma.pyd",                         "_internal/_lzma.pyd",                         "file"),
-    ("_multiprocessing.pyd",              "_internal/_multiprocessing.pyd",              "file"),
-    ("_overlapped.pyd",                   "_internal/_overlapped.pyd",                   "file"),
-    ("_queue.pyd",                        "_internal/_queue.pyd",                        "file"),
-    ("_socket.pyd",                       "_internal/_socket.pyd",                       "file"),
-    ("_sqlite3.pyd",                      "_internal/_sqlite3.pyd",                      "file"),
-    ("_ssl.pyd",                          "_internal/_ssl.pyd",                          "file"),
-    ("_uuid.pyd",                         "_internal/_uuid.pyd",                         "file"),
-    ("_wmi.pyd",                          "_internal/_wmi.pyd",                          "file"),
-    ("_asyncio.pyd",                      "_internal/_asyncio.pyd",                      "file"),
+    ("_bz2.pyd", "_internal/_bz2.pyd", "file"),
+    ("_ctypes.pyd", "_internal/_ctypes.pyd", "file"),
+    ("_decimal.pyd", "_internal/_decimal.pyd", "file"),
+    ("_elementtree.pyd", "_internal/_elementtree.pyd", "file"),
+    ("_hashlib.pyd", "_internal/_hashlib.pyd", "file"),
+    ("_lzma.pyd", "_internal/_lzma.pyd", "file"),
+    ("_multiprocessing.pyd", "_internal/_multiprocessing.pyd", "file"),
+    ("_overlapped.pyd", "_internal/_overlapped.pyd", "file"),
+    ("_queue.pyd", "_internal/_queue.pyd", "file"),
+    ("_socket.pyd", "_internal/_socket.pyd", "file"),
+    ("_sqlite3.pyd", "_internal/_sqlite3.pyd", "file"),
+    ("_ssl.pyd", "_internal/_ssl.pyd", "file"),
+    ("_uuid.pyd", "_internal/_uuid.pyd", "file"),
+    ("_wmi.pyd", "_internal/_wmi.pyd", "file"),
+    ("_asyncio.pyd", "_internal/_asyncio.pyd", "file"),
     ("_cffi_backend.cp313-win_amd64.pyd", "_internal/_cffi_backend.cp313-win_amd64.pyd", "file"),
-    ("_brotli.cp313-win_amd64.pyd",       "_internal/_brotli.cp313-win_amd64.pyd",       "file"),
+    ("_brotli.cp313-win_amd64.pyd", "_internal/_brotli.cp313-win_amd64.pyd", "file"),
 ]
 
 CHECKS_RESOURCES = [
-    ("Assets/",    "_internal/Assets",  "dir"),
-    ("SFX/",       "_internal/SFX",     "dir"),
-    ("icons/",     "_internal/icons",   "dir"),
-    ("fonts/",     "_internal/fonts",   "dir"),
-    ("legal/",     "_internal/legal",   "dir"),
+    ("Assets/", "_internal/Assets", "dir"),
+    ("SFX/", "_internal/SFX", "dir"),
+    ("icons/", "_internal/icons", "dir"),
+    ("fonts/", "_internal/fonts", "dir"),
+    ("legal/", "_internal/legal", "dir"),
 ]
 
 CHECKS_QT = [
-    ("Qt6Core.dll",                "_internal/PySide6/Qt6Core.dll",                    "file"),
-    ("Qt6Gui.dll",                 "_internal/PySide6/Qt6Gui.dll",                     "file"),
-    ("Qt6Widgets.dll",             "_internal/PySide6/Qt6Widgets.dll",                 "file"),
-    ("Qt6Network.dll",             "_internal/PySide6/Qt6Network.dll",                 "file"),
-    ("Shiboken.pyd",               "_internal/shiboken6/Shiboken.pyd",                 "file"),
-    ("Qt6Multimedia.dll",          "_internal/PySide6/Qt6Multimedia.dll",              "file"),
-    ("Qt6MultimediaWidgets.dll",   "_internal/PySide6/Qt6MultimediaWidgets.dll",       "file"),
-    ("Qt6Svg.dll",                 "_internal/PySide6/Qt6Svg.dll",                     "file"),
-    ("Qt6OpenGL.dll",              "_internal/PySide6/Qt6OpenGL.dll",                  "file"),
-    ("Qt6Quick.dll",               "_internal/PySide6/Qt6Quick.dll",                   "file"),
-    ("Qt6Qml.dll",                 "_internal/PySide6/Qt6Qml.dll",                     "file"),
-    ("PySide6/QtCore.pyd",         "_internal/PySide6/QtCore.pyd",                     "file"),
-    ("PySide6/QtGui.pyd",          "_internal/PySide6/QtGui.pyd",                      "file"),
-    ("PySide6/QtWidgets.pyd",      "_internal/PySide6/QtWidgets.pyd",                  "file"),
-    ("PySide6/QtNetwork.pyd",      "_internal/PySide6/QtNetwork.pyd",                  "file"),
-    ("PySide6/QtMultimedia.pyd",   "_internal/PySide6/QtMultimedia.pyd",               "file"),
-    ("platforms/qwindows.dll",     "_internal/PySide6/plugins/platforms/qwindows.dll", "file"),
-    ("imageformats/",              "_internal/PySide6/plugins/imageformats",           "dir"),
+    ("Qt6Core.dll", "_internal/PySide6/Qt6Core.dll", "file"),
+    ("Qt6Gui.dll", "_internal/PySide6/Qt6Gui.dll", "file"),
+    ("Qt6Widgets.dll", "_internal/PySide6/Qt6Widgets.dll", "file"),
+    ("Qt6Network.dll", "_internal/PySide6/Qt6Network.dll", "file"),
+    ("Shiboken.pyd", "_internal/shiboken6/Shiboken.pyd", "file"),
+    ("Qt6Multimedia.dll", "_internal/PySide6/Qt6Multimedia.dll", "file"),
+    ("Qt6MultimediaWidgets.dll", "_internal/PySide6/Qt6MultimediaWidgets.dll", "file"),
+    ("Qt6Svg.dll", "_internal/PySide6/Qt6Svg.dll", "file"),
+    ("Qt6OpenGL.dll", "_internal/PySide6/Qt6OpenGL.dll", "file"),
+    ("Qt6Quick.dll", "_internal/PySide6/Qt6Quick.dll", "file"),
+    ("Qt6Qml.dll", "_internal/PySide6/Qt6Qml.dll", "file"),
+    ("PySide6/QtCore.pyd", "_internal/PySide6/QtCore.pyd", "file"),
+    ("PySide6/QtGui.pyd", "_internal/PySide6/QtGui.pyd", "file"),
+    ("PySide6/QtWidgets.pyd", "_internal/PySide6/QtWidgets.pyd", "file"),
+    ("PySide6/QtNetwork.pyd", "_internal/PySide6/QtNetwork.pyd", "file"),
+    ("PySide6/QtMultimedia.pyd", "_internal/PySide6/QtMultimedia.pyd", "file"),
+    ("platforms/qwindows.dll", "_internal/PySide6/plugins/platforms/qwindows.dll", "file"),
+    ("imageformats/", "_internal/PySide6/plugins/imageformats", "dir"),
 ]
 
 CHECKS_LIBS = [
-    ("mupdfcpp64.dll",  "_internal/pymupdf/mupdfcpp64.dll",  "file"),
-    ("PIL/",            "_internal/PIL",                      "dir"),
-    ("cryptography/",   "_internal/cryptography",             "dir"),
-    ("matplotlib/",     "_internal/matplotlib",               "dir"),
+    ("mupdfcpp64.dll", "_internal/pymupdf/mupdfcpp64.dll", "file"),
+    ("PIL/", "_internal/PIL", "dir"),
+    ("cryptography/", "_internal/cryptography", "dir"),
+    ("matplotlib/", "_internal/matplotlib", "dir"),
 ]
 
 ALL_GROUPS = {
-    "Core":         CHECKS_CORE,
-    "Modules":      CHECKS_MODULES,
-    "Resources":    CHECKS_RESOURCES,
+    "Core": CHECKS_CORE,
+    "Modules": CHECKS_MODULES,
+    "Resources": CHECKS_RESOURCES,
     "Qt / PySide6": CHECKS_QT,
-    "Libraries":    CHECKS_LIBS,
+    "Libraries": CHECKS_LIBS,
 }
 ALL_CHECKS = CHECKS_CORE + CHECKS_MODULES + CHECKS_RESOURCES + CHECKS_QT + CHECKS_LIBS
 
 
 #  THEMES
 DARK = {
-    "bg":         "#0f1117",
-    "surface":    "#1a1d27",
-    "border":     "#2e3250",
-    "text":       "#e8eaf6",
-    "text_dim":   "#6b7280",
-    "ok":         "#22c55e",
-    "ok_bg":      "#0d2218",
-    "fail":       "#ef4444",
-    "fail_bg":    "#2a0f0f",
-    "accent":     "#6366f1",
-    "btn_fg":     "#ffffff",
+    "bg": "#0f1117",
+    "surface": "#1a1d27",
+    "border": "#2e3250",
+    "text": "#e8eaf6",
+    "text_dim": "#6b7280",
+    "ok": "#22c55e",
+    "ok_bg": "#0d2218",
+    "fail": "#ef4444",
+    "fail_bg": "#2a0f0f",
+    "accent": "#6366f1",
+    "btn_fg": "#ffffff",
     "pending_bg": "#1a1d27",
 }
 LIGHT = {
-    "bg":         "#f4f5fb",
-    "surface":    "#ffffff",
-    "border":     "#d1d5eb",
-    "text":       "#1a1d2e",
-    "text_dim":   "#6b7280",
-    "ok":         "#16a34a",
-    "ok_bg":      "#f0fdf4",
-    "fail":       "#dc2626",
-    "fail_bg":    "#fff5f5",
-    "accent":     "#4f46e5",
-    "btn_fg":     "#ffffff",
+    "bg": "#f4f5fb",
+    "surface": "#ffffff",
+    "border": "#d1d5eb",
+    "text": "#1a1d2e",
+    "text_dim": "#6b7280",
+    "ok": "#16a34a",
+    "ok_bg": "#f0fdf4",
+    "fail": "#dc2626",
+    "fail_bg": "#fff5f5",
+    "accent": "#4f46e5",
+    "btn_fg": "#ffffff",
     "pending_bg": "#f9fafb",
 }
 
@@ -147,9 +147,8 @@ class QuickCheckApp:
 
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-                "FileConverterPro.QuickCheck"
-            )
+
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("FileConverterPro.QuickCheck")
         except Exception:
             pass
         try:
@@ -174,39 +173,56 @@ class QuickCheckApp:
 
         self._title_col = tk.Frame(self._hdr, bg=t["bg"])
         self._title_col.pack(side="left")
-        self.title_lbl = tk.Label(self._title_col, text="Quick Check",
-                                  font=("Segoe UI", 18, "bold"), bg=t["bg"], fg=t["text"])
+        self.title_lbl = tk.Label(
+            self._title_col, text="Quick Check", font=("Segoe UI", 18, "bold"), bg=t["bg"], fg=t["text"]
+        )
         self.title_lbl.pack(anchor="w")
-        self.sub_lbl = tk.Label(self._title_col, text="Build integrity verification",
-                                font=("Segoe UI", 9), bg=t["bg"], fg=t["text_dim"])
+        self.sub_lbl = tk.Label(
+            self._title_col, text="Build integrity verification", font=("Segoe UI", 9), bg=t["bg"], fg=t["text_dim"]
+        )
         self.sub_lbl.pack(anchor="w")
 
         self._btn_frame = tk.Frame(self._hdr, bg=t["bg"])
         self._btn_frame.pack(side="right")
-        self.rerun_btn = tk.Button(self._btn_frame, text="↺  Re-run",
-                                   font=("Segoe UI", 9, "bold"),
-                                   bg=t["accent"], fg=t["btn_fg"],
-                                   relief="flat", cursor="hand2", padx=14, pady=6,
-                                   command=self._start_check)
+        self.rerun_btn = tk.Button(
+            self._btn_frame,
+            text="↺  Re-run",
+            font=("Segoe UI", 9, "bold"),
+            bg=t["accent"],
+            fg=t["btn_fg"],
+            relief="flat",
+            cursor="hand2",
+            padx=14,
+            pady=6,
+            command=self._start_check,
+        )
         self.rerun_btn.pack(side="left", padx=(0, 6))
-        self.toggle_btn = tk.Button(self._btn_frame, text="☀",
-                                    font=("Segoe UI", 13),
-                                    bg=t["surface"], fg=t["text"],
-                                    relief="flat", cursor="hand2", width=3,
-                                    command=self._toggle_theme)
+        self.toggle_btn = tk.Button(
+            self._btn_frame,
+            text="☀",
+            font=("Segoe UI", 13),
+            bg=t["surface"],
+            fg=t["text"],
+            relief="flat",
+            cursor="hand2",
+            width=3,
+            command=self._toggle_theme,
+        )
         self.toggle_btn.pack(side="left")
 
-        self.status_frame = tk.Frame(self.root, bg=t["surface"],
-                                     highlightbackground=t["border"], highlightthickness=1)
+        self.status_frame = tk.Frame(self.root, bg=t["surface"], highlightbackground=t["border"], highlightthickness=1)
         self.status_frame.pack(fill="x", padx=20, pady=10)
-        self.status_icon_lbl = tk.Label(self.status_frame, text="⏳",
-                                        font=("Segoe UI", 15), bg=t["surface"], fg=t["text"])
+        self.status_icon_lbl = tk.Label(
+            self.status_frame, text="⏳", font=("Segoe UI", 15), bg=t["surface"], fg=t["text"]
+        )
         self.status_icon_lbl.pack(side="left", padx=(14, 6), pady=8)
-        self.status_text_lbl = tk.Label(self.status_frame, text="Running checks...",
-                                        font=("Segoe UI", 10, "bold"), bg=t["surface"], fg=t["text"])
+        self.status_text_lbl = tk.Label(
+            self.status_frame, text="Running checks...", font=("Segoe UI", 10, "bold"), bg=t["surface"], fg=t["text"]
+        )
         self.status_text_lbl.pack(side="left", pady=8)
-        self.status_count_lbl = tk.Label(self.status_frame, text="",
-                                         font=("Segoe UI", 9), bg=t["surface"], fg=t["text_dim"])
+        self.status_count_lbl = tk.Label(
+            self.status_frame, text="", font=("Segoe UI", 9), bg=t["surface"], fg=t["text_dim"]
+        )
         self.status_count_lbl.pack(side="right", padx=14, pady=8)
 
         style = ttk.Style()
@@ -241,51 +257,66 @@ class QuickCheckApp:
             self._canvases[group_name] = canvas
 
             for label, path, _ in checks:
-                row_frame = tk.Frame(inner, bg=t["pending_bg"],
-                                     highlightbackground=t["border"], highlightthickness=1)
+                row_frame = tk.Frame(inner, bg=t["pending_bg"], highlightbackground=t["border"], highlightthickness=1)
                 row_frame.pack(fill="x", padx=4, pady=2, ipady=5)
 
                 icon_var = tk.StringVar(value="·")
-                icon_lbl = tk.Label(row_frame, textvariable=icon_var,
-                                    font=("Segoe UI", 12, "bold"), width=2,
-                                    bg=t["pending_bg"], fg=t["text_dim"])
+                icon_lbl = tk.Label(
+                    row_frame,
+                    textvariable=icon_var,
+                    font=("Segoe UI", 12, "bold"),
+                    width=2,
+                    bg=t["pending_bg"],
+                    fg=t["text_dim"],
+                )
                 icon_lbl.pack(side="left", padx=(10, 4))
 
-                name_lbl = tk.Label(row_frame, text=label,
-                                    font=("Segoe UI", 9), anchor="w",
-                                    bg=t["pending_bg"], fg=t["text_dim"])
+                name_lbl = tk.Label(
+                    row_frame, text=label, font=("Segoe UI", 9), anchor="w", bg=t["pending_bg"], fg=t["text_dim"]
+                )
                 name_lbl.pack(side="left", padx=(0, 6))
 
-                path_lbl = tk.Label(row_frame, text=path,
-                                    font=("Segoe UI", 7), anchor="w",
-                                    bg=t["pending_bg"], fg=t["text_dim"])
+                path_lbl = tk.Label(
+                    row_frame, text=path, font=("Segoe UI", 7), anchor="w", bg=t["pending_bg"], fg=t["text_dim"]
+                )
                 path_lbl.pack(side="left", fill="x", expand=True)
 
                 detail_var = tk.StringVar(value="")
-                detail_lbl = tk.Label(row_frame, textvariable=detail_var,
-                                      font=("Segoe UI", 8, "bold"), width=12, anchor="e",
-                                      bg=t["pending_bg"], fg=t["text_dim"])
+                detail_lbl = tk.Label(
+                    row_frame,
+                    textvariable=detail_var,
+                    font=("Segoe UI", 8, "bold"),
+                    width=12,
+                    anchor="e",
+                    bg=t["pending_bg"],
+                    fg=t["text_dim"],
+                )
                 detail_lbl.pack(side="right", padx=(0, 10))
 
                 self.rows[path] = {
-                    "frame":      row_frame,
-                    "icon_var":   icon_var,
-                    "icon_lbl":   icon_lbl,
-                    "name_lbl":   name_lbl,
-                    "path_lbl":   path_lbl,
+                    "frame": row_frame,
+                    "icon_var": icon_var,
+                    "icon_lbl": icon_lbl,
+                    "name_lbl": name_lbl,
+                    "path_lbl": path_lbl,
                     "detail_var": detail_var,
                     "detail_lbl": detail_lbl,
-                    "state":      "pending",
-                    "group":      group_name,
-                    "canvas":     canvas,
-                    "inner":      inner,
+                    "state": "pending",
+                    "group": group_name,
+                    "canvas": canvas,
+                    "inner": inner,
                 }
 
-        self.close_btn = tk.Button(self.root, text="Close",
-                                   font=("Segoe UI", 10, "bold"),
-                                   bg=t["surface"], fg=t["text"],
-                                   relief="flat", cursor="hand2",
-                                   command=self.root.destroy)
+        self.close_btn = tk.Button(
+            self.root,
+            text="Close",
+            font=("Segoe UI", 10, "bold"),
+            bg=t["surface"],
+            fg=t["text"],
+            relief="flat",
+            cursor="hand2",
+            command=self.root.destroy,
+        )
 
         def _on_mousewheel(event):
             tab_idx = self.notebook.index("current")
@@ -293,6 +324,7 @@ class QuickCheckApp:
             c = self._canvases.get(group_name)
             if c:
                 c.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
         self.root.bind_all("<MouseWheel>", _on_mousewheel)
 
     def _apply_theme(self):
@@ -305,11 +337,9 @@ class QuickCheckApp:
         self.title_lbl.configure(bg=t["bg"], fg=t["text"])
         self.sub_lbl.configure(bg=t["bg"], fg=t["text_dim"])
         self.rerun_btn.configure(bg=t["accent"], fg=t["btn_fg"])
-        self.toggle_btn.configure(bg=t["surface"], fg=t["text"],
-                                  text="☀" if self.dark else "☾")
+        self.toggle_btn.configure(bg=t["surface"], fg=t["text"], text="☀" if self.dark else "☾")
 
-        for w in (self.status_frame, self.status_icon_lbl,
-                  self.status_text_lbl, self.status_count_lbl):
+        for w in (self.status_frame, self.status_icon_lbl, self.status_text_lbl, self.status_count_lbl):
             w.configure(bg=t["surface"])
         self.status_frame.configure(highlightbackground=t["border"])
         self.status_text_lbl.configure(fg=t["text"])
@@ -318,13 +348,15 @@ class QuickCheckApp:
         s = self._style
         s.theme_use("default")
         s.configure("TNotebook", background=t["bg"], borderwidth=0)
-        s.configure("TNotebook.Tab",
-                    background=t["surface"], foreground=t["text_dim"],
-                    padding=[10, 5], font=("Segoe UI", 9))
-        s.map("TNotebook.Tab",
-              background=[("selected", t["surface"])],
-              foreground=[("selected", t["text"])],
-              expand=[("selected", [1, 1, 1, 0])])
+        s.configure(
+            "TNotebook.Tab", background=t["surface"], foreground=t["text_dim"], padding=[10, 5], font=("Segoe UI", 9)
+        )
+        s.map(
+            "TNotebook.Tab",
+            background=[("selected", t["surface"])],
+            foreground=[("selected", t["text"])],
+            expand=[("selected", [1, 1, 1, 0])],
+        )
 
         for group_name, outer in self._tab_frames.items():
             outer.configure(bg=t["surface"])
@@ -365,7 +397,7 @@ class QuickCheckApp:
         t = self.theme
         r = self.rows[path]
         color = t["ok"] if ok else t["fail"]
-        bg    = t["ok_bg"] if ok else t["fail_bg"]
+        bg = t["ok_bg"] if ok else t["fail_bg"]
         r["state"] = "ok" if ok else "fail"
         r["icon_var"].set("✓" if ok else "✗")
         r["detail_var"].set(detail)
@@ -373,8 +405,7 @@ class QuickCheckApp:
         for w in (r["icon_lbl"], r["name_lbl"], r["path_lbl"], r["detail_lbl"]):
             w.configure(bg=bg)
         r["icon_lbl"].configure(fg=color)
-        r["name_lbl"].configure(fg=t["text"],
-                                font=("Segoe UI", 9, "bold") if not ok else ("Segoe UI", 9))
+        r["name_lbl"].configure(fg=t["text"], font=("Segoe UI", 9, "bold") if not ok else ("Segoe UI", 9))
         r["path_lbl"].configure(fg=t["text_dim"] if ok else color)
         r["detail_lbl"].configure(fg=color)
 
@@ -407,11 +438,10 @@ class QuickCheckApp:
             full = BASE_DIR / rel_path.replace("/", os.sep)
             if kind == "dir":
                 ok = full.is_dir()
-                detail = (f"{sum(1 for _ in full.rglob('*') if _.is_file())} files"
-                          if ok else "missing")
+                detail = f"{sum(1 for _ in full.rglob('*') if _.is_file())} files" if ok else "missing"
             else:
                 ok = full.is_file()
-                detail = (f"{full.stat().st_size / 1024:.1f} KB" if ok else "missing")
+                detail = f"{full.stat().st_size / 1024:.1f} KB" if ok else "missing"
             if ok:
                 found += 1
             self.root.after(0, self._on_result, rel_path, ok, detail, found, total)
@@ -444,21 +474,17 @@ class QuickCheckApp:
 
         if missing == 0:
             color = t["ok"]
-            bg    = t["ok_bg"]
+            bg = t["ok_bg"]
             self.status_icon_lbl.configure(text="✓", bg=bg, fg=color)
-            self.status_text_lbl.configure(
-                text=f"All {total} checks passed — build is healthy!",
-                bg=bg, fg=color)
+            self.status_text_lbl.configure(text=f"All {total} checks passed — build is healthy!", bg=bg, fg=color)
             self.status_count_lbl.configure(text=f"{found} / {total}", bg=bg)
             self.status_frame.configure(bg=bg, highlightbackground=color)
             self.root.after(5000, self.root.destroy)
         else:
             color = t["fail"]
-            bg    = t["fail_bg"]
+            bg = t["fail_bg"]
             self.status_icon_lbl.configure(text="✗", bg=bg, fg=color)
-            self.status_text_lbl.configure(
-                text=f"{missing} missing file(s) — rebuild required",
-                bg=bg, fg=color)
+            self.status_text_lbl.configure(text=f"{missing} missing file(s) — rebuild required", bg=bg, fg=color)
             self.status_count_lbl.configure(text=f"{found} / {total}", bg=bg)
             self.status_frame.configure(bg=bg, highlightbackground=color)
             self.close_btn.pack(fill="x", padx=20, pady=(0, 12), ipady=6)
