@@ -6,6 +6,7 @@ import csv
 import json
 import re
 
+
 class DocumentConverters:
     """Document conversion methods for AdvancedConverterEngine."""
 
@@ -13,8 +14,8 @@ class DocumentConverters:
         """Convert plain text to PDF with word wrapping."""
         try:
             from reportlab.lib.pagesizes import A4
-            from reportlab.pdfgen import canvas as rl_canvas
             from reportlab.lib.utils import simpleSplit
+            from reportlab.pdfgen import canvas as rl_canvas
 
             c = rl_canvas.Canvas(dst, pagesize=A4)
             width, height = A4
@@ -54,12 +55,12 @@ class DocumentConverters:
         return self._rtf_parse_spans(tokens, color_table)
 
     def _rtf_parse_colortbl(self, raw: str) -> list:
-        m = re.search(r'\{\\colortbl;([^}]*)\}', raw, re.DOTALL)
+        m = re.search(r"\{\\colortbl;([^}]*)\}", raw, re.DOTALL)
         if not m:
             return []
         colors = []
-        for part in m.group(1).split(';'):
-            nums = re.findall(r'(\d+)', part)
+        for part in m.group(1).split(";"):
+            nums = re.findall(r"(\d+)", part)
             if len(nums) >= 3:
                 colors.append((int(nums[0]), int(nums[1]), int(nums[2])))
         return colors
@@ -68,28 +69,28 @@ class DocumentConverters:
         tokens = []
         i = 0
         while i < len(raw):
-            if raw[i] == '{':
-                tokens.append(('{', ''))
+            if raw[i] == "{":
+                tokens.append(("{", ""))
                 i += 1
-            elif raw[i] == '}':
-                tokens.append(('}', ''))
+            elif raw[i] == "}":
+                tokens.append(("}", ""))
                 i += 1
-            elif raw[i] == '\\':
-                m = re.match(r'\\([a-zA-Z]+)(-?\d+)?\s?', raw[i:])
+            elif raw[i] == "\\":
+                m = re.match(r"\\([a-zA-Z]+)(-?\d+)?\s?", raw[i:])
                 if m:
-                    tokens.append(('cmd', m.group(1), m.group(2)))
+                    tokens.append(("cmd", m.group(1), m.group(2)))
                     i += m.end()
-                elif raw[i:i+2] == '\\\'':
-                    tokens.append(('char', chr(int(raw[i+2:i+4], 16))))
+                elif raw[i : i + 2] == "\\'":
+                    tokens.append(("char", chr(int(raw[i + 2 : i + 4], 16))))
                     i += 4
                 else:
-                    tokens.append(('char', raw[i+1]))
+                    tokens.append(("char", raw[i + 1]))
                     i += 2
-            elif raw[i] == '\r\n' or raw[i] == '\n':
-                tokens.append(('char', '\n'))
+            elif raw[i] == "\r\n" or raw[i] == "\n":
+                tokens.append(("char", "\n"))
                 i += 1
             else:
-                tokens.append(('char', raw[i]))
+                tokens.append(("char", raw[i]))
                 i += 1
         return tokens
 
@@ -98,72 +99,103 @@ class DocumentConverters:
             def __init__(self):
                 self.bold = False
                 self.italic = False
+                self.underline = False
                 self.font_size = 11
                 self.color = None
+
             def copy(self):
                 s = State()
                 s.bold = self.bold
                 s.italic = self.italic
+                s.underline = self.underline
                 s.font_size = self.font_size
                 s.color = self.color
                 return s
 
-        def _span(text="", par=False, cell_end=False, row_end=False):
-            return {"text": text, "bold": state.bold, "italic": state.italic,
-                    "size": state.font_size, "par": par, "cell_end": cell_end, "row_end": row_end}
+        def _span(text="", par=False, cell_end=False, row_end=False, in_table=False):
+            return {
+                "text": text,
+                "bold": state.bold,
+                "italic": state.italic,
+                "underline": state.underline,
+                "fontsize": state.font_size,
+                "size": state.font_size,
+                "color": state.color,
+                "par": par,
+                "cell_end": cell_end,
+                "row_end": row_end,
+                "in_table": in_table,
+            }
 
         state = State()
         spans = []
         buf = []
         stack = []
+        in_table = False
 
         for tok in tokens:
-            if tok[0] == '{':
+            if tok[0] == "{":
                 stack.append(state)
                 state = state.copy()
-            elif tok[0] == '}':
+            elif tok[0] == "}":
                 if stack:
                     state = stack.pop()
                 if buf:
-                    spans.append(_span("".join(buf)))
+                    spans.append(_span("".join(buf), in_table=in_table))
                     buf = []
-            elif tok[0] == 'cmd':
+            elif tok[0] == "cmd":
                 cmd = tok[1]
                 val = tok[2]
-                if cmd == 'b':
-                    state.bold = val != '0' if val else True
-                elif cmd == 'i':
-                    state.italic = val != '0' if val else True
-                elif cmd == 'fs':
+                if cmd == "b":
+                    state.bold = val != "0" if val else True
+                elif cmd == "i":
+                    state.italic = val != "0" if val else True
+                elif cmd == "ul":
+                    state.underline = val != "0" if val else True
+                elif cmd == "fs":
                     if val:
                         state.font_size = max(6, int(val) // 2)
-                elif cmd in ('par', 'pard'):
+                elif cmd == "cf":
+                    if val:
+                        try:
+                            idx = int(val) - 1
+                            state.color = color_table[idx] if 0 <= idx < len(color_table) else None
+                        except Exception:
+                            state.color = None
+                elif cmd == "trowd":
+                    in_table = True
+                elif cmd in ("par", "pard"):
                     if buf:
-                        spans.append(_span("".join(buf), par=True))
+                        spans.append(_span("".join(buf), par=True, in_table=in_table))
                         buf = []
                     else:
-                        spans.append(_span("", par=True))
-                elif cmd in ('cell', 'cellx'):
+                        spans.append(_span("", par=True, in_table=in_table))
+                elif cmd in ("cell", "cellx"):
                     if buf:
-                        spans.append(_span("".join(buf), cell_end=True))
+                        spans.append(_span("".join(buf), cell_end=True, in_table=in_table))
                         buf = []
-                elif cmd in ('row', 'rowend'):
+                    else:
+                        spans.append(_span("", cell_end=True, in_table=in_table))
+                elif cmd in ("row", "rowend"):
                     if buf:
-                        spans.append(_span("".join(buf), row_end=True))
+                        spans.append(_span("".join(buf), row_end=True, in_table=in_table))
                         buf = []
-            elif tok[0] == 'char':
-                if tok[1] != '\n':
+                    else:
+                        spans.append(_span("", row_end=True, in_table=in_table))
+                    in_table = False
+            elif tok[0] == "char":
+                if tok[1] != "\n":
                     buf.append(tok[1])
 
         if buf:
-            spans.append(_span("".join(buf)))
+            spans.append(_span("".join(buf), in_table=in_table))
         return spans
 
     def _rtf_spans_to_pdf(self, spans: list, dst: str) -> bool:
         try:
             from reportlab.lib.pagesizes import A4
-            from reportlab.pdfgen import canvas as rl_canvas
             from reportlab.lib.utils import simpleSplit
+            from reportlab.pdfgen import canvas as rl_canvas
 
             c = rl_canvas.Canvas(dst, pagesize=A4)
             width, height = A4
@@ -178,7 +210,9 @@ class DocumentConverters:
                 if not text:
                     continue
                 size = span.get("size", 11)
-                font = "Helvetica-Bold" if span.get("bold") else "Helvetica-Oblique" if span.get("italic") else "Helvetica"
+                font = (
+                    "Helvetica-Bold" if span.get("bold") else "Helvetica-Oblique" if span.get("italic") else "Helvetica"
+                )
                 try:
                     c.setFont(font, size)
                 except Exception:
@@ -201,6 +235,7 @@ class DocumentConverters:
     def _txt_to_docx(self, src: str, dst: str) -> bool:
         try:
             from docx import Document
+
             doc = Document()
             with open(src, "r", encoding="utf-8", errors="replace") as f:
                 for line in f:
@@ -214,6 +249,7 @@ class DocumentConverters:
     def _rtf_to_docx(self, src: str, dst: str) -> bool:
         try:
             from docx import Document
+
             raw = open(src, "r", encoding="utf-8", errors="replace").read()
             spans = self._rtf_to_spans(raw)
             doc = Document()
@@ -265,9 +301,9 @@ class DocumentConverters:
     def _xlsx_to_pdf(self, src: str, dst: str) -> bool:
         try:
             import openpyxl
+            from reportlab.lib import colors
             from reportlab.lib.pagesizes import A4, landscape
             from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
-            from reportlab.lib import colors
 
             wb = openpyxl.load_workbook(src, data_only=True)
             elements = []
@@ -278,12 +314,16 @@ class DocumentConverters:
                     rows.append([str(c) if c is not None else "" for c in row])
                 if rows:
                     t = Table(rows)
-                    t.setStyle(TableStyle([
-                        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                        ('FONTSIZE', (0, 0), (-1, -1), 8),
-                    ]))
+                    t.setStyle(
+                        TableStyle(
+                            [
+                                ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+                                ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                                ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                                ("FONTSIZE", (0, 0), (-1, -1), 8),
+                            ]
+                        )
+                    )
                     elements.append(t)
 
             if elements:
@@ -298,6 +338,7 @@ class DocumentConverters:
     def _xlsx_to_json(self, src: str, dst: str) -> bool:
         try:
             import openpyxl
+
             wb = openpyxl.load_workbook(src, data_only=True)
             result = {}
             for sheet_name in wb.sheetnames:
@@ -317,6 +358,7 @@ class DocumentConverters:
     def _xlsx_to_csv(self, src: str, dst: str) -> bool:
         try:
             import openpyxl
+
             wb = openpyxl.load_workbook(src, data_only=True)
             ws = wb.active
             with open(dst, "w", encoding="utf-8", newline="") as f:
@@ -332,7 +374,7 @@ class DocumentConverters:
     def _pptx_to_pdf(self, src: str, dst: str) -> bool:
         try:
             from pptx import Presentation
-            from reportlab.lib.pagesizes import landscape, A4
+            from reportlab.lib.pagesizes import A4, landscape
             from reportlab.pdfgen import canvas as rl_canvas
 
             prs = Presentation(src)
