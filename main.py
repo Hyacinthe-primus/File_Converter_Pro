@@ -635,6 +635,7 @@ class WindowTransition:
         from system_notifier import SystemNotifier
 
         notifier = SystemNotifier()
+        win._system_notifier = notifier
         Thread(target=notifier.check_and_notify_update, daemon=True).start()
 
         from daemon import is_autostart_enabled
@@ -651,7 +652,7 @@ class WindowTransition:
                 win._scheduler = SchedulerManager()
                 win._scheduler.start()
 
-            Thread(target=_start_services, args=[win], daemon=True).start()
+            QTimer.singleShot(0, lambda: _start_services(win))
 
         return win
 
