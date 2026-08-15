@@ -18,20 +18,21 @@ try:
     from apscheduler.schedulers.background import BackgroundScheduler
     from apscheduler.triggers.cron import CronTrigger
     from apscheduler.triggers.interval import IntervalTrigger
+
     APSCHEDULER_AVAILABLE = True
 except ImportError:
     APSCHEDULER_AVAILABLE = False
 
 from tasks.watcher import (
+    _build_conversion_type,
     _is_temp_file,
     _load_all_toml,
-    _normalise_rules,
-    _build_conversion_type,
-    _run_conversion,
-    _merge_conversion_type,
-    _run_merge,
-    _resolve_output_dir,
     _merge_already_done,
+    _merge_conversion_type,
+    _normalise_rules,
+    _resolve_output_dir,
+    _run_conversion,
+    _run_merge,
     _save_merge_state,
 )
 
@@ -49,7 +50,7 @@ def _load_toml_with_paths() -> list[tuple[Path, dict]]:
         import tomllib
     except ImportError:
         try:
-            import tomli as tomllib 
+            import tomli as tomllib
         except ImportError:
             logger.error("[Scheduler] No TOML library available (tomllib / tomli)")
             return []
@@ -99,12 +100,12 @@ def _disable_date_task_in_toml(toml_path: Path, task_name: str) -> None:
         return
 
     section_header = f"[scheduled_tasks.{task_name}]"
-    lines          = text.splitlines(keepends=True)
-    inside         = False
-    patched        = False
-    out            = []
+    lines = text.splitlines(keepends=True)
+    inside = False
+    patched = False
+    out = []
 
-    enabled_re = re.compile(r'^(\s*enabled\s*=\s*)true(\s*(?:#.*)?)$', re.IGNORECASE)
+    enabled_re = re.compile(r"^(\s*enabled\s*=\s*)true(\s*(?:#.*)?)$", re.IGNORECASE)
 
     for line in lines:
         stripped = line.strip()
@@ -115,9 +116,7 @@ def _disable_date_task_in_toml(toml_path: Path, task_name: str) -> None:
             continue
 
         if inside and not patched:
-            if stripped.startswith("[") and not stripped.startswith(
-                f"[scheduled_tasks.{task_name}."
-            ):
+            if stripped.startswith("[") and not stripped.startswith(f"[scheduled_tasks.{task_name}."):
                 inside = False
                 out.append(line)
                 continue
@@ -125,21 +124,19 @@ def _disable_date_task_in_toml(toml_path: Path, task_name: str) -> None:
             m = enabled_re.match(line.rstrip("\n\r"))
             if m:
                 new_line = m.group(1) + "false" + m.group(2)
-                ending   = line[len(line.rstrip("\n\r")):]
+                ending = line[len(line.rstrip("\n\r")) :]
                 out.append(new_line + ending)
                 patched = True
-                logger.info(
-                    "[Scheduler] Auto-disabled task '%s' in %s", task_name, toml_path
-                )
+                logger.info("[Scheduler] Auto-disabled task '%s' in %s", task_name, toml_path)
                 continue
 
         out.append(line)
 
     if not patched:
         logger.warning(
-            "[Scheduler] Could not find 'enabled = true' for task '%s' in %s — "
-            "file left unchanged.",
-            task_name, toml_path,
+            "[Scheduler] Could not find 'enabled = true' for task '%s' in %s — file left unchanged.",
+            task_name,
+            toml_path,
         )
         return
 
@@ -155,21 +152,23 @@ def get_scheduled_task_configs() -> list:
     for name, cfg in tasks.items():
         if not cfg.get("enabled", True):
             continue
-        path    = cfg.get("path", "").strip()
-        rules   = cfg.get("rules", {})
+        path = cfg.get("path", "").strip()
+        rules = cfg.get("rules", {})
         trigger = cfg.get("trigger", {})
         if not path or not rules or not trigger:
             logger.warning("[Scheduler] Skipping '%s': missing path, rules or trigger", name)
             continue
-        result.append({
-            "name":       name,
-            "path":       path,
-            "output_dir": cfg.get("output_dir", "").strip(),
-            "rules":      _normalise_rules(rules),
-            "recursive":  cfg.get("recursive", False),
-            "trigger":    trigger,
-            "toml_file":  _find_toml_for_task(name),
-        })
+        result.append(
+            {
+                "name": name,
+                "path": path,
+                "output_dir": cfg.get("output_dir", "").strip(),
+                "rules": _normalise_rules(rules),
+                "recursive": cfg.get("recursive", False),
+                "trigger": trigger,
+                "toml_file": _find_toml_for_task(name),
+            }
+        )
     return result
 
 
@@ -177,21 +176,23 @@ def get_all_scheduled_task_configs() -> list:
     tasks = _load_all_toml().get("scheduled_tasks", {})
     result = []
     for name, cfg in tasks.items():
-        path    = cfg.get("path", "").strip()
-        rules   = cfg.get("rules", {})
+        path = cfg.get("path", "").strip()
+        rules = cfg.get("rules", {})
         trigger = cfg.get("trigger", {})
         if not path or not rules or not trigger:
             continue
-        result.append({
-            "name":       name,
-            "path":       path,
-            "output_dir": cfg.get("output_dir", "").strip(),
-            "rules":      _normalise_rules(rules),
-            "recursive":  cfg.get("recursive", False),
-            "trigger":    trigger,
-            "enabled":    cfg.get("enabled", True),
-            "toml_file":  _find_toml_for_task(name),
-        })
+        result.append(
+            {
+                "name": name,
+                "path": path,
+                "output_dir": cfg.get("output_dir", "").strip(),
+                "rules": _normalise_rules(rules),
+                "recursive": cfg.get("recursive", False),
+                "trigger": trigger,
+                "enabled": cfg.get("enabled", True),
+                "toml_file": _find_toml_for_task(name),
+            }
+        )
     return result
 
 
@@ -201,26 +202,28 @@ def _build_trigger(trigger_cfg: dict):
 
     if t == "cron":
         return CronTrigger(
-            day_of_week = trigger_cfg.get("day_of_week", "*"),
-            day         = trigger_cfg.get("day",         "*"),
-            hour        = trigger_cfg.get("hour",         0),
-            minute      = trigger_cfg.get("minute",       0),
+            day_of_week=trigger_cfg.get("day_of_week", "*"),
+            day=trigger_cfg.get("day", "*"),
+            hour=trigger_cfg.get("hour", 0),
+            minute=trigger_cfg.get("minute", 0),
         )
 
     if t == "interval":
         return IntervalTrigger(
-            hours   = trigger_cfg.get("hours",   0),
-            minutes = trigger_cfg.get("minutes", 0),
+            hours=trigger_cfg.get("hours", 0),
+            minutes=trigger_cfg.get("minutes", 0),
         )
 
     if t == "date":
         from apscheduler.triggers.date import DateTrigger
+
         run_at = trigger_cfg.get("run_at", "")
         if not run_at:
             logger.error("[Scheduler] 'date' trigger missing 'run_at'")
             return None
         try:
             from datetime import datetime
+
             return DateTrigger(run_date=datetime.fromisoformat(run_at))
         except ValueError as e:
             logger.error("[Scheduler] Invalid 'run_at' value '%s': %s", run_at, e)
@@ -238,8 +241,8 @@ def _run_task(cfg: dict) -> None:
     After a successful run of a  type = "date"  task, enabled is set to false
     in the originating TOML file so the job is not re-queued on next startup.
     """
-    path      = cfg["path"]
-    rules     = cfg["rules"]
+    path = cfg["path"]
+    rules = cfg["rules"]
     recursive = cfg["recursive"]
 
     iterator = Path(path).rglob("*") if recursive else Path(path).iterdir()
@@ -257,7 +260,7 @@ def _run_task(cfg: dict) -> None:
 
         for rule in rules[ext]:
             if rule["kind"] == "convert":
-                fmt      = rule["fmt"]
+                fmt = rule["fmt"]
                 expected = Path(output_dir) / f"{f.stem}.{fmt}"
                 if expected.exists():
                     continue
@@ -285,13 +288,18 @@ def _run_task(cfg: dict) -> None:
         if conversion_type is None:
             logger.error(
                 "[Scheduler] Cannot build merge conversion_type for action=%s sort=%s",
-                action, sort,
+                action,
+                sort,
             )
             continue
         try:
             logger.info(
                 "[Scheduler] Merge %s (%d files, sort=%s) → %s (%s)",
-                action, len(files), sort, output_dir, cfg["name"],
+                action,
+                len(files),
+                sort,
+                output_dir,
+                cfg["name"],
             )
             _run_merge(conversion_type, files, output_dir)
             _save_merge_state(output_dir, action, files)
@@ -322,7 +330,7 @@ class SchedulerManager:
 
     def __init__(self):
         self._scheduler = None
-        self._running   = False
+        self._running = False
 
     def start(self) -> None:
         if not APSCHEDULER_AVAILABLE:
@@ -357,12 +365,12 @@ class SchedulerManager:
                 continue
             try:
                 self._scheduler.add_job(
-                    func             = _run_task,
-                    trigger          = trigger,
-                    args             = [cfg],
-                    id               = cfg["name"],
-                    name             = cfg["name"],
-                    replace_existing = True,
+                    func=_run_task,
+                    trigger=trigger,
+                    args=[cfg],
+                    id=cfg["name"],
+                    name=cfg["name"],
+                    replace_existing=True,
                 )
                 logger.info("[Scheduler] Job registered: '%s'", cfg["name"])
             except Exception as e:
