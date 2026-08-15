@@ -1,8 +1,8 @@
 """BatchConvertDialog — Batch conversion format/quality selection."""
 
-from PySide6.QtWidgets import QDialog, QFormLayout, QComboBox, QDialogButtonBox
-from qss_helpers import _apply_dialog_btn
+from PySide6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QFormLayout
 
+from qss_helpers import _apply_dialog_btn
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
 
@@ -19,18 +19,19 @@ class BatchConvertDialog(TranslationMixin, QDialog):
         layout = QFormLayout(self)
 
         self.format_combo = QComboBox()
-        self.format_combo.addItems([
-            self.translate_text("PDF"),
-            self.translate_text("DOCX"),
-            self.translate_text("Images PNG")
-        ])
+        self.format_codes = ["pdf", "docx", "png"]
+        self.format_combo.addItem(self.translate_text("PDF"), "pdf")
+        self.format_combo.addItem(self.translate_text("DOCX"), "docx")
+        self.format_combo.addItem(self.translate_text("Images PNG"), "png")
 
         self.quality_combo = QComboBox()
-        self.quality_combo.addItems([
-            self.translate_text("Haute qualité"),
-            self.translate_text("Qualité standard"),
-            self.translate_text("Compressé")
-        ])
+        self.quality_combo.addItems(
+            [
+                self.translate_text("Haute qualité"),
+                self.translate_text("Qualité standard"),
+                self.translate_text("Compressé"),
+            ]
+        )
 
         layout.addRow(self.translate_text("Format cible:"), self.format_combo)
         layout.addRow(self.translate_text("Qualité:"), self.quality_combo)
@@ -43,3 +44,8 @@ class BatchConvertDialog(TranslationMixin, QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addRow(buttons)
+
+    def selected_format(self) -> str:
+        """Return a stable format code ('pdf', 'docx' or 'png')."""
+        data = self.format_combo.currentData()
+        return data if isinstance(data, str) and data in self.format_codes else self.format_codes[0]
