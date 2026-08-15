@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
 
 from qss_helpers import _apply_dialog_btn, _load_qss, get_current_theme
 from theme_manager import CUSTOM_THEMES_DIR, get_builtin_themes, get_custom_themes, import_theme, remove_theme
+from translations import decorate_language_name
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
 from widgets import AnimatedCheckBox
@@ -518,7 +519,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         info_col = QVBoxLayout()
         info_col.setSpacing(2)
 
-        name_lbl = QLabel(lang["name"])
+        name_lbl = QLabel(decorate_language_name(lang["name"]))
         name_lbl.setStyleSheet(f"font-weight: bold; font-size: 13px; color: {name_col}; border: none;")
         info_col.addWidget(name_lbl)
 
@@ -643,14 +644,13 @@ class SettingsDialog(TranslationMixin, QDialog):
             parent_app.update_texts()
         # Update language toolbar button text if present
         if hasattr(parent_app, "language_action"):
-            if code == "fr":
-                parent_app.language_action.setText("🇬🇧 English")
-            elif code == "en":
-                parent_app.language_action.setText("🇫🇷 Français")
-            else:
-                langs = parent_app.translation_manager.get_available_languages()
-                name = next((lang["name"] for lang in langs if lang["code"] == code), code)
-                parent_app.language_action.setText(f"🌐 {name}")
+            available = [lang["code"] for lang in parent_app.translation_manager.get_available_languages()]
+            try:
+                idx = available.index(code)
+                next_code = available[(idx + 1) % len(available)]
+            except ValueError:
+                next_code = code
+            parent_app.language_action.setText(parent_app._get_language_label(next_code))
         self._refresh_lang_list()
 
     def _remove_language(self, code: str, name: str) -> None:
