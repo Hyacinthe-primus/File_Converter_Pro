@@ -6,22 +6,24 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-_NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
-
 from PySide6.QtWidgets import QMessageBox
+
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
 
 
 class ArchiveEnginesMixin:
     """Mixin: archive creation engines (ZIP, RAR, TAR) for FileConverterApp."""
 
-    def create_structured_zip_archive(self, archive_path, folders, additional_files, compression_level, password, split_size):
+    def create_structured_zip_archive(
+        self, archive_path, folders, additional_files, compression_level, password, split_size
+    ):
         try:
             print(f"[DEBUG] Creating structured ZIP: {archive_path}")
 
             compression_map = {
                 self.translate_text("Normal"): zipfile.ZIP_STORED,
                 self.translate_text("Haute compression"): zipfile.ZIP_DEFLATED,
-                self.translate_text("Compression maximale"): zipfile.ZIP_LZMA
+                self.translate_text("Compression maximale"): zipfile.ZIP_LZMA,
             }
 
             compression_method = compression_map.get(compression_level, zipfile.ZIP_DEFLATED)
@@ -31,15 +33,13 @@ class ArchiveEnginesMixin:
             if password:
                 try:
                     import pyzipper
+
                     print("[DEBUG] Using pyzipper with AES-256 encryption and structure")
 
                     with pyzipper.AESZipFile(
-                        archive_path,
-                        'w',
-                        compression=compression_method,
-                        encryption=pyzipper.WZ_AES
+                        archive_path, "w", compression=compression_method, encryption=pyzipper.WZ_AES
                     ) as zipf:
-                        zipf.setpassword(password.encode('utf-8'))
+                        zipf.setpassword(password.encode("utf-8"))
 
                         for folder in folders:
                             folder_name = Path(folder).name
@@ -70,7 +70,7 @@ class ArchiveEnginesMixin:
                     print("[WARNING] pyzipper not installed, using standard zipfile")
                     password = None
 
-            with zipfile.ZipFile(archive_path, 'w', compression=compression_method) as zipf:
+            with zipfile.ZipFile(archive_path, "w", compression=compression_method) as zipf:
                 for folder in folders:
                     folder_name = Path(folder).name
                     print(f"[DEBUG] Adding folder: {folder_name}")
@@ -99,6 +99,7 @@ class ArchiveEnginesMixin:
         except Exception as e:
             print(f"[ERROR] Error creating structured ZIP: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -139,16 +140,20 @@ class ArchiveEnginesMixin:
 
         return parts_created
 
-    def create_split_zip_archive(self, base_archive_path, files_to_compress, compression_level, password, split_size_mb):
+    def create_split_zip_archive(
+        self, base_archive_path, files_to_compress, compression_level, password, split_size_mb
+    ):
         try:
-            print(f"[DEBUG SPLIT ZIP] Starting - max size: {split_size_mb}MB, files: {len(files_to_compress)}, password: {'Yes' if password else 'No'}")
+            print(
+                f"[DEBUG SPLIT ZIP] Starting - max size: {split_size_mb}MB, files: {len(files_to_compress)}, password: {'Yes' if password else 'No'}"  # noqa: E501
+            )
 
             winrar_paths = [
                 r"C:\Program Files\WinRAR\WinRAR.exe",
                 r"C:\Program Files (x86)\WinRAR\WinRAR.exe",
                 r"C:\Program Files\WinRAR\Rar.exe",
                 "rar",
-                "winrar"
+                "winrar",
             ]
 
             winrar_exe = None
@@ -166,14 +171,16 @@ class ArchiveEnginesMixin:
                     break
 
             if not winrar_exe:
-                QMessageBox.warning(self, self.translate_text("Information"),
-                                self.translate_text("WinRAR not found for ZIP splitting.\n"
-                                                    "Installation required for splitting."))
+                QMessageBox.warning(
+                    self,
+                    self.translate_text("Information"),
+                    self.translate_text("WinRAR not found for ZIP splitting.\nInstallation required for splitting."),
+                )
                 return False
 
             print(f"[DEBUG] WinRAR found: {winrar_exe}")
 
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8') as f:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt", encoding="utf-8") as f:
                 for file_path in files_to_compress:
                     if os.path.exists(file_path):
                         escaped_path = file_path.replace('"', '\\"')
@@ -186,12 +193,12 @@ class ArchiveEnginesMixin:
                 compression_map = {
                     self.translate_text("Normal"): "-m3",
                     self.translate_text("Haute compression"): "-m5",
-                    self.translate_text("Compression maximale"): "-m5 -md128M"
+                    self.translate_text("Compression maximale"): "-m5 -md128M",
                 }
 
                 compression_args = compression_map.get(compression_level, "-m3")
 
-                cmd = [winrar_exe, 'a']
+                cmd = [winrar_exe, "a"]
 
                 cmd.append(compression_args)
 
@@ -280,7 +287,7 @@ class ArchiveEnginesMixin:
                             f"{base_stem}.zip",
                             f"{base_stem}.z*",
                             f"{base_stem}.zip.*",
-                            f"{base_stem}.part*.zip"
+                            f"{base_stem}.part*.zip",
                         ]
 
                         for pattern in patterns_to_clean:
@@ -309,27 +316,28 @@ class ArchiveEnginesMixin:
         except Exception as e:
             print(f"[ERROR] General error creating split ZIP: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
     def create_single_zip_archive(self, archive_path, files_to_compress, compression_method, password):
         try:
-            print(f"[DEBUG CREATE ZIP] Creating: {archive_path}, files: {len(files_to_compress)}, password: {'Yes' if password else 'No'}")
+            print(
+                f"[DEBUG CREATE ZIP] Creating: {archive_path}, files: {len(files_to_compress)}, password: {'Yes' if password else 'No'}"  # noqa: E501
+            )
 
             os.makedirs(os.path.dirname(archive_path), exist_ok=True)
 
             if password:
                 try:
                     import pyzipper
+
                     print("[DEBUG] Using pyzipper with AES-256 encryption")
 
                     with pyzipper.AESZipFile(
-                        archive_path,
-                        'w',
-                        compression=compression_method,
-                        encryption=pyzipper.WZ_AES
+                        archive_path, "w", compression=compression_method, encryption=pyzipper.WZ_AES
                     ) as zipf:
-                        zipf.setpassword(password.encode('utf-8'))
+                        zipf.setpassword(password.encode("utf-8"))
 
                         for i, file_path in enumerate(files_to_compress):
                             try:
@@ -351,8 +359,11 @@ class ArchiveEnginesMixin:
 
                 except ImportError:
                     print("[WARNING] pyzipper not installed, using standard zipfile")
-                    QMessageBox.warning(self, self.translate_text("Information"),
-                                    self.translate_text("pyzipper is not installed. Encryption not available."))
+                    QMessageBox.warning(
+                        self,
+                        self.translate_text("Information"),
+                        self.translate_text("pyzipper is not installed. Encryption not available."),
+                    )
                     password = None
 
                 except Exception as e:
@@ -360,7 +371,7 @@ class ArchiveEnginesMixin:
                     password = None
 
             try:
-                with zipfile.ZipFile(archive_path, 'w', compression=compression_method) as zipf:
+                with zipfile.ZipFile(archive_path, "w", compression=compression_method) as zipf:
                     for i, file_path in enumerate(files_to_compress):
                         try:
                             if os.path.exists(file_path):
@@ -386,6 +397,7 @@ class ArchiveEnginesMixin:
         except Exception as e:
             print(f"[ERROR] Error creating ZIP: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -398,7 +410,7 @@ class ArchiveEnginesMixin:
             self.translate_text("ZIP"): "zip",
             self.translate_text("TAR.GZ"): "tar.gz",
             self.translate_text("TAR"): "tar",
-            self.translate_text("RAR"): "rar"
+            self.translate_text("RAR"): "rar",
         }
         return extensions.get(archive_format, "zip")
 
@@ -407,7 +419,7 @@ class ArchiveEnginesMixin:
             compression_map = {
                 self.translate_text("Normal"): zipfile.ZIP_STORED,
                 self.translate_text("Haute compression"): zipfile.ZIP_DEFLATED,
-                self.translate_text("Compression maximale"): zipfile.ZIP_LZMA
+                self.translate_text("Compression maximale"): zipfile.ZIP_LZMA,
             }
 
             compression_method = compression_map.get(compression_level, zipfile.ZIP_DEFLATED)
@@ -420,15 +432,13 @@ class ArchiveEnginesMixin:
             if password:
                 try:
                     import pyzipper
+
                     print("[DEBUG] Using pyzipper with AES encryption")
 
                     with pyzipper.AESZipFile(
-                        archive_path,
-                        'w',
-                        compression=compression_method,
-                        encryption=pyzipper.WZ_AES
+                        archive_path, "w", compression=compression_method, encryption=pyzipper.WZ_AES
                     ) as zipf:
-                        zipf.setpassword(password.encode('utf-8'))
+                        zipf.setpassword(password.encode("utf-8"))
 
                         for i, file_path in enumerate(files_to_compress):
                             try:
@@ -447,12 +457,15 @@ class ArchiveEnginesMixin:
 
                 except ImportError:
                     print("[WARNING] pyzipper not installed, using standard zipfile")
-                    QMessageBox.warning(self, self.translate_text("Information"),
-                                        self.translate_text("pyzipper is not installed. Encryption not available."))
+                    QMessageBox.warning(
+                        self,
+                        self.translate_text("Information"),
+                        self.translate_text("pyzipper is not installed. Encryption not available."),
+                    )
                     password = None
 
             try:
-                with zipfile.ZipFile(archive_path, 'w', compression=compression_method) as zipf:
+                with zipfile.ZipFile(archive_path, "w", compression=compression_method) as zipf:
                     for i, file_path in enumerate(files_to_compress):
                         try:
                             if os.path.exists(file_path):
@@ -486,7 +499,7 @@ class ArchiveEnginesMixin:
                 r"C:\Program Files (x86)\WinRAR\WinRAR.exe",
                 r"C:\Program Files\WinRAR\Rar.exe",
                 "rar",
-                "winrar"
+                "winrar",
             ]
 
             winrar_exe = None
@@ -504,16 +517,21 @@ class ArchiveEnginesMixin:
                     break
 
             if not winrar_exe:
-                QMessageBox.warning(self, self.translate_text("Information"),
-                                self.translate_text("WinRAR not found. Installation required:\n"
-                                                    "1. Download WinRAR from win-rar.com\n"
-                                                    "2. Install it\n"
-                                                    "3. Add WinRAR to PATH or restart the application"))
+                QMessageBox.warning(
+                    self,
+                    self.translate_text("Information"),
+                    self.translate_text(
+                        "WinRAR not found. Installation required:\n"
+                        "1. Download WinRAR from win-rar.com\n"
+                        "2. Install it\n"
+                        "3. Add WinRAR to PATH or restart the application"
+                    ),
+                )
                 return False
 
             print(f"[DEBUG] WinRAR found: {winrar_exe}")
 
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8') as f:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt", encoding="utf-8") as f:
                 for file_path in files_to_compress:
                     if os.path.exists(file_path):
                         escaped_path = file_path.replace('"', '\\"')
@@ -526,12 +544,12 @@ class ArchiveEnginesMixin:
                 compression_map = {
                     self.translate_text("Normal"): "-m3",
                     self.translate_text("Haute compression"): "-m5",
-                    self.translate_text("Compression maximale"): "-m5 -md128M"
+                    self.translate_text("Compression maximale"): "-m5 -md128M",
                 }
 
                 compression_args = compression_map.get(compression_level, "-m3")
 
-                cmd = [winrar_exe, 'a']
+                cmd = [winrar_exe, "a"]
 
                 cmd.append(compression_args)
 
@@ -623,6 +641,7 @@ class ArchiveEnginesMixin:
 
     def create_tar_archive(self, archive_path, files_to_compress, archive_format, compression_level):
         import tarfile
+
         compression_map = {"TAR.GZ": "gz", "TAR": None}
         compression_type = compression_map[archive_format]
         mode = "w:gz" if compression_type == "gz" else "w"
