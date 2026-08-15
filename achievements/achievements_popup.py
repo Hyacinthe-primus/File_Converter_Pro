@@ -4,23 +4,26 @@ Achievements Popup
 """
 
 import os
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-                               QFrame, QGraphicsOpacityEffect)
-from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QUrl, Signal
-from PySide6.QtGui import QPixmap, QImage
-from PySide6.QtMultimedia import QSoundEffect
 import sys
-_PKG_DIR  = os.path.dirname(os.path.abspath(__file__))
+
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer, QUrl, Signal
+from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtMultimedia import QSoundEffect
+from PySide6.QtWidgets import QDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QVBoxLayout
+
+_PKG_DIR = os.path.dirname(os.path.abspath(__file__))
 _ROOT_DIR = os.path.dirname(_PKG_DIR)
 if _ROOT_DIR not in sys.path:
     sys.path.insert(0, _ROOT_DIR)
 from translations import TranslationManager
 from utils.translation_mixin import TranslationMixin
 
+
 class AchievementPopup(TranslationMixin, QDialog):
     """Achievement acquisition popup"""
+
     finished_display = Signal()
-    
+
     def __init__(self, achievement, achievement_system, parent=None, language="fr"):
         super().__init__(parent)
         self.achievement = achievement
@@ -30,10 +33,10 @@ class AchievementPopup(TranslationMixin, QDialog):
         self._tm.set_language(language)
         self.dark_mode = True
         parent = self.parent()
-        if hasattr(parent, 'dark_mode'):
+        if hasattr(parent, "dark_mode"):
             self.dark_mode = parent.dark_mode
-        elif hasattr(parent, 'config') and 'dark_mode' in parent.config:
-            self.dark_mode = parent.config.get('dark_mode', True)
+        elif hasattr(parent, "config") and "dark_mode" in parent.config:
+            self.dark_mode = parent.config.get("dark_mode", True)
         self.sound_effect = None
 
     def set_translator(self, tm) -> None:
@@ -51,14 +54,13 @@ class AchievementPopup(TranslationMixin, QDialog):
         self.setSizeGripEnabled(False)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        
-        
+
         container = QFrame()
         container.setObjectName("container")
-        font_family = self.custom_font.family() if hasattr(self, 'custom_font') else "Segoe UI"
+        font_family = self.custom_font.family() if hasattr(self, "custom_font") else "Segoe UI"
         container.setStyleSheet(f"""
             #container {{
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
@@ -68,17 +70,17 @@ class AchievementPopup(TranslationMixin, QDialog):
                 font-family: '{font_family}';
             }}
         """)
-        
+
         container_layout = QHBoxLayout(container)
         container_layout.setContentsMargins(15, 15, 15, 15)
         container_layout.setSpacing(15)
-        
+
         # Icon
         icon_path = self.achievement_system.get_achievement_icon_path(self.achievement["icon"])
         icon_label = QLabel()
         icon_label.setAttribute(Qt.WA_TranslucentBackground)
         icon_label.setStyleSheet("background: transparent;")
-        
+
         if os.path.exists(icon_path):
             pixmap = QPixmap(icon_path)
             if not pixmap.isNull():
@@ -86,19 +88,17 @@ class AchievementPopup(TranslationMixin, QDialog):
                     scaled = pixmap.scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                 else:
                     scaled = pixmap.toImage().convertToFormat(QImage.Format_ARGB32)
-                    scaled = QPixmap.fromImage(scaled).scaled(
-                        64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation
-                    )
+                    scaled = QPixmap.fromImage(scaled).scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                 icon_label.setPixmap(scaled)
         else:
             icon_label.setText("🏆")
             icon_label.setStyleSheet("font-size: 48px;")
-        
+
         container_layout.addWidget(icon_label)
-        
+
         content_layout = QVBoxLayout()
         content_layout.setSpacing(5)
-        
+
         title_text = self.translate_text("SUCCÈS DÉBLOQUÉ")
         title_label = QLabel(f"🏆 {title_text} 🏆")
         title_label.setStyleSheet("""
@@ -108,7 +108,7 @@ class AchievementPopup(TranslationMixin, QDialog):
             background: transparent;
         """)
         content_layout.addWidget(title_label)
-        
+
         _raw_name = self.achievement["name"]
         if isinstance(_raw_name, str):
             name = self._tm.translate_text(_raw_name)
@@ -119,7 +119,7 @@ class AchievementPopup(TranslationMixin, QDialog):
         name_label.setStyleSheet(f"font-size: 16px; font-weight: bold;color: {name_color}; background: transparent;")
         name_label.setWordWrap(True)
         content_layout.addWidget(name_label)
-        
+
         _raw_desc = self.achievement["description"]
         if isinstance(_raw_desc, str):
             description = self._tm.translate_text(_raw_desc)
@@ -133,10 +133,10 @@ class AchievementPopup(TranslationMixin, QDialog):
         """)
         desc_label.setWordWrap(True)
         content_layout.addWidget(desc_label)
-        
+
         reward_layout = QHBoxLayout()
         reward_layout.addStretch()
-        
+
         xp_label = QLabel(f"+{self.achievement['reward_xp']} XP")
         xp_label.setStyleSheet("""
             font-size: 14px;
@@ -147,17 +147,17 @@ class AchievementPopup(TranslationMixin, QDialog):
             border-radius: 10px;
         """)
         reward_layout.addWidget(xp_label)
-        
+
         content_layout.addLayout(reward_layout)
         container_layout.addLayout(content_layout, 1)
-        
+
         layout.addWidget(container)
-        
+
         self.adjustSize()
         min_height = 120
-        max_height = 180  
+        max_height = 180
         self.setFixedHeight(max(min_height, min(self.sizeHint().height(), max_height)))
-        
+
         screen_geometry = self.screen().availableGeometry()
         self.move(screen_geometry.width() - self.width() - 20, 50)
 
@@ -166,7 +166,7 @@ class AchievementPopup(TranslationMixin, QDialog):
         container = self.findChild(QFrame, "container")
         if not container:
             return
-        
+
         if self.dark_mode:
             container.setStyleSheet("""
                 #container {
@@ -234,25 +234,25 @@ class AchievementPopup(TranslationMixin, QDialog):
 
     def setup_animations(self):
         """Configure animations"""
-        
+
         self.opacity_effect = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(self.opacity_effect)
-        
+
         self.enter_animation = QPropertyAnimation(self.opacity_effect, b"opacity")
         self.enter_animation.setDuration(500)
         self.enter_animation.setStartValue(0.0)
         self.enter_animation.setEndValue(1.0)
         self.enter_animation.setEasingCurve(QEasingCurve.OutCubic)
-        
+
         self.exit_animation = QPropertyAnimation(self.opacity_effect, b"opacity")
         self.exit_animation.setDuration(500)
         self.exit_animation.setStartValue(1.0)
         self.exit_animation.setEndValue(0.0)
         self.exit_animation.setEasingCurve(QEasingCurve.InCubic)
-        
+
         self.show()
         self.enter_animation.start()
-        
+
         QTimer.singleShot(6500, self.hide_popup)
 
     def play_sound(self):
@@ -261,40 +261,41 @@ class AchievementPopup(TranslationMixin, QDialog):
             sound_file = self.achievement_system.get_sound_path(
                 self.achievement_system.get_achievement_sound(self.achievement["id"])
             )
-            
-            print(f"Attempting to play sound: {sound_file}") 
-            
+
+            print(f"Attempting to play sound: {sound_file}")
+
             if sound_file and os.path.exists(sound_file):
-                print(f"Sound file found: {sound_file}") 
-                
-                from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
+                print(f"Sound file found: {sound_file}")
+
                 from PySide6.QtCore import QUrl
-                
+                from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
+
                 self.media_player = QMediaPlayer()
                 self.audio_output = QAudioOutput()
                 self.media_player.setAudioOutput(self.audio_output)
-                
-                self.audio_output.setVolume(0.7) 
-                
+
+                self.audio_output.setVolume(0.7)
+
                 url = QUrl.fromLocalFile(sound_file)
-                print(f"URL created: {url.toString()}")  
-                
+                print(f"URL created: {url.toString()}")
+
                 self.media_player.setSource(url)
-                
+
                 self.media_player.errorOccurred.connect(self.handle_player_error)
                 self.media_player.mediaStatusChanged.connect(self.handle_media_status)
                 self.media_player.playbackStateChanged.connect(self.handle_playback_state)
-                
+
                 self.media_player.play()
-                
-                print("Sound sent for playback")  
-            
+
+                print("Sound sent for playback")
+
             else:
-                print(f"Sound file NOT found or empty path: {sound_file}") 
-        
+                print(f"Sound file NOT found or empty path: {sound_file}")
+
         except Exception as e:
             print(f"Achievement sound playback error: {e}")
             import traceback
+
             traceback.print_exc()
 
     def handle_player_error(self, error):
@@ -305,8 +306,14 @@ class AchievementPopup(TranslationMixin, QDialog):
     def handle_media_status(self, status):
         """Track media status"""
         status_names = {
-            0: "NoMedia", 1: "Loading", 2: "Loaded", 3: "Stalled",
-            4: "Buffering", 5: "Buffered", 6: "EndOfMedia", 7: "InvalidMedia"
+            0: "NoMedia",
+            1: "Loading",
+            2: "Loaded",
+            3: "Stalled",
+            4: "Buffering",
+            5: "Buffered",
+            6: "EndOfMedia",
+            7: "InvalidMedia",
         }
         print(f"Media status: {status_names.get(status, status)}")
 
@@ -328,12 +335,8 @@ class AchievementPopup(TranslationMixin, QDialog):
     def play_fallback_sound(self):
         """Play a fallback sound"""
         try:
-            fallback_sounds = [
-                "trophy_progression.wav",
-                "first_step.wav",
-                "conversion_done.wav"
-            ]
-            
+            fallback_sounds = ["trophy_progression.wav", "first_step.wav", "conversion_done.wav"]
+
             for sound_file in fallback_sounds:
                 sound_path = self.achievement_system.get_sound_path(sound_file)
                 if sound_path and os.path.exists(sound_path):
@@ -343,9 +346,9 @@ class AchievementPopup(TranslationMixin, QDialog):
                     self.sound_effect.play()
                     print(f"Fallback sound played: {sound_file}")
                     return
-            
+
             print("No fallback sound found")
-        
+
         except Exception as e:
             print(f"Fallback sound playback error: {e}")
 
