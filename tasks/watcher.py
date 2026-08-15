@@ -25,8 +25,9 @@ except ImportError:
         tomllib = None
 
 try:
+    from watchdog.events import FileCreatedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
-    from watchdog.events import FileSystemEventHandler, FileCreatedEvent
+
     WATCHDOG_AVAILABLE = True
 except ImportError:
     WATCHDOG_AVAILABLE = False
@@ -34,30 +35,52 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 MERGE_IMAGE_ACTION = "merged_images_to_pdf"
-MERGE_PDF_ACTION   = "merged_pdf"
-MERGE_DOCX_ACTION  = "merged_docx"
+MERGE_PDF_ACTION = "merged_pdf"
+MERGE_DOCX_ACTION = "merged_docx"
 
 MERGE_ACTIONS = {MERGE_IMAGE_ACTION, MERGE_PDF_ACTION, MERGE_DOCX_ACTION}
 
 MERGE_DEBOUNCE_SECONDS = 2.0
 
 IMAGE_EXTENSIONS = {
-    "jpg", "jpeg", "png", "webp", "bmp", "tiff", "tif", "heic", "heif",
-    "jfif", "avif", "gif", "psd", "svg", "j2k", "jp2", "jpx",
-    "dng", "raw", "cr2", "cr3", "nef", "arw", "orf", "rw2", "raf",
+    "jpg",
+    "jpeg",
+    "png",
+    "webp",
+    "bmp",
+    "tiff",
+    "tif",
+    "heic",
+    "heif",
+    "jfif",
+    "avif",
+    "gif",
+    "psd",
+    "svg",
+    "j2k",
+    "jp2",
+    "jpx",
+    "dng",
+    "raw",
+    "cr2",
+    "cr3",
+    "nef",
+    "arw",
+    "orf",
+    "rw2",
+    "raf",
 }
-PDF_EXTENSIONS  = {"pdf"}
+PDF_EXTENSIONS = {"pdf"}
 DOCX_EXTENSIONS = {"docx", "doc"}
 _TEMP_PREFIXES = ("~$", "~")
 _TEMP_SUFFIXES = (".tmp", ".~tmp")
 
+
 def _is_temp_file(path: str | Path) -> bool:
     """Return True for temporary/lock files that should never be processed."""
     name = Path(path).name
-    return (
-        name.startswith(_TEMP_PREFIXES)
-        or name.lower().endswith(_TEMP_SUFFIXES)
-    )
+    return name.startswith(_TEMP_PREFIXES) or name.lower().endswith(_TEMP_SUFFIXES)
+
 
 def _get_automation_dir() -> Path:
     if getattr(sys, "frozen", False):
@@ -116,7 +139,7 @@ def _normalise_rule_value(raw) -> list:
                 result.append({"kind": "convert", "fmt": stripped})
         elif isinstance(item, dict):
             action = item.get("action", "").strip().lower()
-            sort   = item.get("sort",   "none").strip().lower()
+            sort = item.get("sort", "none").strip().lower()
             if action in MERGE_ACTIONS:
                 result.append({"kind": "merge", "action": action, "sort": sort})
             else:
@@ -142,14 +165,16 @@ def get_watch_folder_configs() -> list:
         if not path or not rules:
             logger.warning("[Watcher] Skipping '%s': missing path or rules", name)
             continue
-        result.append({
-            "name":             name,
-            "path":             path,
-            "output_dir":       cfg.get("output_dir", "").strip(),
-            "rules":            _normalise_rules(rules),
-            "recursive":        cfg.get("recursive", False),
-            "convert_existing": cfg.get("convert_existing", False),
-        })
+        result.append(
+            {
+                "name": name,
+                "path": path,
+                "output_dir": cfg.get("output_dir", "").strip(),
+                "rules": _normalise_rules(rules),
+                "recursive": cfg.get("recursive", False),
+                "convert_existing": cfg.get("convert_existing", False),
+            }
+        )
     return result
 
 
@@ -157,19 +182,21 @@ def get_all_watch_folder_configs() -> list:
     folders = _load_all_toml().get("watch_folders", {})
     result = []
     for name, cfg in folders.items():
-        path  = cfg.get("path", "").strip()
+        path = cfg.get("path", "").strip()
         rules = cfg.get("rules", {})
         if not path or not rules:
             continue
-        result.append({
-            "name":             name,
-            "path":             path,
-            "output_dir":       cfg.get("output_dir", "").strip(),
-            "rules":            _normalise_rules(rules),
-            "recursive":        cfg.get("recursive", False),
-            "convert_existing": cfg.get("convert_existing", False),
-            "enabled":          cfg.get("enabled", True),
-        })
+        result.append(
+            {
+                "name": name,
+                "path": path,
+                "output_dir": cfg.get("output_dir", "").strip(),
+                "rules": _normalise_rules(rules),
+                "recursive": cfg.get("recursive", False),
+                "convert_existing": cfg.get("convert_existing", False),
+                "enabled": cfg.get("enabled", True),
+            }
+        )
     return result
 
 
@@ -226,28 +253,32 @@ def _run_conversion(conversion_type: str, src: str, output_dir: str) -> None:
     os.makedirs(output_dir, exist_ok=True)
     if conversion_type == "image_to_pdf":
         from context_menu.window import _convert_image_to_pdf
+
         _convert_image_to_pdf(src, output_dir)
     elif conversion_type == "docx_to_pdf":
         from context_menu.window import _convert_docx_to_pdf
+
         _convert_docx_to_pdf(src, output_dir)
     elif conversion_type == "pdf_to_docx":
         from context_menu.window import _convert_pdf_to_docx
+
         _convert_pdf_to_docx(src, output_dir)
     else:
         from converter.converters import AdvancedConverterEngine
+
         result = AdvancedConverterEngine().convert(conversion_type, src, output_dir)
         if not result.success:
             raise RuntimeError(result.error)
 
 
 _SORT_TO_ORDER: dict[str, str] = {
-    "none":             "none",
+    "none": "none",
     "alphabetical_asc": "alpha_asc",
-    "alphabetical_desc":"alpha_desc",
-    "numerical_asc":    "num_asc",
-    "numerical_desc":   "num_desc",
-    "date_asc":         "date_asc",
-    "date_desc":        "date_desc",
+    "alphabetical_desc": "alpha_desc",
+    "numerical_asc": "num_asc",
+    "numerical_desc": "num_desc",
+    "date_asc": "date_asc",
+    "date_desc": "date_desc",
 }
 
 
@@ -272,7 +303,7 @@ def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str) -> 
     os.makedirs(output_dir, exist_ok=True)
 
     from context_menu.formats import MERGE_DISPATCH
-    from context_menu.window import _merge_images_to_pdf, _merge_pdfs, _merge_docx
+    from context_menu.window import _merge_docx, _merge_images_to_pdf, _merge_pdfs
 
     if conversion_type == "images_to_pdf_merged":
         _merge_images_to_pdf(file_paths, output_dir)
@@ -308,10 +339,7 @@ def _collect_merge_files(
         return []
 
     iterator = Path(folder).rglob("*") if recursive else Path(folder).iterdir()
-    return [
-        str(f) for f in iterator
-        if f.is_file() and f.suffix.lstrip(".").lower() in valid_exts
-    ]
+    return [str(f) for f in iterator if f.is_file() and f.suffix.lstrip(".").lower() in valid_exts]
 
 
 def _merge_state_path(output_dir: str, action: str) -> Path:
@@ -340,10 +368,14 @@ def _save_merge_state(output_dir: str, action: str, files: list[str]) -> None:
     state_file = _merge_state_path(output_dir, action)
     try:
         os.makedirs(output_dir, exist_ok=True)
-        state_file.write_text(json.dumps({
-            "fingerprint": _merge_fingerprint(files),
-            "files": sorted(files),
-        }))
+        state_file.write_text(
+            json.dumps(
+                {
+                    "fingerprint": _merge_fingerprint(files),
+                    "files": sorted(files),
+                }
+            )
+        )
     except Exception as e:
         logger.warning("[Watcher] Could not save merge state: %s", e)
 
@@ -361,7 +393,7 @@ class _FolderEventHandler(FileSystemEventHandler):
     def __init__(self, config: dict):
         super().__init__()
         self.config = config
-        self._lock  = Lock()
+        self._lock = Lock()
         self._seen: set[str] = set()
 
         self._merge_timers: dict[tuple, Timer] = {}
@@ -377,7 +409,7 @@ class _FolderEventHandler(FileSystemEventHandler):
 
         if _is_temp_file(src):
             return
-        ext   = Path(src).suffix.lstrip(".").lower()
+        ext = Path(src).suffix.lstrip(".").lower()
         rules = self.config["rules"]
 
         if ext not in rules:
@@ -391,9 +423,7 @@ class _FolderEventHandler(FileSystemEventHandler):
                 self._seen.discard(src)
             return
 
-        output_dir = _resolve_output_dir(
-            self.config["output_dir"], src, self.config["path"]
-        )
+        output_dir = _resolve_output_dir(self.config["output_dir"], src, self.config["path"])
 
         for rule in rules[ext]:
             if rule["kind"] == "convert":
@@ -415,9 +445,7 @@ class _FolderEventHandler(FileSystemEventHandler):
         except Exception as e:
             logger.error("[Watcher] %s → %s failed: %s", Path(src).name, fmt, e)
 
-    def _schedule_merge(
-        self, src: str, action: str, sort: str, output_dir: str
-    ) -> None:
+    def _schedule_merge(self, src: str, action: str, sort: str, output_dir: str) -> None:
         """
         (Re)start a debounce timer for the (output_dir, action, sort) group.
         The sub-folder of the file is the grouping unit so that recursive
@@ -437,7 +465,9 @@ class _FolderEventHandler(FileSystemEventHandler):
         t.start()
         logger.debug(
             "[Watcher] Merge debounce (re)started: action=%s sort=%s dir=%s",
-            action, sort, output_dir,
+            action,
+            sort,
+            output_dir,
         )
 
     def _fire_merge(self, action: str, sort: str, output_dir: str) -> None:
@@ -445,7 +475,7 @@ class _FolderEventHandler(FileSystemEventHandler):
         with self._lock:
             self._merge_timers.pop(key, None)
 
-        watch_root  = self.config["path"]
+        watch_root = self.config["path"]
         recursive = self.config["recursive"]
 
         out_base = self.config["output_dir"] if self.config["output_dir"] else watch_root
@@ -469,7 +499,10 @@ class _FolderEventHandler(FileSystemEventHandler):
         try:
             logger.info(
                 "[Watcher] Merge %s (%d files, sort=%s) → %s",
-                action, len(files), sort, output_dir,
+                action,
+                len(files),
+                sort,
+                output_dir,
             )
             _run_merge(conversion_type, files, output_dir)
             _save_merge_state(output_dir, action, files)
@@ -519,7 +552,7 @@ class WatcherManager:
             if not os.path.isdir(path):
                 logger.warning("[Watcher] Folder not found, skipping: %s", path)
                 continue
-            handler  = _FolderEventHandler(cfg)
+            handler = _FolderEventHandler(cfg)
             observer = Observer()
             observer.schedule(handler, path, recursive=cfg["recursive"])
             observer.start()
@@ -541,8 +574,8 @@ class WatcherManager:
         """
         Process files already present when the watcher starts.
         """
-        path      = cfg["path"]
-        rules     = cfg["rules"]
+        path = cfg["path"]
+        rules = cfg["rules"]
         recursive = cfg.get("recursive", False)
 
         iterator = Path(path).rglob("*") if recursive else Path(path).iterdir()
@@ -560,7 +593,7 @@ class WatcherManager:
 
             for rule in rules[ext]:
                 if rule["kind"] == "convert":
-                    fmt      = rule["fmt"]
+                    fmt = rule["fmt"]
                     expected = Path(output_dir) / f"{f.stem}.{fmt}"
                     if expected.exists():
                         continue
@@ -589,7 +622,10 @@ class WatcherManager:
             try:
                 logger.info(
                     "[Watcher] Existing merge %s (%d files, sort=%s) → %s",
-                    action, len(files), sort, output_dir,
+                    action,
+                    len(files),
+                    sort,
+                    output_dir,
                 )
                 _run_merge(conversion_type, files, output_dir)
                 _save_merge_state(output_dir, action, files)
