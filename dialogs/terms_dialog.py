@@ -6,21 +6,28 @@ Extracted from dialogs.py for better code organization.
 
 """
 
-import sys
 import os
 import re
+import sys
 
+from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QGroupBox, QTextBrowser, QTabWidget, QWidget, QMessageBox
+    QDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QTabWidget,
+    QTextBrowser,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtGui import QIcon, QDesktopServices
 
-from qss_helpers import _load_qss, _apply_dialog_btn
-from widgets import AnimatedCheckBox
-
+from qss_helpers import _apply_dialog_btn, _load_qss
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
+from widgets import AnimatedCheckBox
 
 
 class TermsAndPrivacyDialog(TranslationMixin, QDialog):
@@ -47,6 +54,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
     def get_icon_path(self):
         """Find icon.ico robustly (dev + PyInstaller)"""
         from utils import get_icon_path
+
         return get_icon_path("icon.ico")
 
     def get_legal_files_path(self):
@@ -54,7 +62,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         legal_dir = "legal"
 
         # PyInstaller mode
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             base_path = sys._MEIPASS
             path = os.path.join(base_path, legal_dir)
             if os.path.exists(path):
@@ -88,13 +96,13 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         <p>Contact the developer to obtain full versions.</p>
         """
 
-        with open(os.path.join(legal_dir, "privacy_policy_fr.html"), 'w', encoding='utf-8') as f:
+        with open(os.path.join(legal_dir, "privacy_policy_fr.html"), "w", encoding="utf-8") as f:
             f.write(default_content_fr)
-        with open(os.path.join(legal_dir, "privacy_policy_en.html"), 'w', encoding='utf-8') as f:
+        with open(os.path.join(legal_dir, "privacy_policy_en.html"), "w", encoding="utf-8") as f:
             f.write(default_content_en)
-        with open(os.path.join(legal_dir, "terms_conditions_fr.html"), 'w', encoding='utf-8') as f:
+        with open(os.path.join(legal_dir, "terms_conditions_fr.html"), "w", encoding="utf-8") as f:
             f.write(default_content_fr.replace("Politique de confidentialité", "Conditions d'utilisation"))
-        with open(os.path.join(legal_dir, "terms_conditions_en.html"), 'w', encoding='utf-8') as f:
+        with open(os.path.join(legal_dir, "terms_conditions_en.html"), "w", encoding="utf-8") as f:
             f.write(default_content_en.replace("Privacy Policy", "Terms of Use"))
 
     def setup_ui(self):
@@ -110,7 +118,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         terms_layout.setContentsMargins(15, 12, 15, 15)
 
         title_color = "#ffffff" if self.dark_mode else "#212529"
-        translated_msg = self.translate_text('Conditions d\'utilisation')
+        translated_msg = self.translate_text("Conditions d'utilisation")
         terms_title = QLabel(f"<h2 style='color: {title_color}; margin: 0 0 8px 0;'>{translated_msg}</h2>")
         terms_title.setStyleSheet(f"background-color: transparent; color: {title_color};")
         terms_layout.addWidget(terms_title)
@@ -130,7 +138,9 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         privacy_layout = QVBoxLayout(self.privacy_tab)
         privacy_layout.setContentsMargins(15, 12, 15, 15)
 
-        privacy_title = QLabel(f"<h2 style='color: {title_color}; margin: 0 0 8px 0;'>{self.translate_text('Politique de confidentialité')}</h2>")
+        privacy_title = QLabel(
+            f"<h2 style='color: {title_color}; margin: 0 0 8px 0;'>{self.translate_text('Politique de confidentialité')}</h2>"
+        )
         privacy_title.setStyleSheet(f"background-color: transparent; color: {title_color};")
         privacy_layout.addWidget(privacy_title)
 
@@ -213,8 +223,8 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
                 background-color: #1e7e34;
             }}
             QPushButton:disabled {{
-                background-color: {'#4a4a4a' if self.dark_mode else '#d1d5db'};
-                color: {'#808080' if self.dark_mode else '#9ca3af'};
+                background-color: {"#4a4a4a" if self.dark_mode else "#d1d5db"};
+                color: {"#808080" if self.dark_mode else "#9ca3af"};
             }}
         """)
 
@@ -300,20 +310,10 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         theme_css = self.get_html_theme_css()
         new_style = f"<style>\n{theme_css}\n</style>"
 
-        if re.search(r'<style[\s>]', content, re.IGNORECASE):
-            content = re.sub(
-                r'<style[^>]*>.*?</style>',
-                new_style,
-                content,
-                flags=re.IGNORECASE | re.DOTALL
-            )
-        elif '<head>' in content.lower():
-            content = re.sub(
-                r'(</head>)',
-                f'{new_style}\n\\1',
-                content,
-                flags=re.IGNORECASE
-            )
+        if re.search(r"<style[\s>]", content, re.IGNORECASE):
+            content = re.sub(r"<style[^>]*>.*?</style>", new_style, content, flags=re.IGNORECASE | re.DOTALL)
+        elif "<head>" in content.lower():
+            content = re.sub(r"(</head>)", f"{new_style}\n\\1", content, flags=re.IGNORECASE)
         else:
             content = new_style + "\n" + content
         return content
@@ -334,7 +334,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         legal_path = self.get_legal_files_path()
         file_path = os.path.join(legal_path, f"terms_conditions_{self._get_legal_lang_code('terms_conditions')}.html")
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
             return self._apply_theme_to_html(content)
         except Exception as e:
@@ -360,7 +360,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         legal_path = self.get_legal_files_path()
         file_path = os.path.join(legal_path, f"privacy_policy_{self._get_legal_lang_code('privacy_policy')}.html")
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
             return self._apply_theme_to_html(content)
         except Exception as e:
@@ -382,10 +382,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
             """
 
     def update_accept_button(self):
-        self.accept_button.setEnabled(
-            self.terms_checkbox.isChecked() and
-            self.privacy_checkbox.isChecked()
-        )
+        self.accept_button.setEnabled(self.terms_checkbox.isChecked() and self.privacy_checkbox.isChecked())
 
     def accept(self):
         if self.terms_checkbox.isChecked() and self.privacy_checkbox.isChecked():
@@ -393,12 +390,14 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
 
     def reject(self):
         """Handle click on Decline"""
-        if hasattr(self, 'from_settings') and self.from_settings:
+        if hasattr(self, "from_settings") and self.from_settings:
             super().reject()
         else:
             QMessageBox.information(
                 self,
                 self.translate_text("Conditions requises"),
-                self.translate_text("Vous devez accepter les conditions d'utilisation et la politique de confidentialité pour utiliser cette application.")
+                self.translate_text(
+                    "Vous devez accepter les conditions d'utilisation et la politique de confidentialité pour utiliser cette application."
+                ),
             )
             super().reject()
