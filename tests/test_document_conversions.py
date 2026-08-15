@@ -81,7 +81,7 @@ def test_json_to_csv_empty(tmp_path):
 
 def test_csv_to_json_special_chars(tmp_path):
     src = tmp_path / "special.csv"
-    src.write_text("text,value\n\"hello, world\",42\n\"line1\nline2\",99", encoding="utf-8")
+    src.write_text('text,value\n"hello, world",42\n"line1\nline2",99', encoding="utf-8")
     dst = tmp_path / "special.json"
     engine = _engine()
     result = engine._csv_to_json(str(src), str(dst))
