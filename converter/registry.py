@@ -1,0 +1,101 @@
+"""Conversion type registry: category map and method dispatch table."""
+
+from __future__ import annotations
+
+CATEGORY_MAP = {
+    # Documents
+    "txt_to_pdf": "document",
+    "rtf_to_pdf": "document",
+    "txt_to_docx": "document",
+    "rtf_to_docx": "document",
+    "csv_to_json": "document",
+    "json_to_csv": "document",
+    "xlsx_to_pdf": "document",
+    "xlsx_to_json": "document",
+    "xlsx_to_csv": "document",
+    "pptx_to_pdf": "document",
+    "html_to_pdf": "document",
+    "pdf_to_html": "document",
+    "epub_to_pdf": "document",
+    # Images
+    "image_to_png": "image",
+    "image_to_jpeg": "image",
+    "image_to_jpg": "image",
+    "image_to_bmp": "image",
+    "image_to_heic": "image",
+    "image_to_webp": "image",
+    "image_to_tiff": "image",
+    "image_to_psd": "image",
+    "image_to_svg": "image",
+    "image_to_avif": "image",
+    "image_to_j2k": "image",
+    "image_to_dng": "image",
+    "image_to_ico": "image",
+    # Video
+    "video_to_mp4": "video",
+    "video_to_webm": "video",
+    "video_to_mkv": "video",
+    "video_to_mov": "video",
+    "video_to_avi": "video",
+    "video_to_mp3": "audio",
+    "video_to_wav": "audio",
+    "video_to_aac": "audio",
+    "video_to_flac": "audio",
+    # Audio
+    "audio_to_mp3": "audio",
+    "audio_to_wav": "audio",
+    "audio_to_aac": "audio",
+    "audio_to_ogg": "audio",
+    "audio_to_flac": "audio",
+    "audio_to_m4a": "audio",
+}
+
+
+DISPATCH = {
+    # Documents
+    "txt_to_pdf": ("_txt_to_pdf", "pdf"),
+    "rtf_to_pdf": (("_rtf_to_pdf_native", "_rtf_to_pdf"), "pdf"),
+    "txt_to_docx": ("_txt_to_docx", "docx"),
+    "rtf_to_docx": ("_rtf_to_docx", "docx"),
+    "csv_to_json": ("_csv_to_json", "json"),
+    "json_to_csv": ("_json_to_csv", "csv"),
+    "xlsx_to_pdf": (("_xlsx_to_pdf_com", "_xlsx_to_pdf"), "pdf"),
+    "xlsx_to_json": ("_xlsx_to_json", "json"),
+    "xlsx_to_csv": ("_xlsx_to_csv", "csv"),
+    "pptx_to_pdf": (("_pptx_to_pdf_com", "_pptx_to_pdf_native", "_pptx_to_pdf"), "pdf"),
+    "html_to_pdf": ("_html_to_pdf", "pdf"),
+    "pdf_to_html": ("_pdf_to_html", "html"),
+    "epub_to_pdf": ("_epub_to_pdf", "pdf"),
+    # Images
+    "image_to_png": ("_image_convert", "png"),
+    "image_to_jpeg": ("_image_convert", "jpeg"),
+    "image_to_jpg": ("_image_convert", "jpg"),
+    "image_to_bmp": ("_image_convert", "bmp"),
+    "image_to_heic": ("_heic_convert", "heic"),
+    "image_to_webp": ("_image_convert", "webp"),
+    "image_to_tiff": ("_image_convert", "tiff"),
+    "image_to_psd": ("_magick_convert", "psd"),
+    "image_to_svg": ("_image_to_svg", "svg"),
+    "image_to_avif": ("_image_convert", "avif"),
+    "image_to_j2k": ("_image_convert", "j2k"),
+    "image_to_dng": ("_raw_convert", "dng"),
+    "image_to_ico": ("_image_to_ico", "ico"),
+    # Video → Video
+    "video_to_mp4": ("_ffmpeg_convert", "mp4"),
+    "video_to_webm": ("_ffmpeg_convert", "webm"),
+    "video_to_mkv": ("_ffmpeg_convert", "mkv"),
+    "video_to_mov": ("_ffmpeg_convert", "mov"),
+    "video_to_avi": ("_ffmpeg_convert", "avi"),
+    # Video → Audio
+    "video_to_mp3": ("_ffmpeg_convert", "mp3"),
+    "video_to_wav": ("_ffmpeg_convert", "wav"),
+    "video_to_aac": ("_ffmpeg_convert", "aac"),
+    "video_to_flac": ("_ffmpeg_convert", "flac"),
+    # Audio → Audio
+    "audio_to_mp3": ("_ffmpeg_convert", "mp3"),
+    "audio_to_wav": ("_ffmpeg_convert", "wav"),
+    "audio_to_aac": ("_ffmpeg_convert", "aac"),
+    "audio_to_ogg": ("_ffmpeg_convert", "ogg"),
+    "audio_to_flac": ("_ffmpeg_convert", "flac"),
+    "audio_to_m4a": ("_ffmpeg_convert", "m4a"),
+}
