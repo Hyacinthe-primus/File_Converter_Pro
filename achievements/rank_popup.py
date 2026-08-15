@@ -7,13 +7,13 @@ Rank Popup
 """
 
 import os
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-                               QFrame, QGraphicsOpacityEffect)
-from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QPixmap, QFont, QColor
-from PySide6.QtCore import QUrl
 import sys
-_PKG_DIR  = os.path.dirname(os.path.abspath(__file__))
+
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer, QUrl
+from PySide6.QtGui import QColor, QFont, QPixmap
+from PySide6.QtWidgets import QDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QVBoxLayout
+
+_PKG_DIR = os.path.dirname(os.path.abspath(__file__))
 _ROOT_DIR = os.path.dirname(_PKG_DIR)
 if _ROOT_DIR not in sys.path:
     sys.path.insert(0, _ROOT_DIR)
@@ -21,8 +21,8 @@ if _ROOT_DIR not in sys.path:
 from translations import TranslationManager
 from utils.translation_mixin import TranslationMixin
 
-class RankPopup(TranslationMixin, QDialog):
 
+class RankPopup(TranslationMixin, QDialog):
     def __init__(self, rank_data, achievement_system, parent=None, language="fr"):
         super().__init__(parent)
         self.rank_data = rank_data
@@ -30,7 +30,7 @@ class RankPopup(TranslationMixin, QDialog):
         self.language = language
         self._tm = TranslationManager()
         self._tm.set_language(language)
-        self.dark_mode = getattr(parent, 'dark_mode', True)
+        self.dark_mode = getattr(parent, "dark_mode", True)
 
     def setup_ui(self):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
@@ -74,7 +74,7 @@ class RankPopup(TranslationMixin, QDialog):
                 color: #212529;
             }}
             """)
-        
+
         icon_path = self.achievement_system.get_achievement_icon_path(self.rank_data["icon"])
         icon_label = QLabel()
         icon_label.setAttribute(Qt.WA_TranslucentBackground)
@@ -86,9 +86,9 @@ class RankPopup(TranslationMixin, QDialog):
             icon_label.setText("🎖️")
             icon_label.setStyleSheet("font-size: 48px;")
         container_layout.addWidget(icon_label)
-        
+
         content_layout = QVBoxLayout()
-        
+
         rank_up_text = self.translate_text("Rank Up!")
         self.rank_up_label = QLabel(rank_up_text.upper())
         self.rank_up_label.setAttribute(Qt.WA_TranslucentBackground)
@@ -102,13 +102,13 @@ class RankPopup(TranslationMixin, QDialog):
             letter-spacing: 1.5px;
         """)
         content_layout.addWidget(self.rank_up_label, alignment=Qt.AlignCenter)
-        
+
         title_label = QLabel(self.translate_text("🏆 NOUVEAU TITRE 🏆"))
         title_label.setAttribute(Qt.WA_TranslucentBackground)
         text_color = self.rank_data.get("color", "#FFFFFF")
         title_label.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {text_color};")
         content_layout.addWidget(title_label)
-        
+
         _raw_name = self.rank_data["name"]
         if isinstance(_raw_name, str):
             name = self._tm.translate_text(_raw_name)
@@ -118,7 +118,7 @@ class RankPopup(TranslationMixin, QDialog):
         name_label.setAttribute(Qt.WA_TranslucentBackground)
         name_label.setStyleSheet(f"font-size: 16px; font-weight: bold; color: {text_color};")
         content_layout.addWidget(name_label)
-        
+
         reward_layout = QHBoxLayout()
         reward_layout.addStretch()
         xp_label = QLabel(f"+{self.achievement_system.get_total_xp()} XP")
@@ -132,18 +132,19 @@ class RankPopup(TranslationMixin, QDialog):
         """)
         reward_layout.addWidget(xp_label)
         content_layout.addLayout(reward_layout)
-        
+
         container_layout.addLayout(content_layout, 1)
         layout.addWidget(container)
-        
+
         self.adjustSize()
         self.setFixedHeight(min(180, max(120, self.sizeHint().height())))
         screen = self.screen().availableGeometry()
         self.move(screen.width() - self.width() - 20, 50)
-        
+
         font_path = os.path.join(_ROOT_DIR, "fonts", "SF-Pro-Display-Medium.ttf")
         if os.path.exists(font_path):
             from PySide6.QtGui import QFontDatabase
+
             font_id = QFontDatabase.addApplicationFont(font_path)
             if font_id != -1:
                 families = QFontDatabase.applicationFontFamilies(font_id)
@@ -166,7 +167,8 @@ class RankPopup(TranslationMixin, QDialog):
         try:
             sound_file = self.achievement_system.get_sound_path(self.rank_data["sound"])
             if sound_file and os.path.exists(sound_file):
-                from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
+                from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
+
                 self.media_player = QMediaPlayer()
                 self.audio_output = QAudioOutput()
                 self.media_player.setAudioOutput(self.audio_output)
