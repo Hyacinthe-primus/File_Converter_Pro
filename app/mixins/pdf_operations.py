@@ -1,11 +1,12 @@
 """PdfOperationsMixin — PDF merge, split, protect methods."""
 
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
-from PySide6.QtWidgets import QDialog, QMessageBox
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QDialog, QMessageBox
+
 
 class PdfOperationsMixin:
     """Mixin: PDF merge, split, protect for FileConverterApp."""
@@ -25,11 +26,15 @@ class PdfOperationsMixin:
             pdf_files = [f for f in self.files_list if f.lower().endswith('.pdf')]
 
         if len(pdf_files) < 2:
-            msg = self.translate_text("Veuillez sélectionner au moins 2 fichiers PDF") if selected_items else self.translate_text("La liste doit contenir au moins 2 fichiers PDF")
+            msg = (
+                self.translate_text("Veuillez sélectionner au moins 2 fichiers PDF")
+                if selected_items
+                else self.translate_text("La liste doit contenir au moins 2 fichiers PDF")
+            )
             QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
             return
 
-        dialog = MergeOrderDialog(pdf_files, ".pdf", language = self.current_language)
+        dialog = MergeOrderDialog(pdf_files, ".pdf", parent=self, language=self.current_language)
         if dialog.exec() != QDialog.Accepted:
             return
         ordered_files = dialog.get_ordered_files()
@@ -52,7 +57,16 @@ class PdfOperationsMixin:
             writer.close()
 
             conversion_time = (datetime.now() - start_time).total_seconds()
-            self.db_manager.add_conversion_record(source_file=", ".join([Path(f).name for f in ordered_files]), source_format="PDF", target_file=output_file, target_format="PDF", operation_type="merge_pdf", file_size=total_size, conversion_time=conversion_time, success=True)
+            self.db_manager.add_conversion_record(
+                source_file=", ".join([Path(f).name for f in ordered_files]),
+                source_format="PDF",
+                target_file=output_file,
+                target_format="PDF",
+                operation_type="merge_pdf",
+                file_size=total_size,
+                conversion_time=conversion_time,
+                success=True,
+            )
             self.achievement_system.record_conversion("merge_pdf", total_size, True)
             import fitz
             merged_doc = fitz.open(output_file)
@@ -61,8 +75,13 @@ class PdfOperationsMixin:
             self.show_progress(False)
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("merge_pdf")
-            QMessageBox.information(self, self.translate_text("Succès"),
-                                    self.translate_text("pdf_merge_success").format(count=len(ordered_files), time=f"{conversion_time:.1f}"))
+            QMessageBox.information(
+                self,
+                self.translate_text("Succès"),
+                self.translate_text("pdf_merge_success").format(
+                    count=len(ordered_files), time=f"{conversion_time:.1f}"
+                ),
+            )
         except Exception as e:
             self.show_progress(False)
             QMessageBox.critical(self, self.translate_text("Erreur"),
@@ -70,6 +89,7 @@ class PdfOperationsMixin:
 
     def merge_word_docs(self):
         from docxcompose.composer import Composer
+
         from dialogs.merge_order_dialog import MergeOrderDialog
         selected_items = self.files_list_widget.selectedItems()
         word_files = []
@@ -88,7 +108,7 @@ class PdfOperationsMixin:
                                 self.translate_text("Veuillez sélectionner au moins 2 fichiers Word"))
             return
 
-        dialog = MergeOrderDialog(word_files, ".docx", language = self.current_language)
+        dialog = MergeOrderDialog(word_files, ".docx", parent=self, language=self.current_language)
         if dialog.exec() != QDialog.Accepted:
             return
         ordered_files = dialog.get_ordered_files()
@@ -106,16 +126,31 @@ class PdfOperationsMixin:
             from docx import Document
             composer = Composer(Document(word_files[0]))
             for wf in word_files[1:]:
+                composer.doc.add_page_break()
                 composer.append(Document(wf))
             composer.save(output_file)
             self.show_progress(False)
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("merge_word")
             conversion_time = (datetime.now() - start_time).total_seconds()
-            self.db_manager.add_conversion_record(source_file=", ".join([Path(f).name for f in ordered_files]), source_format="Word", target_file=output_file, target_format="Word", operation_type="merge_word", file_size=total_size, conversion_time=conversion_time, success=True)
+            self.db_manager.add_conversion_record(
+                source_file=", ".join([Path(f).name for f in ordered_files]),
+                source_format="Word",
+                target_file=output_file,
+                target_format="Word",
+                operation_type="merge_word",
+                file_size=total_size,
+                conversion_time=conversion_time,
+                success=True,
+            )
             self.achievement_system.record_conversion("merge_word", total_size, True)
-            QMessageBox.information(self, self.translate_text("Succès"),
-                                    self.translate_text("word_merge_success").format(count=len(word_files), time=f"{conversion_time:.1f}"))
+            QMessageBox.information(
+                self,
+                self.translate_text("Succès"),
+                self.translate_text("word_merge_success").format(
+                    count=len(word_files), time=f"{conversion_time:.1f}"
+                ),
+            )
         except Exception as e:
             self.show_progress(False)
             QMessageBox.critical(self, self.translate_text("Erreur"),
@@ -199,7 +234,6 @@ class PdfOperationsMixin:
 
             pdf_document.close()
             self.achievement_system.record_pdf_split(total_pages)
-            self.achievement_system.record_conversion("split_pdf", 0, True)
             if not silent:
                 if self.config.get("enable_system_notifications", True):
                     self.system_notifier.send("split_pdf")
@@ -260,5 +294,10 @@ class PdfOperationsMixin:
         self.show_progress(False)
         if success_count > 0:
             self.achievement_system.record_pdf_protection(success_count, len(password))
-        QMessageBox.information(self, self.translate_text("Succès"),
-                                self.translate_text("all_pdfs_protected").format(success_count=success_count, total_time="0"))
+        QMessageBox.information(
+            self,
+            self.translate_text("Succès"),
+            self.translate_text("all_pdfs_protected").format(
+                success_count=success_count, total_time=0.0
+            ),
+        )
