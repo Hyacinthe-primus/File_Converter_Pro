@@ -6,27 +6,19 @@ import os
 import subprocess
 from pathlib import Path
 
-_NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
+
 
 class MediaConverters:
     """Audio/video conversion methods for AdvancedConverterEngine."""
 
     @staticmethod
     def _find_ffmpeg() -> str | None:
-        """Locate ffmpeg binary in PATH or common install dirs."""
-        import shutil
-        ffmpeg = shutil.which("ffmpeg")
-        if ffmpeg:
-            return ffmpeg
-        candidates = [
-            r"C:\ffmpeg\bin\ffmpeg.exe",
-            r"C:\Program Files\ffmpeg\bin\ffmpeg.exe",
-            "/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg",
-        ]
-        for c in candidates:
-            if c and os.path.isfile(c):
-                return c
-        return None
+        """Locate ffmpeg via the centralized resolver
+        (PATH → app-local → common dirs → config file)."""
+        from external_binaries import resolve_binary
+
+        return resolve_binary("ffmpeg")
 
     def _has_audio_stream(self, src: str, ffmpeg_bin: str) -> bool:
         try:
@@ -42,33 +34,33 @@ class MediaConverters:
             print("[ffmpeg] ffmpeg not found")
             return False
 
-        ext = Path(dst).suffix.lower().lstrip('.')
+        ext = Path(dst).suffix.lower().lstrip(".")
 
         AUDIO_PRESETS = {
-            'mp3': ['-codec:a', 'libmp3lame', '-q:a', '2'],
-            'wav': ['-codec:a', 'pcm_s16le'],
-            'aac': ['-codec:a', 'aac', '-b:a', '192k'],
-            'ogg': ['-codec:a', 'libvorbis', '-q:a', '4'],
-            'flac': ['-codec:a', 'flac'],
-            'm4a': ['-codec:a', 'aac', '-b:a', '192k'],
+            "mp3": ["-codec:a", "libmp3lame", "-q:a", "2"],
+            "wav": ["-codec:a", "pcm_s16le"],
+            "aac": ["-codec:a", "aac", "-b:a", "192k"],
+            "ogg": ["-codec:a", "libvorbis", "-q:a", "4"],
+            "flac": ["-codec:a", "flac"],
+            "m4a": ["-codec:a", "aac", "-b:a", "192k"],
         }
 
         VIDEO_PRESETS = {
-            'mp4': ['-codec:v', 'libx264', '-crf', '23', '-codec:a', 'aac'],
-            'webm': ['-codec:v', 'libvpx-vp9', '-crf', '30', '-codec:a', 'libopus'],
-            'mkv': ['-codec:v', 'libx264', '-crf', '23', '-codec:a', 'aac'],
-            'mov': ['-codec:v', 'libx264', '-crf', '23', '-codec:a', 'aac'],
-            'avi': ['-codec:v', 'libxvid', '-qscale:v', '4', '-codec:a', 'libmp3lame'],
+            "mp4": ["-codec:v", "libx264", "-crf", "23", "-codec:a", "aac"],
+            "webm": ["-codec:v", "libvpx-vp9", "-crf", "30", "-codec:a", "libopus"],
+            "mkv": ["-codec:v", "libx264", "-crf", "23", "-codec:a", "aac"],
+            "mov": ["-codec:v", "libx264", "-crf", "23", "-codec:a", "aac"],
+            "avi": ["-codec:v", "libxvid", "-qscale:v", "4", "-codec:a", "libmp3lame"],
         }
 
-        cmd = [ffmpeg, '-y', '-i', src]
+        cmd = [ffmpeg, "-y", "-i", src]
 
         if ext in AUDIO_PRESETS:
             cmd.extend(AUDIO_PRESETS[ext])
         elif ext in VIDEO_PRESETS:
             cmd.extend(VIDEO_PRESETS[ext])
         else:
-            cmd.extend(['-codec:v', 'copy', '-codec:a', 'copy'])
+            cmd.extend(["-codec:v", "copy", "-codec:a", "copy"])
 
         cmd.append(dst)
 
