@@ -1,10 +1,8 @@
 """ModernSplashScreen — Animated loading screen with progress steps."""
 
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QProgressBar,
-                               QFrame)
-from PySide6.QtCore import (Qt, QPropertyAnimation, QEasingCurve,
-                            QSequentialAnimationGroup)
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSequentialAnimationGroup, Qt
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QFrame, QLabel, QProgressBar, QVBoxLayout, QWidget
 
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
@@ -27,6 +25,7 @@ class ModernSplashScreen(TranslationMixin, QWidget):
     def get_icon_path(self):
         """Find icon.ico robustly (dev + PyInstaller)"""
         from utils import get_icon_path
+
         return get_icon_path("icon.ico")
 
     def setup_ui(self):
