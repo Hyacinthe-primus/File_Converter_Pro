@@ -16,21 +16,71 @@ Features:
 
 import os
 import platform
+import re
 import webbrowser
 
 IS_WINDOWS = platform.system() == "Windows"
 
+
+def _compare_versions(a: str, b: str) -> int:
+    """Compare two dotted version strings numerically.
+
+    Returns negative if a < b, 0 if equal, positive if a > b.
+    Non-numeric segments (e.g. "1.0.7-rc1") are ignored for ordering.
+    """
+    a_parts = [int(p) for p in re.findall(r"\d+", a)]
+    b_parts = [int(p) for p in re.findall(r"\d+", b)]
+    for x, y in zip(a_parts, b_parts):
+        if x != y:
+            return -1 if x < y else 1
+    return (len(a_parts) > len(b_parts)) - (len(a_parts) < len(b_parts))
+
 if IS_WINDOWS:
     try:
-        from winotify import Notification as WinotifyNotification
+        import subprocess as _winotify_subprocess
 
+        from winotify import Notification as WinotifyNotification
+        import winotify as _winotify_module
+
+        def _run_ps_isolated(*, file: str = "", command: str = "") -> None:
+            """Replacement for winotify._run_ps.
+
+            The original spawns powershell.exe without CREATE_NO_WINDOW, so the
+            child attaches to the parent's console (ConPTY) and resets it
+            (clears the screen/scrollback and rewrites the title). Giving the
+            child its own hidden console keeps the app's terminal intact.
+            """
+            si = _winotify_subprocess.STARTUPINFO()
+            si.dwFlags |= _winotify_subprocess.STARTF_USESHOWWINDOW
+
+            cmd = ["powershell.exe", "-ExecutionPolicy", "Bypass"]
+            if file and command:
+                raise ValueError
+            elif file:
+                cmd.extend(["-file", file])
+            elif command:
+                cmd.extend(["-Command", command])
+            else:
+                raise ValueError
+
+            _winotify_subprocess.Popen(
+                cmd,
+                stdin=_winotify_subprocess.DEVNULL,
+                stdout=_winotify_subprocess.DEVNULL,
+                stderr=_winotify_subprocess.DEVNULL,
+                startupinfo=si,
+                creationflags=_winotify_subprocess.CREATE_NO_WINDOW,
+            )
+
+        _winotify_module._run_ps = _run_ps_isolated
         WINOTIFY_AVAILABLE = True
     except ImportError:
         WINOTIFY_AVAILABLE = False
-        print("[NOTIFIER] ⚠️ winotify not installed — falling back to Qt tray")
+        print("[NOTIFIER] winotify not installed — falling back to Qt tray")
 else:
     WINOTIFY_AVAILABLE = False
 
+from PySide6.QtCore import QObject, Signal  # noqa: E402
 from PySide6.QtGui import QAction, QIcon  # noqa: E402
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon  # noqa: E402
 
@@ -45,14 +95,21 @@ class QtNotifier:
     """Qt-based system tray notifier (fallback for non-Windows or missing winotify)."""
 
     def __init__(self) -> None:
-        self.tray = QSystemTrayIcon()
-        self.tray.setIcon(QIcon("icon.png"))
-        self.tray.show()
+        self.tray = None
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            self.tray = QSystemTrayIcon()
+            self.tray.setIcon(QIcon("icon.png"))
+            self.tray.show()
+        else:
+            print("[NOTIFIER] No system tray available — desktop notifications disabled")
 
     def notify(self, title: str, message: str) -> None:
-        self.tray.showMessage(title, message)
+        if self.tray is not None:
+            self.tray.showMessage(title, message)
 
     def notify_with_actions(self, title: str, message: str, actions: list) -> None:
+        if self.tray is None:
+            return
         self.tray.showMessage(title, message)
         menu = QMenu()
         for label, callback in actions:
@@ -62,13 +119,20 @@ class QtNotifier:
         self.tray.setContextMenu(menu)
 
 
+class _NotifierBridge(QObject):
+    """Forwards notification requests from worker threads to the Qt main thread."""
+
+    notify_request = Signal(str, str, str, str, str)  # title, message, action_label, action_url, duration
+    update_available = Signal(str, str, str)  # title, message, release_url
+
+
 try:
     from playsound3 import playsound
 
     PLAY_SOUND_AVAILABLE = True
 except ImportError:
     PLAY_SOUND_AVAILABLE = False
-    print("[NOTIFIER] ⚠️ playsound3 not installed")
+    print("[NOTIFIER] playsound3 not installed")
 
 
 class SystemNotifier:
@@ -111,6 +175,9 @@ class SystemNotifier:
         self.toast_icon_path = self.icon_path if os.path.exists(self.icon_path) else ""
 
         self._qt_notifier = QtNotifier()
+        self._bridge = _NotifierBridge()
+        self._bridge.notify_request.connect(self._show_notification)
+        self._bridge.update_available.connect(self._show_update_notification)
 
         backend = "winotify (Windows)" if (IS_WINDOWS and WINOTIFY_AVAILABLE) else "Qt tray"
         print(
@@ -220,12 +287,12 @@ class SystemNotifier:
         """Play the notification sound if available."""
         if PLAY_SOUND_AVAILABLE and self.sound_path and os.path.exists(self.sound_path):
             try:
-                print(f"[NOTIFIER] 🔊 Playing sound: {self.sound_path}")
+                print(f"[NOTIFIER] Playing sound: {self.sound_path}")
                 playsound(self.sound_path, block=False)
             except Exception as e:
-                print(f"[NOTIFIER] ❌ Sound error: {e}")
+                print(f"[NOTIFIER] Sound error: {e}")
         else:
-            print("[NOTIFIER] ⚠️ Sound skipped (file missing or playsound3 not installed)")
+            print("[NOTIFIER] Sound skipped (file missing or playsound3 not installed)")
 
     # Public API
 
@@ -247,53 +314,30 @@ class SystemNotifier:
             True if the notification was sent, False otherwise.
         """
         if not config_enabled:
-            print("[NOTIFIER] ❌ Notifications disabled in settings")
+            print("[NOTIFIER] Notifications disabled in settings")
             return False
 
         if not self.should_notify(operation_type):
-            print(f"[NOTIFIER] ⚠️ Excluded operation: {operation_type}")
+            print(f"[NOTIFIER] Excluded operation: {operation_type}")
             return False
 
         try:
             task_name = self._get_task_display_name(operation_type)
             message = self._translate_message(task_name)
+            print(f"[NOTIFIER] Sending notification: {operation_type} → '{message}'")
 
-            print(f"[NOTIFIER] 📤 Sending notification: {operation_type} → '{message}'")
-
-            icon_to_use = ""
-            if self.toast_icon_path and os.path.exists(self.toast_icon_path):
-                icon_to_use = self.toast_icon_path
-                print(f"[NOTIFIER] 🖼️ Icon used: {icon_to_use}")
-            else:
-                print("[NOTIFIER] ⚠️ No icon available")
-
-            if IS_WINDOWS and WINOTIFY_AVAILABLE:
-                toast = WinotifyNotification(
-                    app_id=self.app_id,
-                    title=self.app_name,
-                    msg=message,
-                    duration="short",
-                    icon=icon_to_use,
-                )
-                toast.add_actions(
-                    label=self._repo_button_label(),
-                    launch=self.REPO_URL,
-                )
-                toast.show()
-            else:
-                self._qt_notifier.notify_with_actions(
-                    title=self.app_name,
-                    message=message,
-                    actions=[
-                        (self._repo_button_label(), lambda: open_url(self.REPO_URL)),
-                    ],
-                )
-
+            self._bridge.notify_request.emit(
+                self.app_name,
+                message,
+                self._repo_button_label(),
+                self.REPO_URL,
+                "short",
+            )
             self._play_sound()
             return True
 
         except Exception as e:
-            print(f"[NOTIFIER] 💥 CRITICAL ERROR: {e}")
+            print(f"[NOTIFIER] CRITICAL ERROR: {e}")
             import traceback
 
             traceback.print_exc()
@@ -311,28 +355,13 @@ class SystemNotifier:
             return False
 
         try:
-            if IS_WINDOWS and WINOTIFY_AVAILABLE:
-                toast = WinotifyNotification(
-                    app_id=self.app_id,
-                    title=title,
-                    msg=message,
-                    duration=duration,
-                    icon=self.toast_icon_path if self.toast_icon_path and os.path.exists(self.toast_icon_path) else "",
-                )
-                toast.add_actions(
-                    label=self._repo_button_label(),
-                    launch=self.REPO_URL,
-                )
-                toast.show()
-            else:
-                self._qt_notifier.notify_with_actions(
-                    title=title,
-                    message=message,
-                    actions=[
-                        (self._repo_button_label(), lambda: open_url(self.REPO_URL)),
-                    ],
-                )
-
+            self._bridge.notify_request.emit(
+                title,
+                message,
+                self._repo_button_label(),
+                self.REPO_URL,
+                duration,
+            )
             self._play_sound()
             return True
 
@@ -341,7 +370,7 @@ class SystemNotifier:
             return False
 
     def check_and_notify_update(self) -> bool:
-        """Check GitHub releases and notify if a newer version is available."""
+        """Check GitHub releases in the background; show the result on the Qt main thread."""
         try:
             import requests
 
@@ -352,36 +381,54 @@ class SystemNotifier:
             latest = resp.json()["tag_name"].lstrip("v")
             current = __version__.lstrip("v")
 
-            if latest == current:
-                print(f"[NOTIFIER] Up to date ({current})")
+            if _compare_versions(current, latest) >= 0:
+                if _compare_versions(current, latest) > 0:
+                    print(f"[NOTIFIER] Up to date ({current}) - ahead of GitHub version {latest}")
+                else:
+                    print(f"[NOTIFIER] Up to date ({current})")
                 return False
 
-            print(f"[NOTIFIER] 🆕 Update available: {current} → {latest}")
+            print(f"[NOTIFIER] Update available: {current} → {latest}")
 
             release_url = "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest"
-            title = "File Converter Pro — Update Available"
+            title = "File Converter Pro - Update Available"
             message = f"Version {latest} is available. You're on {current}"
-
-            if IS_WINDOWS and WINOTIFY_AVAILABLE:
-                toast = WinotifyNotification(
-                    app_id=self.app_id,
-                    title=title,
-                    msg=message,
-                    duration="long",
-                    icon=self.toast_icon_path if os.path.exists(self.toast_icon_path) else "",
-                )
-                toast.add_actions(label="⬇️ Download", launch=release_url)
-                toast.show()
-            else:
-                self._qt_notifier.notify_with_actions(
-                    title=title,
-                    message=message,
-                    actions=[("⬇️ Download", lambda: open_url(release_url))],
-                )
-
-            self._play_sound()
+            self._bridge.update_available.emit(title, message, release_url)
             return True
 
         except Exception as e:
             print(f"[NOTIFIER] ❌ Update check failed: {e}")
             return False
+
+    def _show_notification(self, title: str, message: str, action_label: str, action_url: str, duration: str) -> None:
+        """Runs on the Qt main thread — safe to touch the tray here."""
+        try:
+            icon = getattr(self, "toast_icon_path", "") or ""
+            if icon and not os.path.exists(icon):
+                icon = ""
+            if IS_WINDOWS and WINOTIFY_AVAILABLE:
+                toast = WinotifyNotification(
+                    app_id=self.app_id,
+                    title=title,
+                    msg=message,
+                    duration=duration,
+                    icon=icon,
+                )
+                toast.add_actions(label=action_label, launch=action_url)
+                toast.show()
+            else:
+                self._qt_notifier.notify_with_actions(
+                    title=title,
+                    message=message,
+                    actions=[(action_label, lambda: open_url(action_url))],
+                )
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+            print(f"[NOTIFIER] Notification error: {e}")
+
+    def _show_update_notification(self, title: str, message: str, release_url: str) -> None:
+        """Runs on the Qt main thread — safe to touch the tray here."""
+        self._show_notification(title, message, "⬇️ Download", release_url, "long")
+        self._play_sound()
