@@ -5,22 +5,32 @@ Supports dark and light themes automatically.
 
 """
 
-import sys
-import math
-import random
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QWidget, QApplication, QFrame, QLineEdit, QMessageBox
-)
-from PySide6.QtCore import (Qt, QTimer, QRectF)
-from PySide6.QtGui import (QColor, QPainter, QPainterPath, QRadialGradient, QBrush, QCursor)
-import os
-import webbrowser
 import json
-from pathlib import Path
 import logging
+import math
+import os
+import random
+import sys
+import webbrowser
+from pathlib import Path
+
+from PySide6.QtCore import QRectF, Qt, QTimer
+from PySide6.QtGui import QBrush, QColor, QCursor, QPainter, QPainterPath, QRadialGradient
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 KOFI_LINK = "https://ko-fi.com/hyacinthe_primus/goal?g=0"
+
 
 def _donor_flag_path(config_dir: str | None = None) -> Path:
     """
@@ -30,6 +40,7 @@ def _donor_flag_path(config_dir: str | None = None) -> Path:
         return Path(config_dir) / "donor_pending.json"
     try:
         import sys
+
         sys._MEIPASS
         return Path(os.environ.get("APPDATA", Path.home())) / "FileConverterPro" / "donor_pending.json"
     except AttributeError:
@@ -41,9 +52,9 @@ def mark_donor_pending(amount: str, config_dir: str | None = None):
     try:
         path = _donor_flag_path(config_dir)
         path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         current_total = 0.0
-        
+
         if path.exists():
             try:
                 old_data = json.loads(path.read_text(encoding="utf-8"))
@@ -59,12 +70,10 @@ def mark_donor_pending(amount: str, config_dir: str | None = None):
 
         str_total = f"{total:.2f}".rstrip("0").rstrip(".")
 
-        path.write_text(
-            json.dumps({"amount": str_total, "ts": __import__("time").time()}),
-            encoding="utf-8"
-        )
+        path.write_text(json.dumps({"amount": str_total, "ts": __import__("time").time()}), encoding="utf-8")
     except Exception as e:
-        print(f"Error while updating donor flag: {e}") 
+        print(f"Error while updating donor flag: {e}")
+
 
 def pop_donor_flag(config_dir: str | None = None) -> dict | None:
     """Read and delete the donor flag. Returns data dict or None."""
@@ -80,32 +89,38 @@ def pop_donor_flag(config_dir: str | None = None) -> dict | None:
 
 
 PILL_COLORS_DARK = [
-    ("rgba(255,80,120,0.40)",  "#ff8aaa", "#ff4a7d", "#c0226a"),
-    ("rgba(255,140,60,0.40)",  "#ffaa70", "#ff8c28", "#c05010"),
-    ("rgba(160,80,255,0.40)",  "#c080ff", "#9040f0", "#5010c0"),
-    ("rgba(60,200,120,0.40)",  "#60e090", "#28c060", "#108040"),
-    ("rgba(60,160,255,0.40)",  "#70c0ff", "#2880e0", "#0840a0"),
+    ("rgba(255,80,120,0.40)", "#ff8aaa", "#ff4a7d", "#c0226a"),
+    ("rgba(255,140,60,0.40)", "#ffaa70", "#ff8c28", "#c05010"),
+    ("rgba(160,80,255,0.40)", "#c080ff", "#9040f0", "#5010c0"),
+    ("rgba(60,200,120,0.40)", "#60e090", "#28c060", "#108040"),
+    ("rgba(60,160,255,0.40)", "#70c0ff", "#2880e0", "#0840a0"),
 ]
 
 PILL_COLORS_LIGHT = [
-    ("rgba(220,50,90,0.35)",   "#c02050", "#e0325a", "#a01545"),
-    ("rgba(210,110,30,0.35)",  "#b06010", "#d07820", "#904010"),
-    ("rgba(130,50,220,0.35)",  "#8030c0", "#7020d0", "#400890"),
-    ("rgba(20,160,80,0.35)",   "#109050", "#18b060", "#087040"),
-    ("rgba(30,120,210,0.35)",  "#1060c0", "#1870d0", "#0840a0"),
+    ("rgba(220,50,90,0.35)", "#c02050", "#e0325a", "#a01545"),
+    ("rgba(210,110,30,0.35)", "#b06010", "#d07820", "#904010"),
+    ("rgba(130,50,220,0.35)", "#8030c0", "#7020d0", "#400890"),
+    ("rgba(20,160,80,0.35)", "#109050", "#18b060", "#087040"),
+    ("rgba(30,120,210,0.35)", "#1060c0", "#1870d0", "#0840a0"),
 ]
 
 
 class HeartParticle:
     COLORS_DARK = [
-        QColor(255, 80, 120), QColor(255, 140, 60),
-        QColor(160, 80, 255), QColor(60, 200, 120),
-        QColor(255, 200, 60), QColor(255, 60, 200),
+        QColor(255, 80, 120),
+        QColor(255, 140, 60),
+        QColor(160, 80, 255),
+        QColor(60, 200, 120),
+        QColor(255, 200, 60),
+        QColor(255, 60, 200),
     ]
     COLORS_LIGHT = [
-        QColor(220, 50, 90),  QColor(210, 110, 30),
-        QColor(130, 50, 220), QColor(20, 160, 80),
-        QColor(200, 160, 20), QColor(200, 40, 180),
+        QColor(220, 50, 90),
+        QColor(210, 110, 30),
+        QColor(130, 50, 220),
+        QColor(20, 160, 80),
+        QColor(200, 160, 20),
+        QColor(200, 40, 180),
     ]
 
     def __init__(self, x, y, dark_mode=True):
@@ -241,18 +256,10 @@ class BigHeartWidget(QWidget):
     def _heart_path(cx, cy, s):
         path = QPainterPath()
         path.moveTo(cx, cy + s * 0.38)
-        path.cubicTo(cx - s * 0.05, cy + s * 0.12,
-                     cx - s * 0.55, cy - s * 0.18,
-                     cx - s * 0.55, cy - s * 0.12)
-        path.cubicTo(cx - s * 0.55, cy - s * 0.52,
-                     cx, cy - s * 0.52,
-                     cx, cy - s * 0.12)
-        path.cubicTo(cx, cy - s * 0.52,
-                     cx + s * 0.55, cy - s * 0.52,
-                     cx + s * 0.55, cy - s * 0.12)
-        path.cubicTo(cx + s * 0.55, cy - s * 0.18,
-                     cx + s * 0.05, cy + s * 0.12,
-                     cx, cy + s * 0.38)
+        path.cubicTo(cx - s * 0.05, cy + s * 0.12, cx - s * 0.55, cy - s * 0.18, cx - s * 0.55, cy - s * 0.12)
+        path.cubicTo(cx - s * 0.55, cy - s * 0.52, cx, cy - s * 0.52, cx, cy - s * 0.12)
+        path.cubicTo(cx, cy - s * 0.52, cx + s * 0.55, cy - s * 0.52, cx + s * 0.55, cy - s * 0.12)
+        path.cubicTo(cx + s * 0.55, cy - s * 0.18, cx + s * 0.05, cy + s * 0.12, cx, cy + s * 0.38)
         path.closeSubpath()
         return path
 
@@ -318,8 +325,7 @@ class AmountPill(QPushButton):
 class DonateDialog(QDialog):
     """Beautiful animated donation dialog with Ko-fi integration."""
 
-    AMOUNTS = [("1 €", "1"), ("3 €", "3"), ("5 €", "5"),
-               ("10 €", "10"), ("20 €", "20")]
+    AMOUNTS = [("1 €", "1"), ("3 €", "3"), ("5 €", "5"), ("10 €", "10"), ("20 €", "20")]
 
     def __init__(self, parent=None, dark_mode=True, language="en", config_dir=None):
         super().__init__(parent)
@@ -512,12 +518,19 @@ class DonateDialog(QDialog):
 
         from PySide6.QtCore import QRegularExpression
         from PySide6.QtGui import QRegularExpressionValidator
-        rx = QRegularExpression(r'^\d{0,4}([.,]\d{0,2})?$')
+
+        rx = QRegularExpression(r"^\d{0,4}([.,]\d{0,2})?$")
         self._custom_input.setValidator(QRegularExpressionValidator(rx, self._custom_input))
 
         self._custom_input.textEdited.connect(self._on_custom_edited)
-        self._custom_input.focusInEvent  = lambda e: (self._set_container_focus(True),  QLineEdit.focusInEvent(self._custom_input, e))
-        self._custom_input.focusOutEvent = lambda e: (self._set_container_focus(False), QLineEdit.focusOutEvent(self._custom_input, e))
+        self._custom_input.focusInEvent = lambda e: (
+            self._set_container_focus(True),
+            QLineEdit.focusInEvent(self._custom_input, e),
+        )
+        self._custom_input.focusOutEvent = lambda e: (
+            self._set_container_focus(False),
+            QLineEdit.focusOutEvent(self._custom_input, e),
+        )
 
         container_lay.addWidget(self._custom_input)
         container_lay.addWidget(self._custom_euro)
@@ -571,10 +584,10 @@ class DonateDialog(QDialog):
             return
         if focused:
             color = "rgba(255,74,125,0.55)" if self.dark_mode else "rgba(220,50,90,0.50)"
-            bg    = "rgba(255,74,125,0.07)"  if self.dark_mode else "rgba(220,50,90,0.05)"
+            bg = "rgba(255,74,125,0.07)" if self.dark_mode else "rgba(220,50,90,0.05)"
         else:
             color = "rgba(255,255,255,0.12)" if self.dark_mode else "rgba(30,30,50,0.14)"
-            bg    = "rgba(255,255,255,0.05)" if self.dark_mode else "rgba(30,30,50,0.04)"
+            bg = "rgba(255,255,255,0.05)" if self.dark_mode else "rgba(30,30,50,0.04)"
         self._custom_container.setStyleSheet(f"""
             QWidget#DonateCustomContainer {{
                 background: {bg};
@@ -760,12 +773,13 @@ class DonateDialog(QDialog):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        if hasattr(self, 'heart_canvas'):
+        if hasattr(self, "heart_canvas"):
             self.heart_canvas.setGeometry(0, 100, self.header.width(), 90)
 
 
 class StarParticle:
     """Tiny twinkling star for the thank-you animation."""
+
     def __init__(self, w, h):
         self.x = random.uniform(0, w)
         self.y = random.uniform(0, h)
@@ -793,19 +807,20 @@ class StarParticle:
         cx, cy = self.x, self.y
         path = QPainterPath()
         path.moveTo(cx, cy - s)
-        path.lineTo(cx + s*0.3, cy - s*0.3)
+        path.lineTo(cx + s * 0.3, cy - s * 0.3)
         path.lineTo(cx + s, cy)
-        path.lineTo(cx + s*0.3, cy + s*0.3)
+        path.lineTo(cx + s * 0.3, cy + s * 0.3)
         path.lineTo(cx, cy + s)
-        path.lineTo(cx - s*0.3, cy + s*0.3)
+        path.lineTo(cx - s * 0.3, cy + s * 0.3)
         path.lineTo(cx - s, cy)
-        path.lineTo(cx - s*0.3, cy - s*0.3)
+        path.lineTo(cx - s * 0.3, cy - s * 0.3)
         path.closeSubpath()
         painter.drawPath(path)
 
 
 class ThankYouCanvas(QWidget):
     """Animated canvas: hearts + stars floating upward."""
+
     def __init__(self, dark_mode=True, parent=None):
         super().__init__(parent)
         self.dark_mode = dark_mode
@@ -831,7 +846,7 @@ class ThankYouCanvas(QWidget):
         for p in self.hearts + self.stars:
             p.update()
         self.hearts = [p for p in self.hearts if p.alive]
-        self.stars  = [p for p in self.stars  if p.alive]
+        self.stars = [p for p in self.stars if p.alive]
         self.update()
 
     def paintEvent(self, event):
