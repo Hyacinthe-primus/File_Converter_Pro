@@ -18,12 +18,12 @@ import os
 import platform
 import webbrowser
 
-
 IS_WINDOWS = platform.system() == "Windows"
 
 if IS_WINDOWS:
     try:
         from winotify import Notification as WinotifyNotification
+
         WINOTIFY_AVAILABLE = True
     except ImportError:
         WINOTIFY_AVAILABLE = False
@@ -31,9 +31,11 @@ if IS_WINDOWS:
 else:
     WINOTIFY_AVAILABLE = False
 
-from PySide6.QtWidgets import QSystemTrayIcon, QMenu
-from PySide6.QtGui import QAction, QIcon
-from app import __version__
+from PySide6.QtGui import QAction, QIcon  # noqa: E402
+from PySide6.QtWidgets import QMenu, QSystemTrayIcon  # noqa: E402
+
+from app import __version__  # noqa: E402
+
 
 def open_url(url: str) -> None:
     webbrowser.open(url)
@@ -59,8 +61,10 @@ class QtNotifier:
             menu.addAction(action)
         self.tray.setContextMenu(menu)
 
+
 try:
     from playsound3 import playsound
+
     PLAY_SOUND_AVAILABLE = True
 except ImportError:
     PLAY_SOUND_AVAILABLE = False
@@ -97,20 +101,22 @@ class SystemNotifier:
             language: Interface language ("fr" or "en")
         """
         self.app_instance = app_instance
-        self.language     = language
-        self._tm          = None
-        self.app_name     = "File Converter Pro"
-        self.app_id       = "FileConverterPro.SystemNotifier"
+        self.language = language
+        self._tm = None
+        self.app_name = "File Converter Pro"
+        self.app_id = "FileConverterPro.SystemNotifier"
 
-        self.icon_path  = self._get_resource_path("icon.png")
+        self.icon_path = self._get_resource_path("icon.png")
         self.sound_path = self._get_resource_path(os.path.join("SFX", "notif.mp3"))
         self.toast_icon_path = self.icon_path if os.path.exists(self.icon_path) else ""
 
         self._qt_notifier = QtNotifier()
 
         backend = "winotify (Windows)" if (IS_WINDOWS and WINOTIFY_AVAILABLE) else "Qt tray"
-        print(f"[NOTIFIER] Initialized — backend: {backend} | "
-              f"Icon: {os.path.exists(self.toast_icon_path) if self.toast_icon_path else 'None'}")
+        print(
+            f"[NOTIFIER] Initialized — backend: {backend} | "
+            f"Icon: {os.path.exists(self.toast_icon_path) if self.toast_icon_path else 'None'}"
+        )
 
     def set_translator(self, tm) -> None:
         """Share the app-wide TranslationManager (includes loaded .lang files)."""
@@ -126,6 +132,7 @@ class SystemNotifier:
     def _get_resource_path(self, relative_path: str) -> str:
         """Return absolute path to a resource, compatible with dev and PyInstaller."""
         from utils import resource_path
+
         return resource_path(relative_path)
 
     def _translate_message(self, task_name: str) -> str:
@@ -150,57 +157,57 @@ class SystemNotifier:
     def _get_task_display_name(self, operation_key: str) -> str:
         """Convert an operation key into a human-readable name for the notification."""
         task_names = {
-            "pdf_to_word":      "PDF → Word",
-            "word_to_pdf":      "Word → PDF",
-            "image_to_pdf":     "Images → PDF",
-            "image_to_pdf_s":   "Images → PDF (séparés)",
-            "merge_pdf":        "Fusion PDF",
-            "merge_word":       "Fusion Word",
-            "split_pdf":        "Division PDF",
+            "pdf_to_word": "PDF → Word",
+            "word_to_pdf": "Word → PDF",
+            "image_to_pdf": "Images → PDF",
+            "image_to_pdf_s": "Images → PDF (séparés)",
+            "merge_pdf": "Fusion PDF",
+            "merge_word": "Fusion Word",
+            "split_pdf": "Division PDF",
             "batch_conversion": "Conversion par lot",
-            "batch_rename":     "Renommage par lot",
+            "batch_rename": "Renommage par lot",
             "file_compression": "Compression de fichiers",
-            "txt_to_pdf":       "TXT → PDF",
-            "rtf_to_pdf":       "RTF → PDF",
-            "txt_to_docx":      "TXT → DOCX",
-            "rtf_to_docx":      "RTF → DOCX",
-            "csv_to_json":      "CSV → JSON",
-            "json_to_csv":      "JSON → CSV",
-            "xlsx_to_pdf":      "Excel → PDF",
-            "xlsx_to_json":     "Excel → JSON",
-            "xlsx_to_csv":      "Excel → CSV",
-            "pptx_to_pdf":      "PowerPoint → PDF",
-            "html_to_pdf":      "HTML → PDF",
-            "pdf_to_html":      "PDF → HTML",
-            "epub_to_pdf":      "EPUB → PDF",
-            "image_to_png":     "Image → PNG",
-            "image_to_jpeg":    "Image → JPEG",
-            "image_to_jpg":     "Image → JPG",
-            "image_to_bmp":     "Image → BMP",
-            "image_to_heic":    "Image → HEIC",
-            "image_to_webp":    "Image → WEBP",
-            "image_to_tiff":    "Image → TIFF",
-            "image_to_psd":     "Image → PSD",
-            "image_to_svg":     "Image → SVG",
-            "image_to_avif":    "Image → AVIF",
-            "image_to_j2k":     "Image → J2K",
-            "image_to_dng":     "Image → DNG",
-            "image_to_ico":     "Image → ICO",
-            "video_to_mp4":     "Vidéo → MP4",
-            "video_to_webm":    "Vidéo → WEBM",
-            "video_to_mkv":     "Vidéo → MKV",
-            "video_to_mov":     "Vidéo → MOV",
-            "video_to_avi":     "Vidéo → AVI",
-            "video_to_mp3":     "Vidéo → MP3",
-            "video_to_wav":     "Vidéo → WAV",
-            "video_to_aac":     "Vidéo → AAC",
-            "video_to_flac":    "Vidéo → FLAC",
-            "audio_to_mp3":     "Audio → MP3",
-            "audio_to_wav":     "Audio → WAV",
-            "audio_to_aac":     "Audio → AAC",
-            "audio_to_ogg":     "Audio → OGG",
-            "audio_to_flac":    "Audio → FLAC",
-            "audio_to_m4a":     "Audio → M4A",
+            "txt_to_pdf": "TXT → PDF",
+            "rtf_to_pdf": "RTF → PDF",
+            "txt_to_docx": "TXT → DOCX",
+            "rtf_to_docx": "RTF → DOCX",
+            "csv_to_json": "CSV → JSON",
+            "json_to_csv": "JSON → CSV",
+            "xlsx_to_pdf": "Excel → PDF",
+            "xlsx_to_json": "Excel → JSON",
+            "xlsx_to_csv": "Excel → CSV",
+            "pptx_to_pdf": "PowerPoint → PDF",
+            "html_to_pdf": "HTML → PDF",
+            "pdf_to_html": "PDF → HTML",
+            "epub_to_pdf": "EPUB → PDF",
+            "image_to_png": "Image → PNG",
+            "image_to_jpeg": "Image → JPEG",
+            "image_to_jpg": "Image → JPG",
+            "image_to_bmp": "Image → BMP",
+            "image_to_heic": "Image → HEIC",
+            "image_to_webp": "Image → WEBP",
+            "image_to_tiff": "Image → TIFF",
+            "image_to_psd": "Image → PSD",
+            "image_to_svg": "Image → SVG",
+            "image_to_avif": "Image → AVIF",
+            "image_to_j2k": "Image → J2K",
+            "image_to_dng": "Image → DNG",
+            "image_to_ico": "Image → ICO",
+            "video_to_mp4": "Vidéo → MP4",
+            "video_to_webm": "Vidéo → WEBM",
+            "video_to_mkv": "Vidéo → MKV",
+            "video_to_mov": "Vidéo → MOV",
+            "video_to_avi": "Vidéo → AVI",
+            "video_to_mp3": "Vidéo → MP3",
+            "video_to_wav": "Vidéo → WAV",
+            "video_to_aac": "Vidéo → AAC",
+            "video_to_flac": "Vidéo → FLAC",
+            "audio_to_mp3": "Audio → MP3",
+            "audio_to_wav": "Audio → WAV",
+            "audio_to_aac": "Audio → AAC",
+            "audio_to_ogg": "Audio → OGG",
+            "audio_to_flac": "Audio → FLAC",
+            "audio_to_m4a": "Audio → M4A",
         }
         fr_key = task_names.get(operation_key, operation_key)
         if self._tm is not None:
@@ -249,7 +256,7 @@ class SystemNotifier:
 
         try:
             task_name = self._get_task_display_name(operation_type)
-            message   = self._translate_message(task_name)
+            message = self._translate_message(task_name)
 
             print(f"[NOTIFIER] 📤 Sending notification: {operation_type} → '{message}'")
 
@@ -288,6 +295,7 @@ class SystemNotifier:
         except Exception as e:
             print(f"[NOTIFIER] 💥 CRITICAL ERROR: {e}")
             import traceback
+
             traceback.print_exc()
             return False
 
@@ -331,7 +339,7 @@ class SystemNotifier:
         except Exception as e:
             print(f"[NOTIFIER] Custom notification error: {e}")
             return False
-    
+
     def check_and_notify_update(self) -> bool:
         """Check GitHub releases and notify if a newer version is available."""
         try:
@@ -351,7 +359,7 @@ class SystemNotifier:
             print(f"[NOTIFIER] 🆕 Update available: {current} → {latest}")
 
             release_url = "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest"
-            title   = "File Converter Pro — Update Available"
+            title = "File Converter Pro — Update Available"
             message = f"Version {latest} is available. You're on {current}"
 
             if IS_WINDOWS and WINOTIFY_AVAILABLE:
