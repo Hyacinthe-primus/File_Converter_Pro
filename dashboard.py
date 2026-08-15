@@ -20,27 +20,42 @@ Classes:
 
 """
 
-from pathlib import Path
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-                               QLabel, QFileDialog, QMessageBox, QComboBox,
-                               QLineEdit, QTabWidget, QTableWidget, QDialog,
-                               QTableWidgetItem, QDateEdit, QFrame,
-                               QGraphicsDropShadowEffect, QGraphicsOpacityEffect, QSizePolicy)
-from PySide6.QtCore import (QDate, QTimer, QPropertyAnimation, QEasingCurve,
-                            Qt )
-from PySide6.QtGui import QColor
 from datetime import datetime
+from pathlib import Path
 
-from qss_helpers import _load_qss
+from PySide6.QtCore import QDate, QEasingCurve, QPropertyAnimation, Qt, QTimer
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDateEdit,
+    QDialog,
+    QFileDialog,
+    QFrame,
+    QGraphicsDropShadowEffect,
+    QGraphicsOpacityEffect,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QPushButton,
+    QSizePolicy,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
 from converter import AdvancedDatabaseManager
+from qss_helpers import _load_qss
 from utils.translation_mixin import TranslationMixin
 
-
 FigureCanvas = None
-Figure       = None
-plt          = None
-mdates       = None
-animation    = None
+Figure = None
+plt = None
+mdates = None
+animation = None
+
 
 def _ensure_matplotlib():
     """Import matplotlib on first use and populate module-level references."""
@@ -48,22 +63,27 @@ def _ensure_matplotlib():
     if FigureCanvas is not None:
         return
     import matplotlib
-    matplotlib.use('QtAgg')
+
+    matplotlib.use("QtAgg")
+    import matplotlib.animation as _animation
+    import matplotlib.dates as _mdates
+    import matplotlib.pyplot as _plt
     from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as _FigureCanvas
     from matplotlib.figure import Figure as _Figure
-    import matplotlib.pyplot as _plt
-    import matplotlib.dates as _mdates
-    import matplotlib.animation as _animation
+
     FigureCanvas = _FigureCanvas
-    Figure       = _Figure
-    plt          = _plt
-    mdates       = _mdates
-    animation    = _animation
+    Figure = _Figure
+    plt = _plt
+    mdates = _mdates
+    animation = _animation
+
 
 def _get_asset_path(relative: str) -> str:
     """Resolve an asset path — dev mode AND PyInstaller (onedir + onefile)."""
     from utils import resource_path
-    return resource_path(relative).replace('\\', '/')
+
+    return resource_path(relative).replace("\\", "/")
+
 
 class _AdvDbProxy:
     """
@@ -73,17 +93,17 @@ class _AdvDbProxy:
     that compat itself was trying to call.
     All other methods are forwarded transparently.
     """
+
     def __init__(self, db: AdvancedDatabaseManager):
         self._db = db
 
     def get_statistics(self, days=30):
         return self._db.get_statistics_compat(days)
 
-    def get_conversion_history(self, limit=200, search_query=None,
-                               start_date=None, end_date=None):
+    def get_conversion_history(self, limit=200, search_query=None, start_date=None, end_date=None):
         return self._db.get_conversion_history(
-            limit=limit, search_query=search_query,
-            start_date=start_date, end_date=end_date)
+            limit=limit, search_query=search_query, start_date=start_date, end_date=end_date
+        )
 
     def export_history(self, filepath, format_type):
         self._db.export_history(filepath, fmt=format_type)
@@ -108,7 +128,7 @@ class _FillBar(QWidget):
         self._fill_timer.setInterval(12)
         self._fill_timer.timeout.connect(self._fill_tick)
         self._fill_target = 0.0
-        self._fill_speed  = 0.055
+        self._fill_speed = 0.055
 
         self._shimmer_timer = QTimer(self)
         self._shimmer_timer.setInterval(14)
@@ -141,7 +161,8 @@ class _FillBar(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        from PySide6.QtGui import QPainter, QLinearGradient, QBrush, QColor
+        from PySide6.QtGui import QBrush, QColor, QLinearGradient, QPainter
+
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
 
@@ -247,19 +268,19 @@ class AnimatedStatCard(QFrame):
         layout.addWidget(self._fill_bar)
 
     def _lerp_color(self, c1: str, c2: str, t: float) -> str:
-        r1,g1,b1 = int(c1[1:3],16), int(c1[3:5],16), int(c1[5:7],16)
-        r2,g2,b2 = int(c2[1:3],16), int(c2[3:5],16), int(c2[5:7],16)
-        return f"#{int(r1+(r2-r1)*t):02x}{int(g1+(g2-g1)*t):02x}{int(b1+(b2-b1)*t):02x}"
+        r1, g1, b1 = int(c1[1:3], 16), int(c1[3:5], 16), int(c1[5:7], 16)
+        r2, g2, b2 = int(c2[1:3], 16), int(c2[3:5], 16), int(c2[5:7], 16)
+        return f"#{int(r1 + (r2 - r1) * t):02x}{int(g1 + (g2 - g1) * t):02x}{int(b1 + (b2 - b1) * t):02x}"
 
     def _apply_card_style(self, t: float):
         if self.dark_mode:
             bg0, bg1 = "#1e2535", "#252f42"
-            border0  = "#2d3748"
+            border0 = "#2d3748"
         else:
             bg0, bg1 = "#ffffff", "#f0f5ff"
-            border0  = "#e8ecf0"
+            border0 = "#e8ecf0"
 
-        bg     = self._lerp_color(bg0, bg1, t)
+        bg = self._lerp_color(bg0, bg1, t)
         border = self._lerp_color(border0, self.accent_color, t)
 
         self.setStyleSheet(f"""
@@ -277,7 +298,7 @@ class AnimatedStatCard(QFrame):
             b = int(self.accent_color[5:7], 16)
             effect.setColor(QColor(r, g, b, int(20 + 110 * t)))
         except Exception:
-            effect.setColor(QColor(0, 0, 0, int(20 + 60*t)))
+            effect.setColor(QColor(0, 0, 0, int(20 + 60 * t)))
         effect.setBlurRadius(int(10 + 32 * t))
         effect.setOffset(0, int(2 + 6 * t))
         self.setGraphicsEffect(effect)
@@ -342,7 +363,6 @@ class AnimatedStatCard(QFrame):
 
 
 class StatisticsDashboard(TranslationMixin, QDialog):
-
     def __init__(self, db_manager, language="fr", parent=None, translation_manager=None):
         super().__init__(parent)
         self.setModal(False)
@@ -355,6 +375,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             self._translation_manager = translation_manager
         else:
             from translations import TranslationManager
+
             self._translation_manager = TranslationManager()
             self._translation_manager.set_language(language)
         self.setWindowTitle(self.translate_text("📊 Tableau de Bord & Statistiques"))
@@ -362,8 +383,8 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         self.setWindowFlag(Qt.FramelessWindowHint, False)
         self._dark = self._get_dark_mode()
         # DB selector state
-        self._main_db   = db_manager
-        self._adv_db    = None
+        self._main_db = db_manager
+        self._adv_db = None
         self._using_adv = False
 
         self.setup_ui()
@@ -371,7 +392,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         self._apply_global_style()
 
     def _get_dark_mode(self):
-        return hasattr(self.parent(), 'dark_mode') and self.parent().dark_mode
+        return hasattr(self.parent(), "dark_mode") and self.parent().dark_mode
 
     def _apply_global_style(self):
         arrow_svg = _get_asset_path("Assets/down-arrow.svg")
@@ -388,9 +409,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         top_bar = QHBoxLayout()
 
         title_lbl = QLabel(self.translate_text("📊 Tableau de Bord & Statistiques"))
-        title_lbl.setStyleSheet(
-            "font-size: 20px; font-weight: 800; letter-spacing: -0.5px; background: transparent;"
-        )
+        title_lbl.setStyleSheet("font-size: 20px; font-weight: 800; letter-spacing: -0.5px; background: transparent;")
         top_bar.addWidget(title_lbl, 1)
 
         self.refresh_btn = QPushButton("🔄  " + self.translate_text("Rafraîchir les statistiques"))
@@ -454,9 +473,9 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         cards_layout.setSpacing(14)
 
         self.card_conversions = AnimatedStatCard("🔄", self.translate_text("Conversions totales:"), "#4dabf7", dm)
-        self.card_size        = AnimatedStatCard("💾", self.translate_text("Taille totale traitée:"), "#28a745", dm)
-        self.card_time_saved  = AnimatedStatCard("⏱️", self.translate_text("Temps économisé:"), "#ff6b6b", dm)
-        self.card_avg_time    = AnimatedStatCard("⚡", self.translate_text("Temps moyen par conversion:"), "#ffd166", dm)
+        self.card_size = AnimatedStatCard("💾", self.translate_text("Taille totale traitée:"), "#28a745", dm)
+        self.card_time_saved = AnimatedStatCard("⏱️", self.translate_text("Temps économisé:"), "#ff6b6b", dm)
+        self.card_avg_time = AnimatedStatCard("⚡", self.translate_text("Temps moyen par conversion:"), "#ffd166", dm)
 
         for card in [self.card_conversions, self.card_size, self.card_time_saved, self.card_avg_time]:
             card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -471,8 +490,8 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             container = QFrame()
             container.setStyleSheet(f"""
                 QFrame {{
-                    background: {'#161b27' if dm else '#ffffff'};
-                    border: 1px solid {'#2d3748' if dm else '#dde3ec'};
+                    background: {"#161b27" if dm else "#ffffff"};
+                    border: 1px solid {"#2d3748" if dm else "#dde3ec"};
                     border-radius: 12px;
                 }}
             """)
@@ -483,14 +502,14 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             header_lbl = QLabel(title)
             header_lbl.setStyleSheet(f"""
                 QLabel {{
-                    background: {'#1a2236' if dm else '#eef2fa'};
-                    color: {'#90caf9' if dm else '#2b6cb0'};
+                    background: {"#1a2236" if dm else "#eef2fa"};
+                    color: {"#90caf9" if dm else "#2b6cb0"};
                     font-size: 13px;
                     font-weight: 700;
                     padding: 10px 14px;
                     border-top-left-radius: 12px;
                     border-top-right-radius: 12px;
-                    border-bottom: 1px solid {'#2d3748' if dm else '#dde3ec'};
+                    border-bottom: 1px solid {"#2d3748" if dm else "#dde3ec"};
                 }}
             """)
             vbox.addWidget(header_lbl)
@@ -504,12 +523,12 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         formats_section = make_section(
             self.translate_text("📁 Formats les plus utilisés"),
             "formats_table",
-            [self.translate_text("Format"), self.translate_text("Utilisations")]
+            [self.translate_text("Format"), self.translate_text("Utilisations")],
         )
         operations_section = make_section(
             self.translate_text("⚡ Opérations les plus fréquentes"),
             "operations_table",
-            [self.translate_text("Opération"), self.translate_text("Nombre")]
+            [self.translate_text("Opération"), self.translate_text("Nombre")],
         )
 
         hlayout.addWidget(formats_section, 1)
@@ -545,24 +564,28 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         period_lbl.setStyleSheet("font-weight: 600; font-size: 12px; background: transparent;")
 
         self.period_combo = QComboBox()
-        self.period_combo.addItems([
-            self.translate_text("7 derniers jours"),
-            self.translate_text("30 derniers jours"),
-            self.translate_text("3 derniers mois"),
-            self.translate_text("6 derniers mois")
-        ])
+        self.period_combo.addItems(
+            [
+                self.translate_text("7 derniers jours"),
+                self.translate_text("30 derniers jours"),
+                self.translate_text("3 derniers mois"),
+                self.translate_text("6 derniers mois"),
+            ]
+        )
         self.period_combo.currentIndexChanged.connect(self._smooth_update_charts)
 
         chart_lbl = QLabel(self.translate_text("Type de graphique:"))
         chart_lbl.setStyleSheet("font-weight: 600; font-size: 12px; background: transparent;")
 
         self.chart_type_combo = QComboBox()
-        self.chart_type_combo.addItems([
-            self.translate_text("Conversions par jour"),
-            self.translate_text("Taille traitée par jour"),
-            self.translate_text("Types d'opérations"),
-            self.translate_text("Évolution des formats")
-        ])
+        self.chart_type_combo.addItems(
+            [
+                self.translate_text("Conversions par jour"),
+                self.translate_text("Taille traitée par jour"),
+                self.translate_text("Types d'opérations"),
+                self.translate_text("Évolution des formats"),
+            ]
+        )
         self.chart_type_combo.currentIndexChanged.connect(self._smooth_update_charts)
 
         controls_layout.addWidget(period_lbl)
@@ -576,8 +599,8 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         canvas_frame = QFrame()
         canvas_frame.setStyleSheet(f"""
             QFrame {{
-                background: {'#161b27' if self._dark else '#ffffff'};
-                border: 1px solid {'#2d3748' if self._dark else '#dde3ec'};
+                background: {"#161b27" if self._dark else "#ffffff"};
+                border: 1px solid {"#2d3748" if self._dark else "#dde3ec"};
                 border-radius: 14px;
             }}
         """)
@@ -600,8 +623,8 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         filters_frame = QFrame()
         filters_frame.setStyleSheet(f"""
             QFrame {{
-                background: {'#161b27' if self._dark else '#f8faff'};
-                border: 1px solid {'#2d3748' if self._dark else '#dde3ec'};
+                background: {"#161b27" if self._dark else "#f8faff"};
+                border: 1px solid {"#2d3748" if self._dark else "#dde3ec"};
                 border-radius: 10px;
                 padding: 4px;
             }}
@@ -611,9 +634,9 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         filters_layout.setSpacing(10)
 
         def flbl(text):
-            l = QLabel(text)
-            l.setStyleSheet("font-weight: 600; font-size: 12px; background: transparent;")
-            return l
+            lbl = QLabel(text)
+            lbl.setStyleSheet("font-weight: 600; font-size: 12px; background: transparent;")
+            return lbl
 
         self.start_date_edit = QDateEdit()
         self.start_date_edit.setCalendarPopup(True)
@@ -652,16 +675,19 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         filters_layout.addWidget(self.apply_filters_btn)
         layout.addWidget(filters_frame)
 
-        self.detailed_table = self._make_table([
-            self.translate_text("Date/Heure"),
-            self.translate_text("Opération"),
-            self.translate_text("Source"),
-            self.translate_text("Cible"),
-            self.translate_text("Taille"),
-            self.translate_text("Temps"),
-            self.translate_text("Statut")
-        ])
+        self.detailed_table = self._make_table(
+            [
+                self.translate_text("Date/Heure"),
+                self.translate_text("Opération"),
+                self.translate_text("Source"),
+                self.translate_text("Cible"),
+                self.translate_text("Taille"),
+                self.translate_text("Temps"),
+                self.translate_text("Statut"),
+            ]
+        )
         from PySide6.QtWidgets import QHeaderView as _HV
+
         _hh = self.detailed_table.horizontalHeader()
         _hh.setStretchLastSection(False)
         _hh.setSectionResizeMode(_HV.Fixed)
@@ -679,13 +705,13 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         export_csv_btn.setStyleSheet(self._btn_style("#4361ee", "#3451d1", "#2a3fbf"))
         export_csv_btn.setCursor(Qt.PointingHandCursor)
         export_csv_btn.setFixedHeight(34)
-        export_csv_btn.clicked.connect(lambda: self.export_history('csv'))
+        export_csv_btn.clicked.connect(lambda: self.export_history("csv"))
 
         export_json_btn = QPushButton("📋  " + self.translate_text("Exporter en JSON"))
         export_json_btn.setStyleSheet(self._btn_style("#7c3aed", "#6d28d9", "#5b21b6"))
         export_json_btn.setCursor(Qt.PointingHandCursor)
         export_json_btn.setFixedHeight(34)
-        export_json_btn.clicked.connect(lambda: self.export_history('json'))
+        export_json_btn.clicked.connect(lambda: self.export_history("json"))
 
         export_layout.addWidget(export_csv_btn)
         export_layout.addWidget(export_json_btn)
@@ -698,7 +724,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         """Fade the canvas out, redraw, fade back in when entering Charts tab.
         On the very first visit the chart is already rendered — skip the blink."""
         if index == 1:
-            if not getattr(self, '_charts_tab_visited', False):
+            if not getattr(self, "_charts_tab_visited", False):
                 self._charts_tab_visited = True
             else:
                 self._fade_chart(fade_in=False, callback=self._redraw_and_fadein)
@@ -743,16 +769,16 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             self.translate_text("7 derniers jours"): 7,
             self.translate_text("30 derniers jours"): 30,
             self.translate_text("3 derniers mois"): 90,
-            self.translate_text("6 derniers mois"): 180
+            self.translate_text("6 derniers mois"): 180,
         }
         days = days_map.get(self.period_combo.currentText(), 30)
         stats = self.db_manager.get_statistics(days)
 
-        if stats['general']:
-            total_conversions = stats['general'][0] or 0
-            total_size        = stats['general'][1] or 0
-            total_time        = stats['general'][2] or 0
-            avg_time          = stats['general'][3] or 0
+        if stats["general"]:
+            total_conversions = stats["general"][0] or 0
+            total_size = stats["general"][1] or 0
+            total_time = stats["general"][2] or 0
+            avg_time = stats["general"][3] or 0
 
             self.card_conversions.set_value(str(total_conversions), float(total_conversions))
             size_str = self.format_size(total_size)
@@ -761,7 +787,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             self.card_avg_time.set_value(f"{avg_time:.1f}s", avg_time, "s", is_float=True)
 
         self.formats_table.setRowCount(0)
-        for i, (fmt, count) in enumerate(stats['top_formats']):
+        for i, (fmt, count) in enumerate(stats["top_formats"]):
             self.formats_table.insertRow(i)
             self.formats_table.setItem(i, 0, QTableWidgetItem(fmt))
             item = QTableWidgetItem(str(count))
@@ -769,30 +795,27 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             self.formats_table.setItem(i, 1, item)
 
         self.operations_table.setRowCount(0)
-        for i, (op, count) in enumerate(stats['top_operations']):
+        for i, (op, count) in enumerate(stats["top_operations"]):
             self.operations_table.insertRow(i)
             self.operations_table.setItem(i, 0, QTableWidgetItem(self.translate_operation_type(op)))
             item = QTableWidgetItem(str(count))
             item.setTextAlignment(Qt.AlignCenter)
             self.operations_table.setItem(i, 1, item)
 
-        start_date   = self.start_date_edit.date().toString("yyyy-MM-dd")
-        end_date     = self.end_date_edit.date().toString("yyyy-MM-dd")
+        start_date = self.start_date_edit.date().toString("yyyy-MM-dd")
+        end_date = self.end_date_edit.date().toString("yyyy-MM-dd")
         search_query = self.search_input.text() or None
 
         history = self.db_manager.get_conversion_history(
-            limit=2500,
-            search_query=search_query,
-            start_date=start_date,
-            end_date=end_date
+            limit=2500, search_query=search_query, start_date=start_date, end_date=end_date
         )
 
         self.detailed_table.setRowCount(0)
         for i, row in enumerate(history):
             self.detailed_table.insertRow(i)
 
-            dt = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S')
-            self.detailed_table.setItem(i, 0, QTableWidgetItem(dt.strftime('%d/%m/%Y %H:%M')))
+            dt = datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
+            self.detailed_table.setItem(i, 0, QTableWidgetItem(dt.strftime("%d/%m/%Y %H:%M")))
             self.detailed_table.setItem(i, 1, QTableWidgetItem(self.translate_operation_type(row[6])))
 
             source_name = Path(row[2]).name if row[2] else ""
@@ -821,20 +844,20 @@ class StatisticsDashboard(TranslationMixin, QDialog):
     def update_charts(self):
         dm = self._get_dark_mode()
 
-        bg_color      = '#0d1117' if dm else '#ffffff'
-        plot_bg_color = '#161b27' if dm else '#f8f9fa'
-        grid_color    = '#2d3748' if dm else '#e2e8f0'
-        axis_color    = '#8899aa' if dm else '#64748b'
-        text_color    = '#e2e8f0' if dm else '#1a202c'
-        label_color   = '#cbd5e0' if dm else '#374151'
+        bg_color = "#0d1117" if dm else "#ffffff"
+        plot_bg_color = "#161b27" if dm else "#f8f9fa"
+        grid_color = "#2d3748" if dm else "#e2e8f0"
+        axis_color = "#8899aa" if dm else "#64748b"
+        text_color = "#e2e8f0" if dm else "#1a202c"
+        label_color = "#cbd5e0" if dm else "#374151"
 
         days_map = {
             self.translate_text("7 derniers jours"): 7,
             self.translate_text("30 derniers jours"): 30,
             self.translate_text("3 derniers mois"): 90,
-            self.translate_text("6 derniers mois"): 180
+            self.translate_text("6 derniers mois"): 180,
         }
-        days  = days_map.get(self.period_combo.currentText(), 30)
+        days = days_map.get(self.period_combo.currentText(), 30)
         stats = self.db_manager.get_statistics(days)
 
         self.chart_canvas.figure.clear()
@@ -846,47 +869,73 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             spine.set_color(axis_color)
             spine.set_linewidth(0.8)
         ax.tick_params(colors=axis_color, length=3)
-        ax.grid(True, alpha=0.25, color=grid_color, linestyle='--', linewidth=0.7)
+        ax.grid(True, alpha=0.25, color=grid_color, linestyle="--", linewidth=0.7)
 
         chart_type = self.chart_type_combo.currentText()
 
-        if chart_type == self.translate_text("Conversions par jour") and stats['daily_stats']:
-            dates       = [datetime.strptime(r[0], '%Y-%m-%d') for r in stats['daily_stats']]
-            conversions = [r[1] for r in stats['daily_stats']]
-            x_pos       = range(len(dates))
+        if chart_type == self.translate_text("Conversions par jour") and stats["daily_stats"]:
+            dates = [datetime.strptime(r[0], "%Y-%m-%d") for r in stats["daily_stats"]]
+            conversions = [r[1] for r in stats["daily_stats"]]
+            x_pos = range(len(dates))
 
-            bar_color  = '#640986' if dm else '#1e3a8a'
-            edge_color = '#1e2535' if dm else '#ffffff'
-            ax.bar(x_pos, conversions, width=0.6, color=bar_color, alpha=0.88,
-                   edgecolor=edge_color, linewidth=1.2, zorder=3)
+            bar_color = "#640986" if dm else "#1e3a8a"
+            edge_color = "#1e2535" if dm else "#ffffff"
+            ax.bar(
+                x_pos,
+                conversions,
+                width=0.6,
+                color=bar_color,
+                alpha=0.88,
+                edgecolor=edge_color,
+                linewidth=1.2,
+                zorder=3,
+            )
 
             max_conv = max(conversions) if conversions else 1
             for i, v in enumerate(conversions):
-                ax.text(i, v + max_conv * 0.02, str(v),
-                        ha='center', va='bottom', fontsize=9, fontweight='bold', color=text_color)
+                ax.text(
+                    i,
+                    v + max_conv * 0.02,
+                    str(v),
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                    fontweight="bold",
+                    color=text_color,
+                )
 
             max_labels = 15
             step = max(1, len(dates) // max_labels)
-            labels = [dates[i].strftime('%d/%m/%Y') if i % step == 0 else '' for i in range(len(dates))]
+            labels = [dates[i].strftime("%d/%m/%Y") if i % step == 0 else "" for i in range(len(dates))]
             ax.set_xticks(list(x_pos))
-            ax.set_xticklabels(labels, rotation=45, ha='right', fontsize=9, color=text_color)
+            ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=9, color=text_color)
             ax.yaxis.set_tick_params(labelcolor=text_color)
 
             ax.set_xlabel(self.translate_text("Date"), color=label_color, fontsize=11)
             ax.set_ylabel(self.translate_text("Nombre de conversions"), color=label_color, fontsize=11)
-            ax.set_title(self.translate_text("Conversions par jour"), color=text_color,
-                         fontsize=14, fontweight='bold', pad=14)
+            ax.set_title(
+                self.translate_text("Conversions par jour"), color=text_color, fontsize=14, fontweight="bold", pad=14
+            )
             ax.margins(x=0.01)
             self.chart_canvas.figure.tight_layout()
 
-        elif chart_type == self.translate_text("Taille traitée par jour") and stats['daily_stats']:
-            dates    = [datetime.strptime(r[0], '%Y-%m-%d') for r in stats['daily_stats']]
-            sizes_mb = [r[2] / (1024 * 1024) for r in stats['daily_stats']]
+        elif chart_type == self.translate_text("Taille traitée par jour") and stats["daily_stats"]:
+            dates = [datetime.strptime(r[0], "%Y-%m-%d") for r in stats["daily_stats"]]
+            sizes_mb = [r[2] / (1024 * 1024) for r in stats["daily_stats"]]
 
-            line_color = '#0891B2' if dm else '#28a745'
-            ax.plot(dates, sizes_mb, marker='o', color=line_color, linewidth=2.2,
-                    markersize=6, markerfacecolor=line_color, markeredgewidth=1.5,
-                    markeredgecolor=bg_color, zorder=4)
+            line_color = "#0891B2" if dm else "#28a745"
+            ax.plot(
+                dates,
+                sizes_mb,
+                marker="o",
+                color=line_color,
+                linewidth=2.2,
+                markersize=6,
+                markerfacecolor=line_color,
+                markeredgewidth=1.5,
+                markeredgecolor=bg_color,
+                zorder=4,
+            )
             ax.fill_between(dates, sizes_mb, alpha=0.18, color=line_color)
 
             max_size = max(sizes_mb) if sizes_mb else 1
@@ -898,127 +947,184 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                 if size == 0:
                     continue
                 label = f"{size / 1024:.1f} Go" if size >= 1024 else f"{size:.1f} Mo"
-                ax.text(dates[i], size + y_margin * 0.25, label,
-                        ha='center', va='bottom', fontsize=9, fontweight='bold', color=text_color)
+                ax.text(
+                    dates[i],
+                    size + y_margin * 0.25,
+                    label,
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                    fontweight="bold",
+                    color=text_color,
+                )
 
             ax.set_xlabel(self.translate_text("Date"), color=label_color, fontsize=11)
             ax.set_ylabel(self.translate_text("Taille (Mo)"), color=label_color, fontsize=11)
-            ax.set_title(self.translate_text("Taille de fichiers traitée par jour"), color=text_color,
-                         fontsize=14, fontweight='bold', pad=14)
-            ax.tick_params(axis='x', rotation=45, colors=text_color)
-            ax.tick_params(axis='y', colors=text_color)
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
+            ax.set_title(
+                self.translate_text("Taille de fichiers traitée par jour"),
+                color=text_color,
+                fontsize=14,
+                fontweight="bold",
+                pad=14,
+            )
+            ax.tick_params(axis="x", rotation=45, colors=text_color)
+            ax.tick_params(axis="y", colors=text_color)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%Y"))
             self.chart_canvas.figure.autofmt_xdate()
             self.chart_canvas.figure.tight_layout()
 
-        elif chart_type == self.translate_text("Types d'opérations") and stats['top_operations']:
-            operations  = [self.translate_operation_type(r[0]) for r in stats['top_operations']]
-            counts      = [r[1] for r in stats['top_operations']]
-            total       = sum(counts)
+        elif chart_type == self.translate_text("Types d'opérations") and stats["top_operations"]:
+            operations = [self.translate_operation_type(r[0]) for r in stats["top_operations"]]
+            counts = [r[1] for r in stats["top_operations"]]
+            total = sum(counts)
             percentages = [c / float(total) * 100 for c in counts]
 
             color_map = {
-                "PDF vers Word": "#1e3a8a", "PDF to Word": "#1e3a8a",
-                "Word vers PDF": "#3b82f6", "Word to PDF": "#3b82f6",
-                "Images vers PDF": "#10b981", "Images to PDF": "#10b981",
-                "Images vers PDF séparés": "#059669", "Images to Separate PDFs": "#059669",
-                "Fusion PDF": "#8b5cf6", "Merge PDF": "#8b5cf6",
-                "Fusion Word": "#2a0a74", "Merge Word": "#2a0a74",
-                "Division PDF": "#f59e0b", "Split PDF": "#f59e0b",
-                "Protection PDF": "#ef4444", "Protect PDF": "#ef4444",
-                "Compression de fichiers": "#6366f1", "File Compression": "#6366f1",
-                "Optimisation bureautique": "#06b6d4", "Office Optimization": "#06b6d4",
-                "Conversion par Lot": "#ec4899", "Batch Conversion": "#ec4899",
-                "Renommage par Lot": "#8b5cf6", "Batch Rename": "#8b5cf6"
+                "PDF vers Word": "#1e3a8a",
+                "PDF to Word": "#1e3a8a",
+                "Word vers PDF": "#3b82f6",
+                "Word to PDF": "#3b82f6",
+                "Images vers PDF": "#10b981",
+                "Images to PDF": "#10b981",
+                "Images vers PDF séparés": "#059669",
+                "Images to Separate PDFs": "#059669",
+                "Fusion PDF": "#8b5cf6",
+                "Merge PDF": "#8b5cf6",
+                "Fusion Word": "#2a0a74",
+                "Merge Word": "#2a0a74",
+                "Division PDF": "#f59e0b",
+                "Split PDF": "#f59e0b",
+                "Protection PDF": "#ef4444",
+                "Protect PDF": "#ef4444",
+                "Compression de fichiers": "#6366f1",
+                "File Compression": "#6366f1",
+                "Optimisation bureautique": "#06b6d4",
+                "Office Optimization": "#06b6d4",
+                "Conversion par Lot": "#ec4899",
+                "Batch Conversion": "#ec4899",
+                "Renommage par Lot": "#8b5cf6",
+                "Batch Rename": "#8b5cf6",
             }
-            colors = [color_map.get(op, plt.cm.Set3(i / max(len(operations), 1)))
-                      for i, op in enumerate(operations)]
+            colors = [color_map.get(op, plt.cm.Set3(i / max(len(operations), 1))) for i, op in enumerate(operations)]
 
             def custom_autopct(pct):
-                return f'{pct:.1f}%' if pct >= 10 else ''
+                return f"{pct:.1f}%" if pct >= 10 else ""
 
             wedges, texts, autotexts = ax.pie(
-                counts, labels=None, autopct=custom_autopct,
-                startangle=90, colors=colors,
+                counts,
+                labels=None,
+                autopct=custom_autopct,
+                startangle=90,
+                colors=colors,
                 wedgeprops=dict(width=0.42, edgecolor=bg_color, linewidth=1.5),
-                pctdistance=0.82
+                pctdistance=0.82,
             )
             for at in autotexts:
                 if at.get_text():
-                    at.set_color('white')
-                    at.set_fontweight('bold')
+                    at.set_color("white")
+                    at.set_fontweight("bold")
                     at.set_fontsize(9)
 
-            ax.set_title(self.translate_text("Répartition des types d'opérations"),
-                         fontsize=14, fontweight='bold', pad=20, color=label_color)
+            ax.set_title(
+                self.translate_text("Répartition des types d'opérations"),
+                fontsize=14,
+                fontweight="bold",
+                pad=20,
+                color=label_color,
+            )
 
-            legend_labels = [
-                f"{op}: {count} ({pct:.1f}%)"
-                for op, count, pct in zip(operations, counts, percentages)
-            ]
-            legend = ax.legend(wedges, legend_labels,
-                               title=self.translate_text("Types d'opérations"),
-                               loc="center left", bbox_to_anchor=(1, 0, 0.5, 1),
-                               fontsize=9, title_fontsize=10,
-                               frameon=True, framealpha=0.92,
-                               facecolor=plot_bg_color, edgecolor=grid_color,
-                               labelcolor=label_color)
+            legend_labels = [f"{op}: {count} ({pct:.1f}%)" for op, count, pct in zip(operations, counts, percentages)]
+            legend = ax.legend(
+                wedges,
+                legend_labels,
+                title=self.translate_text("Types d'opérations"),
+                loc="center left",
+                bbox_to_anchor=(1, 0, 0.5, 1),
+                fontsize=9,
+                title_fontsize=10,
+                frameon=True,
+                framealpha=0.92,
+                facecolor=plot_bg_color,
+                edgecolor=grid_color,
+                labelcolor=label_color,
+            )
             plt.setp(legend.get_title(), color=text_color)
 
             self.chart_canvas.figure.tight_layout(rect=[0.18, 0, 0.8, 1])
 
-            ops_label   = self.translate_text("\nOpérations")
+            ops_label = self.translate_text("\nOpérations")
             center_text = f"Total: {total}{ops_label}"
-            ax.text(0, 0, center_text, ha='center', va='center',
-                    fontsize=12, fontweight='bold', color=text_color)
+            ax.text(0, 0, center_text, ha="center", va="center", fontsize=12, fontweight="bold", color=text_color)
 
             if any(p < 10 for p in percentages):
-                note = self.translate_text(
-                    "•Les pourcentages < 10% ne sont affichés\nque dans la légende"
+                note = self.translate_text("•Les pourcentages < 10% ne sont affichés\nque dans la légende")
+                ax.text(
+                    -1.9,
+                    0,
+                    note,
+                    ha="center",
+                    va="center",
+                    fontsize=8,
+                    color="#6b7280" if not dm else "#8b94a1",
+                    style="italic",
                 )
-                ax.text(-1.9, 0, note, ha='center', va='center', fontsize=8,
-                        color='#6b7280' if not dm else '#8b94a1', style='italic')
 
-        elif chart_type == self.translate_text("Évolution des formats") and stats['top_formats']:
-            formats = [r[0] for r in stats['top_formats']]
-            counts  = [r[1] for r in stats['top_formats']]
-            n       = len(formats)
+        elif chart_type == self.translate_text("Évolution des formats") and stats["top_formats"]:
+            formats = [r[0] for r in stats["top_formats"]]
+            counts = [r[1] for r in stats["top_formats"]]
+            n = len(formats)
 
-            ax.barh(formats, counts,
-                    color=[plt.cm.Pastel1(i / max(n, 1)) for i in range(n)],
-                    edgecolor=grid_color, linewidth=0.8, height=0.65)
+            ax.barh(
+                formats,
+                counts,
+                color=[plt.cm.Pastel1(i / max(n, 1)) for i in range(n)],
+                edgecolor=grid_color,
+                linewidth=0.8,
+                height=0.65,
+            )
             ax.set_xlabel(self.translate_text("Nombre d'utilisations"), color=label_color, fontsize=11)
-            ax.set_title(self.translate_text("Formats les plus utilisés"), color=label_color,
-                         fontsize=14, fontweight='bold', pad=14)
-            ax.grid(True, alpha=0.25, axis='x', color=grid_color, linestyle='--')
-            ax.tick_params(axis='y', colors=label_color)
-            ax.tick_params(axis='x', colors=axis_color)
+            ax.set_title(
+                self.translate_text("Formats les plus utilisés"),
+                color=label_color,
+                fontsize=14,
+                fontweight="bold",
+                pad=14,
+            )
+            ax.grid(True, alpha=0.25, axis="x", color=grid_color, linestyle="--")
+            ax.tick_params(axis="y", colors=label_color)
+            ax.tick_params(axis="x", colors=axis_color)
 
             for bar, count in zip(ax.patches, counts):
                 w = bar.get_width()
-                ax.text(w + 0.15, bar.get_y() + bar.get_height() / 2, str(count),
-                        va='center', ha='left', color=text_color, fontweight='bold', fontsize=9)
+                ax.text(
+                    w + 0.15,
+                    bar.get_y() + bar.get_height() / 2,
+                    str(count),
+                    va="center",
+                    ha="left",
+                    color=text_color,
+                    fontweight="bold",
+                    fontsize=9,
+                )
 
             self.chart_canvas.figure.tight_layout()
 
         self.chart_canvas.draw()
 
     def export_history(self, format_type):
-        file_filter = "CSV (*.csv)" if format_type == 'csv' else "JSON (*.json)"
-        filepath, _ = QFileDialog.getSaveFileName(
-            self, self.translate_text("Exporter l'historique"), "", file_filter
-        )
+        file_filter = "CSV (*.csv)" if format_type == "csv" else "JSON (*.json)"
+        filepath, _ = QFileDialog.getSaveFileName(self, self.translate_text("Exporter l'historique"), "", file_filter)
         if filepath:
             try:
                 self.db_manager.export_history(filepath, format_type)
                 QMessageBox.information(
-                    self, self.translate_text("Succès"),
-                    self.translate_text(f"Historique exporté avec succès vers {filepath}")
+                    self,
+                    self.translate_text("Succès"),
+                    self.translate_text(f"Historique exporté avec succès vers {filepath}"),
                 )
             except Exception as e:
                 QMessageBox.critical(
-                    self, self.translate_text("Erreur"),
-                    self.translate_text(f"Erreur lors de l'export: {str(e)}")
+                    self, self.translate_text("Erreur"), self.translate_text(f"Erreur lors de l'export: {str(e)}")
                 )
 
     def _build_db_selector_bar(self) -> QWidget:
@@ -1028,17 +1134,15 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         row.setContentsMargins(8, 6, 8, 6)
         row.setSpacing(8)
 
-        btn_base   = "border-radius:7px; font-size:11px; font-weight:700; padding:5px 14px; border: none;"
+        btn_base = "border-radius:7px; font-size:11px; font-weight:700; padding:5px 14px; border: none;"
         btn_active = f"background:#4dabf7; color:#fff; {btn_base}"
         btn_normal = (
-            f"background:#1e2535; color:#8b9ab0; {btn_base}" if dm
-            else f"background:#e2e8f0; color:#4a5568; {btn_base}"
+            f"background:#1e2535; color:#8b9ab0; {btn_base}" if dm else f"background:#e2e8f0; color:#4a5568; {btn_base}"
         )
 
         lbl = QLabel(self.translate_text("Base de données :"))
         lbl.setStyleSheet(
-            f"color:{'#8b9ab0' if dm else '#6b7280'}; font-size:11px; font-weight:600;"
-            " background: transparent;"
+            f"color:{'#8b9ab0' if dm else '#6b7280'}; font-size:11px; font-weight:600; background: transparent;"
         )
         row.addWidget(lbl)
 
@@ -1066,25 +1170,19 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         row.addStretch()
 
         self._db_path_lbl = QLabel("")
-        self._db_path_lbl.setStyleSheet(
-            "color:#6366f1; font-size:10px; font-style:italic; background: transparent;"
-        )
+        self._db_path_lbl.setStyleSheet("color:#6366f1; font-size:10px; font-style:italic; background: transparent;")
         row.addWidget(self._db_path_lbl)
 
-        bar.setStyleSheet(
-            f"background:{'#161b27' if dm else '#eef2fa'};"
-            "border-radius:9px;"
-        )
+        bar.setStyleSheet(f"background:{'#161b27' if dm else '#eef2fa'};border-radius:9px;")
         bar.setFixedHeight(44)
         return bar
 
     def _switch_db(self, mode: str) -> None:
         dm = self._dark
-        btn_base   = "border-radius:7px; font-size:11px; font-weight:700; padding:5px 14px; border: none;"
+        btn_base = "border-radius:7px; font-size:11px; font-weight:700; padding:5px 14px; border: none;"
         btn_active = f"background:#4dabf7; color:#fff; {btn_base}"
         btn_normal = (
-            f"background:#1e2535; color:#8b9ab0; {btn_base}" if dm
-            else f"background:#e2e8f0; color:#4a5568; {btn_base}"
+            f"background:#1e2535; color:#8b9ab0; {btn_base}" if dm else f"background:#e2e8f0; color:#4a5568; {btn_base}"
         )
 
         self._btn_main_db.setStyleSheet(btn_normal)
@@ -1107,7 +1205,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                 self,
                 self.translate_text("Choisir une base de données"),
                 "",
-                "SQLite databases (*.db *.sqlite *.sqlite3);;All files (*)"
+                "SQLite databases (*.db *.sqlite *.sqlite3);;All files (*)",
             )
             if not path:
                 return
@@ -1118,6 +1216,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             except Exception:
                 try:
                     import sqlite3 as _sql
+
                     conn = _sql.connect(path)
                     conn.execute("SELECT 1 FROM conversion_history LIMIT 1")
                     conn.close()
@@ -1134,7 +1233,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                     QMessageBox.critical(
                         self,
                         self.translate_text("Erreur"),
-                        self.translate_text(f"Impossible d'ouvrir la base : {exc2}")
+                        self.translate_text(f"Impossible d'ouvrir la base : {exc2}"),
                     )
                     return
 
@@ -1143,12 +1242,11 @@ class StatisticsDashboard(TranslationMixin, QDialog):
     def format_size(self, size_bytes):
         if size_bytes is None:
             return "0 octets"
-        for unit in ['octets', 'Ko', 'Mo', 'Go', 'To']:
+        for unit in ["octets", "Ko", "Mo", "Go", "To"]:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
         return f"{size_bytes:.2f} Po"
-
 
     def translate_operation_type(self, operation_key):
         return self._translation_manager.translate_operation_type(operation_key)
