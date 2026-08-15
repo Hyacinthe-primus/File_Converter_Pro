@@ -1,9 +1,9 @@
 """Tests for compression workflows — create real ZIP files and verify content."""
 
 import os
+import shutil
 import sys
 import tempfile
-import shutil
 import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -31,26 +31,26 @@ def _create_test_files(directory, count=3):
 class TestSingleZipArchive:
     def test_creates_valid_zip(self, tmp_dir):
         from app.mixins.compression import CompressionMixin
+
         mixin = CompressionMixin()
         mixin.translate_text = lambda x: x
-        mixin.progress_bar = type('', (), {'setValue': lambda self, v: None})()
+        mixin.progress_bar = type("", (), {"setValue": lambda self, v: None})()
 
         files = _create_test_files(tmp_dir)
         archive = os.path.join(tmp_dir, "test.zip")
-        result = mixin.create_single_zip_archive(
-            archive, files, zipfile.ZIP_DEFLATED, None
-        )
+        result = mixin.create_single_zip_archive(archive, files, zipfile.ZIP_DEFLATED, None)
         assert result is True
         assert os.path.exists(archive)
-        with zipfile.ZipFile(archive, 'r') as zf:
+        with zipfile.ZipFile(archive, "r") as zf:
             names = zf.namelist()
             assert len(names) == 3
 
     def test_creates_zip_with_subdirs(self, tmp_dir):
         from app.mixins.compression import CompressionMixin
+
         mixin = CompressionMixin()
         mixin.translate_text = lambda x: x
-        mixin.progress_bar = type('', (), {'setValue': lambda self, v: None})()
+        mixin.progress_bar = type("", (), {"setValue": lambda self, v: None})()
 
         sub = os.path.join(tmp_dir, "subdir")
         os.makedirs(sub)
@@ -65,9 +65,7 @@ class TestSingleZipArchive:
                 all_files.append(os.path.join(root, f))
 
         archive = os.path.join(tmp_dir, "nested.zip")
-        result = mixin.create_single_zip_archive(
-            archive, all_files, zipfile.ZIP_DEFLATED, None
-        )
+        result = mixin.create_single_zip_archive(archive, all_files, zipfile.ZIP_DEFLATED, None)
         assert result is True
         assert os.path.exists(archive)
 
@@ -75,24 +73,28 @@ class TestSingleZipArchive:
 class TestArchiveExtension:
     def test_zip_extension(self):
         from app.mixins.compression import CompressionMixin
+
         m = CompressionMixin()
         m.translate_text = lambda x: x
         assert m.get_archive_extension("ZIP") == "zip"
 
     def test_rar_extension(self):
         from app.mixins.compression import CompressionMixin
+
         m = CompressionMixin()
         m.translate_text = lambda x: x
         assert m.get_archive_extension("RAR") == "rar"
 
     def test_tar_gz_extension(self):
         from app.mixins.compression import CompressionMixin
+
         m = CompressionMixin()
         m.translate_text = lambda x: x
         assert m.get_archive_extension("TAR.GZ") == "tar.gz"
 
     def test_tar_extension(self):
         from app.mixins.compression import CompressionMixin
+
         m = CompressionMixin()
         m.translate_text = lambda x: x
         assert m.get_archive_extension("TAR") == "tar"
@@ -101,6 +103,7 @@ class TestArchiveExtension:
 class TestFindSplitArchiveParts:
     def test_find_zip_parts(self, tmp_dir):
         from app.mixins.compression import CompressionMixin
+
         mixin = CompressionMixin()
         mixin.translate_text = lambda x: x
 
@@ -112,6 +115,7 @@ class TestFindSplitArchiveParts:
 
     def test_find_rar_parts(self, tmp_dir):
         from app.mixins.compression import CompressionMixin
+
         mixin = CompressionMixin()
         mixin.translate_text = lambda x: x
 
@@ -125,9 +129,10 @@ class TestFindSplitArchiveParts:
 class TestTarArchive:
     def test_creates_tar(self, tmp_dir):
         from app.mixins.compression import CompressionMixin
+
         mixin = CompressionMixin()
         mixin.translate_text = lambda x: x
-        mixin.progress_bar = type('', (), {'setValue': lambda self, v: None})()
+        mixin.progress_bar = type("", (), {"setValue": lambda self, v: None})()
 
         files = _create_test_files(tmp_dir)
         archive = os.path.join(tmp_dir, "test.tar")
@@ -137,9 +142,10 @@ class TestTarArchive:
 
     def test_creates_tar_gz(self, tmp_dir):
         from app.mixins.compression import CompressionMixin
+
         mixin = CompressionMixin()
         mixin.translate_text = lambda x: x
-        mixin.progress_bar = type('', (), {'setValue': lambda self, v: None})()
+        mixin.progress_bar = type("", (), {"setValue": lambda self, v: None})()
 
         files = _create_test_files(tmp_dir)
         archive = os.path.join(tmp_dir, "test.tar.gz")
