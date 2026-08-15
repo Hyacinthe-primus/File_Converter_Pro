@@ -18,16 +18,27 @@ import os
 import time
 from pathlib import Path
 
-from PySide6.QtCore    import Qt, Signal, QThread, QObject
+from PySide6.QtCore import QObject, Qt, QThread, Signal
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
-    QLabel, QTabWidget, QWidget, QScrollArea,
-    QGridLayout, QGroupBox, QProgressBar, QTextEdit,
-    QFileDialog, QMessageBox )
+    QDialog,
+    QFileDialog,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
-from converter import AdvancedDatabaseManager, AdvancedConverterEngine
+from converter import AdvancedConverterEngine, AdvancedDatabaseManager
+from qss_helpers import _apply_dialog_btn, _load_qss
 from translations import TranslationManager
-from qss_helpers import _load_qss, _apply_dialog_btn
 from utils.translation_mixin import TranslationMixin
 
 
@@ -35,8 +46,9 @@ class _ConversionWorker(QObject):
     """
     Runs conversions off the main thread.
     """
+
     progress = Signal(int, int, str)
-    log      = Signal(str)
+    log = Signal(str)
     finished = Signal(int, int)
 
     def __init__(
@@ -48,17 +60,17 @@ class _ConversionWorker(QObject):
         dst_dir: str,
         achievement_system=None,
         tm=None,
-        config=None
+        config=None,
     ) -> None:
         super().__init__()
-        self.engine              = engine
-        self.db                  = db
-        self.conversion_type     = conversion_type
-        self.sources             = sources
-        self.dst_dir             = dst_dir
-        self._cancelled          = False
-        self.achievement_system  = achievement_system
-        self._tm                 = tm
+        self.engine = engine
+        self.db = db
+        self.conversion_type = conversion_type
+        self.sources = sources
+        self.dst_dir = dst_dir
+        self._cancelled = False
+        self.achievement_system = achievement_system
+        self._tm = tm
         self._config = config or {}
 
     def cancel(self) -> None:
@@ -96,32 +108,35 @@ class _ConversionWorker(QObject):
             result = self.engine.convert(self.conversion_type, src, self.dst_dir)
 
             from converter.converters import CATEGORY_MAP
+
             category = CATEGORY_MAP.get(self.conversion_type, "document")
 
             self.db.add_record(
-                source_file     = result.source,
-                source_format   = Path(result.source).suffix.lstrip(".").upper(),
-                target_file     = result.target,
-                target_format   = Path(result.target).suffix.lstrip(".").upper()
-                                  if result.success else "",
-                conversion_type = self.conversion_type,
-                category        = category,
-                file_size       = result.file_size,
-                conversion_time = result.elapsed,
-                success         = result.success,
-                error_message   = result.error,
+                source_file=result.source,
+                source_format=Path(result.source).suffix.lstrip(".").upper(),
+                target_file=result.target,
+                target_format=Path(result.target).suffix.lstrip(".").upper() if result.success else "",
+                conversion_type=self.conversion_type,
+                category=category,
+                file_size=result.file_size,
+                conversion_time=result.elapsed,
+                success=result.success,
+                error_message=result.error,
             )
 
             if result.success:
                 ok += 1
-                self.log.emit(self._t("adv_log_success",
-                                      target=Path(result.target).name,
-                                      elapsed=result.elapsed))
+                engine_suffix = ""
+                if result.engine_used:
+                    engine_label = result.engine_used.lstrip("_").replace("_", " ")
+                    engine_suffix = f" ({self._t('adv_log_engine', engine=engine_label)})"
+                self.log.emit(
+                    self._t("adv_log_success", target=Path(result.target).name, elapsed=result.elapsed)
+                    + engine_suffix
+                )
                 if self.achievement_system is not None and _achievements_on:
                     try:
-                        self.achievement_system.record_advanced_conversion(
-                            self.conversion_type, success=True
-                        )
+                        self.achievement_system.record_advanced_conversion(self.conversion_type, success=True)
                     except Exception as _e:
                         print(f"[ADV ACH] Error: {_e}")
             else:
@@ -133,9 +148,7 @@ class _ConversionWorker(QObject):
                     self.log.emit(self._t("adv_log_error", error=err_msg))
                 if self.achievement_system is not None and _achievements_on:
                     try:
-                        self.achievement_system.record_advanced_conversion(
-                            self.conversion_type, success=False
-                        )
+                        self.achievement_system.record_advanced_conversion(self.conversion_type, success=False)
                     except Exception as _e:
                         print(f"[ADV ACH] Error (fail): {_e}")
 
@@ -171,8 +184,9 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
     ) -> None:
         super().__init__(parent)
         self.parent_window = parent
-        self.language      = language
-        self._tm = TranslationManager(); self._tm.set_language(language)
+        self.language = language
+        self._tm = TranslationManager()
+        self._tm.set_language(language)
 
         self.adv_db = advanced_db or AdvancedDatabaseManager()
         self.engine = AdvancedConverterEngine()
@@ -211,6 +225,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
                     item = widget.item(i)
                     if item.isSelected():
                         from PySide6.QtCore import Qt as _Qt
+
                         path = item.data(_Qt.UserRole) or item.text()
                         selected.append(path)
                 if selected:
@@ -256,10 +271,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
             self._thread = None
             self._worker = None
         if running:
-            QMessageBox.warning(
-                self, self.tr_("En cours"),
-                self.tr_("Une conversion est déjà en cours.")
-            )
+            QMessageBox.warning(self, self.tr_("En cours"), self.tr_("Une conversion est déjà en cours."))
             return
 
         self.conversion_requested.emit(conversion_type)
@@ -267,11 +279,12 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         sources = self._get_source_files(accepted_exts)
         if not sources:
             QMessageBox.information(
-                self, self.tr_("Aucun fichier"),
+                self,
+                self.tr_("Aucun fichier"),
                 self.tr_(
                     "Aucun fichier compatible trouvé dans la liste.\n"
                     "Ajoutez des fichiers dans la fenêtre principale d'abord."
-                )
+                ),
             )
             return
 
@@ -286,9 +299,13 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self._current_conversion_type = conversion_type
         self._last_ok = 0
 
-        _ach_sys = getattr(self.parent_window, 'achievement_system', None)
+        _ach_sys = getattr(self.parent_window, "achievement_system", None)
         worker = _ConversionWorker(
-            self.engine, self.adv_db, conversion_type, sources, dst_dir,
+            self.engine,
+            self.adv_db,
+            conversion_type,
+            sources,
+            dst_dir,
             achievement_system=_ach_sys,
             tm=self._tm,
         )
@@ -300,9 +317,11 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         worker.progress.connect(self._on_progress)
         worker.finished.connect(self._on_finished)
         worker.finished.connect(thread.quit)
+
         def _cleanup():
             self._thread = None
             self._worker = None
+
         thread.finished.connect(thread.deleteLater)
         thread.finished.connect(_cleanup)
 
@@ -356,8 +375,8 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self.tab_widget.setStyleSheet(self._tab_style(0))
 
         self.tab_widget.addTab(self._build_documents_tab(), self.tr_("📄 Documents"))
-        self.tab_widget.addTab(self._build_images_tab(),    self.tr_("🖼️ Images"))
-        self.tab_widget.addTab(self._build_av_tab(),        self.tr_("🎵 Audio/Vidéo"))
+        self.tab_widget.addTab(self._build_images_tab(), self.tr_("🖼️ Images"))
+        self.tab_widget.addTab(self._build_av_tab(), self.tr_("🎵 Audio/Vidéo"))
 
         layout.addWidget(self.tab_widget)
 
@@ -401,62 +420,104 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
     def _build_documents_tab(self) -> QWidget:
         groups = [
-            (self.tr_("TXT / RTF"), [
-                ("📄 TXT → PDF",  "txt_to_pdf",  [".txt"]),
-                ("📄 RTF → PDF",  "rtf_to_pdf",  [".rtf"]),
-                ("📄 TXT → DOCX", "txt_to_docx", [".txt"]),
-                ("📄 RTF → DOCX", "rtf_to_docx", [".rtf"]),
-            ]),
-            (self.tr_("CSV / JSON"), [
-                ("📊 CSV → JSON", "csv_to_json", [".csv"]),
-                ("📊 JSON → CSV", "json_to_csv", [".json"]),
-            ]),
-            (self.tr_("XLSX (Excel)"), [
-                ("📊 XLSX → PDF",  "xlsx_to_pdf",  [".xlsx", ".xls"]),
-                ("📊 XLSX → JSON", "xlsx_to_json", [".xlsx", ".xls"]),
-                ("📊 XLSX → CSV",  "xlsx_to_csv",  [".xlsx", ".xls"]),
-            ]),
-            (self.tr_("PPTX (PowerPoint)"), [
-                ("📽️ PPTX → PDF", "pptx_to_pdf", [".pptx", ".ppt"]),
-            ]),
-            (self.tr_("HTML"), [
-                ("🌐 HTML → PDF", "html_to_pdf", [".html", ".htm"]),
-                ("🌐 PDF → HTML", "pdf_to_html", [".pdf"]),
-            ]),
-            (self.tr_("EPUB (E-book)"), [
-                ("📚 EPUB → PDF", "epub_to_pdf", [".epub"]),
-            ]),
+            (
+                self.tr_("TXT / RTF"),
+                [
+                    ("📄 TXT → PDF", "txt_to_pdf", [".txt"]),
+                    ("📄 RTF → PDF", "rtf_to_pdf", [".rtf"]),
+                    ("📄 TXT → DOCX", "txt_to_docx", [".txt"]),
+                    ("📄 RTF → DOCX", "rtf_to_docx", [".rtf"]),
+                ],
+            ),
+            (
+                self.tr_("CSV / JSON"),
+                [
+                    ("📊 CSV → JSON", "csv_to_json", [".csv"]),
+                    ("📊 JSON → CSV", "json_to_csv", [".json"]),
+                ],
+            ),
+            (
+                self.tr_("XLSX (Excel)"),
+                [
+                    ("📊 XLSX → PDF", "xlsx_to_pdf", [".xlsx", ".xls"]),
+                    ("📊 XLSX → JSON", "xlsx_to_json", [".xlsx", ".xls"]),
+                    ("📊 XLSX → CSV", "xlsx_to_csv", [".xlsx", ".xls"]),
+                ],
+            ),
+            (
+                self.tr_("PPTX (PowerPoint)"),
+                [
+                    ("📽️ PPTX → PDF", "pptx_to_pdf", [".pptx", ".ppt"]),
+                ],
+            ),
+            (
+                self.tr_("HTML"),
+                [
+                    ("🌐 HTML → PDF", "html_to_pdf", [".html", ".htm"]),
+                    ("🌐 PDF → HTML", "pdf_to_html", [".pdf"]),
+                ],
+            ),
+            (
+                self.tr_("EPUB (E-book)"),
+                [
+                    ("📚 EPUB → PDF", "epub_to_pdf", [".epub"]),
+                ],
+            ),
         ]
         return self._build_tab_from_groups(groups, "documents")
 
     def _build_images_tab(self) -> QWidget:
         _IMG_EXTS = [
-            ".png",  ".jpeg", ".jpg",  ".bmp",
-            ".heic", ".heif", ".gif",  ".jpx",
-            ".webp", ".tiff", ".tif",  ".psd",
-            ".svg",  ".avif", ".j2k",  ".jp2",
-            ".dng",  ".cr2",  ".cr3",  ".nef",
-            ".arw",  ".orf",  ".rw2",  ".raf",
-            ".jfif"
-]
+            ".png",
+            ".jpeg",
+            ".jpg",
+            ".bmp",
+            ".heic",
+            ".heif",
+            ".gif",
+            ".jpx",
+            ".webp",
+            ".tiff",
+            ".tif",
+            ".psd",
+            ".svg",
+            ".avif",
+            ".j2k",
+            ".jp2",
+            ".dng",
+            ".cr2",
+            ".cr3",
+            ".nef",
+            ".arw",
+            ".orf",
+            ".rw2",
+            ".raf",
+            ".jfif",
+        ]
         groups = [
-            (self.tr_("Images"), [
-                ("🖼️ Image → PNG",  "image_to_png",  _IMG_EXTS),
-                ("🖼️ Image → JPEG", "image_to_jpeg", _IMG_EXTS),
-                ("🖼️ Image → JPG",  "image_to_jpg",  _IMG_EXTS),
-                ("🖼️ Image → BMP",  "image_to_bmp",  _IMG_EXTS),
-                ("🖼️ Image → HEIC", "image_to_heic", _IMG_EXTS),
-                ("🖼️ Image → WEBP", "image_to_webp", _IMG_EXTS),
-                ("🖼️ Image → TIFF", "image_to_tiff", _IMG_EXTS),
-                ("🖼️ Image → PSD",  "image_to_psd",  _IMG_EXTS),
-                ("🖼️ Image → SVG",  "image_to_svg",  _IMG_EXTS),
-                ("🖼️ Image → AVIF", "image_to_avif", _IMG_EXTS),
-                ("🖼️ Image → J2K",  "image_to_j2k",  _IMG_EXTS),
-                ("🖼️ Image → DNG",  "image_to_dng",  _IMG_EXTS),
-            ]),
-            (self.tr_("ICO (Icône)"), [
-                ("🎨 Image → ICO", "image_to_ico", _IMG_EXTS),
-            ]),
+            (
+                self.tr_("Images"),
+                [
+                    ("🖼️ Image → PNG", "image_to_png", _IMG_EXTS),
+                    ("🖼️ Image → JPEG", "image_to_jpeg", _IMG_EXTS),
+                    ("🖼️ Image → JPG", "image_to_jpg", _IMG_EXTS),
+                    ("🖼️ Image → BMP", "image_to_bmp", _IMG_EXTS),
+                    ("🖼️ Image → HEIC", "image_to_heic", _IMG_EXTS),
+                    ("🖼️ Image → WEBP", "image_to_webp", _IMG_EXTS),
+                    ("🖼️ Image → TIFF", "image_to_tiff", _IMG_EXTS),
+                    ("🖼️ Image → PSD", "image_to_psd", _IMG_EXTS),
+                    ("🖼️ Image → SVG", "image_to_svg", _IMG_EXTS),
+                    ("🖼️ Image → AVIF", "image_to_avif", _IMG_EXTS),
+                    ("🖼️ Image → J2K", "image_to_j2k", _IMG_EXTS),
+                    ("🖼️ Image → DNG", "image_to_dng", _IMG_EXTS),
+                ],
+            ),
+            (
+                self.tr_("ICO (Icône)"),
+                [
+                    ("🎨 Image → ICO", "image_to_ico", _IMG_EXTS),
+                ],
+            ),
         ]
         return self._build_tab_from_groups(groups, "images")
 
@@ -464,27 +525,36 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         _VID_EXTS = [".mp4", ".webm", ".mkv", ".mov", ".avi"]
         _AUD_EXTS = [".mp3", ".wav", ".aac", ".ogg", ".flac", ".m4a"]
         groups = [
-            (self.tr_("Vidéo → Vidéo"), [
-                ("🎬 Video → MP4",  "video_to_mp4",  _VID_EXTS),
-                ("🎬 Video → WEBM", "video_to_webm", _VID_EXTS),
-                ("🎬 Video → MKV",  "video_to_mkv",  _VID_EXTS),
-                ("🎬 Video → MOV",  "video_to_mov",  _VID_EXTS),
-                ("🎬 Video → AVI",  "video_to_avi",  _VID_EXTS),
-            ]),
-            (self.tr_("Vidéo → Audio"), [
-                ("🎬 Video → MP3",  "video_to_mp3",  _VID_EXTS),
-                ("🎬 Video → WAV",  "video_to_wav",  _VID_EXTS),
-                ("🎬 Video → AAC",  "video_to_aac",  _VID_EXTS),
-                ("🎬 Video → FLAC", "video_to_flac", _VID_EXTS),
-            ]),
-            (self.tr_("Audio → Audio"), [
-                ("🎵 Audio → MP3",  "audio_to_mp3",  _AUD_EXTS),
-                ("🎵 Audio → WAV",  "audio_to_wav",  _AUD_EXTS),
-                ("🎵 Audio → AAC",  "audio_to_aac",  _AUD_EXTS),
-                ("🎵 Audio → OGG",  "audio_to_ogg",  _AUD_EXTS),
-                ("🎵 Audio → FLAC", "audio_to_flac", _AUD_EXTS),
-                ("🎵 Audio → M4A",  "audio_to_m4a",  _AUD_EXTS),
-            ]),
+            (
+                self.tr_("Vidéo → Vidéo"),
+                [
+                    ("🎬 Video → MP4", "video_to_mp4", _VID_EXTS),
+                    ("🎬 Video → WEBM", "video_to_webm", _VID_EXTS),
+                    ("🎬 Video → MKV", "video_to_mkv", _VID_EXTS),
+                    ("🎬 Video → MOV", "video_to_mov", _VID_EXTS),
+                    ("🎬 Video → AVI", "video_to_avi", _VID_EXTS),
+                ],
+            ),
+            (
+                self.tr_("Vidéo → Audio"),
+                [
+                    ("🎬 Video → MP3", "video_to_mp3", _VID_EXTS),
+                    ("🎬 Video → WAV", "video_to_wav", _VID_EXTS),
+                    ("🎬 Video → AAC", "video_to_aac", _VID_EXTS),
+                    ("🎬 Video → FLAC", "video_to_flac", _VID_EXTS),
+                ],
+            ),
+            (
+                self.tr_("Audio → Audio"),
+                [
+                    ("🎵 Audio → MP3", "audio_to_mp3", _AUD_EXTS),
+                    ("🎵 Audio → WAV", "audio_to_wav", _AUD_EXTS),
+                    ("🎵 Audio → AAC", "audio_to_aac", _AUD_EXTS),
+                    ("🎵 Audio → OGG", "audio_to_ogg", _AUD_EXTS),
+                    ("🎵 Audio → FLAC", "audio_to_flac", _AUD_EXTS),
+                    ("🎵 Audio → M4A", "audio_to_m4a", _AUD_EXTS),
+                ],
+            ),
         ]
         return self._build_tab_from_groups(groups, "audio_video")
 
@@ -507,7 +577,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
         for group_title, buttons in groups:
             group = QGroupBox(group_title)
-            grid  = QGridLayout(group)
+            grid = QGridLayout(group)
             grid.setHorizontalSpacing(10)
             grid.setVerticalSpacing(10)
 
@@ -534,33 +604,27 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         btn.setMinimumHeight(45)
         btn.setCursor(Qt.PointingHandCursor)
         btn.setProperty("tab_type", tab_type)
-        btn.clicked.connect(
-            lambda _checked, ct=conversion_type, exts=accepted_exts:
-                self._run_conversion(ct, exts)
-        )
+        btn.clicked.connect(lambda _checked, ct=conversion_type, exts=accepted_exts: self._run_conversion(ct, exts))
         return btn
 
     def _apply_theme_style(self) -> None:
         dark = getattr(self.parent_window, "dark_mode", False)
         theme = "dark" if dark else "light"
-        self.setStyleSheet(
-            _load_qss("advanced_conversions.qss", theme) +
-            _load_qss("advanced_conversions_buttons.qss")
-        )
+        self.setStyleSheet(_load_qss("advanced_conversions.qss", theme) + _load_qss("advanced_conversions_buttons.qss"))
 
     def _tab_style(self, active_index: int = 0) -> str:
         dark = getattr(self.parent_window, "dark_mode", False)
-        inactive_bg   = "rgba(255,255,255,0.05)"  if dark else "rgba(0,0,0,0.05)"
-        inactive_fg   = "rgba(255,255,255,0.45)"  if dark else "rgba(0,0,0,0.45)"
-        inactive_bdr  = "rgba(255,255,255,0.08)"  if dark else "rgba(0,0,0,0.12)"
-        hover_bg      = "rgba(255,255,255,0.09)"  if dark else "rgba(0,0,0,0.08)"
-        hover_fg      = "rgba(255,255,255,0.72)"  if dark else "rgba(0,0,0,0.72)"
-        pane_bg       = "rgba(255,255,255,0.03)"  if dark else "rgba(0,0,0,0.02)"
-        pane_bdr      = "rgba(255,255,255,0.08)"  if dark else "rgba(0,0,0,0.10)"
+        inactive_bg = "rgba(255,255,255,0.05)" if dark else "rgba(0,0,0,0.05)"
+        inactive_fg = "rgba(255,255,255,0.45)" if dark else "rgba(0,0,0,0.45)"
+        inactive_bdr = "rgba(255,255,255,0.08)" if dark else "rgba(0,0,0,0.12)"
+        hover_bg = "rgba(255,255,255,0.09)" if dark else "rgba(0,0,0,0.08)"
+        hover_fg = "rgba(255,255,255,0.72)" if dark else "rgba(0,0,0,0.72)"
+        pane_bg = "rgba(255,255,255,0.03)" if dark else "rgba(0,0,0,0.02)"
+        pane_bdr = "rgba(255,255,255,0.08)" if dark else "rgba(0,0,0,0.10)"
         palettes = [
             (110, 190, 255),  # documents — blue
-            (32,  200, 170),  # images    — teal
-            (255, 140,  60),  # audio/vid — orange
+            (32, 200, 170),  # images    — teal
+            (255, 140, 60),  # audio/vid — orange
         ]
         r, g, b = palettes[active_index % len(palettes)]
         return f"""
