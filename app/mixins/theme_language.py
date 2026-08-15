@@ -5,6 +5,7 @@ import time
 from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton
 
 from qss_helpers import _load_qss, set_theme
+from translations import decorate_language_name
 
 
 class ThemeLanguageMixin:
@@ -57,14 +58,8 @@ class ThemeLanguageMixin:
     def _get_language_label(self, code: str) -> str:
         for lang in self.translation_manager.get_available_languages():
             if lang["code"] == code:
-                name = lang["name"]
-                if code == "fr":
-                    return f"🇫🇷 {name}"
-                elif code == "en":
-                    return f"🇬🇧 {name}"
-                else:
-                    return f"🌐 {name}"
-        return f"🌐 {code}"
+                return decorate_language_name(lang["name"])
+        return decorate_language_name(code)
 
     def toggle_language(self):
         available = [lang["code"] for lang in self.translation_manager.get_available_languages()]
@@ -116,6 +111,11 @@ class ThemeLanguageMixin:
             key = widget.property("i18n_key")
             if key:
                 widget.setText(self.translate_text(key))
+
+        for widget in self.findChildren(QPushButton):
+            tip_key = widget.property("i18n_tip")
+            if tip_key:
+                widget.setToolTip(self.translate_text(tip_key))
 
         self.theme_action.setText(
             ("☀️ " if self.dark_mode else "🌙 ") + self.translate_text("Mode Clair" if self.dark_mode else "Mode Sombre")
