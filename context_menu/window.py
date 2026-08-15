@@ -8,41 +8,50 @@ Launched via:
 
 import os
 import sys
-import time
 import tempfile
+import time
 from pathlib import Path
+
+from PySide6.QtCore import Qt, QThread, QTimer, Signal
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QComboBox, QProgressBar, QFrame, QApplication
+    QApplication,
+    QComboBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtGui  import QIcon
-from PySide6.QtCore import Qt, QThread, Signal, QTimer
 
-from qss_helpers import _load_qss
 from context_menu.formats import CONVERSION_MAP, LABELS, MERGE_DISPATCH
+from qss_helpers import _load_qss
 
-_COLLECT_MIN_SEC    = 2.0
+_COLLECT_MIN_SEC = 2.0
 _COLLECT_STABLE_SEC = 0.5
-_COLLECT_MAX_SEC    = 8.0
-_COLLECT_POLL_SEC   = 0.05
-_COLLECT_EPOCH_SEC  = 15.0
+_COLLECT_MAX_SEC = 8.0
+_COLLECT_POLL_SEC = 0.05
+_COLLECT_EPOCH_SEC = 15.0
+
 
 def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
     """
     Windows spawns one process per selected file for context menu commands.
     """
-    epoch   = int(time.time() / _COLLECT_EPOCH_SEC)
-    key     = f"fcp_{conversion_type}_{epoch}"
+    epoch = int(time.time() / _COLLECT_EPOCH_SEC)
+    key = f"fcp_{conversion_type}_{epoch}"
     staging = os.path.join(tempfile.gettempdir(), f"{key}.txt")
-    lock    = os.path.join(tempfile.gettempdir(), f"{key}.lock")
+    lock = os.path.join(tempfile.gettempdir(), f"{key}.lock")
 
     with open(staging, "a", encoding="utf-8") as fh:
         fh.write(single_file + "\n")
 
     time.sleep(_COLLECT_MIN_SEC)
 
-    deadline     = time.time() + (_COLLECT_MAX_SEC - _COLLECT_MIN_SEC)
-    last_size    = -1
+    deadline = time.time() + (_COLLECT_MAX_SEC - _COLLECT_MIN_SEC)
+    last_size = -1
     stable_since = time.time()
 
     while time.time() < deadline:
@@ -52,7 +61,7 @@ def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
         except OSError:
             size = last_size
         if size != last_size:
-            last_size    = size
+            last_size = size
             stable_since = time.time()
         elif time.time() - stable_since >= _COLLECT_STABLE_SEC:
             break
@@ -67,9 +76,10 @@ def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
 
     try:
         with open(staging, "r", encoding="utf-8") as fh:
-            return [l.strip() for l in fh if l.strip() and os.path.isfile(l.strip())]
+            return [line.strip() for line in fh if line.strip() and os.path.isfile(line.strip())]
     except Exception:
         return [single_file]
+
 
 AUTO_CLOSE_DELAY_MS = 1800
 
@@ -83,16 +93,18 @@ def _sort_files(files: list, order: str) -> list:
         return sorted(files, key=lambda f: Path(f).name.lower(), reverse=True)
     if order == "numerical_asc":
         import re
-        return sorted(files, key=lambda f: [
-            int(t) if t.isdigit() else t.lower()
-            for t in re.split(r"(\d+)", Path(f).name)
-        ])
+
+        return sorted(
+            files, key=lambda f: [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", Path(f).name)]
+        )
     if order == "numerical_desc":
         import re
-        return sorted(files, key=lambda f: [
-            int(t) if t.isdigit() else t.lower()
-            for t in re.split(r"(\d+)", Path(f).name)
-        ], reverse=True)
+
+        return sorted(
+            files,
+            key=lambda f: [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", Path(f).name)],
+            reverse=True,
+        )
     if order == "date_asc":
         return sorted(files, key=lambda f: Path(f).stat().st_mtime)
     if order == "date_desc":
@@ -102,6 +114,7 @@ def _sort_files(files: list, order: str) -> list:
 
 def _convert_image_to_pdf(src: str, dst_dir: str) -> None:
     import fitz
+
     out = os.path.join(dst_dir, f"{Path(src).stem}.pdf")
     pdf = fitz.open()
     img = fitz.open(src)
@@ -115,6 +128,7 @@ def _convert_image_to_pdf(src: str, dst_dir: str) -> None:
 
 def _merge_images_to_pdf(files: list, dst_dir: str) -> None:
     import fitz
+
     pdf = fitz.open()
     for src in files:
         img = fitz.open(src)
@@ -123,6 +137,7 @@ def _merge_images_to_pdf(files: list, dst_dir: str) -> None:
         page.insert_image(rect, filename=src)
         img.close()
     import time as _time
+
     out = os.path.join(dst_dir, f"merged_images_{_time.strftime('%Y%m%d_%H%M%S')}.pdf")
     pdf.save(out)
     pdf.close()
@@ -130,8 +145,10 @@ def _merge_images_to_pdf(files: list, dst_dir: str) -> None:
 
 def _merge_pdfs(files: list, dst_dir: str, order: str) -> None:
     import fitz
+
     merged = fitz.open()
     import time as _time
+
     for f in _sort_files(files, order):
         doc = fitz.open(f)
         merged.insert_pdf(doc)
@@ -141,11 +158,12 @@ def _merge_pdfs(files: list, dst_dir: str, order: str) -> None:
 
 
 def _merge_docx(files: list, dst_dir: str, order: str) -> None:
-    from docxcompose.composer import Composer
-    from docx import Document
-    from docx.oxml.ns import qn
-    from docx.oxml import OxmlElement
     import time as _time
+
+    from docx import Document
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+    from docxcompose.composer import Composer
 
     sorted_files = _sort_files(files, order)
     merged = Document(sorted_files[0])
@@ -166,53 +184,63 @@ def _merge_docx(files: list, dst_dir: str, order: str) -> None:
 
 
 def _convert_docx_to_pdf(src: str, dst_dir: str) -> None:
-    out     = os.path.join(dst_dir, f"{Path(src).stem}.pdf")
+    out = os.path.join(dst_dir, f"{Path(src).stem}.pdf")
     src_abs = os.path.abspath(src)
     out_abs = os.path.abspath(out)
 
     try:
         from docx2pdf import convert
-        convert(src_abs, out_abs); return
+
+        convert(src_abs, out_abs)
+        return
     except Exception as e:
         print(f"[docx→pdf] docx2pdf failed: {e}")
 
     try:
         import comtypes.client
+
         word = comtypes.client.CreateObject("Word.Application")
         word.Visible = False
         doc = word.Documents.Open(src_abs)
         doc.SaveAs(out_abs, FileFormat=17)
-        doc.Close(False); word.Quit(); return
+        doc.Close(False)
+        word.Quit()
+        return
     except Exception as e:
         print(f"[docx→pdf] COM failed: {e}")
 
     try:
-        import subprocess, shutil
-        candidates = [
-            "soffice", "libreoffice",
-            r"C:\Program Files\LibreOffice\program\soffice.exe",
-            r"C:\Program Files (x86)\LibreOffice\program\soffice.exe",
-        ]
-        exe = next((c for c in candidates if shutil.which(c) or os.path.exists(c)), None)
+        import subprocess
+
+        from external_binaries import resolve_binary
+
+        exe = resolve_binary("libreoffice")
         if exe:
             subprocess.run(
                 [exe, "--headless", "--convert-to", "pdf", "--outdir", dst_dir, src_abs],
-                check=True, capture_output=True, timeout=60
-            ); return
+                check=True,
+                capture_output=True,
+                timeout=60,
+            )
+            return
     except Exception as e:
         print(f"[docx→pdf] LibreOffice failed: {e}")
 
     try:
         from docx import Document as DocxDoc
         from reportlab.lib.pagesizes import A4
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
         from reportlab.lib.styles import getSampleStyleSheet
-        doc = DocxDoc(src_abs); styles = getSampleStyleSheet(); story = []
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+
+        doc = DocxDoc(src_abs)
+        styles = getSampleStyleSheet()
+        story = []
         for para in doc.paragraphs:
             if para.text.strip():
                 story.append(Paragraph(para.text, styles["Normal"]))
                 story.append(Spacer(1, 6))
-        SimpleDocTemplate(out_abs, pagesize=A4).build(story); return
+        SimpleDocTemplate(out_abs, pagesize=A4).build(story)
+        return
     except Exception as e:
         print(f"[docx→pdf] reportlab failed: {e}")
 
@@ -223,7 +251,7 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
     import sys
     import threading
 
-    out     = os.path.join(dst_dir, f"{Path(src).stem}.docx")
+    out = os.path.join(dst_dir, f"{Path(src).stem}.docx")
     src_abs = os.path.abspath(src)
     out_abs = os.path.abspath(out)
 
@@ -231,6 +259,7 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
     if sys.platform == "win32":
         try:
             import winreg
+
             winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, "Word.Application")
             _word_available = True
         except (OSError, ImportError):
@@ -238,12 +267,15 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
             print("[pdf→docx] Word not found in registry — skipping COM tier")
 
         if _word_available:
-            result     = {"ok": False}
+            result = {"ok": False}
             stop_event = threading.Event()
 
             def _dialog_dismisser():
-                import ctypes, ctypes.wintypes, time as _t
-                user32   = ctypes.windll.user32
+                import ctypes
+                import ctypes.wintypes
+                import time as _t
+
+                user32 = ctypes.windll.user32
                 BM_CLICK = 0x00F5
 
                 DialogProc = ctypes.WINFUNCTYPE(
@@ -271,7 +303,7 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
                     return found.value or None
 
                 dialog_classes = ["#32770", "bosa_sdm_msword"]
-                target_title   = "Microsoft Word"
+                target_title = "Microsoft Word"
 
                 while not stop_event.is_set():
                     for cls in dialog_classes:
@@ -293,20 +325,22 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
 
             def _com_worker():
                 word = None
-                doc  = None
+                doc = None
                 try:
-                    import pythoncom, comtypes.client
+                    import comtypes.client
+                    import pythoncom
+
                     pythoncom.CoInitialize()
                     word = comtypes.client.CreateObject("Word.Application")
-                    word.Visible           = False
-                    word.DisplayAlerts     = 0
+                    word.Visible = False
+                    word.DisplayAlerts = 0
                     word.AutomationSecurity = 3
                     doc = word.Documents.Open(
                         src_abs,
-                        ConfirmConversions = False,
-                        ReadOnly           = True,
-                        AddToRecentFiles   = False,
-                        NoEncodingDialog   = True,
+                        ConfirmConversions=False,
+                        ReadOnly=True,
+                        AddToRecentFiles=False,
+                        NoEncodingDialog=True,
                     )
                     doc.SaveAs2(out_abs, FileFormat=16)
                     result["ok"] = True
@@ -315,14 +349,21 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
                     print(f"[pdf→docx] COM failed: {e}")
                 finally:
                     if doc is not None:
-                        try: doc.Close(False)
-                        except Exception: pass
+                        try:
+                            doc.Close(False)
+                        except Exception:
+                            pass
                     if word is not None:
-                        try: word.Quit()
-                        except Exception: pass
+                        try:
+                            word.Quit()
+                        except Exception:
+                            pass
                     try:
-                        import pythoncom as _pc; _pc.CoUninitialize()
-                    except Exception: pass
+                        import pythoncom as _pc
+
+                        _pc.CoUninitialize()
+                    except Exception:
+                        pass
 
             dismisser = threading.Thread(target=_dialog_dismisser, daemon=True)
             dismisser.start()
@@ -338,7 +379,11 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
     # Tier 2: pdf2docx
     try:
         from pdf2docx import Converter
-        cv = Converter(src_abs); cv.convert(out_abs, parse_drawing=True); cv.close(); return
+
+        cv = Converter(src_abs)
+        cv.convert(out_abs, parse_drawing=True)
+        cv.close()
+        return
     except Exception as e:
         print(f"[pdf→docx] pdf2docx failed: {e}")
 
@@ -346,7 +391,8 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
     try:
         import fitz
         from docx import Document as DocxDoc
-        pdf_doc  = fitz.open(src_abs)
+
+        pdf_doc = fitz.open(src_abs)
         word_doc = DocxDoc()
         for page_num in range(len(pdf_doc)):
             text = pdf_doc.load_page(page_num).get_text("text")
@@ -355,7 +401,9 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
                     word_doc.add_paragraph(line.strip())
             if page_num < len(pdf_doc) - 1:
                 word_doc.add_page_break()
-        pdf_doc.close(); word_doc.save(out_abs); return
+        pdf_doc.close()
+        word_doc.save(out_abs)
+        return
     except Exception as e:
         print(f"[pdf→docx] fitz failed: {e}")
 
@@ -367,18 +415,16 @@ class ConversionThread(QThread):
 
     def __init__(self, files: list, conversion_type: str):
         super().__init__()
-        self.files           = files
+        self.files = files
         self.conversion_type = conversion_type
 
     def run(self):
         try:
             base = os.path.dirname(
-                sys.executable if getattr(sys, "frozen", False)
-                else os.path.abspath(os.path.join(__file__, "..", ".."))
+                sys.executable if getattr(sys, "frozen", False) else os.path.abspath(os.path.join(__file__, "..", ".."))
             )
             if base not in sys.path:
                 sys.path.insert(0, base)
-
 
             dst_dir = os.path.dirname(self.files[0])
 
@@ -409,9 +455,8 @@ class ConversionThread(QThread):
                         _convert_pdf_to_docx(f, f_dst_dir)
                     else:
                         from converter.converters import AdvancedConverterEngine
-                        result = AdvancedConverterEngine().convert(
-                            self.conversion_type, f, f_dst_dir
-                        )
+
+                        result = AdvancedConverterEngine().convert(self.conversion_type, f, f_dst_dir)
                         if not result.success:
                             raise Exception(result.error)
                     out_dir = f_dst_dir
@@ -436,15 +481,9 @@ class QuickConvertWindow(QWidget):
         self.files = [f for f in files if os.path.isfile(f)]
         self._converting = False
 
-        self.ext = (
-            os.path.splitext(self.files[0])[1].lstrip(".").lower()
-            if self.files else ""
-        )
+        self.ext = os.path.splitext(self.files[0])[1].lstrip(".").lower() if self.files else ""
         self.forced_conversion = conversion_type
-        self.conversion_types  = (
-            [conversion_type] if conversion_type
-            else CONVERSION_MAP.get(self.ext, [])
-        )
+        self.conversion_types = [conversion_type] if conversion_type else CONVERSION_MAP.get(self.ext, [])
 
         self.setWindowTitle("File Converter Pro")
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
@@ -458,6 +497,7 @@ class QuickConvertWindow(QWidget):
 
     def _set_icon(self):
         from utils import get_icon_path
+
         icon_path = get_icon_path("icon.ico")
         if icon_path and os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
@@ -492,7 +532,7 @@ class QuickConvertWindow(QWidget):
         elif n <= 4:
             file_text = "\n".join(f"• {os.path.basename(f)}" for f in self.files)
         else:
-            previews  = "\n".join(f"• {os.path.basename(f)}" for f in self.files[:3])
+            previews = "\n".join(f"• {os.path.basename(f)}" for f in self.files[:3])
             file_text = f"{previews}\n• … and {n - 3} more"
 
         file_label = QLabel(file_text)
@@ -552,16 +592,12 @@ class QuickConvertWindow(QWidget):
     def _center_on_screen(self):
         geo = QApplication.primaryScreen().availableGeometry()
         self.move(
-            geo.center().x() - self.width()  // 2,
+            geo.center().x() - self.width() // 2,
             geo.center().y() - self.height() // 2,
         )
 
     def _start_conversion(self):
-        conversion_type = (
-            self.forced_conversion
-            if self.forced_conversion
-            else self.combo.currentData()
-        )
+        conversion_type = self.forced_conversion if self.forced_conversion else self.combo.currentData()
         self._converting = True
         self.convert_btn.setEnabled(False)
         self.cancel_btn.setEnabled(False)
