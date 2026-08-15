@@ -50,6 +50,7 @@ def _load_qss(filename: str, theme: str | None = None) -> str:
             pass
         if theme not in ("dark", "light"):
             from theme_manager import get_custom_theme_kind
+
             base = get_custom_theme_kind(theme)
             base_path = os.path.join(_THEMES_DIR, base, filename)
             try:
