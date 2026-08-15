@@ -4,16 +4,29 @@ import os
 import re
 from datetime import datetime
 
-from PySide6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QGroupBox,
-                               QLabel, QLineEdit, QPushButton, QComboBox,
-                               QSpinBox, QTableWidget, QTableWidgetItem,
-                               QHeaderView, QGridLayout)
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+)
+
 from qss_helpers import _apply_dialog_btn
 from widgets import AnimatedCheckBox
 
 
 def _make_tm(language):
     from utils import make_tm
+
     return make_tm(language)
 
 
@@ -95,15 +108,17 @@ class BatchRenameDialog(QDialog):
 
         num_grid.addWidget(QLabel(self.tr_("br_order")), 1, 2)
         self.order_combo = QComboBox()
-        self.order_combo.addItems([
-            self.tr_("br_order_current"),
-            self.tr_("Alphabétique (A→Z)"),
-            self.tr_("Alphabétique (Z→A)"),
-            self.tr_("Numérique (1→9)"),
-            self.tr_("Numérique (9→1)"),
-            self.tr_("Date (ancien→nouveau)"),
-            self.tr_("Date (nouveau→ancien)"),
-        ])
+        self.order_combo.addItems(
+            [
+                self.tr_("br_order_current"),
+                self.tr_("Alphabétique (A→Z)"),
+                self.tr_("Alphabétique (Z→A)"),
+                self.tr_("Numérique (1→9)"),
+                self.tr_("Numérique (9→1)"),
+                self.tr_("Date (ancien→nouveau)"),
+                self.tr_("Date (nouveau→ancien)"),
+            ]
+        )
         self.order_combo.currentIndexChanged.connect(self._refresh_preview)
         num_grid.addWidget(self.order_combo, 1, 3)
         root.addWidget(num_box)
@@ -113,12 +128,14 @@ class BatchRenameDialog(QDialog):
 
         case_lay.addWidget(QLabel(self.tr_("br_case_label")))
         self.case_combo = QComboBox()
-        self.case_combo.addItems([
-            self.tr_("br_case_unchanged"),
-            self.tr_("br_case_upper"),
-            self.tr_("br_case_lower"),
-            self.tr_("br_case_title"),
-        ])
+        self.case_combo.addItems(
+            [
+                self.tr_("br_case_unchanged"),
+                self.tr_("br_case_upper"),
+                self.tr_("br_case_lower"),
+                self.tr_("br_case_title"),
+            ]
+        )
         self.case_combo.currentIndexChanged.connect(self._refresh_preview)
         case_lay.addWidget(self.case_combo)
         case_lay.addSpacing(16)
@@ -155,9 +172,7 @@ class BatchRenameDialog(QDialog):
         prev_lay = QVBoxLayout(prev_box)
 
         self.preview_table = QTableWidget(0, 2)
-        self.preview_table.setHorizontalHeaderLabels([
-            self.tr_("br_col_before"), self.tr_("br_col_after")
-        ])
+        self.preview_table.setHorizontalHeaderLabels([self.tr_("br_col_before"), self.tr_("br_col_after")])
         self.preview_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.preview_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.preview_table.setAlternatingRowColors(True)
@@ -198,14 +213,18 @@ class BatchRenameDialog(QDialog):
         elif idx == 2:
             files.sort(key=lambda f: os.path.basename(f).lower(), reverse=True)
         elif idx == 3:
+
             def _nk(f):
-                nums = re.findall(r'\d+', os.path.splitext(os.path.basename(f))[0])
+                nums = re.findall(r"\d+", os.path.splitext(os.path.basename(f))[0])
                 return [int(n) for n in nums] if nums else [0]
+
             files.sort(key=_nk)
         elif idx == 4:
+
             def _nkd(f):
-                nums = re.findall(r'\d+', os.path.splitext(os.path.basename(f))[0])
+                nums = re.findall(r"\d+", os.path.splitext(os.path.basename(f))[0])
                 return [int(n) for n in nums] if nums else [0]
+
             files.sort(key=_nkd, reverse=True)
         elif idx == 5:
             files.sort(key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0)
@@ -219,7 +238,7 @@ class BatchRenameDialog(QDialog):
         if self.spaces_check.isChecked():
             stem = stem.replace(" ", "_")
         if self.special_check.isChecked():
-            stem = re.sub(r'[^\w\-\.]', '', stem)
+            stem = re.sub(r"[^\w\-\.]", "", stem)
         find = self.find_input.text()
         if find:
             stem = stem.replace(find, self.replace_input.text())
@@ -234,22 +253,24 @@ class BatchRenameDialog(QDialog):
 
     def _compute_new_name(self, file_path, index):
         stem = os.path.splitext(os.path.basename(file_path))[0]
-        ext  = os.path.splitext(file_path)[1]
-        num  = self.start_spin.value() + index * self.step_spin.value()
-        pad  = self.pad_spin.value()
+        ext = os.path.splitext(file_path)[1]
+        num = self.start_spin.value() + index * self.step_spin.value()
+        pad = self.pad_spin.value()
         date = datetime.now().strftime("%Y-%m-%d")
 
         tpl = self.tpl_input.text() or "{original}"
-        new_stem = (tpl
-                    .replace("{original}", stem)
-                    .replace("{num}",      str(num).zfill(pad))
-                    .replace("{date}",     date)
-                    .replace("{ext}",      ext.lstrip(".")))
+        new_stem = (
+            tpl.replace("{original}", stem)
+            .replace("{num}", str(num).zfill(pad))
+            .replace("{date}", date)
+            .replace("{ext}", ext.lstrip("."))
+        )
         new_stem = self._apply_transforms(new_stem)
         return new_stem + ext
 
     def _refresh_preview(self):
         from PySide6.QtGui import QColor
+
         files = self._sorted_files()
         self.preview_table.setRowCount(len(files))
         for i, fp in enumerate(files):
