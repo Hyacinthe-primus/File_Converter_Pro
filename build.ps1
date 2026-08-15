@@ -80,14 +80,14 @@ try {
     exit 1
 }
 
-$parasiteExe = "dist\File Converter Pro.exe"
+$parasiteExe = "dist\FCP.exe"
 if (Test-Path $parasiteExe) {
     Remove-Item -Force $parasiteExe
     Write-Success "Parasite exe removed from dist\"
 }
 
-$exePath = "dist\File Converter Pro\File Converter Pro.exe"
-$distFolder = "dist\File Converter Pro"
+$exePath = "dist\FCP\FCP.exe"
+$distFolder = "dist\FCP"
 
 if (Test-Path $exePath) {
     $fileInfo = Get-Item $exePath
