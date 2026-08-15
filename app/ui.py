@@ -8,54 +8,88 @@ methods of FileConverterApp, extracted as a mixin.
 
 import os
 from pathlib import Path
-from PySide6.QtWidgets import (QApplication, QWidget, QVBoxLayout,
-                               QHBoxLayout, QPushButton, QLabel, QListWidget,
-                               QListWidgetItem, QMessageBox,
-                               QProgressBar, QComboBox, QCheckBox, QToolBar, QStatusBar,
-                               QGroupBox, QLineEdit, QDialog, QSpinBox,
-                               QTextEdit, QTabWidget, QMenu, QRadioButton, QFrame, QTableWidget, QTreeWidget, QInputDialog, QApplication, QMenuBar)
-from PySide6.QtCore import Qt, QTimer, QSize
-from PySide6.QtGui import (QIcon, QPixmap, QFont, QColor, QAction, QPainter,
-                           QKeySequence, QShortcut)
+
+from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtGui import QAction, QColor, QFont, QIcon, QKeySequence, QPainter, QPixmap, QShortcut
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMenu,
+    QMenuBar,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QRadioButton,
+    QSpinBox,
+    QStatusBar,
+    QTableWidget,
+    QTabWidget,
+    QTextEdit,
+    QToolBar,
+    QTreeWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 try:
     from pdf2docx import Converter as _Converter
+
     Converter = _Converter
 except ImportError as _e:
     Converter = None
     print(f"[IMPORT] pdf2docx not available: {_e}")
 
+from achievements import AchievementPopup, AchievementsUI, RankPopup
+from dialogs import ConversionOptionsDialog, PreviewDialog, SettingsDialog
 from qss_helpers import _apply_dialog_btn
 from widgets import AnimatedCheckBox
-from dialogs import (SettingsDialog, ConversionOptionsDialog,
-                     PreviewDialog)
-from achievements import AchievementsUI, AchievementPopup, RankPopup
+
 
 def _get_StatisticsDashboard():
     from dashboard import StatisticsDashboard
+
     return StatisticsDashboard
+
 
 def _get_HistoryDialog():
     from history import HistoryDialog
+
     return HistoryDialog
 
+
 def _get_TemplateClasses():
-    from templates import TemplateManager, EnhancedTemplatesDialog
+    from templates import EnhancedTemplatesDialog, TemplateManager
+
     return TemplateManager, EnhancedTemplatesDialog
 
-from app.logic import AppLogicMixin
-from app.mixins.file_management import FileManagementMixin
-from app.mixins.panels import PanelsMixin
-from app.mixins.project_management import ProjectManagementMixin
-from app.mixins.theme_language import ThemeLanguageMixin
-from utils.translation_mixin import TranslationMixin
 
-class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, ThemeLanguageMixin, TranslationMixin, AppLogicMixin):
+from app.logic import AppLogicMixin  # noqa: E402
+from app.mixins.file_management import FileManagementMixin  # noqa: E402
+from app.mixins.panels import PanelsMixin  # noqa: E402
+from app.mixins.project_management import ProjectManagementMixin  # noqa: E402
+from app.mixins.theme_language import ThemeLanguageMixin  # noqa: E402
+from utils.translation_mixin import TranslationMixin  # noqa: E402
+
+
+class AppUIMixin(
+    FileManagementMixin, PanelsMixin, ProjectManagementMixin, ThemeLanguageMixin, TranslationMixin, AppLogicMixin
+):
     """Mixin: Qt UI construction and theming for FileConverterApp."""
 
     def get_resource_path(self, relative_path):
         """Get the resource path"""
         from utils import resource_path
+
         return resource_path(relative_path)
 
     def show_rank_popup(self, rank_data):
@@ -88,7 +122,7 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         if self.is_showing_achievement or not self.rank_queue:
             return
 
-        if hasattr(self, '_is_showing_rank') and self._is_showing_rank:
+        if hasattr(self, "_is_showing_rank") and self._is_showing_rank:
             return
 
         rank_data = self.rank_queue.pop(0)
@@ -133,7 +167,11 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         self.config["word_to_pdf_mode"] = new_mode
         self.config_manager.save_config(self.config)
 
-        mode_name = self.translate_text("Conserver toute la mise en forme") if new_mode == "preserve_all" else self.translate_text("Texte seulement")
+        mode_name = (
+            self.translate_text("Conserver toute la mise en forme")
+            if new_mode == "preserve_all"
+            else self.translate_text("Texte seulement")
+        )
         self.status_bar.showMessage(f"Mode Word->PDF: {mode_name}", 3000)
 
     def setup_tooltips_with_shortcuts(self):
@@ -191,8 +229,11 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             print(f"[DEBUG] Launching method: {method_name}")
             conversion_method()
         else:
-            QMessageBox.warning(self, self.translate_text("Erreur Interne"),
-                                self.translate_text(f"Méthode de conversion '{method_name}' non trouvée ou non appelable."))
+            QMessageBox.warning(
+                self,
+                self.translate_text("Erreur Interne"),
+                self.translate_text(f"Méthode de conversion '{method_name}' non trouvée ou non appelable."),
+            )
 
     def launch_pdf_to_word_conversion(self):
         """Launch PDF to Word conversion"""
@@ -219,17 +260,17 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         print("Launching Word merge")
         self.merge_word_docs()
 
-    def launch_office_optimization(self):
+    def launch_optimization(self):
         """Launch file optimization for all supported types"""
         print("Launching file optimization")
 
         SUPPORTED_EXTS = {
-            'office': ['.pdf', '.docx', '.doc', '.pptx', '.ppt', '.xlsx', '.xls'],
-            'image':  ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp', '.gif'],
-            'audio':  ['.mp3', '.wav', '.aac', '.flac', '.ogg'],
-            'video':  ['.mp4', '.avi', '.mkv', '.mov', '.webm'],
-            'web':    ['.json', '.html', '.htm'],
-            'ebook':  ['.epub'],
+            "office": [".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls"],
+            "image": [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".gif"],
+            "audio": [".mp3", ".wav", ".aac", ".flac", ".ogg"],
+            "video": [".mp4", ".avi", ".mkv", ".mov", ".webm"],
+            "web": [".json", ".html", ".htm"],
+            "ebook": [".epub"],
         }
         ALL_SUPPORTED = [e for exts in SUPPORTED_EXTS.values() for e in exts]
 
@@ -243,34 +284,39 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
                     files_to_process.append(item.data(Qt.UserRole))
         else:
             files_to_process = self.files_list.copy()
-        office_files = [f for f in files_to_process
-                        if Path(f).suffix.lower() in ALL_SUPPORTED]
+        office_files = [f for f in files_to_process if Path(f).suffix.lower() in ALL_SUPPORTED]
 
         if not office_files:
             if selected_items:
                 msg = self.translate_text(
                     "Aucun fichier optimisable sélectionné. "
-                    "Formats supportés : PDF, Word, PowerPoint, Excel, images, audio, vidéo, JSON, HTML, EPUB.")
+                    "Formats supportés : PDF, Word, PowerPoint, Excel, images, audio, vidéo, JSON, HTML, EPUB."
+                )
             else:
                 msg = self.translate_text(
                     "Aucun fichier optimisable dans la liste. "
-                    "Ajoutez des fichiers PDF, Word, PowerPoint, Excel, images, audio, vidéo, JSON, HTML ou EPUB d'abord.")
+                    "Ajoutez des fichiers PDF, Word, PowerPoint, Excel, images, audio, vidéo, JSON, HTML ou EPUB d'abord."
+                )
             QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
             return
 
-        _def_id, _ = self.template_manager.get_default_template("Optimisation de fichiers") if self.template_manager is not None else (None, None)
+        _def_id, _ = (
+            self.template_manager.get_default_template("Optimisation de fichiers")
+            if self.template_manager is not None
+            else (None, None)
+        )
         if _def_id:
             (self._ensure_template_manager() or object()).apply_template(_def_id, self)
 
-        if hasattr(self, 'active_templates') and 'office_optimization' in self.active_templates:
-            _t = self.active_templates['office_optimization']
+        if hasattr(self, "active_templates") and "office_optimization" in self.active_templates:
+            _t = self.active_templates["office_optimization"]
             self.optimize_office_files(
                 office_files,
-                _t.get('optimization_type', 2),
-                _t.get('quality_level', 1),
-                _t.get('remove_metadata', True),
-                _t.get('compress_images', True),
-                _t.get('keep_backup', True),
+                _t.get("optimization_type", 2),
+                _t.get("quality_level", 1),
+                _t.get("remove_metadata", True),
+                _t.get("compress_images", True),
+                _t.get("keep_backup", True),
             )
             return
 
@@ -290,21 +336,20 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             cat = _ext_cat.get(Path(f).suffix.lower(), "autre")
             cat_counts[cat] = cat_counts.get(cat, 0) + 1
         cat_labels = {
-            'office': self.translate_text("bureautique"),
-            'image':  self.translate_text("image(s)"),
-            'audio':  self.translate_text("audio"),
-            'video':  self.translate_text("vidéo"),
-            'web':    self.translate_text("web"),
-            'ebook':  self.translate_text("ebook"),
+            "office": self.translate_text("bureautique"),
+            "image": self.translate_text("image(s)"),
+            "audio": self.translate_text("audio"),
+            "video": self.translate_text("vidéo"),
+            "web": self.translate_text("web"),
+            "ebook": self.translate_text("ebook"),
         }
         summary_parts = [f"{v} {cat_labels.get(k, k)}" for k, v in cat_counts.items()]
-        summary_text  = f"<b>{len(office_files)}</b> fichier(s) : {', '.join(summary_parts)}"
+        summary_text = f"<b>{len(office_files)}</b> fichier(s) : {', '.join(summary_parts)}"
 
         summary_lbl = QLabel(summary_text)
         summary_lbl.setWordWrap(True)
         summary_lbl.setStyleSheet(
-            "padding:10px 14px; border-radius:8px;"
-            "background:rgba(110,190,255,0.10); color:#5b9bd5; font-size:12px;"
+            "padding:10px 14px; border-radius:8px;background:rgba(110,190,255,0.10); color:#5b9bd5; font-size:12px;"
         )
         root.addWidget(summary_lbl)
 
@@ -314,8 +359,8 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         mode_layout.setSpacing(6)
 
         radio_compress = QRadioButton("🗜  " + self.translate_text("Compression  –  réduit la taille du fichier"))
-        radio_clean    = QRadioButton("🧹  " + self.translate_text("Nettoyage  –  supprime uniquement les métadonnées"))
-        radio_both     = QRadioButton("⚡  " + self.translate_text("Compression + Nettoyage  –  recommandé"))
+        radio_clean = QRadioButton("🧹  " + self.translate_text("Nettoyage  –  supprime uniquement les métadonnées"))
+        radio_both = QRadioButton("⚡  " + self.translate_text("Compression + Nettoyage  –  recommandé"))
         radio_both.setChecked(True)
 
         for r in (radio_compress, radio_clean, radio_both):
@@ -383,8 +428,7 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
 
         quality_val_lbl = QLabel(quality_labels_list[1])
         quality_val_lbl.setAlignment(Qt.AlignCenter)
-        quality_val_lbl.setStyleSheet(
-            f"font-size:12px; font-weight:600; color:{_slider_colors[1][0]}; padding:2px 0;")
+        quality_val_lbl.setStyleSheet(f"font-size:12px; font-weight:600; color:{_slider_colors[1][0]}; padding:2px 0;")
 
         tick_row = QHBoxLayout()
         tick_row.setContentsMargins(4, 0, 4, 0)
@@ -392,20 +436,17 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         for roman in ["I", "II", "III"]:
             tl = QLabel(roman)
             tl.setAlignment(Qt.AlignCenter)
-            tl.setStyleSheet(
-                f"font-size:13px; font-weight:700; color:{_slider_colors[1][0]}; letter-spacing:1px;")
+            tl.setStyleSheet(f"font-size:13px; font-weight:700; color:{_slider_colors[1][0]}; letter-spacing:1px;")
             tick_row.addWidget(tl)
             roman_labels.append(tl)
 
         def _on_slider(v):
             color, track_bg = _slider_colors[v]
             quality_val_lbl.setText(quality_labels_list[v])
-            quality_val_lbl.setStyleSheet(
-                f"font-size:12px; font-weight:600; color:{color}; padding:2px 0;")
+            quality_val_lbl.setStyleSheet(f"font-size:12px; font-weight:600; color:{color}; padding:2px 0;")
             quality_slider.setStyleSheet(_slider_stylesheet(color, track_bg))
             for lbl in roman_labels:
-                lbl.setStyleSheet(
-                    f"font-size:13px; font-weight:700; color:{color}; letter-spacing:1px;")
+                lbl.setStyleSheet(f"font-size:13px; font-weight:700; color:{color}; letter-spacing:1px;")
 
         quality_slider.valueChanged.connect(_on_slider)
 
@@ -468,18 +509,13 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             else:
                 optimization_type = 2
 
-            quality_level   = quality_slider.value()
+            quality_level = quality_slider.value()
             remove_metadata = remove_metadata_check.isChecked()
             compress_images = compress_images_check.isChecked()
-            keep_backup     = keep_backup_check.isChecked()
+            keep_backup = keep_backup_check.isChecked()
 
             self.optimize_office_files(
-                office_files,
-                optimization_type,
-                quality_level,
-                remove_metadata,
-                compress_images,
-                keep_backup
+                office_files, optimization_type, quality_level, remove_metadata, compress_images, keep_backup
             )
 
     def select_all_files(self):
@@ -716,15 +752,19 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             b.setObjectName("NavBtn")
             return b
 
-        self.nav_dashboard_btn  = _nav_btn("📊", self.translate_text("Tableau de Bord"))
-        self.nav_history_btn    = _nav_btn("📋", self.translate_text("Historique"))
-        self.nav_templates_btn  = _nav_btn("🎨", self.translate_text("Modèles"))
+        self.nav_dashboard_btn = _nav_btn("📊", self.translate_text("Tableau de Bord"))
+        self.nav_history_btn = _nav_btn("📋", self.translate_text("Historique"))
+        self.nav_templates_btn = _nav_btn("🎨", self.translate_text("Modèles"))
         self.nav_achievements_btn = _nav_btn("🏆", self.translate_text("Trophées"))
         self.nav_donate_btn = _nav_btn("❤️", self.translate_text("Soutenir le développement"))
 
-        for b in [self.nav_dashboard_btn, self.nav_history_btn,
-                  self.nav_templates_btn, self.nav_achievements_btn,
-                  self.nav_donate_btn]:
+        for b in [
+            self.nav_dashboard_btn,
+            self.nav_history_btn,
+            self.nav_templates_btn,
+            self.nav_achievements_btn,
+            self.nav_donate_btn,
+        ]:
             sidebar_layout.addWidget(b, alignment=Qt.AlignHCenter)
 
         sidebar_layout.addStretch()
@@ -800,12 +840,8 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         self.progress_pct_label.setVisible(False)
         self.progress_pct_label.setFixedWidth(36)
         self.progress_pct_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        self.progress_pct_label.setStyleSheet(
-            "font-size: 11px; font-weight: 700; padding: 0 2px;"
-        )
-        self.progress_bar.valueChanged.connect(
-            lambda v: self.progress_pct_label.setText(f"{v}%")
-        )
+        self.progress_pct_label.setStyleSheet("font-size: 11px; font-weight: 700; padding: 0 2px;")
+        self.progress_bar.valueChanged.connect(lambda v: self.progress_pct_label.setText(f"{v}%"))
 
         self.status_bar.addPermanentWidget(self.progress_pct_label)
         self.status_bar.addPermanentWidget(self.progress_bar)
@@ -836,9 +872,9 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             self.config["window_maximized"] = False
             geom = self.geometry()
             self.config["window_geometry"] = {
-                "x":      geom.x(),
-                "y":      geom.y(),
-                "width":  geom.width(),
+                "x": geom.x(),
+                "y": geom.y(),
+                "width": geom.width(),
                 "height": geom.height(),
             }
         self.config_manager.save_config(self.config)
@@ -847,7 +883,8 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
     def _animate_startup(self):
         """Fade in the entire window on startup — safe, no QPainter conflict."""
         try:
-            from PySide6.QtCore import QPropertyAnimation, QEasingCurve
+            from PySide6.QtCore import QEasingCurve, QPropertyAnimation
+
             self.setWindowOpacity(0.0)
             anim = QPropertyAnimation(self, b"windowOpacity")
             anim.setDuration(500)
@@ -868,17 +905,22 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             logo = self.findChild(QLabel, "LogoLabel")
             if not logo:
                 return
-            is_dark = getattr(self, 'dark_mode', True)
+            is_dark = getattr(self, "dark_mode", True)
             normal_color = "#e8ff6b" if is_dark else "#2d2dc8"
-            dim_color    = "rgba(232,255,107,0.3)" if is_dark else "rgba(45,45,200,0.3)"
-            base = ("font-family:'Segoe UI','SF Pro Display',Arial,sans-serif;"
-                    "font-size:16px;font-weight:900;"
-                    "letter-spacing:1.5px;background:transparent;")
+            dim_color = "rgba(232,255,107,0.3)" if is_dark else "rgba(45,45,200,0.3)"
+            base = (
+                "font-family:'Segoe UI','SF Pro Display',Arial,sans-serif;"
+                "font-size:16px;font-weight:900;"
+                "letter-spacing:1.5px;background:transparent;"
+            )
 
-            def _dim():  logo.setStyleSheet(f"{base}color:{dim_color};")
-            def _norm(): logo.setStyleSheet(f"{base}color:{normal_color};")
+            def _dim():
+                logo.setStyleSheet(f"{base}color:{dim_color};")
 
-            QTimer.singleShot(0,   _dim)
+            def _norm():
+                logo.setStyleSheet(f"{base}color:{normal_color};")
+
+            QTimer.singleShot(0, _dim)
             QTimer.singleShot(200, _norm)
             QTimer.singleShot(350, _dim)
             QTimer.singleShot(550, _norm)
@@ -898,10 +940,16 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         """Connect micro-animations to all action buttons."""
         try:
             action_btns = [
-                self.pdf_to_word_btn, self.word_to_pdf_btn, self.image_to_pdf_btn,
-                self.merge_pdf_btn, self.merge_word_btn,
-                self.split_pdf_btn, self.protect_pdf_btn, self.compress_files_btn,
-                self.batch_convert_btn, self.batch_rename_btn,
+                self.pdf_to_word_btn,
+                self.word_to_pdf_btn,
+                self.image_to_pdf_btn,
+                self.merge_pdf_btn,
+                self.merge_word_btn,
+                self.split_pdf_btn,
+                self.protect_pdf_btn,
+                self.compress_files_btn,
+                self.batch_convert_btn,
+                self.batch_rename_btn,
                 self.more_conversions_btn,
             ]
             for btn in action_btns:
@@ -913,6 +961,7 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         """Set the application icon with robust fallback handling."""
         try:
             from utils import get_icon_path
+
             icon_path = get_icon_path("icon.ico")
 
             if icon_path and os.path.exists(icon_path):
@@ -950,10 +999,22 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
     def _is_empty_space_click(self, source, event):
         """Check if the click is on an empty space of the application"""
         interactive_widgets = (
-            QPushButton, QCheckBox, QRadioButton, QComboBox,
-            QSpinBox, QLineEdit, QTextEdit, QTableWidget,
-            QTreeWidget, QListWidget, QToolBar, QMenuBar,
-            QStatusBar, QProgressBar, QTabWidget, QGroupBox
+            QPushButton,
+            QCheckBox,
+            QRadioButton,
+            QComboBox,
+            QSpinBox,
+            QLineEdit,
+            QTextEdit,
+            QTableWidget,
+            QTreeWidget,
+            QListWidget,
+            QToolBar,
+            QMenuBar,
+            QStatusBar,
+            QProgressBar,
+            QTabWidget,
+            QGroupBox,
         )
 
         if isinstance(source, interactive_widgets):
@@ -966,12 +1027,11 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
 
         return True
 
-
     def show_advanced_conversions(self):
         """Show the advanced conversions dialog"""
         from advanced_conversions import AdvancedConversionsDialog
 
-        if not hasattr(self, 'advanced_conversions_dialog') or not self.advanced_conversions_dialog.isVisible():
+        if not hasattr(self, "advanced_conversions_dialog") or not self.advanced_conversions_dialog.isVisible():
             self.advanced_conversions_dialog = AdvancedConversionsDialog(self, self.current_language)
             # Connect signal for future implementation
             self.advanced_conversions_dialog.conversion_requested.connect(self.handle_advanced_conversion)
@@ -1079,7 +1139,7 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
                     QMessageBox.warning(
                         self,
                         self.translate_text("Fichier introuvable"),
-                        self.translate_text(f"Le fichier n'existe pas ou le chemin est invalide: {file_path}")
+                        self.translate_text(f"Le fichier n'existe pas ou le chemin est invalide: {file_path}"),
                     )
 
     def remove_selected_files(self):
@@ -1098,8 +1158,7 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         if self.history_dialog is None or not self.history_dialog.isVisible():
             HistoryDialog = _get_HistoryDialog()
             self.history_dialog = HistoryDialog(
-                self.db_manager, self, self.current_language,
-                adv_db_manager=self.adv_db_manager
+                self.db_manager, self, self.current_language, adv_db_manager=self.adv_db_manager
             )
             self.history_dialog.show()
         else:
@@ -1108,7 +1167,7 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
 
     def show_templates(self):
         """Display the enhanced template manager"""
-        if not hasattr(self, 'template_manager') or self.template_manager is None:
+        if not hasattr(self, "template_manager") or self.template_manager is None:
             TemplateManager, EnhancedTemplatesDialog = _get_TemplateClasses()
             self.template_manager = TemplateManager(self.db_manager)
 
@@ -1127,19 +1186,19 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         """Called when a template is applied"""
 
         message = self.translate_text(f"Template '{template['name']}' appliqué")
-        if template['type'] == self.translate_text("Fusion PDF"):
+        if template["type"] == self.translate_text("Fusion PDF"):
             message += self.translate_text(" - Ajoutez des fichiers PDF et lancez la fusion")
-        elif template['type'] == self.translate_text("Conversion PDF→Word"):
+        elif template["type"] == self.translate_text("Conversion PDF→Word"):
             message += self.translate_text(" - Lancez une conversion PDF vers Word pour utiliser ces paramètres")
 
         self.status_bar.showMessage(message)
 
-        if template['type'] == self.translate_text("Optimisation de fichiers"):
+        if template["type"] == self.translate_text("Optimisation de fichiers"):
             message += self.translate_text(" - Lancez Optimiser les fichiers pour utiliser ces paramètres")
 
     def create_template_from_current_settings(self):
         """Create a template from the current settings"""
-        if not hasattr(self, 'template_manager') or self.template_manager is None:
+        if not hasattr(self, "template_manager") or self.template_manager is None:
             TemplateManager, _ = _get_TemplateClasses()
             self.template_manager = TemplateManager(self.db_manager)
 
@@ -1152,37 +1211,32 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             name = dialog.textValue().strip()
             if name:
                 (self._ensure_template_manager() or object()).create_template_from_current_settings(
-                    name,
-                    self.translate_text("Conversion PDF→Word"),
-                    self
+                    name, self.translate_text("Conversion PDF→Word"), self
                 )
 
                 QMessageBox.information(
                     self,
                     self.translate_text("Succès"),
-                    self.translate_text(f"Template '{name}' créé à partir des paramètres actuels!")
+                    self.translate_text(f"Template '{name}' créé à partir des paramètres actuels!"),
                 )
 
     def show_achievements(self):
-            """Display the achievements interface."""
-            try:
-                if self.achievements_dialog is not None and self.achievements_dialog.isVisible():
-                    self.achievements_dialog.raise_()
-                    self.achievements_dialog.activateWindow()
-                    return
-            except RuntimeError:
-                self.achievements_dialog = None
+        """Display the achievements interface."""
+        try:
+            if self.achievements_dialog is not None and self.achievements_dialog.isVisible():
+                self.achievements_dialog.raise_()
+                self.achievements_dialog.activateWindow()
+                return
+        except RuntimeError:
+            self.achievements_dialog = None
 
-            self.achievements_dialog = AchievementsUI(
-                self.achievement_system,
-                self,
-                self.current_language
-            )
-            self.achievements_dialog.show()
+        self.achievements_dialog = AchievementsUI(self.achievement_system, self, self.current_language)
+        self.achievements_dialog.show()
 
     def show_donate(self):
         """Open the donation dialog."""
         from donate import DonateDialog
+
         config_dir = os.path.dirname(os.path.abspath(self.config_manager.config_file))
         dlg = DonateDialog(parent=self, dark_mode=self.dark_mode, language=self.current_language, config_dir=config_dir)
         dlg.exec()
@@ -1194,15 +1248,12 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         written by donate.py.  We pop it here and show the Thank You dialog.
         """
         try:
-            from donate import pop_donor_flag, ThankYouDialog
+            from donate import ThankYouDialog, pop_donor_flag
+
             config_dir = os.path.dirname(os.path.abspath(self.config_manager.config_file))
             data = pop_donor_flag(config_dir)
             if data:
-                dlg = ThankYouDialog(
-                    parent=self,
-                    dark_mode=self.dark_mode,
-                    amount=data.get("amount", "")
-                )
+                dlg = ThankYouDialog(parent=self, dark_mode=self.dark_mode, amount=data.get("amount", ""))
                 dlg.exec()
         except Exception as e:
             print(f"[DONOR] Could not show thank-you dialog: {e}")
@@ -1215,12 +1266,14 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
 
     def show_achievements_admin(self):
         from achievements.achievements_manager import QuickAchievementsReset
+
         manager = QuickAchievementsReset("achievements.db", self, language=self.current_language)
         self._achievements_manager_ref = manager
         manager.exec()
 
     def show_achievements_admin_full(self):
         from achievements.achievements_manager import AchievementsManager
+
         manager = AchievementsManager("achievements.db", self, language=self.current_language)
         self._achievements_manager_ref = manager
         manager.exec()
@@ -1233,7 +1286,9 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             self._apply_achievements_btn_state()
             self.config_manager.save_config(self.config)
 
-            QMessageBox.information(self, self.translate_text("Succès"), self.translate_text("Paramètres sauvegardés avec succès!"))
+            QMessageBox.information(
+                self, self.translate_text("Succès"), self.translate_text("Paramètres sauvegardés avec succès!")
+            )
 
     def _apply_achievements_btn_state(self):
         enabled = self.config.get("achievements_enabled", True)
@@ -1241,21 +1296,18 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
         if btn is None:
             return
         btn.setVisible(enabled)
-        btn.setToolTip(
-            self.translate_text("Succès et réalisations") if enabled
-            else ""
-        )
+        btn.setToolTip(self.translate_text("Succès et réalisations") if enabled else "")
 
     def _set_ui_enabled(self, enabled: bool):
         """Disable/re-enable interactive controls during async conversion."""
         for btn in [
-            getattr(self, "pdf_to_word_btn",    None),
-            getattr(self, "word_to_pdf_btn",    None),
-            getattr(self, "image_to_pdf_btn",   None),
-            getattr(self, "batch_convert_btn",  None),
-            getattr(self, "merge_pdf_btn",      None),
-            getattr(self, "merge_word_btn",     None),
-            getattr(self, "split_pdf_btn",      None),
+            getattr(self, "pdf_to_word_btn", None),
+            getattr(self, "word_to_pdf_btn", None),
+            getattr(self, "image_to_pdf_btn", None),
+            getattr(self, "batch_convert_btn", None),
+            getattr(self, "merge_pdf_btn", None),
+            getattr(self, "merge_word_btn", None),
+            getattr(self, "split_pdf_btn", None),
             getattr(self, "more_conversions_btn", None),
         ]:
             if btn is not None:
@@ -1270,5 +1322,3 @@ class AppUIMixin(FileManagementMixin, PanelsMixin, ProjectManagementMixin, Theme
             self.status_bar.showMessage(message)
         else:
             self.status_bar.showMessage(self.translate_text("Ready"))
-
-
