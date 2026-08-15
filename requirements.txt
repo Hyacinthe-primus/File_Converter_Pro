@@ -60,6 +60,6 @@ APScheduler==3.11.2
 requests==2.34.2
 
 # Windows Only
-winotify==1.1.0
-comtypes==1.4.13
-pywin32==311
+winotify==1.1.0; sys_platform == "win32"
+comtypes==1.4.13; sys_platform == "win32"
+pywin32==311; sys_platform == "win32"
