@@ -1,39 +1,79 @@
 """FileManagementMixin — File list management methods."""
 
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
-from PySide6.QtWidgets import (QFileDialog, QMessageBox, QDialog, QVBoxLayout,
-                               QHBoxLayout, QPushButton, QLabel, QListWidgetItem,
-                               QWidget)
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QTimer
-from PySide6.QtGui import QIcon, QFont, QColor
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer
+from PySide6.QtGui import QColor, QFont, QIcon
+from PySide6.QtWidgets import (
+    QDialog,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
-from qss_helpers import _apply_dialog_btn
 from dialogs import BatchRenameDialog
+from qss_helpers import _apply_dialog_btn
 
 
 class FileManagementMixin:
     """Mixin: file list management for FileConverterApp."""
 
     ICON_MAPPING = {
-        '.pdf': ('pdf.ico', '📄'),
-        '.doc': ('word.ico', '📝'), '.docx': ('word.ico', '📝'),
-        '.rtf': ('rtf.ico', '📝'), '.txt': ('txt.ico', '📝'),
-        '.ppt': ('pptx.ico', '📎'), '.pptx': ('pptx.ico', '📎'),
-        '.xlsx': ('xlsx.ico', '📎'), '.csv': ('csv.ico', '📎'),
-        '.epub': ('epub.ico', '📎'), '.html': ('html.ico', '📎'),
-        '.json': ('json.ico', '📎'), '.exe': ('exe.ico', '📎'),
-        **{ext: ('img.ico', '🖼️') for ext in [
-            '.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.gif', '.heic', '.jfif', '.tif',
-            '.svg', '.ico', '.avif', '.heif', '.psd', '.j2k', '.jp2', '.jpx', '.dng',
-            '.cr2', '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf', '.webp'
-        ]},
-        **{ext: ('video.ico', '📎') for ext in ['.mp4', '.avi', '.mkv', '.mov', '.webm']},
-        **{ext: ('audio.ico', '📎') for ext in ['.mp3', '.wav', '.aac', '.flac', '.ogg']},
-        **{ext: ('archive.ico', '🗜️') for ext in ['.zip', '.rar', '.tar', '.gz', '.7z']},
-        **{ext: ('database.ico', '📎') for ext in ['.db', '.sqlite', '.sql']}
+        ".pdf": ("pdf.ico", "📄"),
+        ".doc": ("word.ico", "📝"),
+        ".docx": ("word.ico", "📝"),
+        ".rtf": ("rtf.ico", "📝"),
+        ".txt": ("txt.ico", "📝"),
+        ".ppt": ("pptx.ico", "📎"),
+        ".pptx": ("pptx.ico", "📎"),
+        ".xlsx": ("xlsx.ico", "📎"),
+        ".csv": ("csv.ico", "📎"),
+        ".epub": ("epub.ico", "📎"),
+        ".html": ("html.ico", "📎"),
+        ".json": ("json.ico", "📎"),
+        ".exe": ("exe.ico", "📎"),
+        **{
+            ext: ("img.ico", "🖼️")
+            for ext in [
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".bmp",
+                ".tiff",
+                ".gif",
+                ".heic",
+                ".jfif",
+                ".tif",
+                ".svg",
+                ".ico",
+                ".avif",
+                ".heif",
+                ".psd",
+                ".j2k",
+                ".jp2",
+                ".jpx",
+                ".dng",
+                ".cr2",
+                ".cr3",
+                ".nef",
+                ".arw",
+                ".orf",
+                ".rw2",
+                ".raf",
+                ".webp",
+            ]
+        },
+        **{ext: ("video.ico", "📎") for ext in [".mp4", ".avi", ".mkv", ".mov", ".webm"]},
+        **{ext: ("audio.ico", "📎") for ext in [".mp3", ".wav", ".aac", ".flac", ".ogg"]},
+        **{ext: ("archive.ico", "🗜️") for ext in [".zip", ".rar", ".tar", ".gz", ".7z"]},
+        **{ext: ("database.ico", "📎") for ext in [".db", ".sqlite", ".sql"]},
     }
 
     _icon_cache: dict = {}
@@ -60,13 +100,13 @@ class FileManagementMixin:
                 "Excel (*.xlsx *.xls);;"
                 "EPUB (*.epub);;"
                 "HTML (*.html *.htm);;"
-                "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif *.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2);;"
+                "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif *.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2);;"  # noqa: E501
                 "Audio (*.mp3 *.wav *.aac *.flac *.ogg *.m4a);;"
                 "Vidéo (*.mp4 *.avi *.mkv *.webm *.mov);;"
                 "Données (*.csv *.json);;"
                 "Archives (*.zip *.rar *.tar *.gz);;"
                 "Tous les fichiers (*.*)"
-            )
+            ),
         )
         self.add_files_to_list(files)
 
@@ -129,10 +169,12 @@ class FileManagementMixin:
             item.setData(Qt.UserRole, folder)
             item.setData(Qt.UserRole + 4, self.format_size(folder_size))
 
-            tooltip = (f"Folder: {folder}\n"
-                    f"Size: {self.format_size(folder_size)}\n"
-                    f"Files: {file_count}\n"
-                    f"Full structure preserved during compression")
+            tooltip = (
+                f"Folder: {folder}\n"
+                f"Size: {self.format_size(folder_size)}\n"
+                f"Files: {file_count}\n"
+                f"Full structure preserved during compression"
+            )
 
             item.setToolTip(tooltip)
 
@@ -161,7 +203,7 @@ class FileManagementMixin:
         return total_size
 
     def format_size(self, size_bytes):
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        for unit in ["B", "KB", "MB", "GB", "TB"]:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
@@ -176,17 +218,60 @@ class FileManagementMixin:
             return
 
         supported_extensions = {
-            '.pdf', '.docx', '.doc', '.rtf', '.txt',
-            '.pptx', '.ppt',
-            '.xlsx', '.xls',
-            '.epub', '.html', '.htm',
-            '.csv', '.json',
-            '.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.tif', '.webp', '.gif',
-            '.svg', '.ico', '.avif', '.heic', '.heif', '.psd', '.j2k', '.jp2', '.jfif',
-            '.dng', '.cr2', '.cr3', '.nef', '.arw', '.orf', '.rw2', '.raf', '.jpx',
-            '.mp3', '.wav', '.aac', '.flac', '.ogg',
-            '.mp4', '.avi', '.mkv', '.mov', '.webm',
-            '.zip', '.rar', '.tar', '.gz',
+            ".pdf",
+            ".docx",
+            ".doc",
+            ".rtf",
+            ".txt",
+            ".pptx",
+            ".ppt",
+            ".xlsx",
+            ".xls",
+            ".epub",
+            ".html",
+            ".htm",
+            ".csv",
+            ".json",
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".bmp",
+            ".tiff",
+            ".tif",
+            ".webp",
+            ".gif",
+            ".svg",
+            ".ico",
+            ".avif",
+            ".heic",
+            ".heif",
+            ".psd",
+            ".j2k",
+            ".jp2",
+            ".jfif",
+            ".dng",
+            ".cr2",
+            ".cr3",
+            ".nef",
+            ".arw",
+            ".orf",
+            ".rw2",
+            ".raf",
+            ".jpx",
+            ".mp3",
+            ".wav",
+            ".aac",
+            ".flac",
+            ".ogg",
+            ".mp4",
+            ".avi",
+            ".mkv",
+            ".mov",
+            ".webm",
+            ".zip",
+            ".rar",
+            ".tar",
+            ".gz",
         }
         files = []
 
@@ -209,7 +294,7 @@ class FileManagementMixin:
         for i, file_path in enumerate(new_files):
             display_name = Path(file_path).name
             number = start_index + i
-            numbered_text = f"{number} {display_name}"
+            numbered_text = f"{number}. {display_name}"
 
             item = QListWidgetItem(numbered_text)
             item.setData(Qt.UserRole, file_path)
@@ -218,7 +303,7 @@ class FileManagementMixin:
             if isinstance(icon, QIcon):
                 item.setIcon(icon)
             else:
-                item.setText(f"{number} {icon} {display_name}")
+                item.setText(f"{number}. {icon} {display_name}")
 
             if os.path.isfile(file_path):
                 item.setData(Qt.UserRole + 4, self.format_size(os.path.getsize(file_path)))
@@ -231,7 +316,7 @@ class FileManagementMixin:
     def add_files_to_list(self, files):
         new_files = []
         for file in files:
-            if str(file).lower().endswith('.fcproj'):
+            if str(file).lower().endswith(".fcproj"):
                 continue
             if file not in self.files_list:
                 if os.path.isdir(file):
@@ -247,10 +332,10 @@ class FileManagementMixin:
             number = start_index + i
 
             if isinstance(icon, QIcon):
-                item = QListWidgetItem(f"{number} {display_name}")
+                item = QListWidgetItem(f"{number}. {display_name}")
                 item.setIcon(icon)
             else:
-                item = QListWidgetItem(f"{number} {icon} {display_name}")
+                item = QListWidgetItem(f"{number}. {icon} {display_name}")
 
             item.setData(Qt.UserRole, file_path)
             item.setData(Qt.UserRole + 1, file_type)
@@ -307,8 +392,11 @@ class FileManagementMixin:
     def remove_files(self):
         selected_items = self.files_list_widget.selectedItems()
         if not selected_items:
-            QMessageBox.warning(self, self.translate_text("Avertissement"),
-                                self.translate_text("Veuillez sélectionner au moins un fichier à supprimer"))
+            QMessageBox.warning(
+                self,
+                self.translate_text("Avertissement"),
+                self.translate_text("Veuillez sélectionner au moins un fichier à supprimer"),
+            )
             return
 
         folder_count = 0
@@ -332,8 +420,9 @@ class FileManagementMixin:
                 file_count += 1
 
         if not valid_items:
-            QMessageBox.warning(self, self.translate_text("Avertissement"),
-                                self.translate_text("Aucun fichier valide sélectionné"))
+            QMessageBox.warning(
+                self, self.translate_text("Avertissement"), self.translate_text("Aucun fichier valide sélectionné")
+            )
             return
 
         if folder_count > 0:
@@ -469,9 +558,9 @@ class FileManagementMixin:
                 number = i + 1
                 if isinstance(icon, QIcon):
                     item.setIcon(icon)
-                    item.setText(f"{number} {display_name}")
+                    item.setText(f"{number}. {display_name}")
                 else:
-                    item.setText(f"{number} {icon} {display_name}")
+                    item.setText(f"{number}. {icon} {display_name}")
 
     def update_file_counter(self):
         count = len(self.files_list)
@@ -493,6 +582,7 @@ class FileManagementMixin:
 
         try:
             from PySide6.QtWidgets import QGraphicsOpacityEffect
+
             effect = QGraphicsOpacityEffect(self.file_counter)
             effect.setOpacity(0.15)
             self.file_counter.setGraphicsEffect(effect)
@@ -502,8 +592,9 @@ class FileManagementMixin:
 
     def batch_rename(self):
         if not self.files_list:
-            QMessageBox.warning(self, self.translate_text("Avertissement"),
-                                self.translate_text("Aucun fichier sélectionné"))
+            QMessageBox.warning(
+                self, self.translate_text("Avertissement"), self.translate_text("Aucun fichier sélectionné")
+            )
             return
 
         dialog = BatchRenameDialog(self.files_list, self, self.current_language)
@@ -527,7 +618,7 @@ class FileManagementMixin:
             file_size=total_size,
             conversion_time=conversion_time,
             success=True,
-            notes=f"Renamed {len(rename_plan)} files"
+            notes=f"Renamed {len(rename_plan)} files",
         )
         if self.config.get("enable_system_notifications", True):
             self.system_notifier.send("batch_rename")
