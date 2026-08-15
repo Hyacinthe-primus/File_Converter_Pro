@@ -3,7 +3,7 @@
 param(
     [string]$IssFile   = "setup.iss",
     [string]$OutputDir = "Output",
-    [string]$DistDir   = "dist\File Converter Pro"
+    [string]$DistDir   = "dist\FCP"
 )
 
 # Paths
