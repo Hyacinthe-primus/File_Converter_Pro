@@ -11,37 +11,40 @@ Key Features:
 
 """
 
-import os
 import json
+import os
+
 from cryptography.fernet import Fernet
 from PySide6.QtWidgets import QApplication
 
 CONFIG_FILE = "file_converter_config.dat"
-KEY_FILE    = "file_converter_key.key"
+KEY_FILE = "file_converter_key.key"
 
 DEFAULT_CONFIG: dict = {
-    "dark_mode":                  False,
+    "dark_mode": False,
     # NOTE: "language" is intentionally absent from defaults.
     # Absence means "fresh install — let the caller decide the language"
-    "last_project":               None,
-    "auto_open_last_project":     False,
-    "conversion_quality":         "standard",
-    "default_output_folder":      None,
-    "enable_notifications":       True,
-    "compression_level":          "normal",
-    "accepted_terms":             False,
-    "accepted_privacy":           False,
+    "last_project": None,
+    "auto_open_last_project": False,
+    "conversion_quality": "standard",
+    "default_output_folder": None,
+    "enable_notifications": True,
+    "compression_level": "normal",
+    "accepted_terms": False,
+    "accepted_privacy": False,
     "terms_acceptance_timestamp": None,
     "enable_system_notifications": True,
-    "show_file_previews":         True,
-    "backup_before_conversion":   False,
-    "pdf_to_word_mode":           "with_images",
-    "show_dashboard_on_startup":  False,
-    "keep_history_days":          365,
-    "auto_save_templates":        True,
-    "separate_image_pdfs":        False,
-    "use_system_theme":           True,
+    "show_file_previews": True,
+    "backup_before_conversion": False,
+    "pdf_to_word_mode": "with_images",
+    "show_dashboard_on_startup": False,
+    "keep_history_days": 365,
+    "auto_save_templates": True,
+    "separate_image_pdfs": False,
+    "use_system_theme": True,
+    "image_to_icon_layer": "multi",
 }
+
 
 def is_dark_mode_qt():
     app = QApplication.instance()
@@ -50,6 +53,7 @@ def is_dark_mode_qt():
 
     palette = app.palette()
     return palette.color(palette.ColorRole.Window).lightness() < 128
+
 
 def _load_or_create_key(key_file: str) -> bytes | None:
     """Load an existing Fernet key or generate and persist a new one."""
@@ -67,10 +71,12 @@ def _load_or_create_key(key_file: str) -> bytes | None:
         print(f"Error managing encryption key: {e}")
         return None
 
+
 def _build_cipher(key_file: str) -> Fernet | None:
     """Return a Fernet cipher suite, or None if key loading fails."""
     key = _load_or_create_key(key_file)
     return Fernet(key) if key else None
+
 
 def _decrypt_config(path: str, cipher: Fernet) -> dict:
     """Read and decrypt an encrypted config file."""
@@ -79,16 +85,19 @@ def _decrypt_config(path: str, cipher: Fernet) -> dict:
     decrypted = cipher.decrypt(encrypted)
     return json.loads(decrypted.decode("utf-8"))
 
+
 def _read_plain_config(path: str) -> dict:
     """Read a plain-text JSON config file (fallback when cipher is unavailable)."""
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
 
 def _encrypt_and_write(path: str, data: dict, cipher: Fernet) -> None:
     """Serialize *data* to JSON, encrypt it, and write to *path*."""
     raw = json.dumps(data, indent=4, ensure_ascii=False).encode("utf-8")
     with open(path, "wb") as f:
         f.write(cipher.encrypt(raw))
+
 
 def _write_plain_config(path: str, data: dict) -> None:
     """Write *data* as plain-text JSON to *path* (fallback)."""
@@ -102,12 +111,12 @@ class ConfigManager:
     def __init__(
         self,
         config_file: str = CONFIG_FILE,
-        key_file: str    = KEY_FILE,
+        key_file: str = KEY_FILE,
     ) -> None:
-        self.config_file    = config_file
-        self.key_file       = key_file
+        self.config_file = config_file
+        self.key_file = key_file
         self.default_config = DEFAULT_CONFIG.copy()
-        self.cipher_suite   = _build_cipher(self.key_file)
+        self.cipher_suite = _build_cipher(self.key_file)
 
     def load_config(self) -> dict:
         """
