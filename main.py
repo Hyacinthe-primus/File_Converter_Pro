@@ -16,35 +16,37 @@ Modes of Execution:
 
 """
 
-import sys
 import os
+import sys
 import time
 from datetime import datetime
 
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich.rule import Rule
-from rich.text import Text
-from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.align import Align
 from rich import box
+from rich.align import Align
+from rich.console import Console
 from rich.markup import escape
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.rule import Rule
+from rich.table import Table
+from rich.text import Text
 from rich.theme import Theme
 
-_THEME = Theme({
-    "fcp.brand"   : "bold cyan",
-    "fcp.cmd"     : "bold bright_cyan",
-    "fcp.arg"     : "italic bright_white",
-    "fcp.dim"     : "dim white",
-    "fcp.ok"      : "bold bright_green",
-    "fcp.warn"    : "bold yellow",
-    "fcp.err"     : "bold bright_red",
-    "fcp.section" : "bold magenta",
-    "fcp.debug"   : "dim cyan",
-    "fcp.unlock"  : "bold bright_yellow",
-    "fcp.reset"   : "bold bright_magenta",
-})
+_THEME = Theme(
+    {
+        "fcp.brand": "bold cyan",
+        "fcp.cmd": "bold bright_cyan",
+        "fcp.arg": "italic bright_white",
+        "fcp.dim": "dim white",
+        "fcp.ok": "bold bright_green",
+        "fcp.warn": "bold yellow",
+        "fcp.err": "bold bright_red",
+        "fcp.section": "bold magenta",
+        "fcp.debug": "dim cyan",
+        "fcp.unlock": "bold bright_yellow",
+        "fcp.reset": "bold bright_magenta",
+    }
+)
 
 _console = Console(theme=_THEME, highlight=False)
 
@@ -59,7 +61,7 @@ def _fcp_banner() -> Panel:
         "      ██╔══╝  ██║     ██╔═══╝\n"
         "      ██║     ╚██████╗██║\n"
         "      ╚═╝      ╚═════╝╚═╝\n",
-        style="bold cyan"
+        style="bold cyan",
     )
     art.append("File Converter Pro", style="bold bright_white")
     art.append("  ·  CLI Reference\n", style="dim white")
@@ -78,7 +80,9 @@ def _fcp_section(title: str, icon: str = "◈", style: str = "fcp.section") -> N
 
 
 def _fcp_debug(label: str, value: str) -> None:
-    _console.print(f"  [fcp.debug]⟫[/fcp.debug] [fcp.dim]{label}[/fcp.dim]  [bright_cyan]{escape(str(value))}[/bright_cyan]")
+    _console.print(
+        f"  [fcp.debug]⟫[/fcp.debug] [fcp.dim]{label}[/fcp.dim]  [bright_cyan]{escape(str(value))}[/bright_cyan]"
+    )
 
 
 def _fcp_ok(msg: str) -> None:
@@ -86,7 +90,7 @@ def _fcp_ok(msg: str) -> None:
 
 
 def _fcp_warn(msg: str) -> None:
-    _console.print(f"  [fcp.warn]⚠[/fcp.warn]  {msg}")
+    _console.print(f"  [fcp.warn][/fcp.warn]  {msg}")
 
 
 def _fcp_err(msg: str) -> None:
@@ -100,34 +104,38 @@ def _fcp_typewriter(text: str, style: str = "bright_white", delay: float = 0.018
         time.sleep(delay)
     _console.print()
 
-if getattr(sys, 'frozen', False):
+
+if getattr(sys, "frozen", False):
     os.chdir(os.path.dirname(sys.executable))
 
 if "--daemon" in sys.argv:
-    from daemon import run_daemon_mode
     from rich.console import Console
     from rich.text import Text
+
+    from daemon import run_daemon_mode
+
     _c = Console()
     _c.print(Text("& Daemon launched", style="bold bright_cyan"))
     run_daemon_mode()
     sys.exit(0)
 
-from PySide6.QtWidgets import QApplication, QDialog
-from PySide6.QtCore    import Qt, QTimer
-from PySide6.QtGui     import QIcon
+from PySide6.QtCore import Qt, QTimer  # noqa: E402
+from PySide6.QtGui import QIcon  # noqa: E402
+from PySide6.QtWidgets import QApplication, QDialog  # noqa: E402
 
-from config  import ConfigManager, is_dark_mode_qt
-from app     import FadingMainWindow
-from dialogs import ModernSplashScreen, TermsAndPrivacyDialog
+from app import FadingMainWindow  # noqa: E402
+from config import ConfigManager, is_dark_mode_qt  # noqa: E402
+from dialogs import ModernSplashScreen, TermsAndPrivacyDialog  # noqa: E402
 
-SOCKET_NAME         = "FileConverterPro_SingleInstance"
+SOCKET_NAME = "FileConverterPro_SingleInstance"
 
-SPLASH_DELAY        = 3000
-FADEIN_DELAY        = 100
-STATUSBAR_DELAY     = 700
+SPLASH_DELAY = 3000
+FADEIN_DELAY = 100
+STATUSBAR_DELAY = 700
 SPLASH_DELETE_DELAY = 1100
 
 CLI_COMMANDS = frozenset({"status", "reset", "unlock", "reset-all", "-h", "--help", "help", "--version"})
+
 
 def get_dropped_files(argv: list[str]) -> list[str]:
     """
@@ -145,15 +153,18 @@ def get_dropped_files(argv: list[str]) -> list[str]:
         if arg in ("--lang", "--theme"):
             skip_next = True
             continue
-        if (arg in CLI_COMMANDS
-                or arg.startswith("--lang=")
-                or arg.startswith("--lang:")
-                or arg.startswith("--theme=")
-                or arg.startswith("--theme:")):
+        if (
+            arg in CLI_COMMANDS
+            or arg.startswith("--lang=")
+            or arg.startswith("--lang:")
+            or arg.startswith("--theme=")
+            or arg.startswith("--theme:")
+        ):
             continue
-        if os.path.exists(arg) and not arg.lower().endswith('.fcproj'):
+        if os.path.exists(arg) and not arg.lower().endswith(".fcproj"):
             result.append(arg)
     return result
+
 
 def get_forced_language(argv: list[str]) -> str | None:
     """
@@ -190,6 +201,7 @@ def get_forced_language(argv: list[str]) -> str | None:
             continue
         i += 1
     return None
+
 
 def get_forced_theme(argv: list[str]) -> str | None:
     """
@@ -248,17 +260,17 @@ class CLIHandler:
         tbl.add_column("", style="dim cyan", no_wrap=True)
 
         rows = [
-            ("main.py",                                     "Launch GUI mode",               "▶"),
-            ("main.py status",                              "Show all achievement statuses", "≡"),
-            ("main.py reset [italic]<id>[/italic]",         "Reset a specific achievement",  "↺"),
-            ("main.py unlock [italic]<id>[/italic]",        "Force-unlock an achievement",   "★"),
-            ("main.py reset-all",                           "Nuke every achievement",        "✖"),
-            ("main.py --version",                           "Show version info",             "ⓘ"),
-            ("main.py help / -h / --help",                  "This glorious screen",          "?"),
-            ("main.py --lang [italic]<code>[/italic]",      "Override UI language",          "≋"),
-            ("main.py --theme [italic]dark|light[/italic]", "Override UI theme",             "◐"),
-            ("main.py --lang … --theme …",                  "Override both at once",         "⊕"),
-            ("main.py --daemon",                            "Headless daemon mode",          "∞"),
+            ("main.py", "Launch GUI mode", "▶"),
+            ("main.py status", "Show all achievement statuses", "≡"),
+            ("main.py reset [italic]<id>[/italic]", "Reset a specific achievement", "↺"),
+            ("main.py unlock [italic]<id>[/italic]", "Force-unlock an achievement", "★"),
+            ("main.py reset-all", "Nuke every achievement", ""),
+            ("main.py --version", "Show version info", "ⓘ"),
+            ("main.py help / -h / --help", "This glorious screen", "?"),
+            ("main.py --lang [italic]<code>[/italic]", "Override UI language", "≋"),
+            ("main.py --theme [italic]dark|light[/italic]", "Override UI theme", "◐"),
+            ("main.py --lang … --theme …", "Override both at once", "⊕"),
+            ("main.py --daemon", "Headless daemon mode", "∞"),
         ]
         for cmd, desc, icon in rows:
             tbl.add_row(cmd, desc, icon)
@@ -273,7 +285,9 @@ class CLIHandler:
         content.append("type", style="italic white")
         content.append("]\n\n", style="dim white")
         content.append("Files must share the same category (image / audio / video).", style="dim white")
-        return Panel(content, title="[bold cyan]Context Menu – Quick Convert[/bold cyan]", border_style="cyan", padding=(0, 2))
+        return Panel(
+            content, title="[bold cyan]Context Menu – Quick Convert[/bold cyan]", border_style="cyan", padding=(0, 2)
+        )
 
     @staticmethod
     def _build_examples_table() -> Table:
@@ -297,9 +311,9 @@ class CLIHandler:
         return tbl
 
     def __init__(self, argv: list[str]) -> None:
-        self.argv    = argv
+        self.argv = argv
         self.command = argv[1].lower() if len(argv) > 1 else None
-        self._mgr    = None
+        self._mgr = None
 
     def is_cli_mode(self) -> bool:
         return self.command in CLI_COMMANDS
@@ -310,13 +324,13 @@ class CLIHandler:
         _fcp_debug("args   ", " ".join(self.argv))
 
         dispatch = {
-            "status"   : self._cmd_status,
-            "reset"    : self._cmd_reset,
-            "unlock"   : self._cmd_unlock,
+            "status": self._cmd_status,
+            "reset": self._cmd_reset,
+            "unlock": self._cmd_unlock,
             "reset-all": self._cmd_reset_all,
-            "-h"       : self._cmd_help,
-            "--help"   : self._cmd_help,
-            "help"     : self._cmd_help,
+            "-h": self._cmd_help,
+            "--help": self._cmd_help,
+            "help": self._cmd_help,
             "--version": self._cmd_version,
         }
 
@@ -337,32 +351,38 @@ class CLIHandler:
     def _cmd_reset(self) -> None:
         self._require_arg("reset")
         _console.print()
-        _console.print(Panel(
-            f"[fcp.reset]↺  Resetting:[/fcp.reset]  [bold bright_white]{escape(self.argv[2])}[/bold bright_white]",
-            border_style="magenta",
-            padding=(0, 2),
-        ))
+        _console.print(
+            Panel(
+                f"[fcp.reset]↺  Resetting:[/fcp.reset]  [bold bright_white]{escape(self.argv[2])}[/bold bright_white]",
+                border_style="magenta",
+                padding=(0, 2),
+            )
+        )
         self._mgr_reset_one(self.argv[2])
 
     def _cmd_unlock(self) -> None:
         self._require_arg("unlock")
         _console.print()
-        _console.print(Panel(
-            f"[fcp.unlock]★  Unlocking:[/fcp.unlock]  [bold bright_white]{escape(self.argv[2])}[/bold bright_white]",
-            border_style="yellow",
-            padding=(0, 2),
-        ))
+        _console.print(
+            Panel(
+                f"[fcp.unlock]★  Unlocking:[/fcp.unlock]  [bold bright_white]{escape(self.argv[2])}[/bold bright_white]",  # noqa: E501
+                border_style="yellow",
+                padding=(0, 2),
+            )
+        )
         self._mgr_unlock_one(self.argv[2])
 
     def _cmd_reset_all(self) -> None:
         _console.print()
-        _console.print(Panel(
-            "[bold bright_red]<!>  DANGER ZONE  <!>[/bold bright_red]\n"
-            "[dim white]This will wipe ALL achievement progress.[/dim white]",
-            border_style="red",
-            box=box.DOUBLE_EDGE,
-            padding=(0, 3),
-        ))
+        _console.print(
+            Panel(
+                "[bold bright_red]<!>  DANGER ZONE  <!>[/bold bright_red]\n"
+                "[dim white]This will wipe ALL achievement progress.[/dim white]",
+                border_style="red",
+                box=box.DOUBLE_EDGE,
+                padding=(0, 3),
+            )
+        )
         answer = input("\n  ⚠  Are you sure? Type YES to confirm: ").strip()
         if answer == "YES":
             with Progress(
@@ -390,6 +410,7 @@ class CLIHandler:
 
     def _cmd_version(self) -> None:
         from app import __version__
+
         _console.print()
         panel = Panel.fit(
             f"[bold bright_cyan]File Converter Pro[/bold bright_cyan]\n"
@@ -403,7 +424,9 @@ class CLIHandler:
 
     def _require_arg(self, command: str) -> None:
         if len(self.argv) < 3:
-            _fcp_err(f"Usage: [bright_cyan]main.py {command}[/bright_cyan] [italic white]<achievement_id>[/italic white]")
+            _fcp_err(
+                f"Usage: [bright_cyan]main.py {command}[/bright_cyan] [italic white]<achievement_id>[/italic white]"
+            )
             sys.exit(1)
 
     @staticmethod
@@ -416,11 +439,18 @@ class CLIHandler:
             return
         try:
             from achievements.achievements_manager import (
-                show_achievements_status_cli    as show_status,
-                reset_specific_achievement_cli  as reset_one,
-                unlock_specific_achievement_cli as unlock_one,
-                reset_all_achievements_cli      as reset_all,
+                reset_all_achievements_cli as reset_all,
             )
+            from achievements.achievements_manager import (
+                reset_specific_achievement_cli as reset_one,
+            )
+            from achievements.achievements_manager import (
+                show_achievements_status_cli as show_status,
+            )
+            from achievements.achievements_manager import (
+                unlock_specific_achievement_cli as unlock_one,
+            )
+
             self._mgr = (show_status, reset_one, unlock_one, reset_all)
         except Exception as exc:
             _console.print()
@@ -428,10 +458,21 @@ class CLIHandler:
             _console.print("  [dim]Make sure achievements.db exists in the current directory.[/dim]")
             sys.exit(1)
 
-    def _mgr_show_status(self)         : self._load_manager(); self._mgr[0]()
-    def _mgr_reset_one(self, aid: str) : self._load_manager(); self._mgr[1](aid)
-    def _mgr_unlock_one(self, aid: str): self._load_manager(); self._mgr[2](aid)
-    def _mgr_reset_all(self)           : self._load_manager(); self._mgr[3]()
+    def _mgr_show_status(self):
+        self._load_manager()
+        self._mgr[0]()
+
+    def _mgr_reset_one(self, aid: str):
+        self._load_manager()
+        self._mgr[1](aid)
+
+    def _mgr_unlock_one(self, aid: str):
+        self._load_manager()
+        self._mgr[2](aid)
+
+    def _mgr_reset_all(self):
+        self._load_manager()
+        self._mgr[3]()
 
 
 class SingleInstanceGuard:
@@ -442,7 +483,7 @@ class SingleInstanceGuard:
 
     def acquire(self) -> None:
         try:
-            from PySide6.QtNetwork import QLocalSocket, QLocalServer
+            from PySide6.QtNetwork import QLocalServer, QLocalSocket
 
             sock = QLocalSocket()
             sock.connectToServer(SOCKET_NAME)
@@ -469,19 +510,20 @@ class AppBootstrap:
     ]
 
     def __init__(self, forced_language: str | None = None, forced_theme: str | None = None) -> None:
-        self.config_manager  = ConfigManager()
+        self.config_manager = ConfigManager()
         self.forced_language = forced_language
-        self.forced_theme    = forced_theme
-        self.app    = None
+        self.forced_theme = forced_theme
+        self.app = None
         self.config = None
 
     def setup(self) -> "AppBootstrap":
-        self.app    = self._create_app()
+        self.app = self._create_app()
         self.config = self._load_config()
         return self
 
     def _create_app(self) -> QApplication:
         import signal
+
         app = QApplication(sys.argv)
         signal.signal(signal.SIGINT, lambda *_: app.quit())
         icon_path = self._resolve_icon()
@@ -508,8 +550,8 @@ class AppBootstrap:
             self.config_manager.save_config(config)
 
         if self.forced_theme is not None:
-            config["dark_mode"]         = (self.forced_theme == "dark")
-            config["use_system_theme"]  = False
+            config["dark_mode"] = self.forced_theme == "dark"
+            config["use_system_theme"] = False
             self.config_manager.save_config(config)
             _fcp_debug("theme →", self.forced_theme)
         elif config.get("use_system_theme", True):
@@ -521,6 +563,7 @@ class AppBootstrap:
     @classmethod
     def _resolve_icon(cls) -> str | None:
         from utils import get_icon_path
+
         path = get_icon_path("icon.ico")
         return path if path and os.path.exists(path) else None
 
@@ -529,7 +572,7 @@ class TermsGuard:
     """Shows the Terms & Privacy dialog when user acceptance is required."""
 
     def __init__(self, config: dict, config_manager: ConfigManager) -> None:
-        self.config         = config
+        self.config = config
         self.config_manager = config_manager
 
     def enforce(self) -> None:
@@ -537,21 +580,20 @@ class TermsGuard:
         if self._already_accepted():
             return
 
-        dialog = TermsAndPrivacyDialog(language=self.config.get("language", "fr"), dark_mode=self.config.get("dark_mode", False))
+        dialog = TermsAndPrivacyDialog(
+            language=self.config.get("language", "fr"), dark_mode=self.config.get("dark_mode", False)
+        )
         if dialog.exec() != QDialog.Accepted:
             sys.exit(0)
 
         self._record_acceptance()
 
     def _already_accepted(self) -> bool:
-        return (
-            self.config.get("accepted_terms",   False)
-            and self.config.get("accepted_privacy", False)
-        )
+        return self.config.get("accepted_terms", False) and self.config.get("accepted_privacy", False)
 
     def _record_acceptance(self) -> None:
         now = datetime.now().isoformat()
-        self.config["accepted_terms"]   = True
+        self.config["accepted_terms"] = True
         self.config["accepted_privacy"] = True
 
         if self.config.get("terms_acceptance_timestamp") is not None:
@@ -571,9 +613,9 @@ class WindowTransition:
         config_manager: ConfigManager,
         dropped_files: list[str] | None = None,
     ) -> None:
-        self.splash         = splash
+        self.splash = splash
         self.config_manager = config_manager
-        self.dropped_files  = dropped_files or []
+        self.dropped_files = dropped_files or []
 
     def start(self) -> None:
         win = self._build_main_window()
@@ -589,16 +631,20 @@ class WindowTransition:
         win.activateWindow()
 
         from threading import Thread
+
         from system_notifier import SystemNotifier
+
         notifier = SystemNotifier()
         Thread(target=notifier.check_and_notify_update, daemon=True).start()
 
         from daemon import is_autostart_enabled
+
         if not is_autostart_enabled():
-            from tasks import WatcherManager, SchedulerManager
+            from tasks import SchedulerManager, WatcherManager
 
             def _start_services(win):
                 from daemon import _trim_log_if_clean
+
                 _trim_log_if_clean()
                 win._watcher = WatcherManager()
                 win._watcher.start()
@@ -631,10 +677,9 @@ class WindowTransition:
 
         QTimer.singleShot(FADEIN_DELAY, _crossfade)
 
-        QTimer.singleShot(STATUSBAR_DELAY, lambda:
-            win.status_bar.showMessage(
-                win.translate_text("Prêt - Sélectionnez des fichiers pour commencer")
-            )
+        QTimer.singleShot(
+            STATUSBAR_DELAY,
+            lambda: win.status_bar.showMessage(win.translate_text("Prêt - Sélectionnez des fichiers pour commencer")),
         )
 
         if self.dropped_files:
@@ -645,11 +690,9 @@ class WindowTransition:
 
     def _load_dropped_files(self, win: FadingMainWindow) -> None:
         """Pass dragged files to the main window file list."""
-        if hasattr(win, 'add_files_to_list'):
+        if hasattr(win, "add_files_to_list"):
             win.add_files_to_list(self.dropped_files)
-            win.status_bar.showMessage(
-                f"{len(self.dropped_files)} file(s) loaded automatically"
-            )
+            win.status_bar.showMessage(f"{len(self.dropped_files)} file(s) loaded automatically")
         else:
             _fcp_warn(f"add_files_to_list not found — dropped files ignored: {self.dropped_files}")
 
@@ -676,8 +719,10 @@ def main() -> None:
                 files.append(arg)
         if files:
             from PySide6.QtWidgets import QApplication
+
             _app = QApplication(sys.argv)
             from context_menu.window import run_context_menu
+
             run_context_menu(files, conversion_type=conversion_type)
             return
 
@@ -710,6 +755,7 @@ def main() -> None:
     )
 
     sys.exit(bootstrap.app.exec())
+
 
 if __name__ == "__main__":
     main()
