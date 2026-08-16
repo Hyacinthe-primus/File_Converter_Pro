@@ -160,6 +160,9 @@ class CompressionDialog(TranslationMixin, QDialog):
 
         self.apply_theme_style()
 
+        min_size = self.layout().minimumSize()
+        self.resize(self.layout().sizeHint().expandedTo(min_size))
+
     def update_split_controls_state(self):
         is_split_enabled = self.split_checkbox.isChecked()
         is_custom = self.split_preset_combo.currentText() == self.translate_text("Personnalisé")
@@ -206,6 +209,7 @@ class CompressionDialog(TranslationMixin, QDialog):
                         border: 2px solid #4dabf7;
                     }
                 """)
+                info_color = "#adb5bd"
             else:
                 self.setStyleSheet("""
                     QDialog { background-color: #f8f9fa; }
@@ -239,6 +243,10 @@ class CompressionDialog(TranslationMixin, QDialog):
                         border: 2px solid #4dabf7;
                     }
                 """)
+                info_color = "#1e2229"
+
+            self.split_info_label.setStyleSheet(f"font-size: 10px; color: {info_color}; font-style: italic;")
+            self.format_info.setStyleSheet(f"font-size: 11px; color: {info_color}; font-style: italic;")
 
     def on_split_size_changed(self, value):
         if self.split_checkbox.isChecked() and self.split_preset_combo.currentText() == self.translate_text(

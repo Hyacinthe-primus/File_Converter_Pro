@@ -164,30 +164,6 @@ class CompressionMixin(ArchiveEnginesMixin):
                 "delete_originals": _delete,
             }
 
-            if _encrypt:
-                pwd_dialog = PasswordDialog(self, self.current_language)
-                if pwd_dialog.exec() != QDialog.Accepted:
-                    return
-                password = pwd_dialog.get_password()
-                if not password:
-                    QMessageBox.warning(
-                        self,
-                        self.translate_text("Avertissement"),
-                        self.translate_text("Veuillez entrer un mot de passe"),
-                    )
-                    return
-                if pwd_dialog.password_input.text() != pwd_dialog.confirm_input.text():
-                    QMessageBox.warning(
-                        self,
-                        self.translate_text("Erreur"),
-                        self.translate_text("Les mots de passe ne correspondent pas"),
-                    )
-                    return
-
-            output_dir = self.get_output_directory()
-            if not output_dir:
-                return
-
             archive_format = settings["format"]
             compression_level = settings["level"]
             archive_name = settings["name"]
@@ -195,7 +171,6 @@ class CompressionMixin(ArchiveEnginesMixin):
             settings["split"]
             split_size = settings["split_size"]
             delete_originals = settings["delete_originals"]
-            password = password if _encrypt else None
 
         else:
             dialog = CompressionDialog(self, self.current_language)
@@ -225,32 +200,6 @@ class CompressionMixin(ArchiveEnginesMixin):
                     self, self.translate_text("Erreur"), self.translate_text("Veuillez entrer un nom pour l'archive")
                 )
                 return
-
-            output_dir = self.get_output_directory()
-            if not output_dir:
-                return
-
-            password = None
-            if use_password:
-                pwd_dialog = PasswordDialog(self, self.current_language)
-                if pwd_dialog.exec() == QDialog.Accepted:
-                    password = pwd_dialog.get_password()
-                    if not password:
-                        QMessageBox.warning(
-                            self,
-                            self.translate_text("Avertissement"),
-                            self.translate_text("Veuillez entrer un mot de passe"),
-                        )
-                        return
-                    if pwd_dialog.password_input.text() != pwd_dialog.confirm_input.text():
-                        QMessageBox.warning(
-                            self,
-                            self.translate_text("Erreur"),
-                            self.translate_text("Les mots de passe ne correspondent pas"),
-                        )
-                        return
-                else:
-                    return
 
         archive_format = archive_format.lower()
         norm_map = {"tar.gz": "gz", "tar": "tar", "zip": "zip", "7z": "7z", "rar": "rar"}
@@ -297,6 +246,9 @@ class CompressionMixin(ArchiveEnginesMixin):
                 return
 
         start_time = datetime.now()
+
+        if compression_mode != "folders_with_structure":
+            self.show_progress(True, self.translate_text("compression_in_progress"))
 
         if compression_mode == "folders_with_structure":
             success = self.compress_folders_with_structure(
@@ -365,6 +317,25 @@ class CompressionMixin(ArchiveEnginesMixin):
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("file_compression")
 
+            if compression_mode != "folders_with_structure":
+                final_archive = success
+                compressed_size = self._archive_total_size(final_archive, split_size)
+
+                message = self.translate_text("creat_succ_fl").format(
+                    len(files_to_process),
+                    archive_format,
+                    Path(final_archive).name,
+                    self.format_size(compressed_size),
+                )
+
+                QMessageBox.information(self, self.translate_text("Succès"), self.translate_text(message))
+
+            self.show_progress(False)
+
+        else:
+            self.show_progress(False)
+            QMessageBox.critical(self, self.translate_text("Erreur"), self.translate_text("Compression failed"))
+
     def compress_folders_with_structure(
         self,
         folders,
@@ -404,7 +375,7 @@ class CompressionMixin(ArchiveEnginesMixin):
 
             counter = 1
             base_name = Path(archive_path).stem
-            while os.path.exists(archive_path):
+            while self._compression_target_exists(archive_path, split_size):
                 archive_path = os.path.join(output_dir, f"{base_name}_{counter}.{extension}")
                 counter += 1
 
@@ -440,7 +411,7 @@ class CompressionMixin(ArchiveEnginesMixin):
             self.show_progress(False)
 
             if success:
-                compressed_size = os.path.getsize(archive_path) if os.path.exists(archive_path) else 0
+                compressed_size = self._archive_total_size(archive_path, split_size)
 
                 message = self.translate_text("creat_succ").format(len(folders))
 
@@ -487,7 +458,7 @@ class CompressionMixin(ArchiveEnginesMixin):
                     if deleted_count > 0:
                         self.status_bar.showMessage(self.translate_text("org_el_del").format(deleted_count))
 
-                return True
+                return archive_path
             else:
                 QMessageBox.critical(self, self.translate_text("Erreur"), self.translate_text("Compression failed"))
                 return False

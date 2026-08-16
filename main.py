@@ -632,9 +632,7 @@ class WindowTransition:
 
         from threading import Thread
 
-        from system_notifier import SystemNotifier
-
-        notifier = SystemNotifier()
+        notifier = win.system_notifier
         win._system_notifier = notifier
         Thread(target=notifier.check_and_notify_update, daemon=True).start()
 

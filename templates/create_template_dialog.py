@@ -152,9 +152,9 @@ class CreateTemplateDialog(QDialog):
         self.compression_format_combo.addItems(
             [
                 self.parent_dialog.translate_text("ZIP"),
+                self.parent_dialog.translate_text("7Z"),
                 self.parent_dialog.translate_text("TAR.GZ"),
                 self.parent_dialog.translate_text("TAR"),
-                self.parent_dialog.translate_text("RAR"),
             ]
         )
         self.compression_format_combo.setMinimumHeight(30)

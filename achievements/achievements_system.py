@@ -366,7 +366,7 @@ class AchievementSystem(QObject):
                 "royal_archivist": {
                     "id": "royal_archivist",
                     "name": "L'Archiviste Royal",
-                    "description": "Créer 500 archives (ZIP, RAR, TAR) différentes",
+                    "description": "Créer 500 archives (ZIP, 7Z, TAR) différentes",
                     "icon": "treasure_chest.png",
                     "category": "compression",
                     "tier": "epic",
@@ -503,7 +503,7 @@ class AchievementSystem(QObject):
                     "requirement": {
                         "type": "all_formats_used",
                         "value": True,
-                        "formats": ["pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"],
+                        "formats": ["pdf", "docx", "jpg", "png", "zip", "7z", "tar", "gz"],
                     },
                     "reward_xp": 1000,
                     "secret": False,
@@ -1070,9 +1070,11 @@ class AchievementSystem(QObject):
                         achievement["id"],
                     ),
                 )
-            formats = ["pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"]
+            formats = ["pdf", "docx", "jpg", "png", "zip", "7z", "tar", "gz"]
             for fmt in formats:
                 cursor.execute("INSERT OR IGNORE INTO used_formats (format, used) VALUES (?, ?)", (fmt, False))
+
+            cursor.execute("DELETE FROM used_formats WHERE format = 'rar'")
 
             conn.commit()
             conn.close()
@@ -1321,7 +1323,7 @@ class AchievementSystem(QObject):
 
         file_format = file_format.lower().strip().replace(".", "")
 
-        valid_formats = ["pdf", "docx", "jpg", "jpeg", "png", "zip", "rar", "7z", "tar", "gz"]
+        valid_formats = ["pdf", "docx", "jpg", "jpeg", "png", "zip", "7z", "tar", "gz"]
 
         if file_format not in valid_formats:
             print(f"[ACHIEVEMENTS] Format ignored (invalid): {file_format}")
@@ -1340,6 +1342,7 @@ class AchievementSystem(QObject):
                 conn.close()
                 return
 
+            cursor.execute("INSERT OR IGNORE INTO used_formats (format, used) VALUES (?, FALSE)", (file_format,))
             cursor.execute("UPDATE used_formats SET used = TRUE WHERE format = ?", (file_format,))
 
             cursor.execute("SELECT used FROM used_formats WHERE format = ?", (file_format,))
@@ -1809,8 +1812,8 @@ class AchievementSystem(QObject):
                 self.increment_stat("archives_created")
                 if "zip" in type_str:
                     formats_to_mark.append("zip")
-                elif "rar" in type_str:
-                    formats_to_mark.append("rar")
+                elif "7z" in type_str:
+                    formats_to_mark.append("7z")
                 elif "tar" in type_str:
                     formats_to_mark.append("tar")
                     if "gz" in type_str or "gzip" in type_str or "tgz" in type_str:
@@ -1892,14 +1895,14 @@ class AchievementSystem(QObject):
     def record_archive_protection(self, count=1, password_length=0, archive_format="zip"):
         """
         Records archive protection (Impenetrable Fortress achievement).
-        Only works on ZIP/RAR with a complex password.
+        Only works on ZIP/7Z with a complex password.
         """
         print(
             f"[ACHIEVEMENTS] Recording archive protection: {count}, Pwd len: {password_length}, Format: {archive_format}"  # noqa: E501
         )
 
-        # Only process ZIP, RAR and 7Z for "Impenetrable Fortress"
-        if archive_format.lower() in ["zip", "rar", "7z"]:
+        # Only process ZIP and 7Z for "Impenetrable Fortress"
+        if archive_format.lower() in ["zip", "7z"]:
             if password_length >= 12:
                 self.increment_stat("batch_protect_complex_count", count)
 
@@ -2190,7 +2193,7 @@ class AchievementSystem(QObject):
             "aac": "mp3",
             "flac": "mp3",
         }.get(_ext, _ext)
-        if _ext_norm in ("pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"):
+        if _ext_norm in ("pdf", "docx", "jpg", "png", "zip", "7z", "tar", "gz"):
             self.record_format_usage(_ext_norm)
 
         _batch = self.stats.get("recent_batch_files", 0) + 1
@@ -2237,7 +2240,7 @@ class AchievementSystem(QObject):
                 "tgz": "gz",
                 "gzip": "gz",
                 "zip": "zip",
-                "rar": "rar",
+                "7z": "7z",
                 "tar": "tar",
                 "png": "png",
                 "jpg": "jpg",
@@ -2266,7 +2269,7 @@ class AchievementSystem(QObject):
 
     def check_all_formats_used(self):
         try:
-            required_formats = ["pdf", "docx", "jpg", "png", "zip", "rar", "tar", "gz"]
+            required_formats = ["pdf", "docx", "jpg", "png", "zip", "7z", "tar", "gz"]
 
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()

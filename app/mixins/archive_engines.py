@@ -1,13 +1,17 @@
 """ArchiveEnginesMixin — ZIP, 7Z, TAR archive creation methods."""
 
 import os
+import queue
+import re
 import shutil
 import subprocess
 import tempfile
+import threading
+import time
 import zipfile
 from pathlib import Path
 
-from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QApplication, QMessageBox
 
 from external_binaries import resolve_binary
 
@@ -39,6 +43,98 @@ class ArchiveEnginesMixin:
             list_file = f.name
         print(f"[DEBUG] List file created: {list_file}")
         return list_file
+
+    def _compression_target_exists(self, archive_path, split_size):
+        if split_size > 0:
+            base = Path(archive_path)
+            stem = base.stem
+            ext = base.suffix.lstrip(".").lower()
+            patterns = [f"{stem}.{ext}.*", f"{stem}.z*", f"{stem}.{ext}"]
+            for pattern in patterns:
+                if any(base.parent.glob(pattern)):
+                    return True
+        return os.path.exists(archive_path)
+
+    def _archive_total_size(self, archive_path, split_size):
+        total = 0
+        try:
+            if split_size > 0:
+                base = Path(archive_path)
+                stem = base.stem
+                ext = base.suffix.lstrip(".").lower()
+                for pattern in (f"{stem}.{ext}.*", f"{stem}.z*", f"{stem}.{ext}"):
+                    for part in base.parent.glob(pattern):
+                        try:
+                            total += os.path.getsize(part)
+                        except OSError:
+                            pass
+            elif os.path.exists(archive_path):
+                total = os.path.getsize(archive_path)
+        except OSError:
+            total = 0
+        return total
+
+    def _run_sevenzip_with_progress(self, cmd):
+        cmd = list(cmd) + ["-bsp2"]
+
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            creationflags=_NO_WINDOW,
+        )
+
+        progress_queue = queue.Queue()
+
+        def _read_progress():
+            buf = b""
+            try:
+                while True:
+                    chunk = proc.stderr.read(65536)
+                    if not chunk:
+                        break
+                    buf += chunk
+                    match = re.findall(rb"(\d{1,3})%", buf)
+                    if match:
+                        progress_queue.put(int(match[-1]))
+            except Exception:
+                pass
+
+        threading.Thread(target=_read_progress, daemon=True).start()
+
+        last_pct = 0
+        while proc.poll() is None:
+            try:
+                while True:
+                    last_pct = progress_queue.get_nowait()
+            except queue.Empty:
+                pass
+            if last_pct:
+                self.progress_bar.setValue(max(last_pct, self.progress_bar.value()))
+            QApplication.processEvents()
+            time.sleep(0.02)
+
+        try:
+            while True:
+                last_pct = progress_queue.get_nowait()
+        except queue.Empty:
+            pass
+
+        if proc.returncode == 0:
+            self.progress_bar.setValue(100)
+        else:
+            self.progress_bar.setValue(0)
+
+        stdout_text = ""
+        try:
+            if proc.stdout:
+                stdout_text = proc.stdout.read().decode("utf-8", errors="replace")
+                proc.stdout.close()
+        except Exception:
+            pass
+
+        return proc.returncode, stdout_text
+
 
     def _sevenzip_level_args(self, compression_level, method):
         if method == "zip":
@@ -217,14 +313,14 @@ class ArchiveEnginesMixin:
 
                 print(f"[DEBUG] 7-Zip command for split ZIP: {' '.join(cmd)}")
 
-                result = subprocess.run(cmd, capture_output=True, text=True, creationflags=_NO_WINDOW)
+                result_returncode, stdout_text = self._run_sevenzip_with_progress(cmd)
 
                 try:
                     os.unlink(list_file)
                 except Exception:
                     pass
 
-                if result.returncode == 0:
+                if result_returncode == 0:
                     print(f"[DEBUG] Split ZIP archive successfully created: {base_archive_path}")
 
                     base_path = Path(base_archive_path)
@@ -258,9 +354,8 @@ class ArchiveEnginesMixin:
                         print("[ERROR] No archive created")
                         return False
                 else:
-                    print(f"[ERROR] 7-Zip error (code {result.returncode}):")
-                    print(f"[ERROR] stdout: {result.stdout}")
-                    print(f"[ERROR] stderr: {result.stderr}")
+                    print(f"[ERROR] 7-Zip error (code {result_returncode}):")
+                    print(f"[ERROR] stdout: {stdout_text}")
 
                     try:
                         base_path = Path(base_archive_path)
@@ -511,14 +606,14 @@ class ArchiveEnginesMixin:
 
                 print(f"[DEBUG] 7-Zip command: {' '.join(cmd)}")
 
-                result = subprocess.run(cmd, capture_output=True, text=True, creationflags=_NO_WINDOW)
+                result_returncode, stdout_text = self._run_sevenzip_with_progress(cmd)
 
                 try:
                     os.unlink(list_file)
                 except Exception:
                     pass
 
-                if result.returncode == 0:
+                if result_returncode == 0:
                     print(f"[DEBUG] 7Z archive successfully created: {archive_path}")
 
                     if split_size > 0:
@@ -542,9 +637,8 @@ class ArchiveEnginesMixin:
                             print("[ERROR] Archive not created")
                             return False
                 else:
-                    print(f"[ERROR] 7-Zip error (code {result.returncode}):")
-                    print(f"[ERROR] stdout: {result.stdout}")
-                    print(f"[ERROR] stderr: {result.stderr}")
+                    print(f"[ERROR] 7-Zip error (code {result_returncode}):")
+                    print(f"[ERROR] stdout: {stdout_text}")
 
                     try:
                         if os.path.exists(archive_path):
@@ -623,20 +717,19 @@ class ArchiveEnginesMixin:
 
                 print(f"[DEBUG] 7-Zip command for structured archive: {' '.join(cmd)}")
 
-                result = subprocess.run(cmd, capture_output=True, text=True, creationflags=_NO_WINDOW)
+                result_returncode, stdout_text = self._run_sevenzip_with_progress(cmd)
 
                 try:
                     os.unlink(list_file)
                 except Exception:
                     pass
 
-                if result.returncode == 0:
+                if result_returncode == 0:
                     print(f"[SUCCESS] Structured 7Z archive created: {archive_path}")
                     return True
                 else:
-                    print(f"[ERROR] 7-Zip error (code {result.returncode}):")
-                    print(f"[ERROR] stdout: {result.stdout}")
-                    print(f"[ERROR] stderr: {result.stderr}")
+                    print(f"[ERROR] 7-Zip error (code {result_returncode}):")
+                    print(f"[ERROR] stdout: {stdout_text}")
                     return False
 
             except Exception as e:
@@ -666,7 +759,7 @@ class ArchiveEnginesMixin:
 
             counter = 1
             base_name = Path(archive_path).stem
-            while os.path.exists(archive_path):
+            while self._compression_target_exists(archive_path, split_size):
                 archive_path = os.path.join(output_dir, f"{base_name}_{counter}.{extension}")
                 counter += 1
 
@@ -702,7 +795,7 @@ class ArchiveEnginesMixin:
                 if deleted_count > 0:
                     self.status_bar.showMessage(self.translate_text("org_el_del").format(deleted_count))
 
-            return success
+            return archive_path if success else False
 
         except Exception as e:
             print(f"[ERROR] Error processing compression: {e}")
