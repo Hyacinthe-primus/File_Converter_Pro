@@ -404,7 +404,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         btn_row = QHBoxLayout()
         self._cancel_btn = QPushButton(self.tr_("⛔ Annuler la conversion"))
         self._cancel_btn.setEnabled(False)
-        _apply_dialog_btn(self._cancel_btn, "BtnCancelGlassy")
+        _apply_dialog_btn(self._cancel_btn, "BtnCancel")
         self._cancel_btn.clicked.connect(self._cancel_conversion)
         btn_row.addWidget(self._cancel_btn)
 
