@@ -1,10 +1,6 @@
 """Tests for document conversions — using mixin methods directly."""
 
 import json
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from converter.mixins.document_converters import DocumentConverters
 

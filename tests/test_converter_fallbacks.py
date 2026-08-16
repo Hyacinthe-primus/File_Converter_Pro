@@ -1,9 +1,5 @@
 """Tests for the multi-engine fallback chains in the converter dispatch."""
 
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from converter.converters import AdvancedConverterEngine
 

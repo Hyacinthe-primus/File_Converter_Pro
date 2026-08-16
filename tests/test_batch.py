@@ -1,12 +1,9 @@
 """Tests for batch rename and batch conversion routing logic."""
 
 import os
-import sys
 import tempfile
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from app.mixins.batch import BatchMixin  # noqa: E402
+from app.mixins.batch import BatchMixin
 
 
 def test_batch_rename_basic():

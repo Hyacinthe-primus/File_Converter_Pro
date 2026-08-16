@@ -1,9 +1,5 @@
 """Tests for converter engine dispatch and edge cases."""
 
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from converter.converters import CATEGORY_MAP, AdvancedConverterEngine, ConversionResult
 

@@ -1,10 +1,5 @@
 """Tests for dialog logic — instantiate dialogs with mocked Qt and verify pure methods."""
 
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import pytest
 
 
@@ -13,13 +8,10 @@ class TestCompressionDialogSizing:
     which made Windows clamp the geometry and Qt log 'Unable to set geometry'."""
 
     @pytest.fixture(autouse=True)
-    def _qapp(self):
-        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-        from PySide6.QtWidgets import QApplication
-
-        self._app = QApplication.instance() or QApplication([])
+    def _qapp(self, qapp):
+        self._app = qapp
         yield
-        self._app.processEvents()
+        qapp.processEvents()
 
     def test_initial_size_meets_layout_minimum(self):
         from dialogs import CompressionDialog

@@ -4,54 +4,8 @@ and at most MAX_PROJECT_TABS (5) projects can be open."""
 
 import json
 import os
-import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import pytest
-
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-
-from PySide6.QtWidgets import QApplication, QMessageBox, QPushButton
-
-
-@pytest.fixture(scope="module")
-def qapp():
-    app = QApplication.instance() or QApplication([])
-    yield app
-    app.processEvents()
-
-
-@pytest.fixture()
-def app(qapp, tmp_path):
-    """Build a real FileConverterApp offscreen with isolated config and
-    non-modal message boxes, so the test never blocks on dialogs."""
-    cfg = {
-        "accepted_terms": True,
-        "accepted_privacy": True,
-        "language": "fr",
-        "use_system_theme": False,
-        "dark_mode": False,
-        "last_project": None,
-        "auto_open_last_project": False,
-        "show_dashboard_on_startup": False,
-    }
-    cfg_file = tmp_path / "config.dat"
-    cfg_file.write_text(json.dumps(cfg), encoding="utf-8")
-
-    from config import ConfigManager
-
-    cm = ConfigManager(str(cfg_file), str(tmp_path / "key.key"))
-
-    QMessageBox.critical = staticmethod(lambda *a, **k: None)
-    QMessageBox.warning = staticmethod(lambda *a, **k: None)
-
-    from app import FileConverterApp
-
-    window = FileConverterApp(cm)
-    window.hide()
-    qapp.processEvents()
-    return window
+from PySide6.QtWidgets import QMessageBox, QPushButton
 
 
 def _make_project(tmp_path, name, paths):

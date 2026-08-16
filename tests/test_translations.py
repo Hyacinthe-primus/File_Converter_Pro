@@ -1,9 +1,5 @@
 """Tests for the translation system."""
 
-import os
-import sys
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def test_translation_manager_loads_builtin():
