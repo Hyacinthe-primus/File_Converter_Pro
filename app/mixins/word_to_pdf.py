@@ -273,28 +273,196 @@ class WordToPdfMixin:
         if progress_callback:
             progress_callback(10)
 
+        ok = False
+
         try:
             if self.convert_word_to_pdf_com(docx_path, pdf_path, progress_callback):
-                return True
+                ok = True
         except Exception as e:
             print(f"[Word→PDF] COM failed: {e}")
 
-        if progress_callback:
+        if not ok and progress_callback:
             progress_callback(30)
 
-        try:
-            if self._convert_docx_to_pdf_libreoffice(docx_path, pdf_path, progress_callback):
-                return True
-        except Exception as e:
-            print(f"[Word→PDF] LibreOffice failed: {e}")
+        if not ok:
+            try:
+                if self._convert_docx_to_pdf_libreoffice(docx_path, pdf_path, progress_callback):
+                    ok = True
+            except Exception as e:
+                print(f"[Word→PDF] LibreOffice failed: {e}")
 
-        if progress_callback:
+        if not ok and progress_callback:
             progress_callback(50)
 
+        if not ok:
+            try:
+                ok = self._convert_docx_to_pdf_fallback_reportlab(docx_path, pdf_path, options, progress_callback)
+            except Exception as e:
+                print(f"[Word→PDF] ReportLab fallback failed: {e}")
+
+        if ok and os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 0:
+            self._postprocess_word_pdf(docx_path, pdf_path, options)
+
+        return ok
+
+    def _postprocess_word_pdf(self, docx_path: str, pdf_path: str, options: dict) -> None:
+        """Apply the advanced options to a finished PDF regardless of the engine that produced it.
+
+        - include_metadata: copies the DOCX core properties into the PDF (or strips them).
+        - compress_images + quality: downscales and re-encodes embedded images.
+        """
         try:
-            return self._convert_docx_to_pdf_fallback_reportlab(docx_path, pdf_path, options, progress_callback)
+            import fitz
+        except ImportError:
+            return
+
+        try:
+            doc = fitz.open(pdf_path)
         except Exception as e:
-            print(f"[Word→PDF] ReportLab fallback failed: {e}")
+            print(f"[Word→PDF] Post-process open failed: {e}")
+            return
+
+        changed = False
+        try:
+            if options.get("include_metadata", True):
+                changed |= self._apply_pdf_metadata(doc, docx_path)
+            else:
+                doc.set_metadata({})
+                changed = True
+
+            if options.get("compress_images", True):
+                changed |= self._compress_pdf_images(doc, options.get("quality", ""))
+
+            if changed:
+                tmp = pdf_path + ".tmp"
+                try:
+                    doc.save(tmp, garbage=4, deflate=True)
+                    doc.close()
+                    doc = None
+                    os.replace(tmp, pdf_path)
+                except Exception as e:
+                    print(f"[Word→PDF] Post-process save failed: {e}")
+                    if os.path.exists(tmp):
+                        try:
+                            os.unlink(tmp)
+                        except OSError:
+                            pass
+        finally:
+            if doc is not None:
+                try:
+                    doc.close()
+                except Exception:
+                    pass
+
+    def _apply_pdf_metadata(self, pdf_doc, docx_path: str) -> bool:
+        """Copy the DOCX core properties into the PDF metadata. Returns True if changed."""
+        try:
+            from docx import Document as _DocxDocument
+
+            src = _DocxDocument(docx_path)
+            cp = src.core_properties
+
+            meta = {}
+            if (cp.title or "").strip():
+                meta["title"] = cp.title.strip()
+            elif Path(docx_path).stem.strip():
+                meta["title"] = Path(docx_path).stem.strip()
+            if (cp.author or "").strip():
+                meta["author"] = cp.author.strip()
+            if (cp.subject or "").strip():
+                meta["subject"] = cp.subject.strip()
+            if (cp.keywords or "").strip():
+                meta["keywords"] = cp.keywords.strip()
+            meta["creator"] = "File Converter Pro"
+            meta["producer"] = "File Converter Pro"
+
+            if (pdf_doc.metadata or {}) == meta:
+                return False
+            pdf_doc.set_metadata(meta)
+            print(f"[Word→PDF] Metadata written: {meta}")
+            return True
+        except Exception as e:
+            print(f"[Word→PDF] Metadata skipped: {e}")
+            return False
+
+    def _compress_pdf_images(self, pdf_doc, quality_label: str) -> bool:
+        """Downscale and re-encode embedded images to the target DPI/quality. Returns True if changed."""
+        try:
+            import io
+
+            from PIL import Image as PILImage
+
+            m = _re.search(r"(\d+)\s*DPI", quality_label or "")
+            target_dpi = int(m.group(1)) if m else 150
+            quality = {300: 90, 150: 75, 96: 60}.get(target_dpi, 75)
+
+            try:
+                pdf_doc.rewrite_images(
+                    dpi_threshold=target_dpi + 1,
+                    dpi_target=target_dpi,
+                    quality=quality,
+                    lossy=True,
+                    lossless=True,
+                    bitonal=False,
+                    color=True,
+                    gray=True,
+                )
+            except Exception as e:
+                print(f"[Word→PDF] rewrite_images skipped: {e}")
+
+            changed = False
+            for page in pdf_doc:
+                pending = []
+                done = set()
+                for img in page.get_images(full=True):
+                    xref = img[0]
+                    if xref in done:
+                        continue
+                    done.add(xref)
+                    try:
+                        info = pdf_doc.extract_image(xref)
+                    except Exception:
+                        continue
+                    if not info or not info.get("image"):
+                        continue
+                    rects = page.get_image_rects(xref)
+                    if not rects:
+                        continue
+                    rect = rects[0]
+                    disp_w_in = max(rect.width, 0.1) / 72.0
+                    disp_h_in = max(rect.height, 0.1) / 72.0
+                    cur_dpi = min(info["width"] / disp_w_in, info["height"] / disp_h_in)
+                    if cur_dpi <= target_dpi:
+                        continue
+                    try:
+                        pil = PILImage.open(io.BytesIO(info["image"]))
+                    except Exception:
+                        continue
+                    if pil.mode not in ("RGB", "L"):
+                        pil = pil.convert("RGB")
+                    scale = target_dpi / cur_dpi
+                    new_w = max(1, int(info["width"] * scale))
+                    new_h = max(1, int(info["height"] * scale))
+                    pil = pil.resize((new_w, new_h), PILImage.LANCZOS)
+                    buf = io.BytesIO()
+                    pil.save(buf, format="JPEG", quality=quality, optimize=True)
+                    if len(info["image"]) - len(buf.getvalue()) < 1024:
+                        continue
+                    pending.append((rect, buf.getvalue()))
+
+                if pending:
+                    for rect, _ in pending:
+                        page.add_redact_annot(rect)
+                    page.apply_redactions()
+                    for rect, data in pending:
+                        page.insert_image(rect, stream=data, keep_proportion=True)
+                    changed = True
+
+            if changed:
+                print(f"[Word→PDF] Compressed images to max {target_dpi} DPI")
+            return changed
+        except Exception as e:
+            print(f"[Word→PDF] Image compression skipped: {e}")
             return False
 
     def _convert_docx_to_pdf_libreoffice(self, docx_path, pdf_path, progress_callback=None):
@@ -428,10 +596,15 @@ class WordToPdfMixin:
 
                     ensure_space(new_h + 20)
 
+                    tmp_path = None
                     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
                         img.save(tmp.name, "PNG")
-                        c.drawImage(tmp.name, 72, y - new_h, new_w, new_h)
-                        os.unlink(tmp.name)
+                        tmp_path = tmp.name
+                    try:
+                        c.drawImage(tmp_path, 72, y - new_h, new_w, new_h)
+                    finally:
+                        if tmp_path and os.path.exists(tmp_path):
+                            os.unlink(tmp_path)
 
                     y -= new_h + 20
 
@@ -470,7 +643,9 @@ class WordToPdfMixin:
 
             def _get_inline_image_blob(inline_elem):
                 try:
-                    blip = inline_elem.find(".//{http://schemas.openxmlformats.org/wordprocessingml/2006/main}blip")
+                    blip = inline_elem.find(
+                        ".//{http://schemas.openxmlformats.org/drawingml/2006/main}blip"
+                    )
                     if blip is not None:
                         rId = blip.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")
                         if rId:
