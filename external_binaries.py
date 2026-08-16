@@ -69,6 +69,37 @@ class ToolSpec:
 
 
 TOOLS: dict[str, ToolSpec] = {
+    "7z": ToolSpec(
+        names=("7z", "7zz", "7za"),
+        app_local=(
+            "{app_data}/7zip/7z.exe",
+            "{app_data}/7zip/7zz",
+            "{app_dir}/7zip/7z.exe",
+            "{app_dir}/7zip/7zz",
+        ),
+        system=(
+            r"%PROGRAMFILES%\7-Zip\7z.exe",
+            r"%PROGRAMFILES%\7-Zip\7zz.exe",
+            r"C:\Program Files\7-Zip\7z.exe",
+            r"C:\Program Files\7-Zip\7zz.exe",
+            r"C:\Program Files (x86)\7-Zip\7z.exe",
+            r"C:\Program Files (x86)\7-Zip\7zz.exe",
+            "/usr/bin/7z",
+            "/usr/bin/7zz",
+            "/usr/bin/7za",
+            "/usr/local/bin/7z",
+            "/usr/local/bin/7zz",
+            "/usr/local/bin/7za",
+            "/opt/homebrew/bin/7z",
+            "/opt/homebrew/bin/7zz",
+            "/opt/homebrew/bin/7za",
+            "/opt/local/bin/7z",
+            "/opt/local/bin/7zz",
+            "/opt/local/bin/7za",
+            "/snap/bin/7z",
+            "/snap/bin/7za",
+        ),
+    ),
     "ffmpeg": ToolSpec(
         names=("ffmpeg",),
         app_local=("{app_dir}/ffmpeg/ffmpeg.exe", "{meipass}/ffmpeg.exe"),

@@ -1,4 +1,4 @@
-"""CompressionDialog — Archive settings (ZIP/RAR/TAR, split, encrypt)."""
+"""CompressionDialog — Archive settings (ZIP/7Z/TAR, split, encrypt)."""
 
 import os
 
@@ -41,7 +41,7 @@ class CompressionDialog(TranslationMixin, QDialog):
         format_layout = QHBoxLayout()
         format_layout.addWidget(QLabel(self.translate_text("Format d'archive:")))
         self.format_combo = QComboBox()
-        self.format_combo.addItems(["ZIP", "RAR", "TAR.GZ", "TAR"])
+        self.format_combo.addItems(["ZIP", "7Z", "TAR.GZ", "TAR"])
         self.format_combo.currentIndexChanged.connect(self.update_format_info)
         format_layout.addWidget(self.format_combo)
         layout.addLayout(format_layout)
@@ -133,7 +133,7 @@ class CompressionDialog(TranslationMixin, QDialog):
         self.split_note_label.setWordWrap(True)
         self.split_note_label.setText(
             self.translate_text(
-                "Note: Le fractionnement n'est disponible que pour les formats ZIP et RAR. "
+                "Note: Le fractionnement n'est disponible que pour les formats ZIP et 7Z. "
                 "Les archives TAR/TAR.GZ ne peuvent pas être fractionnées."
             )
         )
@@ -333,15 +333,13 @@ class CompressionDialog(TranslationMixin, QDialog):
                     )
                 else:
                     message = self.translate_text(
-                        "Le chiffrement ZIP utilise le standard AES-256 avec pyzipper (si installé).\n\n"
-                        "Pour une meilleure sécurité, assurez-vous d'avoir installé pyzipper:\n"
-                        "pip install pyzipper"
+                        "Le chiffrement ZIP utilise AES-256 (pyzipper si installé). Le format 7Z "
+                        "utilise AES-256 avec chiffrement de l'en-tête via 7-Zip."
                     )
             else:
                 message = self.translate_text(
-                    "Le chiffrement ZIP utilise le standard AES-256 avec pyzipper (si installé).\n\n"
-                    "Pour une meilleure sécurité, assurez-vous d'avoir installé pyzipper:\n"
-                    "pip install pyzipper"
+                    "Le chiffrement ZIP utilise AES-256 (pyzipper si installé). Le format 7Z "
+                    "utilise AES-256 avec chiffrement de l'en-tête via 7-Zip."
                 )
 
             QMessageBox.information(self, self.translate_text("Information sur le chiffrement"), message)
@@ -351,8 +349,9 @@ class CompressionDialog(TranslationMixin, QDialog):
             "ZIP": self.translate_text(
                 "Format universel, compatible avec tous les systèmes. Supporte le chiffrement et le fractionnement."
             ),
-            "RAR": self.translate_text(
-                "Meilleure compression mais nécessite WinRAR/7-Zip pour décompresser. Supporte le fractionnement."
+            "7Z": self.translate_text(
+                "Format 7-Zip: meilleure compression, multiplateforme. Supporte le chiffrement (AES-256) "
+                "et le fractionnement."
             ),
             "TAR.GZ": self.translate_text("Standard Unix/Linux, bonne compression. Ne supporte PAS le fractionnement."),
             "TAR": self.translate_text(
@@ -371,7 +370,7 @@ class CompressionDialog(TranslationMixin, QDialog):
     def get_compression_settings(self):
         is_split_enabled = self.split_checkbox.isChecked()
         current_format = self.format_combo.currentText()
-        is_split_supported = current_format in ["ZIP", "RAR", self.translate_text("ZIP"), self.translate_text("RAR")]
+        is_split_supported = current_format in ["ZIP", "7Z", self.translate_text("ZIP"), self.translate_text("7Z")]
 
         split_size = 0
         if is_split_enabled and is_split_supported:

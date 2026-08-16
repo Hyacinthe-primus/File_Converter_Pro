@@ -1,6 +1,7 @@
-"""ArchiveEnginesMixin — ZIP, RAR, TAR archive creation methods."""
+"""ArchiveEnginesMixin — ZIP, 7Z, TAR archive creation methods."""
 
 import os
+import shutil
 import subprocess
 import tempfile
 import zipfile
@@ -8,11 +9,51 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QMessageBox
 
+from external_binaries import resolve_binary
+
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
 
 
 class ArchiveEnginesMixin:
-    """Mixin: archive creation engines (ZIP, RAR, TAR) for FileConverterApp."""
+    """Mixin: archive creation engines (ZIP, 7Z, TAR) for FileConverterApp."""
+
+    def _find_sevenzip(self):
+        sevenzip = resolve_binary("7z")
+        if sevenzip:
+            print(f"[DEBUG] 7-Zip found: {sevenzip}")
+            return sevenzip
+        QMessageBox.warning(
+            self,
+            self.translate_text("Information"),
+            self.translate_text("7-Zip not found for archive creation.\nInstallation required."),
+        )
+        return None
+
+    def _write_archive_list(self, files_to_compress):
+        list_file = None
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt", encoding="utf-8") as f:
+            for file_path in files_to_compress:
+                if os.path.exists(file_path):
+                    escaped_path = file_path.replace('"', '\\"')
+                    f.write(f'"{escaped_path}"\n')
+            list_file = f.name
+        print(f"[DEBUG] List file created: {list_file}")
+        return list_file
+
+    def _sevenzip_level_args(self, compression_level, method):
+        if method == "zip":
+            level_map = {
+                self.translate_text("Normal"): "-mx=3",
+                self.translate_text("Haute compression"): "-mx=7",
+                self.translate_text("Compression maximale"): "-mx=9",
+            }
+        else:
+            level_map = {
+                self.translate_text("Normal"): "-mx=3",
+                self.translate_text("Haute compression"): "-mx=7",
+                self.translate_text("Compression maximale"): "-mx=9 -md128M",
+            }
+        return level_map.get(compression_level, "-mx=3")
 
     def create_structured_zip_archive(
         self, archive_path, folders, additional_files, compression_level, password, split_size
@@ -118,10 +159,10 @@ class ArchiveEnginesMixin:
                 f"{base_stem}{extension}.*",
                 f"{base_stem}.part*{extension}",
             ]
-        elif archive_format in ["RAR", self.translate_text("RAR")]:
+        elif archive_format in ["7Z", self.translate_text("7Z"), "RAR", self.translate_text("RAR")]:
             patterns = [
                 f"{base_stem}{extension}",
-                f"{base_stem}.r*",
+                f"{base_stem}{extension}.*",
                 f"{base_stem}.part*{extension}",
             ]
         else:
@@ -148,80 +189,33 @@ class ArchiveEnginesMixin:
                 f"[DEBUG SPLIT ZIP] Starting - max size: {split_size_mb}MB, files: {len(files_to_compress)}, password: {'Yes' if password else 'No'}"  # noqa: E501
             )
 
-            winrar_paths = [
-                r"C:\Program Files\WinRAR\WinRAR.exe",
-                r"C:\Program Files (x86)\WinRAR\WinRAR.exe",
-                r"C:\Program Files\WinRAR\Rar.exe",
-                "rar",
-                "winrar",
-            ]
-
-            winrar_exe = None
-            for path in winrar_paths:
-                if path in ["rar", "winrar"]:
-                    try:
-                        result = subprocess.run([path, "--version"], capture_output=True, creationflags=_NO_WINDOW)
-                        if result.returncode == 0 or result.returncode == 1:
-                            winrar_exe = path
-                            break
-                    except Exception:
-                        continue
-                elif os.path.exists(path):
-                    winrar_exe = path
-                    break
-
-            if not winrar_exe:
-                QMessageBox.warning(
-                    self,
-                    self.translate_text("Information"),
-                    self.translate_text("WinRAR not found for ZIP splitting.\nInstallation required for splitting."),
-                )
+            sevenzip = self._find_sevenzip()
+            if not sevenzip:
                 return False
 
-            print(f"[DEBUG] WinRAR found: {winrar_exe}")
-
-            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt", encoding="utf-8") as f:
-                for file_path in files_to_compress:
-                    if os.path.exists(file_path):
-                        escaped_path = file_path.replace('"', '\\"')
-                        f.write(f'"{escaped_path}"\n')
-                list_file = f.name
-
-            print(f"[DEBUG] List file created: {list_file}")
+            list_file = self._write_archive_list(files_to_compress)
 
             try:
-                compression_map = {
-                    self.translate_text("Normal"): "-m3",
-                    self.translate_text("Haute compression"): "-m5",
-                    self.translate_text("Compression maximale"): "-m5 -md128M",
-                }
+                cmd = [sevenzip, "a"]
 
-                compression_args = compression_map.get(compression_level, "-m3")
+                cmd.append(self._sevenzip_level_args(compression_level, "zip"))
 
-                cmd = [winrar_exe, "a"]
-
-                cmd.append(compression_args)
-
-                cmd.append("-afzip")
+                cmd.append("-tzip")
 
                 cmd.append(f"-v{split_size_mb}M")
                 print(f"[DEBUG] Splitting enabled: {split_size_mb}MB per part")
 
                 if password:
                     cmd.append(f"-p{password}")
-                    cmd.append("-hp")
-                    print("[DEBUG] Using password with header encryption")
-                else:
-                    print("[DEBUG] No password, no encryption options")
+                    cmd.append("-mem=AES256")
+                    print("[DEBUG] Using password with AES-256 encryption")
 
-                cmd.append("-ep1")
-                cmd.append("-idq")
-                cmd.append("-r")
+                cmd.append("-y")
 
                 cmd.append(base_archive_path)
                 cmd.append(f"@{list_file}")
 
-                print(f"[DEBUG] WinRAR command for split ZIP: {' '.join(cmd)}")
+                print(f"[DEBUG] 7-Zip command for split ZIP: {' '.join(cmd)}")
 
                 result = subprocess.run(cmd, capture_output=True, text=True, creationflags=_NO_WINDOW)
 
@@ -239,23 +233,18 @@ class ArchiveEnginesMixin:
 
                     parts_created = []
 
-                    if os.path.exists(base_archive_path):
-                        parts_created.append(Path(base_archive_path))
+                    pattern_zip_num = f"{base_stem}.zip.*"
+                    zip_num_parts = sorted(base_dir.glob(pattern_zip_num))
+                    if zip_num_parts:
+                        parts_created.extend(zip_num_parts)
 
                     pattern_z = f"{base_stem}.z*"
                     z_parts = sorted(base_dir.glob(pattern_z))
                     if z_parts:
                         parts_created.extend(z_parts)
 
-                    pattern_zip_num = f"{base_stem}.zip.*"
-                    zip_num_parts = sorted(base_dir.glob(pattern_zip_num))
-                    if zip_num_parts:
-                        parts_created.extend(zip_num_parts)
-
-                    pattern_part = f"{base_stem}.part*.zip"
-                    part_parts = sorted(base_dir.glob(pattern_part))
-                    if part_parts:
-                        parts_created.extend(part_parts)
+                    if os.path.exists(base_archive_path):
+                        parts_created.append(Path(base_archive_path))
 
                     parts_created = sorted(set(parts_created))
 
@@ -266,15 +255,10 @@ class ArchiveEnginesMixin:
                             print(f"[DEBUG] Part: {part.name} - {size_mb:.1f}MB")
                         return True
                     else:
-                        if os.path.exists(base_archive_path):
-                            size_mb = os.path.getsize(base_archive_path) / (1024 * 1024)
-                            print(f"[DEBUG] Single ZIP archive created: {base_archive_path} - {size_mb:.1f}MB")
-                            return True
-                        else:
-                            print("[ERROR] No archive created")
-                            return False
+                        print("[ERROR] No archive created")
+                        return False
                 else:
-                    print(f"[ERROR] WinRAR error (code {result.returncode}):")
+                    print(f"[ERROR] 7-Zip error (code {result.returncode}):")
                     print(f"[ERROR] stdout: {result.stdout}")
                     print(f"[ERROR] stderr: {result.stderr}")
 
@@ -303,7 +287,7 @@ class ArchiveEnginesMixin:
                     return False
 
             except Exception as e:
-                print(f"[ERROR] Exception creating split ZIP with WinRAR: {e}")
+                print(f"[ERROR] Exception creating split ZIP with 7-Zip: {e}")
 
                 try:
                     if os.path.exists(list_file):
@@ -404,10 +388,12 @@ class ArchiveEnginesMixin:
     def get_archive_extension(self, archive_format):
         extensions = {
             "ZIP": "zip",
+            "7Z": "7z",
             "RAR": "rar",
             "TAR.GZ": "tar.gz",
             "TAR": "tar",
             self.translate_text("ZIP"): "zip",
+            self.translate_text("7Z"): "7z",
             self.translate_text("TAR.GZ"): "tar.gz",
             self.translate_text("TAR"): "tar",
             self.translate_text("RAR"): "rar",
@@ -489,69 +475,23 @@ class ArchiveEnginesMixin:
             print(f"[ERROR] Error creating ZIP: {e}")
             return False
 
-    def create_rar_archive(self, archive_path, files_to_compress, compression_level, password, split_size=0):
+    def create_7z_archive(self, archive_path, files_to_compress, compression_level, password, split_size=0):
         try:
-            print(f"[DEBUG] Creating RAR: {archive_path}")
+            print(f"[DEBUG] Creating 7Z: {archive_path}")
             print(f"[DEBUG] Split size: {split_size}MB")
 
-            winrar_paths = [
-                r"C:\Program Files\WinRAR\WinRAR.exe",
-                r"C:\Program Files (x86)\WinRAR\WinRAR.exe",
-                r"C:\Program Files\WinRAR\Rar.exe",
-                "rar",
-                "winrar",
-            ]
-
-            winrar_exe = None
-            for path in winrar_paths:
-                if path in ["rar", "winrar"]:
-                    try:
-                        result = subprocess.run([path, "--version"], capture_output=True, creationflags=_NO_WINDOW)
-                        if result.returncode == 0 or result.returncode == 1:
-                            winrar_exe = path
-                            break
-                    except Exception:
-                        continue
-                elif os.path.exists(path):
-                    winrar_exe = path
-                    break
-
-            if not winrar_exe:
-                QMessageBox.warning(
-                    self,
-                    self.translate_text("Information"),
-                    self.translate_text(
-                        "WinRAR not found. Installation required:\n"
-                        "1. Download WinRAR from win-rar.com\n"
-                        "2. Install it\n"
-                        "3. Add WinRAR to PATH or restart the application"
-                    ),
-                )
+            sevenzip = self._find_sevenzip()
+            if not sevenzip:
                 return False
 
-            print(f"[DEBUG] WinRAR found: {winrar_exe}")
-
-            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt", encoding="utf-8") as f:
-                for file_path in files_to_compress:
-                    if os.path.exists(file_path):
-                        escaped_path = file_path.replace('"', '\\"')
-                        f.write(f'"{escaped_path}"\n')
-                list_file = f.name
-
-            print(f"[DEBUG] List file created: {list_file}")
+            list_file = self._write_archive_list(files_to_compress)
 
             try:
-                compression_map = {
-                    self.translate_text("Normal"): "-m3",
-                    self.translate_text("Haute compression"): "-m5",
-                    self.translate_text("Compression maximale"): "-m5 -md128M",
-                }
+                cmd = [sevenzip, "a"]
 
-                compression_args = compression_map.get(compression_level, "-m3")
+                cmd.append(self._sevenzip_level_args(compression_level, "7z"))
 
-                cmd = [winrar_exe, "a"]
-
-                cmd.append(compression_args)
+                cmd.append("-t7z")
 
                 if split_size > 0:
                     cmd.append(f"-v{split_size}M")
@@ -559,18 +499,17 @@ class ArchiveEnginesMixin:
 
                 if password:
                     cmd.append(f"-p{password}")
-                    cmd.append("-hp")
+                    cmd.append("-mhe=on")
                     print("[DEBUG] Using password with header encryption")
                 else:
                     cmd.append("-p-")
 
-                cmd.append("-ep1")
-                cmd.append("-idq")
+                cmd.append("-y")
 
                 cmd.append(archive_path)
                 cmd.append(f"@{list_file}")
 
-                print(f"[DEBUG] WinRAR command: {' '.join(cmd)}")
+                print(f"[DEBUG] 7-Zip command: {' '.join(cmd)}")
 
                 result = subprocess.run(cmd, capture_output=True, text=True, creationflags=_NO_WINDOW)
 
@@ -580,22 +519,21 @@ class ArchiveEnginesMixin:
                     pass
 
                 if result.returncode == 0:
-                    print(f"[DEBUG] RAR archive successfully created: {archive_path}")
+                    print(f"[DEBUG] 7Z archive successfully created: {archive_path}")
 
                     if split_size > 0:
                         base_name = Path(archive_path).stem
                         base_dir = Path(archive_path).parent
-                        parts = list(base_dir.glob(f"{base_name}.part*.rar"))
+                        parts = list(base_dir.glob(f"{base_name}.7z.*"))
                         if parts:
                             print(f"[DEBUG] Split archive created: {len(parts)} parts")
                             return True
+                        elif os.path.exists(archive_path):
+                            print(f"[DEBUG] Single archive created: {archive_path}")
+                            return True
                         else:
-                            if os.path.exists(archive_path):
-                                print(f"[DEBUG] Single archive created: {archive_path}")
-                                return True
-                            else:
-                                print("[ERROR] No archive created")
-                                return False
+                            print("[ERROR] No archive created")
+                            return False
                     else:
                         if os.path.exists(archive_path):
                             print(f"[DEBUG] Single archive created: {archive_path}")
@@ -604,7 +542,7 @@ class ArchiveEnginesMixin:
                             print("[ERROR] Archive not created")
                             return False
                 else:
-                    print(f"[ERROR] WinRAR error (code {result.returncode}):")
+                    print(f"[ERROR] 7-Zip error (code {result.returncode}):")
                     print(f"[ERROR] stdout: {result.stdout}")
                     print(f"[ERROR] stderr: {result.stderr}")
 
@@ -614,7 +552,7 @@ class ArchiveEnginesMixin:
                         if split_size > 0:
                             base_name = Path(archive_path).stem
                             base_dir = Path(archive_path).parent
-                            for part in base_dir.glob(f"{base_name}.part*.rar"):
+                            for part in base_dir.glob(f"{base_name}.7z.*"):
                                 try:
                                     os.remove(part)
                                 except Exception:
@@ -625,7 +563,7 @@ class ArchiveEnginesMixin:
                     return False
 
             except Exception as e:
-                print(f"[ERROR] Exception creating RAR: {e}")
+                print(f"[ERROR] Exception creating 7Z: {e}")
 
                 try:
                     if os.path.exists(list_file):
@@ -636,7 +574,141 @@ class ArchiveEnginesMixin:
                 return False
 
         except Exception as e:
-            print(f"[ERROR] General error creating RAR: {e}")
+            print(f"[ERROR] General error creating 7Z: {e}")
+            return False
+
+    def create_structured_7z_archive(
+        self, archive_path, folders, additional_files, compression_level, password, split_size
+    ):
+        try:
+            print(f"[DEBUG] Creating structured 7Z: {archive_path}")
+
+            sevenzip = self._find_sevenzip()
+            if not sevenzip:
+                return False
+
+            os.makedirs(os.path.dirname(archive_path), exist_ok=True)
+
+            list_file = None
+            with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".txt", encoding="utf-8") as f:
+                for folder in folders:
+                    escaped_path = folder.replace('"', '\\"')
+                    f.write(f'"{escaped_path}"\n')
+                for file_path in additional_files:
+                    if os.path.exists(file_path):
+                        escaped_path = file_path.replace('"', '\\"')
+                        f.write(f'"{escaped_path}"\n')
+                list_file = f.name
+
+            try:
+                cmd = [sevenzip, "a"]
+
+                cmd.append(self._sevenzip_level_args(compression_level, "7z"))
+
+                cmd.append("-t7z")
+
+                if split_size > 0:
+                    cmd.append(f"-v{split_size}M")
+                    print(f"[DEBUG] Splitting enabled: {split_size}MB per part")
+
+                if password:
+                    cmd.append(f"-p{password}")
+                    cmd.append("-mhe=on")
+                    print("[DEBUG] Using password with header encryption")
+
+                cmd.append("-y")
+
+                cmd.append(archive_path)
+                cmd.append(f"@{list_file}")
+
+                print(f"[DEBUG] 7-Zip command for structured archive: {' '.join(cmd)}")
+
+                result = subprocess.run(cmd, capture_output=True, text=True, creationflags=_NO_WINDOW)
+
+                try:
+                    os.unlink(list_file)
+                except Exception:
+                    pass
+
+                if result.returncode == 0:
+                    print(f"[SUCCESS] Structured 7Z archive created: {archive_path}")
+                    return True
+                else:
+                    print(f"[ERROR] 7-Zip error (code {result.returncode}):")
+                    print(f"[ERROR] stdout: {result.stdout}")
+                    print(f"[ERROR] stderr: {result.stderr}")
+                    return False
+
+            except Exception as e:
+                print(f"[ERROR] Exception creating structured 7Z: {e}")
+
+                try:
+                    if list_file and os.path.exists(list_file):
+                        os.unlink(list_file)
+                except Exception:
+                    pass
+
+                return False
+
+        except Exception as e:
+            print(f"[ERROR] Error creating structured 7Z: {e}")
+            import traceback
+
+            traceback.print_exc()
+            return False
+
+    def process_compression(
+        self, files, output_dir, archive_name, archive_format, compression_level, password, delete_originals, split_size
+    ):
+        try:
+            extension = self.get_archive_extension(archive_format)
+            archive_path = os.path.join(output_dir, f"{archive_name}.{extension}")
+
+            counter = 1
+            base_name = Path(archive_path).stem
+            while os.path.exists(archive_path):
+                archive_path = os.path.join(output_dir, f"{base_name}_{counter}.{extension}")
+                counter += 1
+
+            print(f"[DEBUG] Final archive: {archive_path}")
+
+            if archive_format in ["ZIP", self.translate_text("ZIP")]:
+                if split_size and split_size > 0:
+                    success = self.create_split_zip_archive(
+                        archive_path, files, compression_level, password, split_size
+                    )
+                else:
+                    success = self.create_zip_archive(archive_path, files, compression_level, password)
+            elif archive_format in ["7Z", self.translate_text("7Z"), "RAR", self.translate_text("RAR")]:
+                success = self.create_7z_archive(archive_path, files, compression_level, password, split_size)
+            elif archive_format in ["TAR.GZ", self.translate_text("TAR.GZ"), "TAR", self.translate_text("TAR")]:
+                success = self.create_tar_archive(archive_path, files, archive_format, compression_level)
+            else:
+                success = self.create_zip_archive(archive_path, files, compression_level, password)
+
+            if success and delete_originals:
+                deleted_count = 0
+                for item in files:
+                    try:
+                        if os.path.exists(item):
+                            if os.path.isdir(item):
+                                shutil.rmtree(item)
+                            else:
+                                os.remove(item)
+                            deleted_count += 1
+                    except Exception as e:
+                        print(f"[ERROR] Cannot delete {item}: {e}")
+
+                if deleted_count > 0:
+                    self.status_bar.showMessage(self.translate_text("org_el_del").format(deleted_count))
+
+            return success
+
+        except Exception as e:
+            print(f"[ERROR] Error processing compression: {e}")
+            import traceback
+
+            traceback.print_exc()
             return False
 
     def create_tar_archive(self, archive_path, files_to_compress, archive_format, compression_level):

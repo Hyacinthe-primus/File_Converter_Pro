@@ -1,4 +1,4 @@
-"""CompressionMixin — File compression (ZIP, RAR, TAR) methods."""
+"""CompressionMixin — File compression (ZIP, 7Z, TAR) methods."""
 
 import os
 import shutil
@@ -24,7 +24,7 @@ _NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDO
 
 
 class CompressionMixin(ArchiveEnginesMixin):
-    """Mixin: file compression (ZIP, RAR, TAR) for FileConverterApp."""
+    """Mixin: file compression (ZIP, 7Z, TAR) for FileConverterApp."""
 
     def compress_files(self):
         if not (hasattr(self, "active_templates") and "compression" in self.active_templates):
@@ -128,7 +128,8 @@ class CompressionMixin(ArchiveEnginesMixin):
             tpl = self.active_templates["compression"]
             _fmt_map = {
                 "ZIP": self.translate_text("ZIP"),
-                "RAR": self.translate_text("RAR"),
+                "RAR": self.translate_text("7Z"),
+                "7Z": self.translate_text("7Z"),
                 "TAR.GZ": self.translate_text("TAR.GZ"),
                 "TAR": self.translate_text("TAR"),
             }
@@ -252,7 +253,7 @@ class CompressionMixin(ArchiveEnginesMixin):
                     return
 
         archive_format = archive_format.lower()
-        norm_map = {"tar.gz": "gz", "tar": "tar", "zip": "zip", "rar": "rar"}
+        norm_map = {"tar.gz": "gz", "tar": "tar", "zip": "zip", "7z": "7z", "rar": "rar"}
         fmt_to_record = norm_map.get(archive_format, archive_format)
         self.achievement_system.mark_format_as_used(fmt_to_record)
         archive_format = settings["format"]
@@ -413,8 +414,8 @@ class CompressionMixin(ArchiveEnginesMixin):
                 success = self.create_structured_zip_archive(
                     archive_path, folders, additional_files, compression_level, password, split_size
                 )
-            elif archive_format in ["RAR", self.translate_text("RAR")]:
-                success = self.create_structured_rar_archive(
+            elif archive_format in ["7Z", self.translate_text("7Z"), "RAR", self.translate_text("RAR")]:
+                success = self.create_structured_7z_archive(
                     archive_path, folders, additional_files, compression_level, password, split_size
                 )
             else:

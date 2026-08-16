@@ -1321,7 +1321,7 @@ class AchievementSystem(QObject):
 
         file_format = file_format.lower().strip().replace(".", "")
 
-        valid_formats = ["pdf", "docx", "jpg", "jpeg", "png", "zip", "rar", "tar", "gz"]
+        valid_formats = ["pdf", "docx", "jpg", "jpeg", "png", "zip", "rar", "7z", "tar", "gz"]
 
         if file_format not in valid_formats:
             print(f"[ACHIEVEMENTS] Format ignored (invalid): {file_format}")
@@ -1898,8 +1898,8 @@ class AchievementSystem(QObject):
             f"[ACHIEVEMENTS] Recording archive protection: {count}, Pwd len: {password_length}, Format: {archive_format}"  # noqa: E501
         )
 
-        # Only process ZIP and RAR for "Impenetrable Fortress"
-        if archive_format.lower() in ["zip", "rar"]:
+        # Only process ZIP, RAR and 7Z for "Impenetrable Fortress"
+        if archive_format.lower() in ["zip", "rar", "7z"]:
             if password_length >= 12:
                 self.increment_stat("batch_protect_complex_count", count)
 

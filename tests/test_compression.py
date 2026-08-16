@@ -78,6 +78,13 @@ class TestArchiveExtension:
         m.translate_text = lambda x: x
         assert m.get_archive_extension("ZIP") == "zip"
 
+    def test_7z_extension(self):
+        from app.mixins.compression import CompressionMixin
+
+        m = CompressionMixin()
+        m.translate_text = lambda x: x
+        assert m.get_archive_extension("7Z") == "7z"
+
     def test_rar_extension(self):
         from app.mixins.compression import CompressionMixin
 
@@ -113,16 +120,16 @@ class TestFindSplitArchiveParts:
         parts = mixin.find_split_archive_parts(archive, "ZIP")
         assert len(parts) >= 1
 
-    def test_find_rar_parts(self, tmp_dir):
+    def test_find_7z_parts(self, tmp_dir):
         from app.mixins.compression import CompressionMixin
 
         mixin = CompressionMixin()
         mixin.translate_text = lambda x: x
 
-        archive = os.path.join(tmp_dir, "test.rar")
+        archive = os.path.join(tmp_dir, "test.7z")
         with open(archive, "w") as f:
             f.write("fake")
-        parts = mixin.find_split_archive_parts(archive, "RAR")
+        parts = mixin.find_split_archive_parts(archive, "7Z")
         assert len(parts) >= 1
 
 
