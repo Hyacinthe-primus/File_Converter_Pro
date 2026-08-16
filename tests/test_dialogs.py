@@ -5,6 +5,46 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import pytest
+
+
+class TestCompressionDialogSizing:
+    """Regression: the dialog used to open shorter than its own layout minimum,
+    which made Windows clamp the geometry and Qt log 'Unable to set geometry'."""
+
+    @pytest.fixture(autouse=True)
+    def _qapp(self):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+
+        self._app = QApplication.instance() or QApplication([])
+        yield
+        self._app.processEvents()
+
+    def test_initial_size_meets_layout_minimum(self):
+        from dialogs import CompressionDialog
+
+        dlg = CompressionDialog(None, "fr")
+        min_size = dlg.layout().minimumSize()
+        assert dlg.width() >= min_size.width()
+        assert dlg.height() >= min_size.height()
+
+    def test_shown_size_meets_layout_minimum_for_all_formats(self):
+        from PySide6.QtWidgets import QDialog
+
+        from dialogs import CompressionDialog
+
+        dlg = CompressionDialog(None, "fr")
+        dlg.show()
+        self._app.processEvents()
+        for fmt in ["ZIP", "7Z", "TAR.GZ", "TAR"]:
+            dlg.format_combo.setCurrentText(fmt)
+            self._app.processEvents()
+            min_size = dlg.layout().minimumSize()
+            assert dlg.width() >= min_size.width(), f"below minimum for {fmt}"
+            assert dlg.height() >= min_size.height(), f"below minimum for {fmt}"
+        dlg.done(QDialog.Accepted)
+
 
 class TestCompressionDialog:
     def test_import(self):

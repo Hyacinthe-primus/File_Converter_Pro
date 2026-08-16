@@ -330,6 +330,7 @@ class BatchMixin:
                 new_files_list.append(old_path)
 
         self.files_list = new_files_list
+        self._sync_active_tab_state()
         self.files_list_widget.clear()
         for idx, file_path in enumerate(self.files_list, 1):
             icon = self.get_file_icon(file_path)

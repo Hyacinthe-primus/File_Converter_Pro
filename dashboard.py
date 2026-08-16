@@ -34,6 +34,7 @@ from PySide6.QtWidgets import (
     QGraphicsDropShadowEffect,
     QGraphicsOpacityEffect,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -542,7 +543,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         t = QTableWidget()
         t.setColumnCount(len(headers))
         t.setHorizontalHeaderLabels(headers)
-        t.horizontalHeader().setStretchLastSection(True)
+        t.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         t.setAlternatingRowColors(True)
         t.setShowGrid(False)
         t.verticalHeader().setVisible(False)

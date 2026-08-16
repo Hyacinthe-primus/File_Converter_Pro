@@ -246,9 +246,9 @@ class HistoryDialog(TranslationMixin, QDialog):
         hh.setSectionResizeMode(2, QHeaderView.Fixed)
         self.history_table.setColumnWidth(2, 160)  # Source file
         hh.setSectionResizeMode(3, QHeaderView.Fixed)
-        self.history_table.setColumnWidth(3, 110)  # Src format
+        self.history_table.setColumnWidth(3, 160)  # Src format
         hh.setSectionResizeMode(4, QHeaderView.Fixed)
-        self.history_table.setColumnWidth(4, 160)  # Target file
+        self.history_table.setColumnWidth(4, 110)  # Target file
         hh.setSectionResizeMode(5, QHeaderView.Fixed)
         self.history_table.setColumnWidth(5, 110)  # Tgt format
         hh.setSectionResizeMode(6, QHeaderView.Fixed)

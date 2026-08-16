@@ -82,6 +82,8 @@ class AppLogicMixin(
         self.files_list = []
         self.current_project = None
         self._project_data = {}
+        self._project_tabs = []
+        self._active_tab = None
         self.preview_dialog = None
         self.temp_files = []
 

@@ -29,7 +29,7 @@
 
 File Converter Pro is a **free, fully offline Windows desktop application** that converts documents, images, audio, and video, all from one polished tool, without a browser or uploading your files anywhere.
 
-Built with Python and PySide6. Animated startup, system-aware dark/light theme, statistics dashboard, gamified achievements, multi-language support. Lightweight: ~270 MB as an exe, ~125 MB from source.
+Built with Python and PySide6. Animated startup, system-aware dark/light theme, statistics dashboard, gamified achievements, multi-language support. Lightweight: ~275 MB as an exe, ~125 MB from source.
 
 Core philosophy: **ship nothing until it runs perfectly on a clean machine, with zero preinstalled dependencies.**
 

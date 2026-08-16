@@ -14,17 +14,22 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidgetItem,
+    QMenu,
     QMessageBox,
     QPushButton,
     QTextEdit,
     QVBoxLayout,
+    QWidget,
 )
 
 from qss_helpers import _apply_dialog_btn
+from widgets import ProjectTabButton
 
 
 class ProjectManagementMixin:
     """Mixin: project file management for FileConverterApp."""
+
+    MAX_PROJECT_TABS = 5
 
     def _update_project_label(self):
         lbl = getattr(self, "project_name_lbl", None)
@@ -44,6 +49,193 @@ class ProjectManagementMixin:
             lbl.setVisible(True)
         else:
             lbl.setVisible(False)
+
+    def _active_tab_state(self):
+        return self._active_tab
+
+    def _tab_label(self, name):
+        return f"🗁  {name}"
+
+    def _on_tab_clicked(self, state):
+        if state is self._active_tab:
+            self.edit_project_info()
+        else:
+            self._switch_project_tab(state)
+
+    def _on_tab_double_clicked(self, state):
+        if state is not self._active_tab:
+            self._switch_project_tab(state)
+        self.edit_project_info()
+
+    def _show_tab_context_menu(self, state, global_pos):
+        menu = QMenu(self)
+        act_info = menu.addAction(self.translate_text("Informations du projet"))
+        act_close = menu.addAction(self.translate_text("Fermer l'onglet"))
+        chosen = menu.exec(global_pos)
+        if chosen is act_info:
+            if state is not self._active_tab:
+                self._switch_project_tab(state)
+            self.edit_project_info()
+        elif chosen is act_close:
+            self._close_project_tab(state)
+
+    def _add_project_tab(self, files_list=None, current_project=None, project_data=None):
+        if len(self._project_tabs) >= self.MAX_PROJECT_TABS:
+            QMessageBox.warning(
+                self,
+                self.translate_text("Limite de projets"),
+                self.translate_text("project_tabs_limit"),
+            )
+            return None
+
+        name = (project_data or {}).get("name") or self.translate_text("Nouveau projet")
+        container = QWidget()
+        container.setObjectName("ProjectTab")
+        lay = QHBoxLayout(container)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(2)
+
+        btn = ProjectTabButton(self._tab_label(name))
+        btn.setObjectName("ProjectTabBtn")
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setMaximumWidth(170)
+        lay.addWidget(btn)
+
+        close_btn = QPushButton("✕")
+        close_btn.setObjectName("ProjectTabClose")
+        close_btn.setFixedSize(18, 18)
+        close_btn.setCursor(Qt.PointingHandCursor)
+        lay.addWidget(close_btn)
+
+        state = {
+            "files_list": files_list if files_list is not None else [],
+            "current_project": current_project,
+            "project_data": project_data,
+            "widget": container,
+        }
+
+        btn.clicked.connect(lambda checked=False, s=state: self._on_tab_clicked(s))
+        btn.double_clicked.connect(lambda s=state: self._on_tab_double_clicked(s))
+        close_btn.clicked.connect(lambda checked=False, s=state: self._close_project_tab(s))
+
+        btn.setContextMenuPolicy(Qt.CustomContextMenu)
+        btn.customContextMenuRequested.connect(
+            lambda pos, s=state: self._show_tab_context_menu(s, btn.mapToGlobal(pos))
+        )
+        container.setContextMenuPolicy(Qt.CustomContextMenu)
+        container.customContextMenuRequested.connect(
+            lambda pos, s=state: self._show_tab_context_menu(s, container.mapToGlobal(pos))
+        )
+
+        self._project_tabs.append(state)
+        self._active_tab = state
+        self.project_tab_layout.addWidget(container)
+        self._refresh_tab_bar()
+        return state
+
+    def _ensure_project_tab(self):
+        return self._add_project_tab()
+
+    def _repopulate_files_list(self):
+        self.files_list_widget.clear()
+        for idx, file in enumerate(self.files_list, 1):
+            icon = self.get_file_icon(file)
+            display_name = Path(file).name
+            if isinstance(icon, QIcon):
+                item = QListWidgetItem(f"{idx}. {display_name}")
+                item.setIcon(icon)
+            else:
+                item = QListWidgetItem(f"{idx}. {icon} {display_name}")
+            item.setData(Qt.UserRole, file)
+            item.setData(Qt.UserRole + 1, "file")
+            item.setToolTip(file)
+            if os.path.isfile(file):
+                item.setData(Qt.UserRole + 4, self.format_size(os.path.getsize(file)))
+            self.files_list_widget.addItem(item)
+            self._attach_preview_btn(item, file)
+
+    def _load_tab_state(self, state):
+        if state is None:
+            return
+        self.files_list = state["files_list"]
+        self.current_project = state["current_project"]
+        self._project_data = state["project_data"]
+        self._repopulate_files_list()
+
+    def _sync_active_tab_state(self):
+        if self._active_tab is None:
+            return
+        self._active_tab["files_list"] = self.files_list
+        self._active_tab["current_project"] = self.current_project
+        self._active_tab["project_data"] = self._project_data
+
+    def _switch_project_tab(self, state):
+        if state is None or state is self._active_tab:
+            return
+        self._active_tab = state
+        self._load_tab_state(state)
+        self._update_project_label()
+        self.update_file_counter()
+        self._refresh_tab_bar()
+
+    def _close_project_tab(self, state):
+        if state not in self._project_tabs:
+            return
+        was_active = state is self._active_tab
+        idx = self._project_tabs.index(state)
+        self._project_tabs.remove(state)
+        container = state["widget"]
+        self.project_tab_layout.removeWidget(container)
+        container.setParent(None)
+        container.deleteLater()
+
+        if was_active:
+            if self._project_tabs:
+                self._active_tab = self._project_tabs[max(0, idx - 1)]
+                self._load_tab_state(self._active_tab)
+            else:
+                self._active_tab = None
+                self.files_list = []
+                self.current_project = None
+                self._project_data = {}
+                self.files_list_widget.clear()
+
+        self._update_project_label()
+        self.update_file_counter()
+        self._refresh_tab_bar()
+
+    def _refresh_tab_bar(self):
+        bar = getattr(self, "project_tab_bar", None)
+        if bar is None:
+            return
+        for state in self._project_tabs:
+            name = (state["project_data"] or {}).get("name") or self.translate_text("Nouveau projet")
+            container = state["widget"]
+            btn = container.findChild(ProjectTabButton, "ProjectTabBtn")
+            if btn is None:
+                continue
+            btn.setText(self._tab_label(name))
+            active = state is self._active_tab
+            for w in (btn, container):
+                w.setProperty("active", active)
+                w.style().unpolish(w)
+                w.style().polish(w)
+            tip = state["current_project"] or ""
+            if tip:
+                btn.setToolTip(tip)
+            else:
+                btn.setToolTip(self.translate_text("Cliquez pour renommer / ajouter des notes"))
+        bar.setVisible(bool(self._project_tabs))
+        if self._project_tabs:
+            lbl = getattr(self, "project_name_lbl", None)
+            if lbl is not None:
+                lbl.setVisible(False)
+
+    def _update_tab_title(self):
+        self._refresh_tab_bar()
+
+    def _refresh_all_tab_titles(self):
+        self._refresh_tab_bar()
 
     def edit_project_info(self):
         if not self._project_data:
@@ -106,6 +298,7 @@ class ProjectManagementMixin:
             self._project_data["name"] = new_name
             self._project_data["notes"] = new_notes
             self._update_project_label()
+            self._update_tab_title()
             if self.current_project:
                 self._save_project_to(self.current_project)
 
@@ -113,7 +306,25 @@ class ProjectManagementMixin:
         if self.current_project and os.path.exists(self.current_project):
             self.open_project_file(self.current_project)
 
+    def _find_tab_for_project(self, file_path):
+        norm = os.path.normcase(os.path.normpath(str(file_path)))
+        for state in self._project_tabs:
+            cur = state.get("current_project")
+            if cur and os.path.normcase(os.path.normpath(str(cur))) == norm:
+                return state
+        return None
+
     def open_project_file(self, file_path):
+        existing_tab = self._find_tab_for_project(file_path)
+        if existing_tab is not None:
+            if existing_tab is not self._active_tab:
+                self._switch_project_tab(existing_tab)
+            QMessageBox.information(
+                self,
+                self.translate_text("Projet déjà ouvert"),
+                self.translate_text("project_already_open"),
+            )
+            return
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 raw = f.read().strip()
@@ -122,12 +333,11 @@ class ProjectManagementMixin:
                 data = json.loads(raw)
                 file_entries = data.get("files", [])
                 all_paths = [e["path"] if isinstance(e, dict) else e for e in file_entries]
-                self._project_data = data
-                self._project_data["modified_at"] = datetime.now().isoformat(timespec="seconds")
+                data["modified_at"] = datetime.now().isoformat(timespec="seconds")
             else:
                 all_paths = [line for line in raw.splitlines() if line.strip()]
                 now = datetime.now().isoformat(timespec="seconds")
-                self._project_data = {
+                data = {
                     "version": 1,
                     "name": Path(file_path).stem,
                     "notes": "",
@@ -142,30 +352,19 @@ class ProjectManagementMixin:
             existing_files = [p for p in all_paths if os.path.exists(p)]
             missing_count = len(all_paths) - len(existing_files)
 
+            if self._ensure_project_tab() is None:
+                return
+
             self.files_list = existing_files
-            self.files_list_widget.clear()
-
-            for idx, file in enumerate(existing_files, 1):
-                icon = self.get_file_icon(file)
-                display_name = Path(file).name
-                if isinstance(icon, QIcon):
-                    item = QListWidgetItem(f"{idx}. {display_name}")
-                    item.setIcon(icon)
-                else:
-                    item = QListWidgetItem(f"{idx}. {icon} {display_name}")
-                item.setData(Qt.UserRole, file)
-                item.setData(Qt.UserRole + 1, "file")
-                item.setToolTip(file)
-                if os.path.isfile(file):
-                    item.setData(Qt.UserRole + 4, self.format_size(os.path.getsize(file)))
-                self.files_list_widget.addItem(item)
-                self._attach_preview_btn(item, file)
-
+            self._repopulate_files_list()
             self.current_project = file_path
+            self._project_data = data
+            self._sync_active_tab_state()
             self._update_project_label()
             self.update_file_counter()
+            self._update_tab_title()
 
-            proj_name = self._project_data.get("name", Path(file_path).stem)
+            proj_name = data.get("name", Path(file_path).stem)
             self.status_bar.showMessage(
                 self.translate_text("project_opened_status").format(proj_name=proj_name, n=len(existing_files))
             )
@@ -183,16 +382,6 @@ class ProjectManagementMixin:
             )
 
     def new_project(self):
-        if self.files_list:
-            reply = QMessageBox.question(
-                self,
-                self.translate_text("Nouveau Projet"),
-                self.translate_text("Voulez-vous créer un nouveau projet ? Les fichiers actuels seront effacés."),
-                QMessageBox.Yes | QMessageBox.No,
-            )
-            if reply != QMessageBox.Yes:
-                return
-
         d = QDialog(self)
         d.setWindowTitle(self.translate_text("Nouveau projet"))
         d.setMinimumWidth(360)
@@ -231,27 +420,32 @@ class ProjectManagementMixin:
         btn_row.addWidget(btn_ok)
         lay.addLayout(btn_row)
 
+        if d.exec() != QDialog.Accepted:
+            return
+
+        proj_name = name_input.text().strip() or self.translate_text("Nouveau projet")
+        proj_notes = notes_input.toPlainText().strip()
         now = datetime.now().isoformat(timespec="seconds")
-        proj_name = self.translate_text("Nouveau projet")
-        proj_notes = ""
 
-        if d.exec() == QDialog.Accepted:
-            proj_name = name_input.text().strip() or self.translate_text("Nouveau projet")
-            proj_notes = notes_input.toPlainText().strip()
+        tab = self._add_project_tab(
+            files_list=[],
+            current_project=None,
+            project_data={
+                "version": 1,
+                "name": proj_name,
+                "notes": proj_notes,
+                "created_at": now,
+                "modified_at": now,
+                "files": [],
+            },
+        )
+        if tab is None:
+            return
 
-        self.files_list.clear()
-        self.files_list_widget.clear()
-        self.current_project = None
-        self._project_data = {
-            "version": 1,
-            "name": proj_name,
-            "notes": proj_notes,
-            "created_at": now,
-            "modified_at": now,
-            "files": [],
-        }
+        self._load_tab_state(tab)
         self._update_project_label()
         self.update_file_counter()
+        self._update_tab_title()
         self.status_bar.showMessage(
             self.translate_text("Nouveau projet créé") + ":" + f" {proj_name}" if proj_name else ""
         )
@@ -320,6 +514,8 @@ class ProjectManagementMixin:
             self._project_data = data
             self.current_project = file_path
             self._update_project_label()
+            self._sync_active_tab_state()
+            self._update_tab_title()
             self.config["last_project"] = file_path
             self.config_manager.save_config(self.config)
             self.status_bar.showMessage(self.translate_text(f"Projet sauvegardé : {data['name']}"))

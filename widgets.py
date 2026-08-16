@@ -18,9 +18,9 @@ Classes:
 
 import os
 
-from PySide6.QtCore import Property, QEasingCurve, QPointF, QPropertyAnimation, QRect, QSize, Qt, QTimer
+from PySide6.QtCore import Property, QEasingCurve, QPointF, QPropertyAnimation, QRect, QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QDragEnterEvent, QDropEvent, QLinearGradient, QPainter, QPen
-from PySide6.QtWidgets import QCheckBox, QListWidget, QStyle, QStyledItemDelegate
+from PySide6.QtWidgets import QCheckBox, QListWidget, QPushButton, QStyle, QStyledItemDelegate
 
 
 class AnimatedCheckBox(QCheckBox):
@@ -318,6 +318,17 @@ class FileSizeDelegate(QStyledItemDelegate):
     def sizeHint(self, option, index):
         sh = super().sizeHint(option, index)
         return QSize(sh.width(), max(sh.height(), 28))
+
+
+class ProjectTabButton(QPushButton):
+    """Tab-style button for the project tab bar in the top bar.
+    Emits *double_clicked* so the app can offer rename on double-click."""
+
+    double_clicked = Signal()
+
+    def mouseDoubleClickEvent(self, event):
+        self.double_clicked.emit()
+        super().mouseDoubleClickEvent(event)
 
 
 class DraggableListWidget(QListWidget):

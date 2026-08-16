@@ -404,6 +404,47 @@ QLabel#ProjectNameLabel:hover {
     border-color: rgba(0,0,0,0.14);
 }
 
+QWidget#ProjectTabBar {
+    background: transparent;
+}
+QWidget#ProjectTab {
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    background: #f6f8fa;
+}
+QWidget#ProjectTab[active="true"] {
+    border-color: #0969da;
+    background: #ffffff;
+}
+QWidget#ProjectTab QPushButton#ProjectTabBtn {
+    border: none;
+    background: transparent;
+    color: #57606a;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+QPushButton#ProjectTabBtn:hover {
+    background: rgba(9,105,218,0.08);
+    color: #1f2328;
+}
+QPushButton#ProjectTabBtn[active="true"] {
+    color: #1f2328;
+}
+QPushButton#ProjectTabClose {
+    border: none;
+    background: transparent;
+    color: #57606a;
+    border-radius: 4px;
+    font-size: 11px;
+    padding: 0;
+}
+QPushButton#ProjectTabClose:hover {
+    background: rgba(207,34,46,0.15);
+    color: #cf222e;
+}
+
 QLabel#LogoLabel {
     font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
     font-size: 16px; font-weight: 900;

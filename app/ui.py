@@ -793,6 +793,14 @@ class AppUIMixin(
         title_lbl.setObjectName("TitleLabel")
         topbar_layout.addWidget(title_lbl)
 
+        self.project_tab_bar = QWidget()
+        self.project_tab_bar.setObjectName("ProjectTabBar")
+        self.project_tab_bar.setVisible(False)
+        self.project_tab_layout = QHBoxLayout(self.project_tab_bar)
+        self.project_tab_layout.setContentsMargins(0, 0, 0, 0)
+        self.project_tab_layout.setSpacing(4)
+        topbar_layout.addWidget(self.project_tab_bar)
+
         self.project_name_lbl = QLabel()
         self.project_name_lbl.setObjectName("ProjectNameLabel")
         self.project_name_lbl.setVisible(False)

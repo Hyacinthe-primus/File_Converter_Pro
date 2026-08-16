@@ -88,6 +88,7 @@ class ThemeLanguageMixin:
     def update_texts(self):
         self.setWindowTitle("File Converter Pro - Professional File Converter")
         self.update_file_counter()
+        self._refresh_all_tab_titles()
         self.status_bar.showMessage(self.translate_text("Prêt - Sélectionnez des fichiers pour commencer"))
 
         for widget in self.findChildren(QGroupBox):

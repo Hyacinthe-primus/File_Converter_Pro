@@ -28,7 +28,6 @@ DEFAULT_CONFIG: dict = {
     "auto_open_last_project": False,
     "conversion_quality": "standard",
     "default_output_folder": None,
-    "enable_notifications": True,
     "compression_level": "normal",
     "accepted_terms": False,
     "accepted_privacy": False,

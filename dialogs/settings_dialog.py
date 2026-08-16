@@ -146,9 +146,6 @@ class SettingsDialog(TranslationMixin, QDialog):
         )
         self.auto_open_checkbox.setChecked(self.config.get("auto_open_last_project", False))
 
-        self.notifications_checkbox = AnimatedCheckBox(self.translate_text("Activer les notifications"))
-        self.notifications_checkbox.setChecked(self.config.get("enable_notifications", True))
-
         self.system_notifications_checkbox = AnimatedCheckBox(self.translate_text("Activer les notifications système"))
         self.system_notifications_checkbox.setChecked(self.config.get("enable_system_notifications", True))
 
@@ -167,7 +164,6 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.separate_image_pdfs_checkbox.setChecked(self.config.get("separate_image_pdfs", False))
 
         interface_layout.addRow(self.auto_open_checkbox)
-        interface_layout.addRow(self.notifications_checkbox)
         interface_layout.addRow(self.system_notifications_checkbox)
         interface_layout.addRow(self.achievements_checkbox)
         interface_layout.addRow(self.show_previews_checkbox)
@@ -221,12 +217,12 @@ class SettingsDialog(TranslationMixin, QDialog):
 
         self.icon_layer_combo = QComboBox()
         self.icon_layer_combo.addItem(self.translate_text("Multi-calque"), "multi")
-        self.icon_layer_combo.addItem("256 x 256", "256")
-        self.icon_layer_combo.addItem("128 x 128", "128")
-        self.icon_layer_combo.addItem("64 x 64", "64")
-        self.icon_layer_combo.addItem("48 x 48", "48")
-        self.icon_layer_combo.addItem("32 x 32", "32")
-        self.icon_layer_combo.addItem("16 x 16", "16")
+        self.icon_layer_combo.addItem("256x256", "256")
+        self.icon_layer_combo.addItem("128x128", "128")
+        self.icon_layer_combo.addItem("64x64", "64")
+        self.icon_layer_combo.addItem("48x48", "48")
+        self.icon_layer_combo.addItem("32x32", "32")
+        self.icon_layer_combo.addItem("16x16", "16")
         current_icon_layer = self.config.get("image_to_icon_layer", "multi")
         for idx in range(self.icon_layer_combo.count()):
             if self.icon_layer_combo.itemData(idx) == current_icon_layer:
@@ -1201,7 +1197,6 @@ class SettingsDialog(TranslationMixin, QDialog):
 
     def restore_defaults(self):
         self.auto_open_checkbox.setChecked(False)
-        self.notifications_checkbox.setChecked(True)
         self.system_notifications_checkbox.setChecked(True)
         self.show_previews_checkbox.setChecked(True)
         self.show_dashboard_checkbox.setChecked(True)
@@ -1443,7 +1438,6 @@ class SettingsDialog(TranslationMixin, QDialog):
         mode_map = {0: "with_images", 1: "text_only", 2: "text_with_image_text"}
         return {
             "auto_open_last_project": self.auto_open_checkbox.isChecked(),
-            "enable_notifications": self.notifications_checkbox.isChecked(),
             "enable_system_notifications": self.system_notifications_checkbox.isChecked(),
             "achievements_enabled": self.achievements_checkbox.isChecked(),
             "show_file_previews": self.show_previews_checkbox.isChecked(),
