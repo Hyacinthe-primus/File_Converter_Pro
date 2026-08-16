@@ -1,10 +1,7 @@
 """Tests for external_binaries config fallback resolution."""
 
 import os
-import sys
 import tempfile
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 
@@ -110,6 +107,7 @@ def test_configured_missing_path_returns_none(tmp_path):
         eb._reset_cache()
 
 
+@pytest.mark.skipif(os.name != "nt", reason="config uses Windows backslash relative paths")
 def test_relative_path_resolved_against_app_root(tmp_path):
     app_root = tmp_path / "app_root"
     fake = app_root / "fake_dir" / "gs.exe"
@@ -136,7 +134,7 @@ def test_env_var_expansion_in_path(tmp_path):
     fake.write_bytes(b"MZ")
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setenv("FCP_TEST_EB", str(tmp_path))
-    conf = _write_conf("[binaries]\nffmpeg = %FCP_TEST_EB%\\bin\\ffmpeg.exe\n")
+    conf = _write_conf(f"[binaries]\nffmpeg = %FCP_TEST_EB%{os.sep}bin{os.sep}ffmpeg.exe\n")
     monkeypatch.setenv("FCP_EXTERNAL_BINARIES_CONF", conf)
     eb._reset_cache()
     try:

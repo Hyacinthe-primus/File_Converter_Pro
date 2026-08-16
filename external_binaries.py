@@ -307,7 +307,7 @@ def get_configured_binary(name: str) -> str | None:
     if not raw:
         return None
 
-    expanded = os.path.expandvars(os.path.expanduser(raw))
+    expanded = _expand_percent_vars(os.path.expandvars(os.path.expanduser(raw)))
     if not os.path.isabs(expanded):
         folder = get_config_folder()
         if folder:
