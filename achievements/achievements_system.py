@@ -122,7 +122,7 @@ class AchievementSystem(QObject):
             self.achievements_data = {
                 "sound_groups": {
                     "trophy_progression": {
-                        "sfx": "trophy_progression.wav",
+                        "sfx": "trophy_progression.ogg",
                         "achievements": [
                             "apprentice",
                             "steel_warrior",
@@ -134,23 +134,23 @@ class AchievementSystem(QObject):
                         ],
                     },
                     "ultimate_tier": {
-                        "sfx": "ultimate_epic.wav",
+                        "sfx": "ultimate_epic.ogg",
                         "achievements": ["file_industrial", "file_god", "eternal_loyalty", "absolute_perfection"],
                     },
                     "security_sounds": {
-                        "sfx": "security_lock.wav",
+                        "sfx": "security_lock.ogg",
                         "achievements": ["data_guardian", "impenetrable_fortress", "master_key"],
                     },
                     "compression_sounds": {
-                        "sfx": "compress_zip.wav",
+                        "sfx": "compress_zip.ogg",
                         "achievements": ["titanic_compressor", "royal_archivist"],
                     },
                     "pdf_tools_sounds": {
-                        "sfx": "pdf_action.wav",
+                        "sfx": "pdf_action.ogg",
                         "achievements": ["division_blade", "eternal_librarian"],
                     },
                     "legendary_sounds": {
-                        "sfx": "legendary_unlock.wav",
+                        "sfx": "legendary_unlock.ogg",
                         "achievements": [
                             "dragon_breath",
                             "division_blade",
@@ -160,7 +160,7 @@ class AchievementSystem(QObject):
                         ],
                     },
                     "conversion_sounds": {
-                        "sfx": "conversion_done.wav",
+                        "sfx": "conversion_done.ogg",
                         "achievements": [
                             "visual_alchemist",
                             "processing_king",
@@ -178,7 +178,7 @@ class AchievementSystem(QObject):
                         ],
                     },
                     "technical_sounds": {
-                        "sfx": "tech_achievement.wav",
+                        "sfx": "tech_achievement.ogg",
                         "achievements": [
                             "all_seeing_eye",
                             "visionary",
@@ -194,13 +194,13 @@ class AchievementSystem(QObject):
                         ],
                     },
                     "fun_sounds": {
-                        "sfx": "fun_unlock.wav",
+                        "sfx": "fun_unlock.ogg",
                         "achievements": ["night_owl", "flash_gordon", "adv_heic_hunter"],
                     },
                     "unique_sounds": {
-                        "first_adventure": "first_step.wav",
-                        "night_knight": "dark_mode.wav",
-                        "cosmic_orb": "cosmic_unlock.wav",
+                        "first_adventure": "first_step.ogg",
+                        "night_knight": "dark_mode.ogg",
+                        "cosmic_orb": "cosmic_unlock.ogg",
                     },
                 },
                 "achievements": {},
@@ -1634,7 +1634,7 @@ class AchievementSystem(QObject):
             "name": fr_name,  # FR key = translation key
             "icon": f"{rank_key}.png",
             "color": color,
-            "sound": f"{rank_key}.wav",
+            "sound": f"{rank_key}.ogg",
         }
 
     def check_all_achievements_unlocked(self):
@@ -1665,11 +1665,11 @@ class AchievementSystem(QObject):
                     if achievement_id in group_data.get("achievements", []):
                         return group_data["sfx"]
 
-            return "trophy_progression.wav"
+            return "trophy_progression.ogg"
 
         except Exception as e:
             print(f"Error retrieving achievement sound: {e}")
-            return "trophy_progression.wav"
+            return "trophy_progression.ogg"
 
     def get_achievement_icon_path(self, icon_name):
         try:
