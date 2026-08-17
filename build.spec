@@ -4,6 +4,8 @@
 block_cipher = None
 import os, shutil, glob
 
+shutil.rmtree(os.path.join('dist', 'FCP'), ignore_errors=True)
+
 def collect_data_files():
     datas = [
         ('icon.ico', '.'),
@@ -73,13 +75,6 @@ def collect_data_files():
     except Exception as e:
         print(f"pdf2docx collect_all failed: {e}")
 
-    try:
-        from PyInstaller.utils.hooks import collect_data_files as _cdf
-        cv2_datas = _cdf("cv2")
-        filtered_datas.extend(cv2_datas)
-    except Exception as e:
-        print(f"cv2 collect failed: {e}")
-
     return filtered_datas
 
 
@@ -89,20 +84,12 @@ try:
 except Exception:
     _pdf2docx_bins, _pdf2docx_hidden = [], []
 
-try:
-    from PyInstaller.utils.hooks import collect_dynamic_libs, collect_data_files as _cdf
-    _cv2_bins = collect_dynamic_libs("cv2")
-    _cv2_hidden = ["cv2"]
-except Exception:
-    _cv2_bins, _cv2_hidden = [], []
-
 SHARED_HIDDEN = [
     'cryptography.hazmat.primitives.kdf.pbkdf2',
     'cryptography.hazmat.primitives.hashes',
     'cryptography.hazmat.backends',
 
     *_pdf2docx_hidden,
-    *_cv2_hidden,
 
     'pdf2docx', 'pdf2docx.main', 'pdf2docx.converter',
     'pdf2docx.common', 'pdf2docx.common.share', 'pdf2docx.common.algorithm',
@@ -167,7 +154,6 @@ SHARED_HIDDEN = [
     'fontTools.misc.encodingTools', 'fontTools.misc.textTools',
     'openpyxl', 'openpyxl.styles', 'openpyxl.utils',
     'pptx', 'pptx.util', 'pptx.enum.shapes', 'pptx.enum.chart',
-    'cv2',
     'lxml', 'lxml.etree', 'lxml._elementpath', 'lxml.html', 'ebooklib',
     'pillow_heif', 'weasyprint',
     'rawpy',
@@ -224,6 +210,8 @@ SHARED_EXCLUDES = [
     'IPython', 'jedi', 'parso', 'prompt_toolkit',
     'zmq', 'tornado', 'ipykernel', 'ipython_genutils',
     'pandas', 'babel',
+    'pythonwin', 'win32ui', 'win32comext',
+    'Crypto', 'pycryptodome',
     'PySide6.QtBluetooth', 'PySide6.QtDBus',
     'PySide6.QtLocation', 'PySide6.QtNfc',
     'PySide6.QtPositioning', 'PySide6.QtRemoteObjects',
@@ -251,7 +239,7 @@ UPX_EXCLUDE = [
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[] + _pdf2docx_bins + _cv2_bins,
+    binaries=[] + _pdf2docx_bins,
     datas=collect_data_files(),
     hiddenimports=SHARED_HIDDEN,
     hookspath=[],
@@ -329,9 +317,31 @@ if os.path.exists(mpl_fonts):
     for f in glob.glob(os.path.join(mpl_fonts, '**', '*.afm'), recursive=True):
         os.remove(f)
 
-old_ffmpeg = os.path.join(dist_dir, 'cv2', 'opencv_videoio_ffmpeg4100_64.dll')
-if os.path.exists(old_ffmpeg):
-    os.remove(old_ffmpeg)
+for orphan_dll in [
+    'Qt6Pdf.dll', 'Qt6Quick.dll', 'Qt6Qml.dll', 'Qt6QmlModels.dll',
+    'Qt6QmlMeta.dll', 'Qt6QmlWorkerScript.dll', 'Qt6VirtualKeyboard.dll',
+]:
+    for dll_path in glob.glob(os.path.join(dist_dir, '**', orphan_dll), recursive=True):
+        os.remove(dll_path)
+
+for libx265 in glob.glob(os.path.join(dist_dir, 'libx265*.dll')):
+    os.remove(libx265)
+
+for plugin_name in [
+    'qdirect2d.dll', 'qicns.dll', 'qminimal.dll', 'qoffscreen.dll',
+    'qtuiotouchplugin.dll',
+]:
+    for plugin in glob.glob(os.path.join(dist_dir, 'PySide6', 'plugins', '**', plugin_name), recursive=True):
+        os.remove(plugin)
+
+allowed_translations = {
+    f'{family}{lang}.qm'
+    for family in ('qtbase_', 'qt_', 'qtmultimedia_')
+    for lang in ('en', 'fr', 'es', 'ar', 'ru', 'ja', 'ko', 'de', 'zh_CN', 'zh_TW', 'pt_BR')
+}
+for qm in glob.glob(os.path.join(dist_dir, 'PySide6', 'translations', '*.qm')):
+    if os.path.basename(qm) not in allowed_translations:
+        os.remove(qm)
 
 automation_dir = os.path.join(DISTPATH, 'FCP', 'automation')
 os.makedirs(automation_dir, exist_ok=True)
