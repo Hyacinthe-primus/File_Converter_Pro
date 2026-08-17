@@ -1294,10 +1294,10 @@ class AchievementsManager(QDialog):
     def play_sound(self, achievement_id):
         """Play the sound associated with an achievement, thread-safe"""
         try:
-            sound_file = "trophy_progression.wav"
+            sound_file = "trophy_progression.ogg"
             sound_groups = {
                 "trophy_progression": {
-                    "sfx": "trophy_progression.wav",
+                    "sfx": "trophy_progression.ogg",
                     "achievements": [
                         "apprentice",
                         "steel_warrior",
@@ -1309,20 +1309,20 @@ class AchievementsManager(QDialog):
                     ],
                 },
                 "ultimate_tier": {
-                    "sfx": "ultimate_epic.wav",
+                    "sfx": "ultimate_epic.ogg",
                     "achievements": ["file_industrial", "file_god", "eternal_loyalty", "absolute_perfection"],
                 },
                 "security_sounds": {
-                    "sfx": "security_lock.wav",
+                    "sfx": "security_lock.ogg",
                     "achievements": ["data_guardian", "impenetrable_fortress", "master_key"],
                 },
                 "compression_sounds": {
-                    "sfx": "compress_zip.wav",
+                    "sfx": "compress_zip.ogg",
                     "achievements": ["titanic_compressor", "royal_archivist"],
                 },
-                "pdf_tools_sounds": {"sfx": "pdf_action.wav", "achievements": ["division_blade", "eternal_librarian"]},
+                "pdf_tools_sounds": {"sfx": "pdf_action.ogg", "achievements": ["division_blade", "eternal_librarian"]},
                 "legendary_sounds": {
-                    "sfx": "legendary_unlock.wav",
+                    "sfx": "legendary_unlock.ogg",
                     "achievements": [
                         "dragon_breath",
                         "division_blade",
@@ -1332,7 +1332,7 @@ class AchievementsManager(QDialog):
                     ],
                 },
                 "conversion_sounds": {
-                    "sfx": "conversion_done.wav",
+                    "sfx": "conversion_done.ogg",
                     "achievements": [
                         "visual_alchemist",
                         "processing_king",
@@ -1350,7 +1350,7 @@ class AchievementsManager(QDialog):
                     ],
                 },
                 "technical_sounds": {
-                    "sfx": "tech_achievement.wav",
+                    "sfx": "tech_achievement.ogg",
                     "achievements": [
                         "all_seeing_eye",
                         "visionary",
@@ -1366,7 +1366,7 @@ class AchievementsManager(QDialog):
                     ],
                 },
                 "fun_sounds": {
-                    "sfx": "fun_unlock.wav",
+                    "sfx": "fun_unlock.ogg",
                     "achievements": [
                         "night_owl",
                         "flash_gordon",
@@ -1374,9 +1374,9 @@ class AchievementsManager(QDialog):
                     ],
                 },
                 "unique_sounds": {
-                    "first_adventure": "first_step.wav",
-                    "night_knight": "dark_mode.wav",
-                    "cosmic_orb": "cosmic_unlock.wav",
+                    "first_adventure": "first_step.ogg",
+                    "night_knight": "dark_mode.ogg",
+                    "cosmic_orb": "cosmic_unlock.ogg",
                 },
             }
 
