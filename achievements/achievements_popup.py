@@ -335,7 +335,7 @@ class AchievementPopup(TranslationMixin, QDialog):
     def play_fallback_sound(self):
         """Play a fallback sound"""
         try:
-            fallback_sounds = ["trophy_progression.wav", "first_step.wav", "conversion_done.wav"]
+            fallback_sounds = ["trophy_progression.ogg", "first_step.ogg", "conversion_done.ogg"]
 
             for sound_file in fallback_sounds:
                 sound_path = self.achievement_system.get_sound_path(sound_file)
