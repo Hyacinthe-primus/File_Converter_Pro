@@ -31,8 +31,11 @@ class MediaConverters:
     def _ffmpeg_convert(self, src: str, dst: str, conversion_type: str) -> bool:
         ffmpeg = self._find_ffmpeg()
         if not ffmpeg:
-            print("[ffmpeg] ffmpeg not found")
-            return False
+            raise RuntimeError(
+                "ffmpeg not found - install it with:\n"
+                "  winget install -e --id Gyan.FFmpeg\n"
+                "Paste the command above in Windows PowerShell."
+            )
 
         ext = Path(dst).suffix.lower().lstrip(".")
 
