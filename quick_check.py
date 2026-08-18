@@ -19,7 +19,7 @@ else:
     BASE_DIR = Path(__file__).parent
 
 CHECKS_CORE = [
-    ("Main executable", "File Converter Pro.exe", "file"),
+    ("Main executable", "FCP.exe", "file"),
     ("icon.ico", "_internal/icon.ico", "file"),
     ("icon.png", "_internal/icon.png", "file"),
     ("base_library.zip", "_internal/base_library.zip", "file"),
