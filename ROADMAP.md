@@ -34,14 +34,40 @@ Example: *"Convert everything in this folder every Monday at 9:00 AM."*
 Monitor a folder and automatically convert any file dropped into it, using a predefined output format and template. Zero interaction required once configured.
 
 ### System Notifications
-
 Windows toast notifications are fully supported for long-running conversions. Users can switch to another app while a batch is running and receive a notification as soon as it completes.
 
 ### Reduced Build Size
-Investigate selective PyInstaller bundling and optional module lazy-loading to bring the compiled size below 300 MB without dropping any features.
+Investigative PyInstaller bundling brought the compiled size from 269 MB to ~219 MB. Orphaned Qt6 DLLs, Pythonwin/MFC, unused crypto libraries, and legacy binaries were removed. SFX sounds were compressed from WAV (16.3 MB) to OGG (2.9 MB), and Qt translations were trimmed to the top 10 world languages.
 
 ### Automated Tests
-Build a test suite covering the conversion engines and fallback chains. Given the size and complexity of the project, automated regression tests would prevent silent breakage when engines or dependencies are updated.
+193 tests covering the conversion engine, fallback chains, architecture invariants (translations, mixins, QSS styling), external binary resolution, and achievements isolation. Shared fixtures are consolidated in `conftest.py`.
+
+### Converter Engine Refactor
+The monolithic converter was split into an engine-based mixin architecture with a centralized dispatch table. Each format (RTF, PPTX, EPUB, HTML, PDF, Office COM) has its own renderer mixin, and a multi-engine fallback chain tries native, LibreOffice, and COM in sequence.
+
+### 7-Zip Replaces WinRAR
+File compression now uses 7-Zip for ZIP splitting and 7Z format support, removing the WinRAR dependency.
+
+### External Binary Resolver
+A centralized lookup chain (system PATH, app-local, common directories, config file) resolves ffmpeg, 7-Zip, and LibreOffice. Users can manually point the app to tool locations via `config/external_binaries.conf`.
+
+### Multi-Project Tabs
+Files can be organized into separate project workspaces within the app, each with its own info dialog. Up to 5 tabs are supported.
+
+### Custom Themes
+A theme manager handles user-created QSS themes. Themes are detected automatically from a `themes/custom_themes/` folder and listed in Settings. The merge order dialog now respects dark/light theme.
+
+### Flagged Language Names
+Language names in the selector now display their country flag, re-translate when switching languages without restarting, and include all missing translation keys across English, French, Italian, Russian, and Chinese.
+
+### Word to PDF Options
+Image compression and metadata stripping are now available when converting Word documents to PDF.
+
+### PDF Optimization for Scanned PDFs
+Scanned PDFs are now supported by the optimizer with Ghostscript and native fallbacks.
+
+### Security Policy
+A `SECURITY.md` was added with responsible disclosure guidelines, scope definitions tied to the actual codebase (file parsing, COM automation, external tools), and safe harbor terms.
 
 ---
 
@@ -111,41 +137,6 @@ make the UI of the software more intuitive to use
 
 ### Output Preview
 A quick preview pane showing a thumbnail or first page of the converted output before the user opens it in another app. Particularly useful for image and PDF outputs.
-
-### Custom Themes
-
-File Converter Pro already supports automatic Dark and Light modes driven by the Windows registry. Custom themes would take this further by letting users define their own color schemes through a simple file format — no code changes required, following the same philosophy as the `.lang` translation system.
-
-A `.theme` file (UTF-8 JSON) placed in a `themes/` folder next to the executable would be detected automatically and listed in Settings:
-
-```json
-{
-  "meta": {
-    "name":    "Midnight Blue",
-    "author":  "Your Name",
-    "version": "1.0",
-    "created": "2026-01-01",
-    "base":    "dark"
-  },
-  "colors": {
-    "background":        "#0d1117",
-    "surface":           "#161b22",
-    "surface_alt":       "#21262d",
-    "accent":            "#1f6feb",
-    "accent_hover":      "#388bfd",
-    "text_primary":      "#e6edf3",
-    "text_secondary":    "#8b949e",
-    "border":            "#30363d",
-    "success":           "#3fb950",
-    "warning":           "#d29922",
-    "error":             "#f85149"
-  }
-}
-```
- 
-The `base` field tells the app which built-in stylesheet to use as a fallback for any key not defined in the file — so a theme only needs to override what it changes.
-
-A built-in **Theme Editor** in Settings would let users tweak colors visually with a live preview, then export the result as a `.theme` file they can share.
 
 ### Pinned Formats
 Let users pin their most-used input/output format combinations to the top of the format selector so they don't have to scroll every time.
