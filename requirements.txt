@@ -13,6 +13,7 @@ PyMuPDF==1.26.6
 pypdf==6.9.1
 pdf2docx==0.5.8
 pdfkit==1.0.0
+pikepdf==10.11.0
 reportlab==4.4.4
 
 # Office docs Libraries
