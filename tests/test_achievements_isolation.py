@@ -17,6 +17,7 @@ import os
 import re
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC_DIR = os.path.join(ROOT_DIR, "src")
 
 _ACH_REF = re.compile(r"achievement", re.IGNORECASE)
 _ACH_IMPORT = re.compile(r"^\s*(?:import achievements|from achievements\b)", re.MULTILINE)
@@ -50,7 +51,7 @@ def _read(root, rel):
 
 def test_converter_has_no_achievement_references():
     offending = [
-        rel for rel in _iter_py_files(ROOT_DIR, "converter") if _ACH_REF.search(_read(ROOT_DIR, rel))
+        rel for rel in _iter_py_files(SRC_DIR, "converter") if _ACH_REF.search(_read(SRC_DIR, rel))
     ]
     assert not offending, (
         "converter/ must stay isolated from the gamification layer, "
@@ -60,7 +61,7 @@ def test_converter_has_no_achievement_references():
 
 def test_tasks_has_no_achievement_references():
     offending = [
-        rel for rel in _iter_py_files(ROOT_DIR, "tasks") if _ACH_REF.search(_read(ROOT_DIR, rel))
+        rel for rel in _iter_py_files(SRC_DIR, "tasks") if _ACH_REF.search(_read(SRC_DIR, rel))
     ]
     assert not offending, (
         "tasks/ must stay isolated from the gamification layer, "
@@ -70,15 +71,15 @@ def test_tasks_has_no_achievement_references():
 
 def test_conversion_workers_do_not_import_achievements():
     for rel in ("advanced_conversions.py", "conversion_worker.py"):
-        assert _ACH_IMPORT.search(_read(ROOT_DIR, rel)) is None, (
+        assert _ACH_IMPORT.search(_read(SRC_DIR, rel)) is None, (
             "{} must not import the achievements package (use injection)".format(rel)
         )
 
 
 def test_achievements_package_has_no_reverse_coupling():
     offending = [
-        rel for rel in _iter_py_files(ROOT_DIR, "achievements")
-        if _ISOLATED_IMPORT.search(_read(ROOT_DIR, rel))
+        rel for rel in _iter_py_files(SRC_DIR, "achievements")
+        if _ISOLATED_IMPORT.search(_read(SRC_DIR, rel))
     ]
     assert not offending, (
         "achievements/ must not import converter/, app/ or tasks/: {}".format(offending)
@@ -87,8 +88,8 @@ def test_achievements_package_has_no_reverse_coupling():
 
 def test_achievements_imports_confined_to_app_layer():
     importers = [
-        rel for rel in _iter_py_files(ROOT_DIR)
-        if _ACH_IMPORT.search(_read(ROOT_DIR, rel))
+        rel for rel in _iter_py_files(SRC_DIR)
+        if _ACH_IMPORT.search(_read(SRC_DIR, rel))
     ]
     extra = sorted(set(importers) - _APP_IMPORT_WHITELIST)
     assert not extra, (

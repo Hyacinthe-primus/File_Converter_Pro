@@ -4,8 +4,8 @@ import json
 import os
 import sys
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add src/ to path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
 # Run all widget tests offscreen so they never open a real window.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")

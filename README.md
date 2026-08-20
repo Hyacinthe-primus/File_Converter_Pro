@@ -1,5 +1,5 @@
 <div align="center">
-<img src="icon.png" alt="File Converter Pro" width="110"/>
+<img src="src/Assets/icon.png" alt="File Converter Pro" width="110"/>
 <h1>File Converter Pro</h1>
 
 <p><em>A free, offline, all-in-one file converter for Windows built to feel premium.</em></p>
@@ -70,7 +70,7 @@ git clone https://github.com/Hyacinthe-primus/File_Converter_Pro.git
 cd File_Converter_Pro
 pip install -r requirements.txt
 pip install -r requirements-dev.txt             # Dev/Build dependencies
-python main.py
+python src/main.py
 ```
 
 > Full developer docs in the **[For Developers](https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/For-Developers)** wiki page.
@@ -103,7 +103,7 @@ See **[CONTRIBUTING.md](CONTRIBUTING.md)** for translations, bug reports, code f
 ## License
 
 Dual licensed: **GPLv3** for open-source use · **Commercial License** for proprietary products.
-See [`LICENSE`](LICENSE/LICENSE.txt) and [COMMERCIAL LICENSE](COMMERCIALLICENSE.md).
+See [`LICENSE`](LICENSE.md) and [COMMERCIAL LICENSE](COMMERCIALLICENSE.md).
 
 © 2026 Prime Enterprises. All rights reserved.
 

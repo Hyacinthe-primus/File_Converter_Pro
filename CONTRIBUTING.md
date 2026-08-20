@@ -98,7 +98,7 @@ For these, **open an issue describing what you want to build and how** before wr
 git clone https://github.com/Hyacinthe-primus/File_Converter_Pro.git
 cd File_Converter_Pro
 pip install -r requirements.txt
-python main.py
+python src/main.py
 ```
 
 See the [Developer section in the Wiki](https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/For-Developers) for build instructions and all CLI flags.

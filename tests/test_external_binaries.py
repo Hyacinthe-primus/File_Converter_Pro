@@ -60,7 +60,8 @@ TEST_CONF = _write_conf("")
 
 def test_config_file_exists_in_repo():
     """The shipped config file exists next to the app."""
-    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "external_binaries.conf")
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    path = os.path.join(repo_root, "src", "config", "external_binaries.conf")
     assert os.path.isfile(path)
 
 

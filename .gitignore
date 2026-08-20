@@ -3,7 +3,7 @@ dist/
 build/
 output/
 Checksum/
-styles/custom_themes
+src/styles/custom_themes
 Wiki/
 
 # Cache files

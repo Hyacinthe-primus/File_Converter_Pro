@@ -19,6 +19,7 @@ import pkgutil
 import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC = os.path.join(ROOT, "src")
 
 EXCLUDED_DIRS = {
     ".git",
@@ -65,8 +66,8 @@ QSS_ALLOWLIST = {
 
 
 def iter_python_files():
-    for entry in sorted(os.listdir(ROOT)):
-        path = os.path.join(ROOT, entry)
+    for entry in sorted(os.listdir(SRC)):
+        path = os.path.join(SRC, entry)
         if os.path.isdir(path):
             if entry in EXCLUDED_DIRS:
                 continue
@@ -100,7 +101,7 @@ def translate_text_literals():
 def load_lang_keys():
     keys = {}
     for f in LANG_FILES:
-        with open(os.path.join(ROOT, f), encoding="utf-8") as fh:
+        with open(os.path.join(SRC, f), encoding="utf-8") as fh:
             data = json.load(fh)
         if isinstance(data, dict) and isinstance(data.get("strings"), dict):
             data = data["strings"]
@@ -145,8 +146,8 @@ def all_styling_text():
     (which also contain f-string / variable stylesheets)."""
     parts = []
     for qss_file in QSS_FILES:
-        parts.append(open(os.path.join(ROOT, qss_file), encoding="utf-8").read())
-    for root, dirs, files in os.walk(os.path.join(ROOT, "styles")):
+        parts.append(open(os.path.join(SRC, qss_file), encoding="utf-8").read())
+    for root, dirs, files in os.walk(os.path.join(SRC, "styles")):
         dirs[:] = [d for d in dirs if d not in ("__pycache__",)]
         for f in files:
             if f.endswith(".qss"):
@@ -159,7 +160,7 @@ def all_styling_text():
 
 class TestTranslationConsistency:
     def test_fr_keys_present_in_all_language_files(self):
-        fr = json.load(open(os.path.join(ROOT, "languages/fr.json"), encoding="utf-8"))
+        fr = json.load(open(os.path.join(SRC, "languages/fr.json"), encoding="utf-8"))
         if isinstance(fr, dict) and isinstance(fr.get("strings"), dict):
             fr = fr["strings"]
         others = {f for f in LANG_FILES if f != "languages/fr.json"}
