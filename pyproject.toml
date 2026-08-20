@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "GNU General Public License v3.0"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Hyacinthe"},
+    {name = "Hyacinthe ft Ivan Magistro Contenta"},
 ]
 
 dependencies = [
