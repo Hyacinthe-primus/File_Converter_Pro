@@ -358,6 +358,8 @@ class FileManagementMixin:
                 border: 1px solid rgba(110,190,255,0.25);
                 border-radius: 5px;
                 font-size: 13px;
+                padding: 0px;
+                font-weight: normal;
             }
             QPushButton:hover { background: rgba(110,190,255,0.30); }
             QPushButton:pressed { background: rgba(110,190,255,0.45); }
