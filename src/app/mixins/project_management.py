@@ -105,6 +105,16 @@ class ProjectManagementMixin:
         close_btn.setObjectName("ProjectTabClose")
         close_btn.setFixedSize(18, 18)
         close_btn.setCursor(Qt.PointingHandCursor)
+        close_btn.setStyleSheet("""
+            QPushButton#ProjectTabClose {
+                padding: 0px;
+                font-weight: normal;
+                background: transparent;
+                border: none;
+                font-size: 13px;
+            }
+            QPushButton#ProjectTabClose:hover { color: #ff6b6b; }
+        """)
         lay.addWidget(close_btn)
 
         state = {
