@@ -3,7 +3,7 @@
 param(
     [string]$IssFile   = "",
     [string]$OutputDir = "Output",
-    [string]$DistDir   = "dist\FCP"
+    [string]$DistDir   = "packaging\dist\FCP"
 )
 
 # This script lives in packaging/. Resolve project root from script location.

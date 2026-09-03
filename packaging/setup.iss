@@ -9,7 +9,7 @@
 #define MyAppURL "https://github.com/Hyacinthe-primus/File-Converter-Pro"
 #define MyAppExeName "FCP.exe"
 #define MyAppId "{{C1E31023-8141-4243-96B2-D3AAC59CAC6F}}"
-#define MyDistDir "..\dist\FCP"
+#define MyDistDir "dist\FCP"
 
 [Setup]
 AppId={#MyAppId}
