@@ -13,18 +13,20 @@ Tables:
 
 import csv
 import json
+import os
 import sqlite3
 from datetime import datetime, timedelta
 
-DEFAULT_DB_PATH = "file_converter_advanced.db"
+from utils import SRC_DIR
+
+DEFAULT_DB_PATH = os.path.join(str(SRC_DIR), "file_converter_advanced.db")
 
 
 class AdvancedDatabaseManager:
     """
     Manages the dedicated SQLite database for advanced conversions.
 
-    Usage
-    -----
+    Usage:
     db = AdvancedDatabaseManager()
     db = AdvancedDatabaseManager("custom/path.db")
     db.add_record(...)
