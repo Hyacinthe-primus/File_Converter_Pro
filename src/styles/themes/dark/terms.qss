@@ -7,6 +7,7 @@ QLabel {
     color: #e0e0e0;
 }
 
+/* tabs */
 QTabWidget::pane {
     border: 1px solid #3a3a3a;
     border-radius: 6px;
@@ -29,8 +30,10 @@ QTabBar::tab:selected {
 }
 QTabBar::tab:hover:!selected {
     background: #4a4a4a;
+    color: #c4b5fd;
 }
 
+/* terms text browser */
 QTextBrowser#TermsTextBrowser {
     background-color: #2d2d2d;
     color: #e0e0e0;
@@ -54,12 +57,11 @@ QTextBrowser#TermsTextBrowser QScrollBar::handle:vertical {
 QTextBrowser#TermsTextBrowser QScrollBar::handle:vertical:hover  { background: #7a8699; }
 QTextBrowser#TermsTextBrowser QScrollBar::handle:vertical:pressed { background: #4dabf7; }
 QTextBrowser#TermsTextBrowser QScrollBar::add-line:vertical,
-QTextBrowser#TermsTextBrowser QScrollBar::sub-line:vertical {
-    height: 0px; border: none; background: none;
-}
+QTextBrowser#TermsTextBrowser QScrollBar::sub-line:vertical { height: 0px; border: none; background: none; }
 QTextBrowser#TermsTextBrowser QScrollBar::add-page:vertical,
 QTextBrowser#TermsTextBrowser QScrollBar::sub-page:vertical { background: transparent; }
 
+/* contact group */
 QGroupBox#ContactGroup {
     font-weight: bold;
     color: #808080;
@@ -79,6 +81,7 @@ QGroupBox#ContactGroup::title {
     font-size: 10px;
 }
 
+/* contact links */
 QTextBrowser#ContactLinks {
     background-color: #202020;
     border: 1px solid #333333;
@@ -97,6 +100,7 @@ QTextBrowser#ContactLinks QScrollBar::handle:vertical {
     border-radius: 4px;
 }
 
+/* terms checkbox */
 QCheckBox#TermsCheckBox {
     color: #e0e0e0;
     font-size: 11px;

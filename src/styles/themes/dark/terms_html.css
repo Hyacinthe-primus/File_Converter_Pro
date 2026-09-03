@@ -7,6 +7,7 @@ body {
     font-size: 11px;
     line-height: 1.5;
 }
+
 h1, h2, h3, h4, h5, h6 {
     color: #ffffff !important;
     border-color: #3498db !important;
@@ -17,10 +18,12 @@ h1 { font-size: 20px; }
 h2 { font-size: 16px; }
 h3 { font-size: 14px; }
 h4 { font-size: 13px; }
+
 p, li, td, th, div, span {
     color: #e0e0e0 !important;
     margin: 8px 0;
 }
+
 a {
     color: #5dade2 !important;
     text-decoration: none;
@@ -29,26 +32,30 @@ a:hover {
     color: #3498db !important;
     text-decoration: underline;
 }
+
 strong, b {
     color: #ffffff !important;
     font-weight: 600;
 }
-em, i {
-    color: #b0b0b0 !important;
-}
+
+em, i { color: #b0b0b0 !important; }
+
 hr {
     border: 0;
-    border-top: 1px solid #3a3a3a !important;
+    border-top: 1px solid rgba(160,140,255,0.12) !important;
     margin: 15px 0;
 }
+
 ul, ol {
     color: #e0e0e0 !important;
     padding-left: 20px;
     margin: 10px 0;
 }
 li { margin-bottom: 5px; }
+
 * { background-color: transparent !important; }
 body, html { background-color: #2d2d2d !important; }
+
 .highlight {
     background-color: #3a3a2d !important;
     padding: 2px 4px;
