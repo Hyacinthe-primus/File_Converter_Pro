@@ -12,6 +12,10 @@ import sqlite3
 import sys
 from datetime import datetime
 
+_SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _SRC_DIR not in sys.path:
+    sys.path.insert(0, _SRC_DIR)
+
 from utils import SRC_DIR, resource_path
 
 _ROOT_DIR = str(SRC_DIR)
