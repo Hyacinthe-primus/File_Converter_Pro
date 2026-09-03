@@ -191,8 +191,8 @@ class AchievementSystem(QObject):
             achievements = {
                 "first_adventure": {
                     "id": "first_adventure",
-                    "name": "Le Début de l'Aventure",
-                    "description": "Réaliser la toute première conversion avec succès",
+                    "name": "The Beginning of the Adventure",
+                    "description": "Complete the very first conversion successfully",
                     "icon": "smiling_smile.png",
                     "category": "progression",
                     "tier": "starter",
@@ -205,8 +205,8 @@ class AchievementSystem(QObject):
                 },
                 "apprentice": {
                     "id": "apprentice",
-                    "name": "L'Apprenti Convertisseur",
-                    "description": "Convertir un total de 100 fichiers",
+                    "name": "The Converting Apprentice",
+                    "description": "Convert a total of 100 files",
                     "icon": "bronze_trophy.png",
                     "category": "progression",
                     "tier": "bronze",
@@ -219,8 +219,8 @@ class AchievementSystem(QObject):
                 },
                 "steel_warrior": {
                     "id": "steel_warrior",
-                    "name": "Le Guerrier d'Acier",
-                    "description": "Convertir un total de 500 fichiers",
+                    "name": "The Steel Warrior",
+                    "description": "Convert a total of 500 files",
                     "icon": "steel_trophy.png",
                     "category": "progression",
                     "tier": "steel",
@@ -233,8 +233,8 @@ class AchievementSystem(QObject):
                 },
                 "format_expert": {
                     "id": "format_expert",
-                    "name": "L'Expert du Format",
-                    "description": "Convertir un total de 1 000 fichiers",
+                    "name": "The Format Expert",
+                    "description": "Convert a total of 1,000 files",
                     "icon": "silver_trophy.png",
                     "category": "progression",
                     "tier": "silver",
@@ -247,8 +247,8 @@ class AchievementSystem(QObject):
                 },
                 "platinum_master": {
                     "id": "platinum_master",
-                    "name": "Le Maître Electrum",
-                    "description": "Convertir un total de 5 000 fichiers",
+                    "name": "The Electrum Master",
+                    "description": "Convert a total of 5,000 files",
                     "icon": "Electrum_trophy.png",
                     "category": "progression",
                     "tier": "platinum_tier",
@@ -261,8 +261,8 @@ class AchievementSystem(QObject):
                 },
                 "file_industrial": {
                     "id": "file_industrial",
-                    "name": "L'Industriel du Fichier",
-                    "description": "Convertir un total de 10 000 fichiers",
+                    "name": "The File Industrialist",
+                    "description": "Convert a total of 10,000 files",
                     "icon": "gold_trophy.png",
                     "category": "progression",
                     "tier": "gold",
@@ -275,8 +275,8 @@ class AchievementSystem(QObject):
                 },
                 "file_god": {
                     "id": "file_god",
-                    "name": "Le Dieu des Fichiers",
-                    "description": "Débloquer absolument tous les autres succès",
+                    "name": "The God of Files",
+                    "description": "Unlock absolutely all other achievements",
                     "icon": "100%_platinium.png",
                     "category": "ultimate",
                     "tier": "platinum",
@@ -289,8 +289,8 @@ class AchievementSystem(QObject):
                 },
                 "titanic_compressor": {
                     "id": "titanic_compressor",
-                    "name": "Le Compresseur Titanique",
-                    "description": "Compresser un total de 100 Go de données cumulées",
+                    "name": "The Titanic Compressor",
+                    "description": "Compress a cumulative total of 100 GB of data",
                     "icon": "Titan's_hammer.png",
                     "category": "compression",
                     "tier": "epic",
@@ -303,8 +303,8 @@ class AchievementSystem(QObject):
                 },
                 "division_blade": {
                     "id": "division_blade",
-                    "name": "La Lame de Division",
-                    "description": "Diviser un PDF contenant plus de 1 000 pages en une seule opération",
+                    "name": "The Division Blade",
+                    "description": "Split a PDF with more than 1,000 pages in a single operation",
                     "icon": "Legendary_sword.png",
                     "category": "pdf_tools",
                     "tier": "legendary",
@@ -317,8 +317,8 @@ class AchievementSystem(QObject):
                 },
                 "visual_alchemist": {
                     "id": "visual_alchemist",
-                    "name": "L'Alchimiste Visuel",
-                    "description": "Convertir 5 000 images (JPG/PNG) en PDF",
+                    "name": "The Visual Alchemist",
+                    "description": "Convert 5,000 images (JPG/PNG) to PDF",
                     "icon": "magic_potion.png",
                     "category": "conversion",
                     "tier": "epic",
@@ -331,8 +331,8 @@ class AchievementSystem(QObject):
                 },
                 "eternal_librarian": {
                     "id": "eternal_librarian",
-                    "name": "Le Bibliothécaire Éternel",
-                    "description": "Fusionner des PDF pour créer un document unique de plus de 500 pages",
+                    "name": "The Eternal Librarian",
+                    "description": "Merge PDFs to create a single document of more than 500 pages",
                     "icon": "Ancient_scroll(papyrus).png",
                     "category": "pdf_tools",
                     "tier": "epic",
@@ -345,8 +345,8 @@ class AchievementSystem(QObject):
                 },
                 "royal_archivist": {
                     "id": "royal_archivist",
-                    "name": "L'Archiviste Royal",
-                    "description": "Créer 500 archives (ZIP, 7Z, TAR) différentes",
+                    "name": "The Royal Archivist",
+                    "description": "Create 500 different archives (ZIP, 7Z, TAR)",
                     "icon": "treasure_chest.png",
                     "category": "compression",
                     "tier": "epic",
@@ -359,8 +359,8 @@ class AchievementSystem(QObject):
                 },
                 "processing_king": {
                     "id": "processing_king",
-                    "name": "Le Roi du Traitement",
-                    "description": "Convertir 2 000 fichiers Word vers PDF (ou inversement)",
+                    "name": "The Processing King",
+                    "description": "Convert 2,000 Word to PDF files (or vice versa)",
                     "icon": "royal_crown.png",
                     "category": "conversion",
                     "tier": "epic",
@@ -373,8 +373,8 @@ class AchievementSystem(QObject):
                 },
                 "data_guardian": {
                     "id": "data_guardian",
-                    "name": "Gardien des Données",
-                    "description": "Protéger 50 fichiers PDF avec un mot de passe",
+                    "name": "Data Guardian",
+                    "description": "Protect 50 PDF files with a password",
                     "icon": "Protector's_shield.png",
                     "category": "security",
                     "tier": "rare",
@@ -387,8 +387,8 @@ class AchievementSystem(QObject):
                 },
                 "impenetrable_fortress": {
                     "id": "impenetrable_fortress",
-                    "name": "La Forteresse Impénétrable",
-                    "description": "Protéger 100 archives avec un mot de passe complexe (12+ caractères)",
+                    "name": "The Impenetrable Fortress",
+                    "description": "Protect 100 archives with a complex password (12+ characters)",
                     "icon": "Sacred_lock.png",
                     "category": "security",
                     "tier": "epic",
@@ -405,8 +405,8 @@ class AchievementSystem(QObject):
                 },
                 "master_key": {
                     "id": "master_key",
-                    "name": "Le Passe-Partout",
-                    "description": "Réussir une conversion sur un fichier protégé (avec bon mot de passe) 50 fois",
+                    "name": "The Master Key",
+                    "description": "Succeed a conversion on a protected file (with the correct password) 50 times",
                     "icon": "golden_key.png",
                     "category": "security",
                     "tier": "rare",
@@ -419,8 +419,8 @@ class AchievementSystem(QObject):
                 },
                 "night_knight": {
                     "id": "night_knight",
-                    "name": "Chevalier de la Nuit",
-                    "description": "Utiliser l'application en Mode Sombre pendant un total de 100 heures",
+                    "name": "Knight of the Night",
+                    "description": "Use the app in Dark Mode for a total of 100 hours",
                     "icon": "silver_shield.png",
                     "category": "usage",
                     "tier": "rare",
@@ -433,8 +433,8 @@ class AchievementSystem(QObject):
                 },
                 "dragon_breath": {
                     "id": "dragon_breath",
-                    "name": "Le Souffle du Dragon",
-                    "description": "Lancer une conversion par lot (Batch) contenant plus de 500 fichiers d'un coup",
+                    "name": "Dragon's Breath",
+                    "description": "Launch a batch conversion containing more than 500 files at once",
                     "icon": "red_dragon.png",
                     "category": "technical",
                     "tier": "legendary",
@@ -447,8 +447,8 @@ class AchievementSystem(QObject):
                 },
                 "all_seeing_eye": {
                     "id": "all_seeing_eye",
-                    "name": "L'Œil Qui Voit Tout",
-                    "description": "Utiliser la fonction OCR sur 1 000 pages au total",
+                    "name": "All-Seeing Eye",
+                    "description": "Use the OCR feature on 1,000 pages in total",
                     "icon": "cyclop.png",
                     "category": "technical",
                     "tier": "epic",
@@ -461,8 +461,8 @@ class AchievementSystem(QObject):
                 },
                 "visionary": {
                     "id": "visionary",
-                    "name": "Le Visionnaire",
-                    "description": "Utiliser la fonction Aperçu (Preview) sur 2 000 fichiers différents",
+                    "name": "The Visionary",
+                    "description": "Use the Preview feature on 2,000 different files",
                     "icon": "clairvoyance_crystal.png",
                     "category": "usage",
                     "tier": "epic",
@@ -475,8 +475,8 @@ class AchievementSystem(QObject):
                 },
                 "universal_traveler": {
                     "id": "universal_traveler",
-                    "name": "Le Voyageur Universel",
-                    "description": "Avoir effectué au moins une conversion vers CHAQUE format de base supporté",
+                    "name": "The Universal Traveler",
+                    "description": "Have performed at least one conversion to EVERY supported base format",
                     "icon": "cosmic_orb.png",
                     "category": "completion",
                     "tier": "epic",
@@ -493,8 +493,8 @@ class AchievementSystem(QObject):
                 },
                 "eternal_loyalty": {
                     "id": "eternal_loyalty",
-                    "name": "Fidélité Éternelle",
-                    "description": "Lancer l'application 365 jours différents (cumulés)",
+                    "name": "Eternal Loyalty",
+                    "description": "Launch the app on 365 different days (cumulative)",
                     "icon": "eternal_diamond.png",
                     "category": "ultimate",
                     "tier": "diamond",
@@ -507,8 +507,8 @@ class AchievementSystem(QObject):
                 },
                 "absolute_perfection": {
                     "id": "absolute_perfection",
-                    "name": "La Perfection Absolue",
-                    "description": "Réaliser une série de 500 conversions consécutives sans aucune erreur ni annulation",  # noqa: E501
+                    "name": "Absolute Perfection",
+                    "description": "Complete a series of 500 consecutive conversions without any error or cancellation",  # noqa: E501
                     "icon": "medal_of_excellence.png",
                     "category": "ultimate",
                     "tier": "legendary",
@@ -521,8 +521,8 @@ class AchievementSystem(QObject):
                 },
                 "night_owl": {
                     "id": "night_owl",
-                    "name": "Le Noctambule",
-                    "description": "Convertir 100 fichiers entre 00h et 06h",
+                    "name": "The Night Owl",
+                    "description": "Convert 100 files between 00:00 and 06:00",
                     "icon": "Night_owl.png",
                     "category": "fun",
                     "tier": "rare",
@@ -540,7 +540,7 @@ class AchievementSystem(QObject):
                 "flash_gordon": {
                     "id": "flash_gordon",
                     "name": "Flash Gordon",
-                    "description": "Convertir 50 fichiers en moins de 5 minutes",
+                    "description": "Convert 50 files in less than 5 minutes",
                     "icon": "Fast_as_lightning.png",
                     "category": "fun",
                     "tier": "rare",
@@ -555,7 +555,7 @@ class AchievementSystem(QObject):
                 "adv_data_architect": {
                     "id": "adv_data_architect",
                     "name": "⚡ Data Architect",
-                    "description": "Réaliser 50 conversions de documents via les Conversions Avancées",
+                    "description": "Complete 50 document conversions via Advanced Conversions",
                     "icon": "blueprint.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -568,8 +568,8 @@ class AchievementSystem(QObject):
                 },
                 "adv_csv_sorcier": {
                     "id": "adv_csv_sorcier",
-                    "name": "⚡ CSV Sorcier",
-                    "description": "Convertir 25 fichiers CSV↔JSON via les Conversions Avancées",
+                    "name": "⚡ CSV Wizard",
+                    "description": "Convert 25 CSV↔JSON files via Advanced Conversions",
                     "icon": "spellbook.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -583,7 +583,7 @@ class AchievementSystem(QObject):
                 "adv_office_slayer": {
                     "id": "adv_office_slayer",
                     "name": "⚡ Office Slayer",
-                    "description": "Convertir 10 XLSX→PDF ET 10 PPTX→PDF via les Conversions Avancées",
+                    "description": "Convert 10 XLSX→PDF AND 10 PPTX→PDF via Advanced Conversions",
                     "icon": "bow_and_arrow.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -597,7 +597,7 @@ class AchievementSystem(QObject):
                 "adv_web_harvester": {
                     "id": "adv_web_harvester",
                     "name": "⚡ Web Harvester",
-                    "description": "Convertir 20 fichiers HTML→PDF via les Conversions Avancées",
+                    "description": "Convert 20 HTML→PDF files via Advanced Conversions",
                     "icon": "spider.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -610,8 +610,8 @@ class AchievementSystem(QObject):
                 },
                 "adv_bibliotheque": {
                     "id": "adv_bibliotheque",
-                    "name": "⚡ Bibliothèque Numérique",
-                    "description": "Convertir 15 fichiers EPUB→PDF via les Conversions Avancées",
+                    "name": "⚡ Digital Library",
+                    "description": "Convert 15 EPUB→PDF files via Advanced Conversions",
                     "icon": "scroll.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -625,7 +625,7 @@ class AchievementSystem(QObject):
                 "adv_icon_forge": {
                     "id": "adv_icon_forge",
                     "name": "⚡ Icon Forge",
-                    "description": "Créer 25 fichiers ICO via les Conversions Avancées",
+                    "description": "Create 25 ICO files via Advanced Conversions",
                     "icon": "anvil.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -638,8 +638,8 @@ class AchievementSystem(QObject):
                 },
                 "adv_format_nomade": {
                     "id": "adv_format_nomade",
-                    "name": "⚡ Format Nomade",
-                    "description": "Avoir utilisé les 13 types de conversion image des Conversions Avancées",
+                    "name": "⚡ Nomadic Format",
+                    "description": "Have used the 13 image conversion types of Advanced Conversions",
                     "icon": "compass.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -653,7 +653,7 @@ class AchievementSystem(QObject):
                 "adv_heic_hunter": {
                     "id": "adv_heic_hunter",
                     "name": "⚡ HEIC Hunter",
-                    "description": "Convertir 20 fichiers HEIC→PNG via les Conversions Avancées",
+                    "description": "Convert 20 HEIC→PNG files via Advanced Conversions",
                     "icon": "telescope.png",
                     "category": "fun",
                     "tier": "advanced",
@@ -667,7 +667,7 @@ class AchievementSystem(QObject):
                 "adv_pixel_perfect": {
                     "id": "adv_pixel_perfect",
                     "name": "⚡ Pixel Perfect",
-                    "description": "Convertir 100 images au total via les Conversions Avancées",
+                    "description": "Convert 100 images in total via Advanced Conversions",
                     "icon": "potions.png",
                     "category": "advanced_conversions",
                     "tier": "epic",
@@ -680,8 +680,8 @@ class AchievementSystem(QObject):
                 },
                 "adv_extracteur_pro": {
                     "id": "adv_extracteur_pro",
-                    "name": "⚡ Extracteur Pro",
-                    "description": "Extraire l'audio de 30 vidéos (VIDEO→MP3) via les Conversions Avancées",
+                    "name": "⚡ Pro Extractor",
+                    "description": "Extract audio from 30 videos (VIDEO→MP3) via Advanced Conversions",
                     "icon": "eagle_shield.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -695,7 +695,7 @@ class AchievementSystem(QObject):
                 "adv_codec_master": {
                     "id": "adv_codec_master",
                     "name": "⚡ Codec Master",
-                    "description": "Avoir utilisé les 9 types de conversion vidéo des Conversions Avancées",
+                    "description": "Have used all 9 video conversion types of Advanced Conversions",
                     "icon": "mechanical_raven.png",
                     "category": "advanced_conversions",
                     "tier": "advanced",
@@ -708,8 +708,8 @@ class AchievementSystem(QObject):
                 },
                 "adv_studio_underground": {
                     "id": "adv_studio_underground",
-                    "name": "⚡ Studio Underground",
-                    "description": "Convertir 75 fichiers audio au total via les Conversions Avancées",
+                    "name": "⚡ Underground Studio",
+                    "description": "Convert 75 audio files in total via Advanced Conversions",
                     "icon": "lyre.png",
                     "category": "advanced_conversions",
                     "tier": "epic",
@@ -723,7 +723,7 @@ class AchievementSystem(QObject):
                 "adv_all_rounder": {
                     "id": "adv_all_rounder",
                     "name": "⚡ All-Rounder",
-                    "description": "Avoir ≥20 conversions réussies dans chacune des 3 catégories (document, image, audio/vidéo) des Conversions Avancées",  # noqa: E501
+                    "description": "Have ≥20 successful conversions in each of the 3 categories (document, image, audio/video) of Advanced Conversions",  # noqa: E501
                     "icon": "scarab.png",
                     "category": "advanced_conversions",
                     "tier": "epic",
@@ -736,8 +736,8 @@ class AchievementSystem(QObject):
                 },
                 "adv_la_machine": {
                     "id": "adv_la_machine",
-                    "name": "⚡ La Machine",
-                    "description": "Réaliser 250 conversions avancées au total",
+                    "name": "⚡ The Machine",
+                    "description": "Complete 250 Advanced Conversions in total",
                     "icon": "gauntlet.png",
                     "category": "advanced_conversions",
                     "tier": "legendary",
@@ -750,8 +750,8 @@ class AchievementSystem(QObject):
                 },
                 "adv_collectionneur": {
                     "id": "adv_collectionneur",
-                    "name": "⚡ Collectionneur Ultime",
-                    "description": "Avoir utilisé CHAQUE type de conversion disponible dans les Conversions Avancées",
+                    "name": "⚡ Ultimate Collector",
+                    "description": "Have used EVERY available conversion type in Advanced Conversions",
                     "icon": "treasure.png",
                     "category": "advanced_conversions",
                     "tier": "legendary",
@@ -765,8 +765,8 @@ class AchievementSystem(QObject):
                 # Templates achievements
                 "tpl_architecte": {
                     "id": "tpl_architecte",
-                    "name": "📋 Architecte de Flux",
-                    "description": "Créer 10 templates au total",
+                    "name": "📋 Flow Architect",
+                    "description": "Create 10 templates in total",
                     "icon": "spinning_wheel.png",
                     "category": "templates",
                     "tier": "rare",
@@ -779,8 +779,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_maitre_presets": {
                     "id": "tpl_maitre_presets",
-                    "name": "📋 Maître des Préréglages",
-                    "description": "Créer 25 templates au total",
+                    "name": "📋 Master of Presets",
+                    "description": "Create 25 templates in total",
                     "icon": "assassin_kit.png",
                     "category": "templates",
                     "tier": "epic",
@@ -793,8 +793,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_reference_absolue": {
                     "id": "tpl_reference_absolue",
-                    "name": "📋 Référence Absolue",
-                    "description": "Avoir 5 templates différents marqués comme défaut simultanément (un par type d'opération)",  # noqa: E501
+                    "name": "📋 Absolute Reference",
+                    "description": "Have 5 different templates marked as default simultaneously (one per operation type)",  # noqa: E501
                     "icon": "tarot_cards.png",
                     "category": "templates",
                     "tier": "epic",
@@ -807,8 +807,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_automatiste": {
                     "id": "tpl_automatiste",
-                    "name": "📋 Automatiste",
-                    "description": "Appliquer des templates 50 fois au total",
+                    "name": "📋 Automator",
+                    "description": "Apply templates 50 times in total",
                     "icon": "hourglass.png",
                     "category": "templates",
                     "tier": "rare",
@@ -821,8 +821,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_le_rituel": {
                     "id": "tpl_le_rituel",
-                    "name": "📋 Le Rituel",
-                    "description": "Appliquer le même template 25 fois",
+                    "name": "📋 The Ritual",
+                    "description": "Apply the same template 25 times",
                     "icon": "skull.png",
                     "category": "templates",
                     "tier": "rare",
@@ -835,8 +835,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_collectionneur_workflows": {
                     "id": "tpl_collectionneur_workflows",
-                    "name": "📋 Collectionneur de Workflows",
-                    "description": "Avoir au moins un template pour chacune des 9 catégories disponibles",
+                    "name": "📋 Workflow Collector",
+                    "description": "Have at least one template for each of the 9 available categories",
                     "icon": "treasure_map.png",
                     "category": "templates",
                     "tier": "epic",
@@ -849,8 +849,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_polyvalent": {
                     "id": "tpl_polyvalent",
-                    "name": "📋 Polyvalent",
-                    "description": "Utiliser 5 types de templates différents en une seule session",
+                    "name": "📋 Versatile",
+                    "description": "Use 5 different template types in a single session",
                     "icon": "mushrooms.png",
                     "category": "templates",
                     "tier": "rare",
@@ -863,8 +863,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_archiviste": {
                     "id": "tpl_archiviste",
-                    "name": "📋 Archiviste de Templates",
-                    "description": "Exporter ses templates au moins une fois",
+                    "name": "📋 Template Archivist",
+                    "description": "Export your templates at least once",
                     "icon": "bear_totem.png",
                     "category": "templates",
                     "tier": "advanced",
@@ -877,8 +877,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_importateur": {
                     "id": "tpl_importateur",
-                    "name": "📋 Importateur",
-                    "description": "Importer un fichier de templates au moins une fois",
+                    "name": "📋 Importer",
+                    "description": "Import a template file at least once",
                     "icon": "ship_wheel.png",
                     "category": "templates",
                     "tier": "advanced",
@@ -891,8 +891,8 @@ class AchievementSystem(QObject):
                 },
                 "tpl_perfectionniste": {
                     "id": "tpl_perfectionniste",
-                    "name": "📋 Perfectionniste",
-                    "description": "Modifier 10 templates existants via Edit",
+                    "name": "📋 Perfectionist",
+                    "description": "Modify 10 existing templates via Edit",
                     "icon": "magic_staff.png",
                     "category": "templates",
                     "tier": "rare",
