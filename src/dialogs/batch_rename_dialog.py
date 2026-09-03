@@ -1,4 +1,4 @@
-"""BatchRenameDialog — Advanced batch rename with template, numbering, case, find/replace."""
+"""BatchRenameDialog - Advanced batch rename with template, numbering, case, find/replace."""
 
 import os
 import re

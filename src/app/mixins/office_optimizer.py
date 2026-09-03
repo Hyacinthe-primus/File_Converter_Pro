@@ -1,4 +1,4 @@
-"""Office document optimization (Word / PowerPoint / Excel)."""
+"""Office document optimization (Word/PowerPoint/Excel)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 class OfficeDocOptimizerMixin:
-    """Word / PowerPoint / Excel optimization methods."""
+    """Word/PowerPoint/Excel optimization methods."""
 
     def optimize_word_file(self, word_path, output_path, compression_level, remove_metadata, compress_images):
         try:

@@ -1,4 +1,4 @@
-"""PdfToWordDialog — Options for PDF to Word conversion mode selection."""
+"""PdfToWordDialog - Options for PDF to Word conversion mode selection."""
 
 from PySide6.QtWidgets import QButtonGroup, QDialog, QDialogButtonBox, QGroupBox, QLabel, QRadioButton, QVBoxLayout
 

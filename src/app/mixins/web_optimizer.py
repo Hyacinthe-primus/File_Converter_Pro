@@ -1,10 +1,10 @@
-"""Web file optimization (JSON / HTML minification)."""
+"""Web file optimization (json/html minification)."""
 
 from __future__ import annotations
 
 
 class WebOptimizerMixin:
-    """JSON/HTML optimization methods."""
+    """json/html optimization methods."""
 
     def optimize_web_file(self, src_path, output_path, file_ext):
         try:

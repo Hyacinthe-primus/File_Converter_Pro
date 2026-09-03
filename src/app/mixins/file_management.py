@@ -1,4 +1,4 @@
-"""FileManagementMixin — File list management methods."""
+"""FileManagementMixin - File list management methods."""
 
 import os
 from datetime import datetime

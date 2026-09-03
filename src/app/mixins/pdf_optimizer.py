@@ -1,10 +1,10 @@
 """PDF optimization strategy.
 
-Tries Ghostscript first (rebuilds the PDF from rendered content — best general
+Tries Ghostscript first (rebuilds the PDF from rendered content - best general
 compression, also recovers files with corrupted xref tables), falls back to PyMuPDF
 (garbage-collection + font subsetting, works fully offline), then pikepdf
 (QPDF-based repair, also fully offline) if PyMuPDF's save doesn't validate.
-A file is never handed back larger than the original — see the final size guard
+A file is never handed back larger than the original, see the final size guard
 in optimize_pdf_file."""
 
 from __future__ import annotations
@@ -104,7 +104,7 @@ class PdfOptimizerMixin:
             return False
 
     def _pikepdf_compress(self, pdf_path, output_path, compression_level):
-        """Offline, pip-only fallback (bundles QPDF statically — no external
+        """Offline, pip-only fallback (bundles QPDF statically - no external
         binary, no download, no PATH/admin concerns). QPDF's repair is
         generally more tolerant of damaged xref tables than MuPDF's, and
         object-stream compaction + stream recompression gets real reduction
@@ -135,10 +135,10 @@ class PdfOptimizerMixin:
 
     def _ghostscript_compress(self, pdf_path, output_path, compression_level):
         """Ghostscript's pdfwrite device rebuilds the PDF from rendered content
-        instead of patching the existing xref table — recovers files MuPDF's
+        instead of patching the existing xref table - recovers files MuPDF's
         repair gives up on, and matches what most online PDF compressors use
         under the hood. Called by absolute path only, resolved by
-        _get_ghostscript_bin() (detection only — see that method). Returns
+        _get_ghostscript_bin() (detection only - see that method). Returns
         False if Ghostscript isn't installed; caller falls back to PyMuPDF.
         """
         gs_bin = self._get_ghostscript_bin()
@@ -219,7 +219,7 @@ class PdfOptimizerMixin:
         return gs
 
     def check_ghostscript_status(self):
-        """Diagnostic helper — call this on its own (e.g. from a settings/about
+        """Diagnostic helper - call this on its own (e.g. from a settings/about
         screen) to know exactly what this app can and can't do, without
         running an actual PDF through it. Returns a dict rather than printing,
         so the caller can show it in the UI. Detection only, no download.
@@ -272,7 +272,7 @@ class PdfOptimizerMixin:
     def _validate_pdf(self, path):
         """Reopen a saved PDF and confirm it's actually readable before trusting it.
 
-        Checks every page, not just the first — corruption from xref surgery
+        Checks every page, not just the first, corruption from xref surgery
         tends to cluster in high object numbers (later pages, embedded fonts,
         images), so a page-0-only check gives false positives on exactly the
         documents most at risk here.

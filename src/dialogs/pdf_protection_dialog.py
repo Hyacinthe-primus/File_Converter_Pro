@@ -1,4 +1,4 @@
-"""PdfProtectionDialog — Dialog for PDF protection options."""
+"""PdfProtectionDialog - Dialog for PDF protection options."""
 
 from PySide6.QtWidgets import (
     QComboBox,

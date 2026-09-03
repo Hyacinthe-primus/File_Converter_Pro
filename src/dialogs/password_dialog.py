@@ -1,4 +1,4 @@
-"""PasswordDialog — Secure password input for PDF protection."""
+"""PasswordDialog - Secure password input for PDF protection."""
 
 from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit
 

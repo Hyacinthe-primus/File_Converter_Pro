@@ -1,4 +1,4 @@
-"""SplitDialog — PDF splitting options (pages, ranges)."""
+"""SplitDialog - PDF splitting options (pages, ranges)."""
 
 from PySide6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QFormLayout, QSpinBox
 

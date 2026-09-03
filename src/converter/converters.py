@@ -3,7 +3,7 @@ Advanced Converter Engine
 converter/converters.py
 
 Routing is driven by a dispatch table (converter/registry.py). Types with
-several engines carry an ordered fallback chain — the first engine that
+several engines carry an ordered fallback chain - the first engine that
 returns success (not False) and writes a non-empty output file wins.
 
   HTML → PDF  : pdfkit/wkhtmltopdf › weasyprint › reportlab

@@ -58,7 +58,7 @@ class PerlinNoise:
     Key improvements over the original:
     • 12-direction gradient table (cube edge midpoints) → less grid-aligned look
     • noise3D(x, y, z): use z=time for seamless, never-cycling animation
-    • fbm(): replaces stacking 4 separate PerlinNoise instances — one call,
+    • fbm(): replaces stacking 4 separate PerlinNoise instances - one call,
       tunable octaves / persistence / lacunarity
     • Isolated RNG (random.Random)
     """

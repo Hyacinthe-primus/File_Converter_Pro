@@ -1,4 +1,4 @@
-"""PdfToWordMixin — PDF → Word/DOCX conversion methods."""
+"""PdfToWordMixin - PDF to DOCX conversion methods."""
 
 import os
 import shutil

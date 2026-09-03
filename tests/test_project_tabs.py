@@ -1,5 +1,5 @@
-"""Tests for multi-project tabs — opening a project adds a tab to the top bar
-(next to "File Converter Pro"), each tab keeps its own file list / project state,
+"""Tests for multi-project tabs - opening a project adds a tab to the top bar
+(next to "File Converter Pro"), each tab keeps its own file list/project state,
 and at most MAX_PROJECT_TABS (5) projects can be open."""
 
 import json

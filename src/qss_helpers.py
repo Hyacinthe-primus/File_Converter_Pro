@@ -1,8 +1,8 @@
 """
 qss_helpers.py
 Helper functions for loading and applying QSS stylesheets.
-    _load_qss(filename, theme=None)  — load from styles/themes/[theme/]filename
-    _apply_dialog_btn(btn, id)       — setObjectName + apply buttons.qss inline
+    _load_qss(filename, theme=None)  - load from styles/themes/[theme/]filename
+    _apply_dialog_btn(btn, id)       - setObjectName + apply buttons.qss inline
 
 Expected structure:
     styles/
@@ -109,13 +109,13 @@ def _apply_dialog_btn(btn, object_name: str) -> None:
     """Assign object_name and apply buttons.qss directly on btn.
 
     QDialog instances are top-level windows: the main-window stylesheet does
-    not cascade into them, so objectName alone is not sufficient — the
+    not cascade into them, so objectName alone is not sufficient, the
     stylesheet must be set explicitly on each button.
 
     Supported object names (defined in styles/themes/[theme/]buttons.qss):
-        BtnOK        — green confirm button
-        BtnCancel    — neutral cancel button
-        BtnCancelRed — red/destructive cancel button
+        BtnOK        - green confirm button
+        BtnCancel    - neutral cancel button
+        BtnCancelRed - red/destructive cancel button
     """
     global _BUTTONS_QSS
     if btn is None:

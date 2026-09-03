@@ -1,4 +1,4 @@
-"""PreviewDialog — Quick file preview (PDF, Images, Word, Text, CSV, JSON, XLSX, HTML, EPUB, Audio, Video)."""
+"""PreviewDialog - Quick file preview (PDF, Images, Word, Text, CSV, JSON, XLSX, HTML, EPUB, Audio, Video)."""
 
 import os
 import tempfile

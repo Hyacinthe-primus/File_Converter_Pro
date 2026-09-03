@@ -1,4 +1,4 @@
-"""BatchConvertDialog — Batch conversion format/quality selection."""
+"""BatchConvertDialog - Batch conversion format/quality selection."""
 
 from PySide6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QFormLayout
 

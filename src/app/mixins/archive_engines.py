@@ -1,4 +1,4 @@
-"""ArchiveEnginesMixin — ZIP, 7Z, TAR archive creation methods."""
+"""ArchiveEnginesMixin - ZIP, 7Z, TAR archive creation methods."""
 
 import os
 import queue

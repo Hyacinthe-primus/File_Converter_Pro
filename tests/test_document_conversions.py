@@ -1,4 +1,4 @@
-"""Tests for document conversions — using mixin methods directly."""
+"""Tests for document conversions - using mixin methods directly."""
 
 import json
 

@@ -1,4 +1,4 @@
-"""MergeOrderDialog — Dialog for choosing merge order."""
+"""MergeOrderDialog - Dialog for choosing merge order."""
 
 import os
 import re

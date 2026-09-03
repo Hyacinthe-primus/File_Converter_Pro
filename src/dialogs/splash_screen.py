@@ -1,4 +1,4 @@
-"""ModernSplashScreen — Animated loading screen with progress steps."""
+"""ModernSplashScreen - Animated loading screen with progress steps."""
 
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QSequentialAnimationGroup, Qt
 from PySide6.QtGui import QIcon

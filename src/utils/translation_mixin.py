@@ -1,4 +1,4 @@
-"""TranslationMixin — shared translate_text for all dialogs and widgets."""
+"""TranslationMixin - shared translate_text for all dialogs and widgets."""
 
 
 class TranslationMixin:

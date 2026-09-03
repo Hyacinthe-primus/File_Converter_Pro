@@ -1,4 +1,4 @@
-"""ThemeLanguageMixin — Theme and language management methods."""
+"""ThemeLanguageMixin - Theme and language management methods."""
 
 import time
 

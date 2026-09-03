@@ -1,7 +1,6 @@
 """Tests for shared utility functions."""
 
 
-
 def test_resource_path():
     """resource_path should return a valid path."""
     from utils import resource_path

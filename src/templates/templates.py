@@ -500,7 +500,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self.delete_btn.setEnabled(True)
 
     def format_config_for_display(self, config, template_type):
-        """Format the configuration for display — comparison uses normalized type (French canonical)."""
+        """Format the configuration for display - comparison uses normalized type (French canonical)."""
         _dark = hasattr(self.parent_window, "dark_mode") and self.parent_window.dark_mode
         if _dark:
             style = (
@@ -968,11 +968,11 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 )
 
     def delete_selected_template(self):
-        """Delete the selected template (single — kept for button compat)"""
+        """Delete the selected template (single - kept for button compat)"""
         self.delete_selected_templates()
 
     def delete_selected_templates(self):
-        """Delete all selected templates — supports multi-selection."""
+        """Delete all selected templates - supports multi-selection."""
         selected_items = self.templates_list.selectedItems()
         if not selected_items:
             return

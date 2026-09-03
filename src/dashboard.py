@@ -80,7 +80,7 @@ def _ensure_matplotlib():
 
 
 def _get_asset_path(relative: str) -> str:
-    """Resolve an asset path — dev mode AND PyInstaller (onedir + onefile)."""
+    """Resolve an asset path dev mode AND PyInstaller (onedir + onefile)."""
     from utils import resource_path
 
     return resource_path(relative).replace("\\", "/")
@@ -723,7 +723,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
     def _on_tab_changed(self, index):
         """Fade the canvas out, redraw, fade back in when entering Charts tab.
-        On the very first visit the chart is already rendered — skip the blink."""
+        On the very first visit the chart is already rendered."""
         if index == 1:
             if not getattr(self, "_charts_tab_visited", False):
                 self._charts_tab_visited = True

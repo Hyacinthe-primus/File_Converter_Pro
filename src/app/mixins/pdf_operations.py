@@ -1,4 +1,4 @@
-"""PdfOperationsMixin — PDF merge, split, protect methods."""
+"""PdfOperationsMixin - PDF merge, split, protect methods."""
 
 import os
 from datetime import datetime

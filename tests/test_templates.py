@@ -1,7 +1,6 @@
 """Tests for template system - TemplateManager CRUD and template dialog imports."""
 
 
-
 class TestTemplateManager:
     def test_import(self):
         from templates.template_manager import TemplateManager

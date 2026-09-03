@@ -1,11 +1,11 @@
-"""OptimizationMixin — office file optimization methods.
+"""OptimizationMixin - office file optimization methods.
 
 Routes files to the right per-format strategy (see optimize_office_files).
 Format-specific logic lives in:
 - pdf_optimizer: PDF (Ghostscript › PyMuPDF › pikepdf)
-- office_optimizer: Word / PowerPoint / Excel
-- media_optimizer: audio / video via ffmpeg
-- web_optimizer: JSON / HTML
+- office_optimizer: Word/PowerPoint/Excel
+- media_optimizer: audio/video via ffmpeg
+- web_optimizer: json/html
 - epub_optimizer: EPUB
 - image_optimizer: images via Pillow
 """

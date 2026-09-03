@@ -1,4 +1,4 @@
-"""TemplateEditorDialog — dialog for editing an existing template."""
+"""TemplateEditorDialog - dialog for editing an existing template."""
 
 from PySide6.QtWidgets import QDialog, QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout
 

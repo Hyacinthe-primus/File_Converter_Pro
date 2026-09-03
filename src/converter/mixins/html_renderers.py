@@ -16,12 +16,12 @@ class HtmlRenderers:
 
     def _html_to_pdf(self, src, dst):
         """
-        HTML → PDF — lightweight strategy stack, PyInstaller-compatible.
+        HTML → PDF - lightweight strategy stack, PyInstaller-compatible.
 
         1. pdfkit    (wkhtmltopdf separate binary, optional)
         2. weasyprint (pip install weasyprint)
-        3. reportlab  — parses HTML manually, never fails, no duplicate content
-           (fitz insert_htmlbox removed — duplicates content on some HTML inputs)
+        3. reportlab  - parses HTML manually, never fails, no duplicate content
+           (fitz insert_htmlbox removed - duplicates content on some HTML inputs)
         """
         src_path = Path(src)
         base_dir = src_path.parent

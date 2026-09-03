@@ -1,4 +1,4 @@
-"""CompressionMixin — File compression (ZIP, 7Z, TAR) methods."""
+"""CompressionMixin - File compression (ZIP, 7Z, TAR) methods."""
 
 import os
 import shutil

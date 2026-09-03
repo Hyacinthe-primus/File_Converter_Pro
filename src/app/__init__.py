@@ -1,10 +1,10 @@
 """
-app/__init__.py — Public API for the app package
+app/__init__.py - Public API for the app package
 File Converter Pro
 
 Exposes:
-    FileConverterApp   — the main application window
-    FadingMainWindow   — FileConverterApp with fade-in animation
+    FileConverterApp   - the main application window
+    FadingMainWindow   - FileConverterApp with fade-in animation
 
 Inheritance chain (MRO):
     AppLogicMixin(OptimizationMixin, ImageToPdfMixin, BatchMixin, ...)

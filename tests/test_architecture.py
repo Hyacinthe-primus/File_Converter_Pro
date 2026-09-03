@@ -1,4 +1,4 @@
-"""Architecture / structural tests.
+"""Architecture/structural tests.
 
 These guard invariants that have repeatedly broken in this codebase:
 

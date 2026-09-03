@@ -1,4 +1,4 @@
-"""WordToPdfMixin — Word/DOCX → PDF conversion methods."""
+"""WordToPdfMixin - DOCX to PDF conversion methods."""
 
 import io
 import os

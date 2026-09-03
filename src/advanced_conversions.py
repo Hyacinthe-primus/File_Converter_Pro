@@ -1,7 +1,7 @@
 """
 Advanced Conversions Dialog
 
-What does it do?
+Features:
     - Provides a dedicated interface for advanced conversion formats
     - Conversions are REAL (not placeholders).
     - File source: items selected in the main window's file list

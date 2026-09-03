@@ -1,5 +1,5 @@
 """Tests for achievements format tracking: 7z seeding, rar removal, and
-the INSERT OR IGNORE / UPDATE marking flow in mark_format_as_used."""
+the INSERT OR IGNORE/UPDATE marking flow in mark_format_as_used."""
 
 import sqlite3
 

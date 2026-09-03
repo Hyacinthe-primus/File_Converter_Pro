@@ -1,4 +1,4 @@
-"""CompressionDialog — Archive settings (ZIP/7Z/TAR, split, encrypt)."""
+"""CompressionDialog - Archive settings (ZIP/7Z/TAR, split, encrypt)."""
 
 import os
 

@@ -1,4 +1,4 @@
-"""Tests for compression workflows — create real ZIP files and verify content."""
+"""Tests for compression workflows - create real ZIP files and verify content."""
 
 import os
 import shutil

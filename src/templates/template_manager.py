@@ -7,7 +7,7 @@ Extracted from templates.py for better code organization.
 Responsibilities:
     - CRUD operations for templates in database
     - Dynamic application of settings based on template type
-    - Import/Export functionality (JSON)
+    - Import/Export functionality
 
 """
 

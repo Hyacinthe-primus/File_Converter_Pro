@@ -1,4 +1,4 @@
-"""Tests for dialog logic — instantiate dialogs with mocked Qt and verify pure methods."""
+"""Tests for dialog logic - instantiate dialogs with mocked Qt and verify pure methods."""
 
 import pytest
 

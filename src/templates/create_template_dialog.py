@@ -1,4 +1,4 @@
-"""CreateTemplateDialog — dialog for creating a new template."""
+"""CreateTemplateDialog - dialog for creating a new template."""
 
 from PySide6.QtWidgets import (
     QComboBox,

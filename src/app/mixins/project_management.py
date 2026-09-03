@@ -1,4 +1,4 @@
-"""ProjectManagementMixin — Project file management methods."""
+"""ProjectManagementMixin - Project file management methods."""
 
 import json
 import os

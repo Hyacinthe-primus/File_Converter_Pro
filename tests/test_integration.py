@@ -1,4 +1,4 @@
-"""Integration tests for file conversions — create real temp files and verify output."""
+"""Integration tests for file conversions - create real temp files and verify output."""
 
 import os
 import shutil

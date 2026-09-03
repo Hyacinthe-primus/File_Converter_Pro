@@ -1,7 +1,6 @@
 """Tests for the translation system."""
 
 
-
 def test_translation_manager_loads_builtin():
     """TranslationManager should load FR and EN from JSON files."""
     from translations import TranslationManager

@@ -1,7 +1,7 @@
 """
 TermsAndPrivacyDialog
 
-Modal dialog for legal acceptance (Terms of Use / Privacy Policy).
+Modal dialog for legal acceptance (Terms of Use/Privacy Policy).
 Extracted from dialogs.py for better code organization.
 
 """

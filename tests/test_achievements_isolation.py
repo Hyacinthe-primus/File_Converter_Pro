@@ -1,11 +1,11 @@
-"""Enforcement tests for Task 3.3 — Achievements Isolation.
+"""Enforcement tests for Task 3.3 - Achievements Isolation.
 
 The gamification layer (achievements/) must stay strictly isolated from the
 conversion engine:
 
   * converter/  and tasks/  never reference achievements.
   * Conversion workers (advanced_conversions.py, conversion_worker.py) use
-    constructor injection and guards — never a direct import.
+    constructor injection and guards, never a direct import.
   * The achievements package never imports converter/, app/ or tasks/.
   * Only the app layer (main.py, app/logic.py, app/ui.py) may import the
     achievements package.

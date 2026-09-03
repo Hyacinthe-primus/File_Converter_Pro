@@ -1,7 +1,6 @@
 """Tests for the converter engine."""
 
 
-
 def test_conversion_result():
     """ConversionResult should store success, source, target."""
     from converter.converters import ConversionResult

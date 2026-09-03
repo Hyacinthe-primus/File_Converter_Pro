@@ -12,7 +12,7 @@ class PdfRenderers:
 
     def _pdf_to_html(self, src, dst):
         """
-        PDF → HTML — self-contained, faithful layout.
+        PDF → HTML - self-contained, faithful layout.
 
         Key improvements:
         - Margins reconstructed from block X positions relative to page width

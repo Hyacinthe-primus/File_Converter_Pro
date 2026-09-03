@@ -1,4 +1,4 @@
-"""ConversionOptionsDialog — Card-based grid for choosing conversion type."""
+"""ConversionOptionsDialog - Card-based grid for choosing conversion type."""
 
 import os
 
