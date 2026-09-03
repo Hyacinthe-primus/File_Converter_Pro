@@ -4,7 +4,7 @@
     "name": "My Language",
     "author": "Your Name",
     "version": "1.0",
-    "created": "2026-03-16",
+    "created": "2026-01-01",
     "description": "Translation for File Converter Pro"
   },
   "strings": {
@@ -20,6 +20,12 @@
     "fichiers sélectionnés": "",
     "Conversion de Fichiers": "",
     "Utiliser OCR pour les images dans les PDF": "",
+    "Génère une couche de texte sélectionnable dans le PDF": "",
+    "Si activé, l'OCR est toujours appliqué lors de la conversion d'images en PDF": "",
+    "Orientation OCR:": "",
+    "Aucune": "",
+    "Automatique": "",
+    "Orientation OCR : aucune, automatique, ou angle manuel": "",
     "PDF vers Word": "",
     "Word vers PDF": "",
     "Images vers PDF": "",
@@ -1169,7 +1175,7 @@
     "Aucune tâche planifiée configurée.": "",
     "Actif": "",
     "Inactif": "",
-    "dropzone_line1": "",
-    "dropzone_line2": ""
+    "dropzone_line1": "██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗\n██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝\n██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗  \n██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝  \n╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗\n ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝",
+    "dropzone_line2": "██████╗ ██████╗  ██████╗ ██████╗     ███████╗██╗██╗     ███████╗███████╗    ██╗  ██╗███████╗██████╗ ███████╗\n██╔══██╗██╔══██╗██╔═══██╗██╔══██╗    ██╔════╝██║██║     ██╔════╝██╔════╝    ██║  ██║██╔════╝██╔══██╗██╔════╝\n██║  ██║██████╔╝██║   ██║██████╔╝    █████╗  ██║██║     █████╗  ███████╗    ███████║█████╗  ██████╔╝█████╗  \n██║  ██║██╔══██╗██║   ██║██╔═══╝     ██╔══╝  ██║██║     ██╔══╝  ╚════██║    ██╔══██║██╔══╝  ██╔══██╗██╔══╝  \n██████╔╝██║  ██║╚██████╔╝██║         ██║     ██║███████╗███████╗███████║    ██║  ██║███████╗██║  ██║███████╗\n╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝         ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝    ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝"
   }
 }

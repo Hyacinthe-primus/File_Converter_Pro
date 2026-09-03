@@ -19,7 +19,7 @@ Classes:
 import os
 
 from PySide6.QtCore import Property, QEasingCurve, QPointF, QPropertyAnimation, QRect, QSize, Qt, QTimer, Signal
-from PySide6.QtGui import QColor, QDragEnterEvent, QDropEvent, QLinearGradient, QPainter, QPen
+from PySide6.QtGui import QColor, QDragEnterEvent, QDropEvent, QFontMetrics, QLinearGradient, QPainter, QPen
 from PySide6.QtWidgets import QCheckBox, QListWidget, QPushButton, QStyle, QStyledItemDelegate
 
 
@@ -40,6 +40,7 @@ class AnimatedCheckBox(QCheckBox):
         self._ripple_progress = 0.0
         self._ripple_active = False
         self._is_dark = False
+        self._word_wrap = False
         self.setFixedHeight(32)
         self.setCursor(Qt.PointingHandCursor)
         self.setMouseTracking(True)
@@ -90,6 +91,16 @@ class AnimatedCheckBox(QCheckBox):
     def setDarkTheme(self, dark: bool):
         self._is_dark = dark
         self.update()
+
+    def setWordWrap(self, wrap: bool):
+        """Wrap the label text onto multiple lines when it overflows its width."""
+        self._word_wrap = wrap
+        if wrap:
+            self.setMinimumHeight(0)
+            self.setMaximumHeight(16777215)
+        else:
+            self.setFixedHeight(32)
+        self.updateGeometry()
 
     def _on_toggled(self, checked):
         self._anim.stop()
@@ -260,13 +271,28 @@ class AnimatedCheckBox(QCheckBox):
             b = int(100 + (130 - 100) * p)
         painter.setPen(QColor(r, g, b))
         fm = painter.fontMetrics()
-        painter.drawText(x, (self.height() + fm.ascent() - fm.descent()) // 2, text)
+        if self._word_wrap:
+            avail_w = max(self.width() - x - 2, 10)
+            rect = QRect(x, 0, avail_w, self.height())
+            painter.drawText(rect, Qt.AlignLeft | Qt.AlignVCenter | Qt.TextWordWrap, text)
+        else:
+            painter.drawText(x, (self.height() + fm.ascent() - fm.descent()) // 2, text)
         painter.restore()
 
     def sizeHint(self):
-        fm = self.fontMetrics()
-        w = 2 + 20 + 10 + fm.horizontalAdvance(self.text()) + 4
-        return QSize(max(w, 120), 32)
+        if not self._word_wrap:
+            fm = self.fontMetrics()
+            w = 2 + 20 + 10 + fm.horizontalAdvance(self.text()) + 4
+            return QSize(max(w, 120), 32)
+        font = self.font()
+        font.setPointSize(10)
+        fm = QFontMetrics(font)
+        full = fm.horizontalAdvance(self.text())
+        text_w = int(min(full, 270))
+        rect = QRect(0, 0, text_w, 10000)
+        height = fm.boundingRect(rect, Qt.TextWordWrap, self.text()).height() + 8
+        width = 2 + 20 + 10 + text_w + 4
+        return QSize(max(width, 120), max(height, 32))
 
 
 class FileSizeDelegate(QStyledItemDelegate):

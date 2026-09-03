@@ -256,12 +256,23 @@ class SettingsDialog(TranslationMixin, QDialog):
         )
         self.auto_save_templates_check.setChecked(self.config.get("auto_save_templates", True))
 
+        self.ocr_orientation_combo = QComboBox()
+        self.ocr_orientation_combo.setEditable(True)
+        self.ocr_orientation_combo.addItem(self.translate_text("Aucune"), "none")
+        self.ocr_orientation_combo.addItem(self.translate_text("Automatique"), "auto")
+        self.ocr_orientation_combo.setInsertPolicy(QComboBox.NoInsert)
+        self._set_ocr_orientation_combo(self.config.get("ocr_orientation", "auto"))
+        self.ocr_orientation_combo.setToolTip(
+            self.translate_text("Orientation OCR : aucune, automatique, ou angle manuel")
+        )
+
         conversion_layout.addRow(self.translate_text("Qualité par défaut:"), self.quality_combo)
         conversion_layout.addRow(self.translate_text("Niveau compression:"), self.compression_level_combo)
         conversion_layout.addRow(self.translate_text("Mode PDF→Word:"), self.pdf_to_word_mode_combo)
         conversion_layout.addRow(self.translate_text("Image → ICO (calques):"), self.icon_layer_combo)
         conversion_layout.addRow(self.translate_text("Dossier de sortie par défaut:"), output_layout)
         conversion_layout.addRow(self.translate_text("Conserver l'historique (jours):"), self.keep_history_days_spin)
+        conversion_layout.addRow(self.translate_text("Orientation OCR:"), self.ocr_orientation_combo)
         conversion_layout.addRow(self.auto_clean_checkbox)
         conversion_layout.addRow(self.backup_checkbox)
         conversion_layout.addRow(self.auto_save_templates_check)
@@ -1210,6 +1221,16 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.auto_save_templates_check.setChecked(True)
         self.separate_image_pdfs_checkbox.setChecked(False)
         self.use_system_theme_checkbox.setChecked(True)
+        self._set_ocr_orientation_combo("auto")
+
+    def _set_ocr_orientation_combo(self, value: str) -> None:
+        """Select the preset matching *value*, or show it as custom text."""
+        for idx in range(self.ocr_orientation_combo.count()):
+            if self.ocr_orientation_combo.itemData(idx) == value:
+                self.ocr_orientation_combo.setCurrentIndex(idx)
+                return
+        self.ocr_orientation_combo.setCurrentIndex(1)
+        self.ocr_orientation_combo.setEditText(str(value))
 
     def _build_automation_tab(self) -> QWidget:
         dark = self._lang_is_dark()
@@ -1453,4 +1474,18 @@ class SettingsDialog(TranslationMixin, QDialog):
             "auto_save_templates": self.auto_save_templates_check.isChecked(),
             "separate_image_pdfs": self.separate_image_pdfs_checkbox.isChecked(),
             "use_system_theme": self.use_system_theme_checkbox.isChecked(),
+            "ocr_orientation": self._ocr_orientation_combo_value(),
         }
+
+    def _ocr_orientation_combo_value(self) -> str:
+        """Return the selected orientation value.
+
+        If the typed text matches a preset's label its data (none/auto) is
+        returned; otherwise the manually entered angle is returned.
+        """
+        text = self.ocr_orientation_combo.currentText().strip()
+        idx = self.ocr_orientation_combo.currentIndex()
+        if 0 <= idx < self.ocr_orientation_combo.count():
+            if text == self.ocr_orientation_combo.itemText(idx):
+                return str(self.ocr_orientation_combo.itemData(idx))
+        return text or "auto"

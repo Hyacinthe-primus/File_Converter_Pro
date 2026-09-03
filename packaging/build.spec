@@ -73,16 +73,33 @@ def collect_data_files():
     except Exception as e:
         print(f"pdf2docx collect_all failed: {e}")
 
+    try:
+        import scanlayer
+        scanlayer_root = os.path.dirname(scanlayer.__file__)
+        fonts_dir = os.path.join(scanlayer_root, 'fonts')
+        if os.path.exists(fonts_dir):
+            filtered_datas.append((fonts_dir, 'scanlayer/fonts'))
+            print("scanlayer font data added")
+    except ImportError:
+        print("scanlayer not installed")
+
     return filtered_datas
 
 
 try:
-    from PyInstaller.utils.hooks import collect_all as _ca
+    from PyInstaller.utils.hooks import collect_all as _ca, collect_submodules as _cs
     _, _pdf2docx_bins, _pdf2docx_hidden = _ca("pdf2docx")
 except Exception:
     _pdf2docx_bins, _pdf2docx_hidden = [], []
 
+try:
+    _rich_hidden = _cs("rich")
+except Exception:
+    _rich_hidden = []
+
 SHARED_HIDDEN = [
+    *_rich_hidden,
+
     'cryptography.hazmat.primitives.kdf.pbkdf2',
     'cryptography.hazmat.primitives.hashes',
     'cryptography.hazmat.backends',
@@ -290,6 +307,13 @@ for d in glob.glob(os.path.join(dist_dir, '*.dist-info')):
     shutil.rmtree(d)
 
 for py in glob.glob(os.path.join(dist_dir, '**', '*.py'), recursive=True):
+    # opencv-python is a package: it needs its Python wrapper files
+    # (__init__.py, config.py, load_config_py3.py, mat_wrapper/, ...) next to
+    # cv2.pyd to be importable. Deleting them breaks `import cv2`, which
+    # scanlayer depends on for OCR. Keep every .py under cv2/.
+    norm = os.path.normpath(py)
+    if os.sep + 'cv2' + os.sep in norm:
+        continue
     os.remove(py)
 
 for pyc in glob.glob(os.path.join(dist_dir, '**', '*.pyc'), recursive=True):
@@ -324,6 +348,10 @@ for orphan_dll in [
 
 for libx265 in glob.glob(os.path.join(dist_dir, 'libx265*.dll')):
     os.remove(libx265)
+
+for ffmpeg_dll in glob.glob(os.path.join(dist_dir, 'cv2', 'opencv_videoio_ffmpeg*.dll')):
+    os.remove(ffmpeg_dll)
+    print(f"Removed unneeded OpenCV video I/O backend: {os.path.basename(ffmpeg_dll)}")
 
 for plugin_name in [
     'qdirect2d.dll', 'qicns.dll', 'qminimal.dll', 'qoffscreen.dll',

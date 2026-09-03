@@ -1,40 +1,24 @@
 """
-External Binaries Configuration
-File Converter Pro
+External Binaries Configuration - File Converter Pro
 
-External binaries (ffmpeg, Ghostscript, ImageMagick, LibreOffice, wkhtmltopdf,
-pandoc, ...) are resolved through a single centralized lookup per tool.
+Centralized lookup for external tools (ffmpeg, Ghostscript, ImageMagick,
+LibreOffice, wkhtmltopdf, pandoc, ...) via :func: resolve_binary.
+All candidate paths live in :data:`TOOLS` - declare them nowhere else.
 
-Lookup order (enforced by :func:`resolve_binary`):
-    1. system PATH            (shutil.which)
-    2. app-local directory    (files bundled with / installed by the app)
-    3. common system dirs     (Windows + Linux + macOS install locations)
-    4. config file            (config/external_binaries.conf)
+Lookup order: system PATH -> app-local dir -> common system dirs -> config file.
 
-All hardcoded path lists live here in :data:`TOOLS` — nothing else in the
-codebase should declare candidate paths.
+Config file: config/external_binaries.conf (INI), next to the exe when frozen,
+or project root in dev. Override path with FCP_EXTERNAL_BINARIES_CONF.
 
-Config file:  config/external_binaries.conf
-    - dev mode : <project root>/config/external_binaries.conf
-    - frozen   : <exe folder>/config/external_binaries.conf
-                 <exe folder>/_internal/config/external_binaries.conf
-
-An alternate location can be forced with the environment variable
-FCP_EXTERNAL_BINARIES_CONF (useful for testing and portable installs).
-
-Format (INI):
     [binaries]
-    ffmpeg = C:\ffmpeg\bin\ffmpeg.exe
+    ffmpeg = C:\\ffmpeg\\bin\\ffmpeg.exe
     ghostscript =
 
-Values support %ENVVAR% / $ENVVAR expansion, a "~" home shortcut, and
-relative paths (resolved against the folder that contains the config/ folder).
-Empty values (or a missing config file) keep automatic detection untouched.
+Values support %ENVVAR%/$ENVVAR expansion, "~", and relative paths (resolved
+against the config/ folder's parent). Empty/missing config = auto-detect only.
 
-Placeholders accepted in the TOOLS app-local templates:
-    {app_dir}    app directory (frozen: exe folder, else _MEIPASS/project root)
-    {app_data}   app data dir  (LOCALAPPDATA or ~)/.file_converter_app
-    {meipass}    sys._MEIPASS when running under PyInstaller
+TOOLS placeholders: {app_dir} (exe dir when frozen, else _MEIPASS/project root),
+{app_data} (LOCALAPPDATA or ~/.file_converter_app), {meipass} (PyInstaller temp dir).
 """
 
 from __future__ import annotations
@@ -212,6 +196,27 @@ TOOLS: dict[str, ToolSpec] = {
             "/opt/homebrew/bin/pandoc",
             "/opt/local/bin/pandoc",
             "/snap/bin/pandoc",
+        ),
+    ),
+    "tesseract": ToolSpec(
+        names=("tesseract",),
+        app_local=(
+            "{app_dir}/tesseract/tesseract.exe",
+            "{app_dir}/tesseract/bin/tesseract.exe",
+            "{app_data}/tesseract/tesseract.exe",
+            "{meipass}/tesseract.exe",
+            "{meipass}/bin/tesseract.exe",
+        ),
+        system=(
+            r"%LOCALAPPDATA%\Tesseract-OCR\tesseract.exe",
+            r"%PROGRAMFILES%\Tesseract-OCR\tesseract.exe",
+            r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+            r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+            "/usr/bin/tesseract",
+            "/usr/local/bin/tesseract",
+            "/opt/homebrew/bin/tesseract",
+            "/opt/local/bin/tesseract",
+            "/snap/bin/tesseract",
         ),
     ),
 }

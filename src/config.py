@@ -3,12 +3,6 @@ Configuration Manager
 
 Handles application settings, system theme detection, and secure storage.
 
-Key Features:
-    - Windows Dark Mode detection via Registry
-    - Encrypted configuration storage using Fernet (cryptography)
-    - User preferences management (language, theme, paths, notifications)
-    - Secure key generation and management for sensitive data
-
 """
 
 import json
@@ -42,6 +36,8 @@ DEFAULT_CONFIG: dict = {
     "separate_image_pdfs": False,
     "use_system_theme": True,
     "image_to_icon_layer": "multi",
+    "ocr_enabled": False,
+    "ocr_orientation": "auto",
 }
 
 

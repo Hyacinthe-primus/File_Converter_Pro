@@ -21,6 +21,7 @@ dependencies = [
     "pdfkit>=1.0",
     "pikepdf>=10.11.0",
     "reportlab>=4.4",
+    "scanlayer>=1.0.2",
     "python-docx>=1.2",
     "python-pptx>=1.0",
     "openpyxl>=3.1",

@@ -1,8 +1,7 @@
-"""PanelsMixin — Left and right panel creation methods."""
+"""PanelsMixin - Left and right panel creation methods."""
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import (
-    QCheckBox,
     QFrame,
     QGroupBox,
     QHBoxLayout,
@@ -14,7 +13,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from widgets import DraggableListWidget
+from widgets import AnimatedCheckBox, DraggableListWidget
 
 
 class PanelsMixin:
@@ -97,14 +96,16 @@ class PanelsMixin:
 
         conv_card, conv_lay = _card(self.translate_text("Conversion de Fichiers"))
         conv_card.setProperty("i18n_key", "Conversion de Fichiers")
+        conv_lay.setContentsMargins(8, 2, 8, 10)
 
         ocr_row = QHBoxLayout()
-        self.ocr_checkbox = QCheckBox(self.translate_text("Utiliser OCR pour les images dans les PDF"))
+        self.ocr_checkbox = AnimatedCheckBox(self.translate_text("Utiliser OCR pour les images dans les PDF"))
+        self.ocr_checkbox.setWordWrap(True)
         self.ocr_checkbox.setProperty("i18n_key", "Utiliser OCR pour les images dans les PDF")
-        self.ocr_checkbox.setChecked(False)
-        self.ocr_checkbox.setEnabled(False)
-        self.ocr_checkbox.setToolTip(self.translate_text("Cette fonctionnalité est en cours de développement"))
+        self.ocr_checkbox.setChecked(bool(self.config.get("ocr_enabled", False)))
+        self.ocr_checkbox.setToolTip(self.translate_text("Génère une couche de texte sélectionnable dans le PDF"))
         self.ocr_checkbox.setObjectName("OcrCheckbox")
+        self.ocr_checkbox.stateChanged.connect(self._on_ocr_checkbox_toggled)
         ocr_row.addWidget(self.ocr_checkbox)
         ocr_row.addStretch()
         conv_lay.addLayout(ocr_row)
@@ -118,7 +119,7 @@ class PanelsMixin:
         self.word_to_pdf_btn.setProperty("i18n_key", "Word → PDF")
         self.image_to_pdf_btn.setProperty("i18n_key", "Images → PDF")
         for b in [self.pdf_to_word_btn, self.word_to_pdf_btn, self.image_to_pdf_btn]:
-            conv_grid.addWidget(b)
+            conv_grid.addWidget(b, 1)
         conv_lay.addLayout(conv_grid)
 
         self.more_conversions_btn = QPushButton("➕​  " + self.translate_text("Plus de conversions"))
@@ -137,8 +138,8 @@ class PanelsMixin:
         self.merge_word_btn = _btn("🔗 " + self.translate_text("Fusionner Word"), "BtnTeal")
         self.merge_pdf_btn.setProperty("i18n_key", "Fusionner PDF")
         self.merge_word_btn.setProperty("i18n_key", "Fusionner Word")
-        merge_row.addWidget(self.merge_pdf_btn)
-        merge_row.addWidget(self.merge_word_btn)
+        merge_row.addWidget(self.merge_pdf_btn, 1)
+        merge_row.addWidget(self.merge_word_btn, 1)
         merge_lay.addLayout(merge_row)
         right_layout.addWidget(merge_card)
 
@@ -153,7 +154,7 @@ class PanelsMixin:
         self.protect_pdf_btn.setProperty("i18n_key", "Protéger PDF")
         self.compress_files_btn.setProperty("i18n_key", "Compresser Fichiers")
         for b in [self.split_pdf_btn, self.protect_pdf_btn, self.compress_files_btn]:
-            adv_row.addWidget(b)
+            adv_row.addWidget(b, 1)
         adv_lay.addLayout(adv_row)
         right_layout.addWidget(adv_card)
 
@@ -165,8 +166,8 @@ class PanelsMixin:
         self.batch_rename_btn = _btn("✏️ " + self.translate_text("Renommer par Lot"), "BtnViolet")
         self.batch_convert_btn.setProperty("i18n_key", "Conversion par Lot")
         self.batch_rename_btn.setProperty("i18n_key", "Renommer par Lot")
-        batch_row.addWidget(self.batch_convert_btn)
-        batch_row.addWidget(self.batch_rename_btn)
+        batch_row.addWidget(self.batch_convert_btn, 1)
+        batch_row.addWidget(self.batch_rename_btn, 1)
         batch_lay.addLayout(batch_row)
         right_layout.addWidget(batch_card)
         right_layout.addStretch()
@@ -184,3 +185,9 @@ class PanelsMixin:
         self._apply_achievements_btn_state()
 
         parent_layout.addWidget(right_panel, 0)
+
+    def _on_ocr_checkbox_toggled(self, state: int) -> None:
+        """Persist the per-conversion OCR checkbox state to the config."""
+        if not hasattr(self, "config"):
+            return
+        self.config["ocr_enabled"] = bool(state)
