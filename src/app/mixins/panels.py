@@ -104,6 +104,7 @@ class PanelsMixin:
         self.ocr_checkbox.setProperty("i18n_key", "Utiliser OCR pour les images dans les PDF")
         self.ocr_checkbox.setChecked(bool(self.config.get("ocr_enabled", False)))
         self.ocr_checkbox.setToolTip(self.translate_text("Génère une couche de texte sélectionnable dans le PDF"))
+        self.ocr_checkbox.setProperty("i18n_tip", "Génère une couche de texte sélectionnable dans le PDF")
         self.ocr_checkbox.setObjectName("OcrCheckbox")
         self.ocr_checkbox.stateChanged.connect(self._on_ocr_checkbox_toggled)
         ocr_row.addWidget(self.ocr_checkbox)

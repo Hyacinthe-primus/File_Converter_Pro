@@ -2,7 +2,7 @@
 
 import time
 
-from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton
+from PySide6.QtWidgets import QCheckBox, QGroupBox, QLabel, QPushButton, QWidget
 
 from qss_helpers import _load_qss, set_theme
 from translations import decorate_language_name
@@ -113,7 +113,7 @@ class ThemeLanguageMixin:
             if key:
                 widget.setText(self.translate_text(key))
 
-        for widget in self.findChildren(QPushButton):
+        for widget in self.findChildren(QWidget):
             tip_key = widget.property("i18n_tip")
             if tip_key:
                 widget.setToolTip(self.translate_text(tip_key))
