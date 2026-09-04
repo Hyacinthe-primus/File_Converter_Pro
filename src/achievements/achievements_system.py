@@ -554,7 +554,7 @@ class AchievementSystem(QObject):
                 # Advanced Conversions
                 "adv_data_architect": {
                     "id": "adv_data_architect",
-                    "name": "⚡ Data Architect",
+                    "name": "Data Architect",
                     "description": "Complete 50 document conversions via Advanced Conversions",
                     "icon": "blueprint.png",
                     "category": "advanced_conversions",
@@ -568,7 +568,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_csv_sorcier": {
                     "id": "adv_csv_sorcier",
-                    "name": "⚡ CSV Wizard",
+                    "name": "CSV Wizard",
                     "description": "Convert 25 CSV↔JSON files via Advanced Conversions",
                     "icon": "spellbook.png",
                     "category": "advanced_conversions",
@@ -582,7 +582,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_office_slayer": {
                     "id": "adv_office_slayer",
-                    "name": "⚡ Office Slayer",
+                    "name": "Office Slayer",
                     "description": "Convert 10 XLSX→PDF AND 10 PPTX→PDF via Advanced Conversions",
                     "icon": "bow_and_arrow.png",
                     "category": "advanced_conversions",
@@ -596,7 +596,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_web_harvester": {
                     "id": "adv_web_harvester",
-                    "name": "⚡ Web Harvester",
+                    "name": "Web Harvester",
                     "description": "Convert 20 HTML→PDF files via Advanced Conversions",
                     "icon": "spider.png",
                     "category": "advanced_conversions",
@@ -610,7 +610,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_bibliotheque": {
                     "id": "adv_bibliotheque",
-                    "name": "⚡ Digital Library",
+                    "name": "Digital Library",
                     "description": "Convert 15 EPUB→PDF files via Advanced Conversions",
                     "icon": "scroll.png",
                     "category": "advanced_conversions",
@@ -624,7 +624,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_icon_forge": {
                     "id": "adv_icon_forge",
-                    "name": "⚡ Icon Forge",
+                    "name": "Icon Forge",
                     "description": "Create 25 ICO files via Advanced Conversions",
                     "icon": "anvil.png",
                     "category": "advanced_conversions",
@@ -638,7 +638,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_format_nomade": {
                     "id": "adv_format_nomade",
-                    "name": "⚡ Nomadic Format",
+                    "name": "Nomadic Format",
                     "description": "Have used the 13 image conversion types of Advanced Conversions",
                     "icon": "compass.png",
                     "category": "advanced_conversions",
@@ -652,7 +652,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_heic_hunter": {
                     "id": "adv_heic_hunter",
-                    "name": "⚡ HEIC Hunter",
+                    "name": "HEIC Hunter",
                     "description": "Convert 20 HEIC→PNG files via Advanced Conversions",
                     "icon": "telescope.png",
                     "category": "fun",
@@ -666,7 +666,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_pixel_perfect": {
                     "id": "adv_pixel_perfect",
-                    "name": "⚡ Pixel Perfect",
+                    "name": "Pixel Perfect",
                     "description": "Convert 100 images in total via Advanced Conversions",
                     "icon": "potions.png",
                     "category": "advanced_conversions",
@@ -680,7 +680,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_extracteur_pro": {
                     "id": "adv_extracteur_pro",
-                    "name": "⚡ Pro Extractor",
+                    "name": "Pro Extractor",
                     "description": "Extract audio from 30 videos (VIDEO→MP3) via Advanced Conversions",
                     "icon": "eagle_shield.png",
                     "category": "advanced_conversions",
@@ -694,7 +694,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_codec_master": {
                     "id": "adv_codec_master",
-                    "name": "⚡ Codec Master",
+                    "name": "Codec Master",
                     "description": "Have used all 9 video conversion types of Advanced Conversions",
                     "icon": "mechanical_raven.png",
                     "category": "advanced_conversions",
@@ -708,7 +708,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_studio_underground": {
                     "id": "adv_studio_underground",
-                    "name": "⚡ Underground Studio",
+                    "name": "Underground Studio",
                     "description": "Convert 75 audio files in total via Advanced Conversions",
                     "icon": "lyre.png",
                     "category": "advanced_conversions",
@@ -722,7 +722,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_all_rounder": {
                     "id": "adv_all_rounder",
-                    "name": "⚡ All-Rounder",
+                    "name": "All-Rounder",
                     "description": "Have ≥20 successful conversions in each of the 3 categories (document, image, audio/video) of Advanced Conversions",  # noqa: E501
                     "icon": "scarab.png",
                     "category": "advanced_conversions",
@@ -736,7 +736,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_la_machine": {
                     "id": "adv_la_machine",
-                    "name": "⚡ The Machine",
+                    "name": "The Machine",
                     "description": "Complete 250 Advanced Conversions in total",
                     "icon": "gauntlet.png",
                     "category": "advanced_conversions",
@@ -750,7 +750,7 @@ class AchievementSystem(QObject):
                 },
                 "adv_collectionneur": {
                     "id": "adv_collectionneur",
-                    "name": "⚡ Ultimate Collector",
+                    "name": "Ultimate Collector",
                     "description": "Have used EVERY available conversion type in Advanced Conversions",
                     "icon": "treasure.png",
                     "category": "advanced_conversions",
@@ -765,7 +765,7 @@ class AchievementSystem(QObject):
                 # Templates achievements
                 "tpl_architecte": {
                     "id": "tpl_architecte",
-                    "name": "📋 Flow Architect",
+                    "name": "Flow Architect",
                     "description": "Create 10 templates in total",
                     "icon": "spinning_wheel.png",
                     "category": "templates",
@@ -779,7 +779,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_maitre_presets": {
                     "id": "tpl_maitre_presets",
-                    "name": "📋 Master of Presets",
+                    "name": "Master of Presets",
                     "description": "Create 25 templates in total",
                     "icon": "assassin_kit.png",
                     "category": "templates",
@@ -793,7 +793,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_reference_absolue": {
                     "id": "tpl_reference_absolue",
-                    "name": "📋 Absolute Reference",
+                    "name": "Absolute Reference",
                     "description": "Have 5 different templates marked as default simultaneously (one per operation type)",  # noqa: E501
                     "icon": "tarot_cards.png",
                     "category": "templates",
@@ -807,7 +807,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_automatiste": {
                     "id": "tpl_automatiste",
-                    "name": "📋 Automator",
+                    "name": "Automator",
                     "description": "Apply templates 50 times in total",
                     "icon": "hourglass.png",
                     "category": "templates",
@@ -821,7 +821,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_le_rituel": {
                     "id": "tpl_le_rituel",
-                    "name": "📋 The Ritual",
+                    "name": "The Ritual",
                     "description": "Apply the same template 25 times",
                     "icon": "skull.png",
                     "category": "templates",
@@ -835,7 +835,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_collectionneur_workflows": {
                     "id": "tpl_collectionneur_workflows",
-                    "name": "📋 Workflow Collector",
+                    "name": "Workflow Collector",
                     "description": "Have at least one template for each of the 9 available categories",
                     "icon": "treasure_map.png",
                     "category": "templates",
@@ -849,7 +849,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_polyvalent": {
                     "id": "tpl_polyvalent",
-                    "name": "📋 Versatile",
+                    "name": "Versatile",
                     "description": "Use 5 different template types in a single session",
                     "icon": "mushrooms.png",
                     "category": "templates",
@@ -863,7 +863,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_archiviste": {
                     "id": "tpl_archiviste",
-                    "name": "📋 Template Archivist",
+                    "name": "Template Archivist",
                     "description": "Export your templates at least once",
                     "icon": "bear_totem.png",
                     "category": "templates",
@@ -877,7 +877,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_importateur": {
                     "id": "tpl_importateur",
-                    "name": "📋 Importer",
+                    "name": "Importer",
                     "description": "Import a template file at least once",
                     "icon": "ship_wheel.png",
                     "category": "templates",
@@ -891,7 +891,7 @@ class AchievementSystem(QObject):
                 },
                 "tpl_perfectionniste": {
                     "id": "tpl_perfectionniste",
-                    "name": "📋 Perfectionist",
+                    "name": "Perfectionist",
                     "description": "Modify 10 existing templates via Edit",
                     "icon": "magic_staff.png",
                     "category": "templates",
