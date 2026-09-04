@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-1.0.7-4dabf7?style=flat-square)](#)
 [![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=flat-square&logo=windows)](#)
 [![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=flat-square&logo=qt&logoColor=white)](#)
-[![License](https://img.shields.io/badge/license-GPLv3%20%2F%20Commercial-blue?style=flat-square)](#license)
+[![License](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](#license)
 [![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)](#)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.13-3776AB?style=flat-square&logo=python&logoColor=white)](#)
 [![Downloads](https://img.shields.io/github/downloads/Hyacinthe-primus/File_Converter_Pro/total.svg)](https://github.com/Hyacinthe-primus/File_Converter_Pro/releases)
@@ -102,8 +102,8 @@ See **[CONTRIBUTING.md](CONTRIBUTING.md)** for translations, bug reports, code f
 
 ## License
 
-Dual licensed: **GPLv3** for open-source use · **Commercial License** for proprietary products.
-See [`LICENSE`](LICENSE.md) and [COMMERCIAL LICENSE](COMMERCIALLICENSE.md).
+File Converter Pro is licensed under the **GNU General Public License v3.0** (GPLv3).
+See [`LICENSE`](LICENSE.md).
 
 © 2026 Prime Enterprises. All rights reserved.
 
