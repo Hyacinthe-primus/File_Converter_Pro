@@ -60,3 +60,12 @@ def test_translate_operation_type():
     tm = TranslationManager()
     result = tm.translate_operation_type("pdf_to_word")
     assert "PDF" in result or "Word" in result
+
+
+def test_translate_markdown_to_html_operation():
+    from translations import TranslationManager
+
+    tm = TranslationManager()
+    for language in ("fr", "en"):
+        tm.set_language(language)
+        assert tm.translate_operation_type("markdown_to_html") == "Markdown → HTML"
