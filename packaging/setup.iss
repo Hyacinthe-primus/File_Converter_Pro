@@ -275,6 +275,8 @@ begin
   DeleteContextMenuForExtension('jpg');
   DeleteContextMenuForExtension('jpx');
   DeleteContextMenuForExtension('json');
+  DeleteContextMenuForExtension('markdown');
+  DeleteContextMenuForExtension('md');
   DeleteContextMenuForExtension('m4a');
   DeleteContextMenuForExtension('mkv');
   DeleteContextMenuForExtension('mov');
@@ -617,6 +619,8 @@ begin
     AddConversion(SubKey, '15_to_pdf_merged', ExpandConstant('{cm:ImagesToPdfMerged}'), 'images_to_pdf_merged');
   end else if Ext = 'json' then begin
     AddConversion(SubKey, '01_to_csv', 'JSON → CSV', 'json_to_csv');
+  end else if (Ext = 'md') or (Ext = 'markdown') then begin
+    AddConversion(SubKey, '01_to_html', 'Markdown → HTML', 'markdown_to_html');
   end else if Ext = 'm4a' then begin
     AddConversion(SubKey, '01_to_mp3', 'Audio → MP3', 'audio_to_mp3');
     AddConversion(SubKey, '02_to_wav', 'Audio → WAV', 'audio_to_wav');
@@ -883,7 +887,7 @@ var
 begin
   Exts := ['aac','apng','arw','avi','avif','bmp','cr2','cr3','csv','dng',
            'doc','docx','epub','flac','gif','heic','heif','html','j2k','jfif',
-           'jp2','jpeg','jpg','jpx','json','m4a','mkv','mov','mp3','mp4',
+           'jp2','jpeg','jpg','jpx','json','markdown','md','m4a','mkv','mov','mp3','mp4',
            'nef','ogg','orf','pdf','png','pptx','psd','raf','raw','rw2','rtf',
            'svg','tif','tiff','txt','wav','webm','webp','xlsx'];
   for I := 0 to GetArrayLength(Exts) - 1 do

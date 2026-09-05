@@ -112,6 +112,21 @@ class TestHtmlToPdf:
         assert result.success or os.path.exists(dst)
 
 
+class TestMarkdownToHtml:
+    def test_markdown_to_html_creates_file(self, tmp_dir):
+        from converter.converters import AdvancedConverterEngine
+
+        src = os.path.join(tmp_dir, "test.md")
+        dst = os.path.join(tmp_dir, "test.html")
+        _write_text(src, "# Test\n\nHello **world**.")
+        result = AdvancedConverterEngine().convert("markdown_to_html", src, tmp_dir)
+
+        assert result.success
+        assert result.target == dst
+        assert result.engine_used == "_markdown_to_html"
+        assert os.path.exists(dst)
+
+
 class TestPdfToHtml:
     def test_import(self):
         from converter.converters import AdvancedConverterEngine

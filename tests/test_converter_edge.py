@@ -39,6 +39,17 @@ def test_dispatch_returns_method_and_ext():
     assert ext == "pdf"
 
 
+def test_markdown_dispatch_and_context_menu():
+    from context_menu.formats import CONVERSION_MAP, LABELS
+
+    engine = AdvancedConverterEngine()
+    assert CATEGORY_MAP["markdown_to_html"] == "document"
+    assert engine._DISPATCH["markdown_to_html"] == ("_markdown_to_html", "html")
+    assert CONVERSION_MAP["md"] == ["markdown_to_html"]
+    assert CONVERSION_MAP["markdown"] == ["markdown_to_html"]
+    assert LABELS["markdown_to_html"] == "Markdown → HTML"
+
+
 def test_dispatch_image_types():
     engine = AdvancedConverterEngine()
     assert "image_to_png" in engine._DISPATCH
