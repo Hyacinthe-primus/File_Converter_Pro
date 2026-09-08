@@ -453,6 +453,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
             (
                 self.tr_("HTML"),
                 [
+                    ("📝 Markdown → HTML", "markdown_to_html", [".md", ".markdown"]),
                     ("🌐 HTML → PDF", "html_to_pdf", [".html", ".htm"]),
                     ("🌐 PDF → HTML", "pdf_to_html", [".pdf"]),
                 ],

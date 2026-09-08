@@ -5,10 +5,37 @@ from __future__ import annotations
 import csv
 import json
 import re
+from html import escape
+from pathlib import Path
 
 
 class DocumentConverters:
     """Document conversion methods for AdvancedConverterEngine."""
+
+    def _markdown_to_html(self, src: str, dst: str) -> bool:
+        """Convert Markdown to a standalone UTF-8 HTML document."""
+        try:
+            import markdown
+
+            source = Path(src).read_text(encoding="utf-8", errors="replace")
+            body = markdown.markdown(source, extensions=["extra", "sane_lists"])
+            title = escape(Path(src).stem)
+            document = (
+                "<!DOCTYPE html>\n"
+                "<html>\n"
+                "<head>\n"
+                '  <meta charset="utf-8">\n'
+                '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
+                f"  <title>{title}</title>\n"
+                "</head>\n"
+                f"<body>\n{body}\n</body>\n"
+                "</html>\n"
+            )
+            Path(dst).write_text(document, encoding="utf-8")
+            return True
+        except Exception as e:
+            print(f"[markdown→html] {e}")
+            return False
 
     def _txt_to_pdf(self, src: str, dst: str) -> bool:
         """Convert plain text to PDF with word wrapping."""

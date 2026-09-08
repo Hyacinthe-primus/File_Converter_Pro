@@ -38,6 +38,7 @@ psd-tools==1.17.0
 ebooklib==0.20
 
 # Conversion utilities
+Markdown==3.10.3
 pypandoc==1.17
 weasyprint==68.1
 lxml==6.0.2

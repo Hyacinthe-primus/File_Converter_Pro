@@ -245,6 +245,7 @@ class SystemNotifier:
             "xlsx_to_json": "Excel → JSON",
             "xlsx_to_csv": "Excel → CSV",
             "pptx_to_pdf": "PowerPoint → PDF",
+            "markdown_to_html": "Markdown → HTML",
             "html_to_pdf": "HTML → PDF",
             "pdf_to_html": "PDF → HTML",
             "epub_to_pdf": "EPUB → PDF",

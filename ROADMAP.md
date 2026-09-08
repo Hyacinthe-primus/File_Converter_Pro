@@ -45,6 +45,9 @@ Investigative PyInstaller bundling brought the compiled size from 269 MB to ~219
 ### Converter Engine Refactor
 The monolithic converter was split into an engine-based mixin architecture with a centralized dispatch table. Each format (RTF, PPTX, EPUB, HTML, PDF, Office COM) has its own renderer mixin, and a multi-engine fallback chain tries native, LibreOffice, and COM in sequence.
 
+### Markdown to HTML
+Markdown files can be converted to standalone UTF-8 HTML documents from the application or the Windows context menu.
+
 ### 7-Zip Replaces WinRAR
 File compression now uses 7-Zip for ZIP splitting and 7Z format support, removing the WinRAR dependency.
 
@@ -122,7 +125,7 @@ Everything stays local: the API binds to `localhost` only and never opens an ext
 ### More Format Support
 Expand the supported format matrix over time. Candidates include:
 - **Markdown → PDF / DOCX** via Pandoc
-- **Markdown → HTML** / **HTML →  Markdown**
+- **HTML → Markdown**
 - **ODT / ODS / ODP → Word**
 - **Word → ODT / ODS / ODP** (LibreOffice native formats)
 - **MP4 → GIF** / **GIF → WebP** for quick web-ready exports

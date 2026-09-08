@@ -31,6 +31,8 @@ class FileManagementMixin:
         ".docx": ("word.ico", "📝"),
         ".rtf": ("rtf.ico", "📝"),
         ".txt": ("txt.ico", "📝"),
+        ".md": ("txt.ico", "📝"),
+        ".markdown": ("txt.ico", "📝"),
         ".ppt": ("pptx.ico", "📎"),
         ".pptx": ("pptx.ico", "📎"),
         ".xlsx": ("xlsx.ico", "📎"),
@@ -90,16 +92,17 @@ class FileManagementMixin:
                 "*.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 "
                 "*.mp3 *.wav *.aac *.flac *.ogg *.m4a "
                 "*.mp4 *.avi *.mkv *.webm *.mov "
-                "*.html *.htm *.epub *.rtf *.txt "
+                "*.html *.htm *.epub *.rtf *.txt *.md *.markdown "
                 "*.csv *.json "
                 "*.zip *.rar *.tar *.gz);;"
-                "Documents (*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.rtf *.txt *.epub *.html *.htm);;"
+                "Documents (*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.rtf *.txt *.md *.markdown *.epub *.html *.htm);;"  # noqa: E501
                 "PDF Files (*.pdf);;"
                 "Word / RTF (*.docx *.doc *.rtf *.txt);;"
                 "PowerPoint (*.pptx *.ppt);;"
                 "Excel (*.xlsx *.xls);;"
                 "EPUB (*.epub);;"
                 "HTML (*.html *.htm);;"
+                "Markdown (*.md *.markdown);;"
                 "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif *.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2);;"  # noqa: E501
                 "Audio (*.mp3 *.wav *.aac *.flac *.ogg *.m4a);;"
                 "Vidéo (*.mp4 *.avi *.mkv *.webm *.mov);;"
@@ -223,6 +226,8 @@ class FileManagementMixin:
             ".doc",
             ".rtf",
             ".txt",
+            ".md",
+            ".markdown",
             ".pptx",
             ".ppt",
             ".xlsx",

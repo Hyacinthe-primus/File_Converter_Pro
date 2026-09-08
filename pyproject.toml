@@ -32,6 +32,7 @@ dependencies = [
     "CairoSVG>=2.9",
     "psd-tools>=1.17",
     "ebooklib>=0.20",
+    "Markdown>=3.10",
     "lxml>=6.0",
     "numpy>=2.2",
     "pyzipper>=0.3",

@@ -1898,7 +1898,7 @@ class AchievementSystem(QObject):
 
     # Advanced conversions tracking
     _ADV_TYPE_MAP = {
-        # Documents (13 types)
+        # Documents (14 types)
         "txt_to_pdf": ("adv_doc_conversions", None, "adv_txt_to_pdf"),
         "rtf_to_pdf": ("adv_doc_conversions", None, "adv_rtf_to_pdf"),
         "txt_to_docx": ("adv_doc_conversions", None, "adv_txt_to_docx"),
@@ -1909,6 +1909,7 @@ class AchievementSystem(QObject):
         "xlsx_to_json": ("adv_doc_conversions", None, "adv_xlsx_to_json"),
         "xlsx_to_csv": ("adv_doc_conversions", None, "adv_xlsx_to_csv"),
         "pptx_to_pdf": ("adv_doc_conversions", "adv_pptx_to_pdf", "adv_pptx_to_pdf_flag"),
+        "markdown_to_html": ("adv_doc_conversions", None, None),
         "html_to_pdf": ("adv_doc_conversions", "adv_html_to_pdf", "adv_html_to_pdf_flag"),
         "pdf_to_html": ("adv_doc_conversions", None, "adv_pdf_to_html"),
         "epub_to_pdf": ("adv_doc_conversions", "adv_epub_to_pdf", "adv_epub_to_pdf_flag"),

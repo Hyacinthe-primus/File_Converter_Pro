@@ -170,6 +170,8 @@ SHARED_HIDDEN = [
     'openpyxl', 'openpyxl.styles', 'openpyxl.utils',
     'pptx', 'pptx.util', 'pptx.enum.shapes', 'pptx.enum.chart',
     'lxml', 'lxml.etree', 'lxml._elementpath', 'lxml.html', 'ebooklib',
+    'markdown', 'markdown.extensions', 'markdown.extensions.extra',
+    'markdown.extensions.sane_lists',
     'pillow_heif', 'weasyprint',
     'rawpy',
     'config', 'database', 'translations', 'widgets', 'external_binaries',

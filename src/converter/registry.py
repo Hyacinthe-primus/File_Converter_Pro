@@ -16,6 +16,7 @@ CATEGORY_MAP = {
     "pptx_to_pdf": "document",
     "html_to_pdf": "document",
     "pdf_to_html": "document",
+    "markdown_to_html": "document",
     "epub_to_pdf": "document",
     # Images
     "image_to_png": "image",
@@ -65,6 +66,7 @@ DISPATCH = {
     "pptx_to_pdf": (("_pptx_to_pdf_com", "_pptx_to_pdf_native", "_pptx_to_pdf"), "pdf"),
     "html_to_pdf": ("_html_to_pdf", "pdf"),
     "pdf_to_html": ("_pdf_to_html", "html"),
+    "markdown_to_html": ("_markdown_to_html", "html"),
     "epub_to_pdf": ("_epub_to_pdf", "pdf"),
     # Images
     "image_to_png": ("_image_convert", "png"),

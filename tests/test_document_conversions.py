@@ -30,6 +30,24 @@ def test_txt_to_pdf_empty(tmp_path):
     assert dst.exists()
 
 
+def test_markdown_to_html(tmp_path):
+    src = tmp_path / "readme.md"
+    src.write_text(
+        "# Heading\n\nA **bold** paragraph.\n\n| A | B |\n|---|---|\n| 1 | 2 |",
+        encoding="utf-8",
+    )
+    dst = tmp_path / "readme.html"
+    result = _engine()._markdown_to_html(str(src), str(dst))
+    html = dst.read_text(encoding="utf-8")
+
+    assert result is True
+    assert html.startswith("<!DOCTYPE html>")
+    assert "<title>readme</title>" in html
+    assert "<h1>Heading</h1>" in html
+    assert "<strong>bold</strong>" in html
+    assert "<table>" in html
+
+
 def test_csv_to_json(tmp_path):
     src = tmp_path / "test.csv"
     src.write_text("name,age\nAlice,30\nBob,25", encoding="utf-8")
