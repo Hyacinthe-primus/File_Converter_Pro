@@ -8,6 +8,105 @@ import re
 from html import escape
 from pathlib import Path
 
+_MD_HTML_STYLE = """
+  <style>
+    :root {
+      color-scheme: light dark;
+      --fg: #1c1e21;
+      --bg: #ffffff;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --code-bg: #f4f5f7;
+      --link: #2563eb;
+      --accent: #f0f4ff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fg: #e5e7eb;
+        --bg: #16181c;
+        --muted: #9ca3af;
+        --border: #2e3238;
+        --code-bg: #1f2226;
+        --link: #7aa2f7;
+        --accent: #1c2333;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 3rem 1.5rem;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, "Segoe UI", "Inter", "Helvetica Neue",
+        Arial, "Noto Sans", sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    .doc {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 650;
+      line-height: 1.3;
+      margin: 1.8em 0 0.6em;
+    }
+    h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+    h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.25em; }
+    h3 { font-size: 1.2em; }
+    p { margin: 0.9em 0; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    blockquote {
+      margin: 1em 0;
+      padding: 0.2em 1em;
+      border-left: 4px solid var(--link);
+      background: var(--accent);
+      color: var(--muted);
+      border-radius: 0 6px 6px 0;
+    }
+    code {
+      font-family: "SF Mono", "Cascadia Code", Consolas, Menlo, monospace;
+      font-size: 0.88em;
+      background: var(--code-bg);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+    }
+    pre {
+      background: var(--code-bg);
+      padding: 1em 1.2em;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+    }
+    pre code { background: none; padding: 0; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1.4em 0;
+      font-size: 0.95em;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.55em 0.9em;
+      text-align: left;
+    }
+    th {
+      background: var(--accent);
+      font-weight: 600;
+    }
+    tr:nth-child(even) td { background: color-mix(in srgb, var(--accent) 40%, transparent); }
+    ul, ol { padding-left: 1.4em; }
+    li { margin: 0.3em 0; }
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2em 0;
+    }
+    img { max-width: 100%; border-radius: 6px; }
+  </style>"""
+
 
 class DocumentConverters:
     """Document conversion methods for AdvancedConverterEngine."""
@@ -27,8 +126,9 @@ class DocumentConverters:
                 '  <meta charset="utf-8">\n'
                 '  <meta name="viewport" content="width=device-width, initial-scale=1">\n'
                 f"  <title>{title}</title>\n"
+                f"{_MD_HTML_STYLE}\n"
                 "</head>\n"
-                f"<body>\n{body}\n</body>\n"
+                f"<body>\n  <div class=\"doc\">\n{body}\n  </div>\n</body>\n"
                 "</html>\n"
             )
             Path(dst).write_text(document, encoding="utf-8")
