@@ -95,16 +95,16 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         self.mode_group = QButtonGroup(self)
 
         self.preserve_all_radio = AnimatedCheckBox(
-            self.translate_text("✅ Conserver toute la mise en forme (recommandé)")
+            self.translate_text("Conserver toute la mise en forme (recommandé)")
         )
         self.preserve_all_radio.setChecked(True)
 
-        self.text_only_radio = AnimatedCheckBox(self.translate_text("📝 Texte seulement (plus rapide)"))
+        self.text_only_radio = AnimatedCheckBox(self.translate_text("Texte seulement (plus rapide)"))
 
         self.mode_group.addButton(self.preserve_all_radio, 1)
         self.mode_group.addButton(self.text_only_radio, 2)
 
-        info_text = self.translate_text("📋 Sélectionnez le mode de conversion :")
+        info_text = self.translate_text("Sélectionnez le mode de conversion :")
         if self.has_content:
             info_text += "\n" + self.translate_text("ℹ️ Ce document contient du contenu formaté, images, tableaux, etc.")
 
