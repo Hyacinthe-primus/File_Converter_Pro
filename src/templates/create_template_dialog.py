@@ -298,7 +298,6 @@ class CreateTemplateDialog(QDialog):
             [
                 self.parent_dialog.translate_text("Conserver les images et la mise en page"),
                 self.parent_dialog.translate_text("Texte brut uniquement"),
-                self.parent_dialog.translate_text("Texte complet (texte + texte des images)"),
             ]
         )
         self.config_layout.addWidget(mode_label)

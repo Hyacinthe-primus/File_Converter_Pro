@@ -385,8 +385,6 @@ class PdfToWordMixin:
                 current_mode = self.config.get("pdf_to_word_mode", "with_images")
                 if current_mode == "with_images":
                     self.convert_pdf_to_docx_improved(file_path, output_file)
-                elif current_mode == "text_only":
-                    self.convert_pdf_to_docx_text_only(file_path, output_file)
                 else:
                     self.convert_pdf_to_docx_text_only(file_path, output_file)
 
@@ -1078,7 +1076,7 @@ class PdfToWordMixin:
             conversion_mode = self.active_templates["pdf_to_word"].get("mode", "with_images")
         else:
             current_mode = self.config.get("pdf_to_word_mode", "with_images")
-            dialog = PdfToWordDialog(self, self.current_language, current_mode, has_images=True)
+            dialog = PdfToWordDialog(self, self.current_language, current_mode)
             if dialog.exec() != QDialog.Accepted:
                 return
             conversion_mode = dialog.get_conversion_mode()
@@ -1104,10 +1102,8 @@ class PdfToWordMixin:
             fs = os.path.getsize(fp) if os.path.exists(fp) else 0
             if _mode == "with_images":
                 self.convert_pdf_to_docx_improved(fp, out)
-            elif _mode == "text_only":
-                self.convert_pdf_to_docx_text_only(fp, out)
             else:
-                self.convert_pdf_to_docx_with_image_text(fp, out)
+                self.convert_pdf_to_docx_text_only(fp, out)
             return {"success": True, "error": "", "file_size": fs, "operation_time": _time.perf_counter() - t0}
 
         tasks = [

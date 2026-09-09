@@ -207,10 +207,9 @@ class SettingsDialog(TranslationMixin, QDialog):
             [
                 self.translate_text("Conserver les images et la mise en page"),
                 self.translate_text("Texte brut uniquement"),
-                self.translate_text("Texte complet (texte + texte des images)"),
             ]
         )
-        mode_map = {"with_images": 0, "text_only": 1, "text_with_image_text": 2}
+        mode_map = {"with_images": 0, "text_only": 1}
         current_mode = self.config.get("pdf_to_word_mode", "with_images")
         self.pdf_to_word_mode_combo.setCurrentIndex(mode_map.get(current_mode, 0))
 
@@ -1456,7 +1455,7 @@ class SettingsDialog(TranslationMixin, QDialog):
     def get_settings(self):
         quality_map = {0: "high", 1: "standard", 2: "compressed"}
         compression_map = {0: "normal", 1: "high", 2: "maximum"}
-        mode_map = {0: "with_images", 1: "text_only", 2: "text_with_image_text"}
+        mode_map = {0: "with_images", 1: "text_only"}
         return {
             "auto_open_last_project": self.auto_open_checkbox.isChecked(),
             "enable_system_notifications": self.system_notifications_checkbox.isChecked(),

@@ -110,13 +110,10 @@ class TemplateManager:
                 mode_map = {
                     "Conserver les images et la mise en page": "with_images",
                     "Texte brut uniquement": "text_only",
-                    "Texte complet (texte + texte des images)": "text_with_image_text",
                     "Keep images and layout": "with_images",
                     "Plain text only": "text_only",
-                    "Full text (text + image text)": "text_with_image_text",
                     "with_images": "with_images",
                     "text_only": "text_only",
-                    "text_with_image_text": "text_with_image_text",
                 }
                 _mode = mode_map.get(cfg.get("mode", ""), "with_images")
                 parent_app.config["pdf_to_word_mode"] = _mode
@@ -286,7 +283,6 @@ class TemplateManager:
             mode_map = {
                 "with_images": "Conserver les images et la mise en page",
                 "text_only": "Texte brut uniquement",
-                "text_with_image_text": "Texte complet (texte + texte des images)",
             }
             quality_map = {
                 "high": "Haute qualité",
@@ -380,7 +376,6 @@ class TemplateManager:
         mode_map = {
             "Conserver les images et la mise en page": "with_images",
             "Texte brut uniquement": "text_only",
-            "Texte complet (texte + texte des images)": "text_with_image_text",
         }
 
         mode = config.get("mode", "Conserver les images et la mise en page")
