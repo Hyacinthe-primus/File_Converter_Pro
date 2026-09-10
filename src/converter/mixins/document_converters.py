@@ -11,7 +11,7 @@ from pathlib import Path
 _MD_HTML_STYLE = """
   <style>
     :root {
-      color-scheme: light dark;
+      color-scheme: light;
       --fg: #1c1e21;
       --bg: #ffffff;
       --muted: #6b7280;
@@ -19,17 +19,6 @@ _MD_HTML_STYLE = """
       --code-bg: #f4f5f7;
       --link: #2563eb;
       --accent: #f0f4ff;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --fg: #e5e7eb;
-        --bg: #16181c;
-        --muted: #9ca3af;
-        --border: #2e3238;
-        --code-bg: #1f2226;
-        --link: #7aa2f7;
-        --accent: #1c2333;
-      }
     }
     * { box-sizing: border-box; }
     body {
