@@ -197,7 +197,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self._worker: _ConversionWorker | None = None
         self._current_conversion_type: str | None = None
 
-        self.setWindowTitle(self.tr_("🔄 Plus de Conversions"))
+        self.setWindowTitle(self.tr_("Plus de Conversions"))
         self.setMinimumSize(900, 720)
         self.setModal(False)
 
@@ -412,7 +412,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
         close_btn = QPushButton(self.tr_("Fermer"))
         close_btn.setMinimumHeight(38)
-        _apply_dialog_btn(close_btn, "BtnClose")
+        _apply_dialog_btn(close_btn, "BtnDecline")
         close_btn.clicked.connect(self.close)
         btn_row.addWidget(close_btn)
 
