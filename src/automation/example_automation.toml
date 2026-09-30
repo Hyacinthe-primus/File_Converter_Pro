@@ -69,7 +69,7 @@ recursive  = false
 [scheduled_tasks.one_time_export]
 path       = "C:/Users/User/Desktop/ToExport"
 output_dir = "C:/Users/User/Desktop/Exported"
-enabled    = true
+enabled    = false   # example only — set to true and adjust date to use
 recursive  = false
 
   # Once on a specific date and time

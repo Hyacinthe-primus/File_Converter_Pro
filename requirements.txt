@@ -43,6 +43,7 @@ pypandoc==1.17
 weasyprint==68.1
 lxml==6.0.2
 numpy==2.2.6
+tzdata==2026.4
 
 # Video/Audio
 ffmpeg-python==0.2.0

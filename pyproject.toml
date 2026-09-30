@@ -40,6 +40,7 @@ dependencies = [
     "matplotlib>=3.10",
     "watchdog>=6.0",
     "APScheduler>=3.11",
+    "tzdata>=2026.4",
     "rich>=14.2",
 ]
 
