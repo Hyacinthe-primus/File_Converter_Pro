@@ -36,15 +36,7 @@ class ThemeLanguageMixin:
         self.config["dark_mode"] = self.dark_mode
         self.config_manager.save_config(self.config)
 
-        logo = self.findChild(QLabel, "LogoLabel")
-        if logo:
-            logo_color = "#e8ff6b" if self.dark_mode else "#2d2dc8"
-            logo.setStyleSheet(
-                "font-family:'Segoe UI','SF Pro Display',Arial,sans-serif;"
-                "font-size:16px;font-weight:900;"
-                "letter-spacing:1.5px;background:transparent;"
-                f"color:{logo_color};"
-            )
+        self._update_logo_label(self.current_theme)
 
     def update_dark_mode_time(self):
         if self.dark_mode:
@@ -134,3 +126,28 @@ class ThemeLanguageMixin:
             theme_name = "dark" if dark else "light"
         set_theme(theme_name)
         self.setStyleSheet(_load_qss("style.qss", theme_name))
+        self._update_logo_label(theme_name)
+
+    def _update_logo_label(self, theme_name: str) -> None:
+        """Update LogoLabel inline style to match the active theme."""
+        logo = self.findChild(QLabel, "LogoLabel")
+        if not logo:
+            return
+        if theme_name == "dark":
+            is_dark = True
+        elif theme_name == "light":
+            is_dark = False
+        else:
+            try:
+                from theme_manager import get_custom_theme_kind
+
+                is_dark = get_custom_theme_kind(theme_name) == "dark"
+            except Exception:
+                is_dark = False
+        logo_color = "#e8ff6b" if is_dark else "#2d2dc8"
+        logo.setStyleSheet(
+            "font-family:'Segoe UI','SF Pro Display',Arial,sans-serif;"
+            "font-size:16px;font-weight:900;"
+            "letter-spacing:1.5px;background:transparent;"
+            f"color:{logo_color};"
+        )

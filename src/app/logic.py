@@ -221,6 +221,8 @@ class AppLogicMixin(
                 self._scheduler.stop()
             except Exception:
                 pass
+        if self.config.get("auto_clean_temp_files", True):
+            self.cleanup_temp_files()
         super().closeEvent(event)
 
     def cleanup_temp_files(self):
@@ -233,6 +235,18 @@ class AppLogicMixin(
             except Exception as e:
                 print(f"[ERROR] Could not delete temporary file {temp_file}: {e}")
         self.temp_files.clear()
+
+    def maybe_auto_save_template(self, template_type: str) -> None:
+        """Auto-save current config as a template if the setting is enabled."""
+        if not self.config.get("auto_save_templates", True):
+            return
+        tm = self._ensure_template_manager()
+        if tm is None:
+            return
+        try:
+            tm.auto_save_config(template_type, self)
+        except Exception as e:
+            print(f"[AUTO-SAVE] Failed to auto-save template: {e}")
 
     def create_temp_file(self, suffix=".tmp"):
         import tempfile

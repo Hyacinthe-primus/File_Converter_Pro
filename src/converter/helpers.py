@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import os
 import time
 from pathlib import Path
 
@@ -60,3 +61,22 @@ def _safe_html(text):
 def _read_file_b64(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
+
+def create_backup(src: str, suffix: str = ".bak") -> str | None:
+    """
+    Create a backup copy of *src* with the given suffix appended.
+    Returns the backup path, or None if the source doesn't exist or copy fails.
+    Cross-platform: uses shutil.copy2 which preserves metadata on all OSes.
+    """
+    import shutil
+
+    if not os.path.isfile(src):
+        return None
+    backup_path = f"{src}{suffix}"
+    try:
+        shutil.copy2(src, backup_path)
+        return backup_path
+    except Exception as e:
+        print(f"[BACKUP] Could not create backup for {src}: {e}")
+        return None

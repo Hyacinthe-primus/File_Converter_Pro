@@ -500,3 +500,74 @@ class TemplateManager:
         except Exception as e:
             print(f"Error importing templates: {e}")
             return 0
+
+    AUTO_SAVE_PREFIX = "[Auto] "
+
+    def auto_save_config(self, template_type: str, parent_app) -> bool:
+        """
+        Save or update an auto-generated template for the given type.
+        Returns True if a template was created or updated.
+        """
+        try:
+            config = self._build_config_from_app(template_type, parent_app)
+            if not config:
+                return False
+
+            existing = self.get_templates_by_type(template_type)
+            auto_name = f"{self.AUTO_SAVE_PREFIX}{template_type}"
+
+            for tid, tpl in existing.items():
+                if tpl["name"] == auto_name:
+                    self.db_manager.update_template_config(tid, json.dumps(config))
+                    self.load_templates()
+                    return True
+
+            self.db_manager.save_template(auto_name, template_type, config)
+            self.load_templates()
+            return True
+
+        except Exception as e:
+            print(f"Error auto-saving config: {e}")
+            return False
+
+    def _build_config_from_app(self, template_type: str, parent_app) -> dict | None:
+        """Build a config dict from the app's current settings for auto-save."""
+        cfg = parent_app.config
+
+        if template_type == "Conversion PDF→Word":
+            return {
+                "mode": cfg.get("pdf_to_word_mode", "with_images"),
+                "quality": cfg.get("conversion_quality", "standard"),
+                "keep_bookmarks": True,
+                "extract_images": False,
+            }
+        if template_type == "Conversion Word→PDF":
+            return {
+                "mode": cfg.get("word_to_pdf_mode", "preserve_all"),
+                "quality": "Standard (150 DPI)",
+                "compress_images": True,
+                "include_metadata": True,
+            }
+        if template_type == "Conversion Images→PDF":
+            return {
+                "separate": cfg.get("separate_image_pdfs", False),
+                "quality": "Standard (150 DPI)",
+            }
+        if template_type == "Compression":
+            return {
+                "format": "ZIP",
+                "compression_level": cfg.get("compression_level", "normal"),
+                "encrypt": False,
+                "delete_originals": False,
+                "split_archive": False,
+                "split_size": 0,
+            }
+        if template_type == "Optimisation de fichiers":
+            return {
+                "optimization_type": 2,
+                "quality_level": 1,
+                "remove_metadata": True,
+                "compress_images": True,
+                "keep_backup": True,
+            }
+        return None

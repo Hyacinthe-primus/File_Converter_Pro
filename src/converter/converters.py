@@ -22,7 +22,7 @@ from __future__ import annotations
 import os
 import time
 
-from converter.helpers import ConversionResult, _build_dst
+from converter.helpers import ConversionResult, _build_dst, create_backup
 from converter.mixins import (
     DocumentConverters,
     EpubRenderers,
@@ -55,12 +55,17 @@ class AdvancedConverterEngine(
 
     _SIG_WITH_TYPE = ("_image_convert", "_ffmpeg_convert", "_heic_convert", "_raw_convert")
 
+    def __init__(self):
+        self.backup_enabled = False
+
     def convert(self, conversion_type, src, dst_dir):
         if conversion_type not in self._DISPATCH:
             return ConversionResult(False, src, "", error=f"Unknown type: {conversion_type}")
         spec, ext = self._DISPATCH[conversion_type]
         engine_names = spec if isinstance(spec, tuple) else (spec,)
         dst = _build_dst(src, dst_dir, ext)
+        if self.backup_enabled and os.path.isfile(src):
+            create_backup(src)
         file_size = os.path.getsize(src) if os.path.exists(src) else 0
         errors = []
         for index, engine_name in enumerate(engine_names):

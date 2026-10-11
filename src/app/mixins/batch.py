@@ -45,6 +45,8 @@ class BatchMixin:
 
     def process_batch_conversion(self, output_dir: str, target_format: str) -> None:
         """Run conversion on all files using worker thread."""
+        if getattr(self, "config", {}).get("auto_clean_temp_files", True):
+            self.cleanup_temp_files()
         selected_items = self.files_list_widget.selectedItems()
         files = []
         if selected_items:
@@ -122,6 +124,14 @@ class BatchMixin:
                     f"{success_count}/{len(files)} {self.translate_text('files converted to')} "
                     f"{self.translate_text(target_label)} ({total_time:.1f}s)",
                 )
+                template_type_map = {
+                    "pdf": "Conversion Word→PDF",
+                    "docx": "Conversion PDF→Word",
+                    "png": "Optimisation de fichiers",
+                }
+                tt = template_type_map.get(target_format)
+                if tt:
+                    self.maybe_auto_save_template(tt)
             else:
                 QMessageBox.warning(
                     self,
@@ -175,7 +185,9 @@ class BatchMixin:
         if conv:
             from converter.converters import AdvancedConverterEngine
 
-            return AdvancedConverterEngine().convert(conv, fp, str(Path(out).parent)).success
+            engine = AdvancedConverterEngine()
+            engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
+            return engine.convert(conv, fp, str(Path(out).parent)).success
         return False
 
     def _batch_to_docx(self, fp: str, out: str, ext: str) -> bool:
@@ -190,7 +202,9 @@ class BatchMixin:
         if conv:
             from converter.converters import AdvancedConverterEngine
 
-            return AdvancedConverterEngine().convert(conv, fp, str(Path(out).parent)).success
+            engine = AdvancedConverterEngine()
+            engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
+            return engine.convert(conv, fp, str(Path(out).parent)).success
         return False
 
     def _batch_pdf_to_docx(self, fp: str, out: str) -> bool:
@@ -234,7 +248,9 @@ class BatchMixin:
             try:
                 from converter.converters import AdvancedConverterEngine
 
-                if not AdvancedConverterEngine().convert(conv, fp, tmp_dir).success:
+                engine = AdvancedConverterEngine()
+                engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
+                if not engine.convert(conv, fp, tmp_dir).success:
                     return False
                 tmp_pdf = os.path.join(tmp_dir, f"{Path(fp).stem}.pdf")
                 if not os.path.exists(tmp_pdf):

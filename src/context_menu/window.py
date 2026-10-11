@@ -457,7 +457,15 @@ class ConversionThread(QThread):
                     else:
                         from converter.converters import AdvancedConverterEngine
 
-                        result = AdvancedConverterEngine().convert(self.conversion_type, f, f_dst_dir)
+                        engine = AdvancedConverterEngine()
+                        try:
+                            from config import ConfigManager
+
+                            _cfg = ConfigManager().load_config()
+                            engine.backup_enabled = _cfg.get("backup_before_conversion", False)
+                        except Exception:
+                            pass
+                        result = engine.convert(self.conversion_type, f, f_dst_dir)
                         if not result.success:
                             raise Exception(result.error)
                     out_dir = f_dst_dir

@@ -72,6 +72,7 @@ class _ConversionWorker(QObject):
         self.achievement_system = achievement_system
         self._tm = tm
         self._config = config or {}
+        self.engine.backup_enabled = self._config.get("backup_before_conversion", False)
 
     def cancel(self) -> None:
         self._cancelled = True
@@ -190,6 +191,8 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
         self.adv_db = advanced_db or AdvancedDatabaseManager()
         self.engine = AdvancedConverterEngine()
+        _cfg = getattr(parent, "config", {}) if parent else {}
+        self.engine.backup_enabled = _cfg.get("backup_before_conversion", False)
 
         self._last_dst_dir: str | None = None
 

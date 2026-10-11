@@ -267,7 +267,15 @@ def _run_conversion(conversion_type: str, src: str, output_dir: str) -> None:
     else:
         from converter.converters import AdvancedConverterEngine
 
-        result = AdvancedConverterEngine().convert(conversion_type, src, output_dir)
+        engine = AdvancedConverterEngine()
+        try:
+            from config import ConfigManager
+
+            _cfg = ConfigManager().load_config()
+            engine.backup_enabled = _cfg.get("backup_before_conversion", False)
+        except Exception:
+            pass
+        result = engine.convert(conversion_type, src, output_dir)
         if not result.success:
             raise RuntimeError(result.error)
 
