@@ -37,6 +37,7 @@ class ThemeLanguageMixin:
         self.config_manager.save_config(self.config)
 
         self._update_logo_label(self.current_theme)
+        self.theme_changed.emit(self.current_theme)
 
     def update_dark_mode_time(self):
         if self.dark_mode:
@@ -127,6 +128,7 @@ class ThemeLanguageMixin:
         set_theme(theme_name)
         self.setStyleSheet(_load_qss("style.qss", theme_name))
         self._update_logo_label(theme_name)
+        self.theme_changed.emit(theme_name)
 
     def _update_logo_label(self, theme_name: str) -> None:
         """Update LogoLabel inline style to match the active theme."""

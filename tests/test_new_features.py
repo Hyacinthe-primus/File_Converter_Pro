@@ -586,3 +586,77 @@ class TestLogoLabelThemeFix:
 
         ThemeLanguageMixin._update_logo_label(parent, "dark")
         parent.deleteLater()
+
+
+class TestAdvancedConversionsCustomTheme:
+    def test_resolve_theme_name_custom(self):
+        """resolve_theme_name returns custom theme name."""
+        from types import SimpleNamespace
+
+        from advanced_conversions import resolve_theme_name
+
+        parent = SimpleNamespace(current_theme="Riso_Press", dark_mode=True)
+        assert resolve_theme_name(parent) == "Riso_Press"
+
+    def test_resolve_theme_name_builtin_dark(self):
+        """resolve_theme_name falls back to dark."""
+        from types import SimpleNamespace
+
+        from advanced_conversions import resolve_theme_name
+
+        parent = SimpleNamespace(current_theme="dark", dark_mode=True)
+        assert resolve_theme_name(parent) == "dark"
+
+    def test_resolve_theme_name_builtin_light(self):
+        """resolve_theme_name falls back to light."""
+        from types import SimpleNamespace
+
+        from advanced_conversions import resolve_theme_name
+
+        parent = SimpleNamespace(current_theme="light", dark_mode=False)
+        assert resolve_theme_name(parent) == "light"
+
+    def test_resolve_theme_name_no_parent(self):
+        """resolve_theme_name defaults to light when no parent."""
+        from advanced_conversions import resolve_theme_name
+
+        assert resolve_theme_name(None) == "light"
+
+    def test_theme_changed_signal_exists(self, qapp):
+        """FileConverterApp has a theme_changed signal."""
+        from app import FileConverterApp
+
+        assert hasattr(FileConverterApp, "theme_changed")
+
+    def test_dialog_connects_to_theme_signal(self, qapp):
+        """AdvancedConversionsDialog connects to parent's theme_changed signal."""
+        from unittest.mock import patch
+
+        from PySide6.QtCore import Signal
+        from PySide6.QtWidgets import QTabWidget, QWidget
+
+        from advanced_conversions import AdvancedConversionsDialog
+
+        class FakeParent(QWidget):
+            theme_changed = Signal(str)
+
+        parent = FakeParent()
+        received = []
+
+        def _on_theme(theme_name):
+            received.append(theme_name)
+
+        with (
+            patch("advanced_conversions._load_qss", return_value=""),
+            patch.object(AdvancedConversionsDialog, "_setup_ui"),
+            patch.object(AdvancedConversionsDialog, "_apply_theme_style"),
+        ):
+            dlg = AdvancedConversionsDialog.__new__(AdvancedConversionsDialog)
+            dlg.parent_window = parent
+            dlg._tab_widget = QTabWidget()
+            dlg._apply_theme_style = lambda: received.append("applied")
+            if hasattr(parent, "theme_changed"):
+                parent.theme_changed.connect(dlg._apply_theme_style)
+            parent.theme_changed.emit("Riso_Press")
+            assert received == ["applied"]
+        parent.deleteLater()

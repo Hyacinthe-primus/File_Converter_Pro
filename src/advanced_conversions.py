@@ -42,6 +42,14 @@ from translations import TranslationManager
 from utils.translation_mixin import TranslationMixin
 
 
+def resolve_theme_name(parent) -> str:
+    custom_theme = getattr(parent, "current_theme", None) if parent else None
+    if custom_theme and custom_theme not in ("dark", "light"):
+        return custom_theme
+    dark = getattr(parent, "dark_mode", False) if parent else False
+    return "dark" if dark else "light"
+
+
 class _ConversionWorker(QObject):
     """
     Runs conversions off the main thread.
@@ -206,6 +214,8 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
         self._setup_ui()
         self._apply_theme_style()
+        if parent is not None and hasattr(parent, "theme_changed"):
+            parent.theme_changed.connect(self._apply_theme_style)
 
     def _get_source_files(self, accepted_exts: list[str]) -> list[str]:
         """
@@ -366,16 +376,16 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         layout.setSpacing(12)
 
         title = QLabel(self.tr_("🔄 Conversions Avancées"))
-        title.setStyleSheet("font-size: 20px; font-weight: bold; margin-bottom: 4px;")
+        title.setObjectName("AdvConvTitle")
         layout.addWidget(title)
 
         subtitle = QLabel(self.tr_("Sélectionnez un format de conversion ci-dessous"))
-        subtitle.setStyleSheet("font-size: 12px; color: #888; margin-bottom: 10px;")
+        subtitle.setObjectName("AdvConvSubtitle")
         layout.addWidget(subtitle)
 
         self.tab_widget = QTabWidget()
         self.tab_widget.currentChanged.connect(self._on_tab_changed)
-        self.tab_widget.setStyleSheet(self._tab_style(0))
+        self.tab_widget.setProperty("active_tab", "documents")
 
         self.tab_widget.addTab(self._build_documents_tab(), self.tr_("📄 Documents"))
         self.tab_widget.addTab(self._build_images_tab(), self.tr_("🖼️ Images"))
@@ -396,9 +406,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self._log_area = QTextEdit()
         self._log_area.setReadOnly(True)
         self._log_area.setFixedHeight(120)
-        self._log_area.setStyleSheet(
-            "font-family: 'Cascadia Code', 'JetBrains Mono', 'Segoe UI', sans-serif; font-size: 11px;"
-        )
+        self._log_area.setObjectName("AdvConvLog")
         prog_layout.addWidget(self._log_area)
 
         self._progress_widget.setVisible(False)
@@ -612,54 +620,21 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         return btn
 
     def _apply_theme_style(self) -> None:
-        dark = getattr(self.parent_window, "dark_mode", False)
-        theme = "dark" if dark else "light"
-        self.setStyleSheet(_load_qss("advanced_conversions.qss", theme) + _load_qss("advanced_conversions_buttons.qss"))
-
-    def _tab_style(self, active_index: int = 0) -> str:
-        dark = getattr(self.parent_window, "dark_mode", False)
-        inactive_bg = "rgba(255,255,255,0.05)" if dark else "rgba(0,0,0,0.05)"
-        inactive_fg = "rgba(255,255,255,0.45)" if dark else "rgba(0,0,0,0.45)"
-        inactive_bdr = "rgba(255,255,255,0.08)" if dark else "rgba(0,0,0,0.12)"
-        hover_bg = "rgba(255,255,255,0.09)" if dark else "rgba(0,0,0,0.08)"
-        hover_fg = "rgba(255,255,255,0.72)" if dark else "rgba(0,0,0,0.72)"
-        pane_bg = "rgba(255,255,255,0.03)" if dark else "rgba(0,0,0,0.02)"
-        pane_bdr = "rgba(255,255,255,0.08)" if dark else "rgba(0,0,0,0.10)"
-        palettes = [
-            (110, 190, 255),  # documents — blue
-            (32, 200, 170),  # images    — teal
-            (255, 140, 60),  # audio/vid — orange
-        ]
-        r, g, b = palettes[active_index % len(palettes)]
-        return f"""
-            QTabWidget::pane {{
-                border: 1px solid {pane_bdr};
-                border-radius: 10px;
-                background-color: {pane_bg};
-            }}
-            QTabBar::tab {{
-                background: {inactive_bg};
-                color: {inactive_fg};
-                border: 1px solid {inactive_bdr};
-                padding: 10px 22px; margin-right: 4px;
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
-                font-weight: 700; font-size: 13px;
-                font-family: 'Segoe UI', 'SF Pro Display', Arial, sans-serif;
-            }}
-            QTabBar::tab:selected {{
-                background: rgba({r},{g},{b},0.18);
-                color: rgb({r},{g},{b});
-                border: 1px solid rgba({r},{g},{b},0.35);
-            }}
-            QTabBar::tab:hover:!selected {{
-                background: {hover_bg};
-                color: {hover_fg};
-            }}
-        """
+        theme = resolve_theme_name(self.parent_window)
+        self.setStyleSheet(_load_qss("advanced_conversions.qss", theme))
+        if not hasattr(self, "tab_widget"):
+            return
+        idx = self.tab_widget.currentIndex()
+        tab_ids = ["documents", "images", "audio_video"]
+        self.tab_widget.setProperty("active_tab", tab_ids[idx % len(tab_ids)])
+        self.tab_widget.style().unpolish(self.tab_widget)
+        self.tab_widget.style().polish(self.tab_widget)
 
     def _on_tab_changed(self, index: int) -> None:
-        self.tab_widget.setStyleSheet(self._tab_style(index))
+        tab_ids = ["documents", "images", "audio_video"]
+        self.tab_widget.setProperty("active_tab", tab_ids[index % len(tab_ids)])
+        self.tab_widget.style().unpolish(self.tab_widget)
+        self.tab_widget.style().polish(self.tab_widget)
 
     def tr_(self, text: str) -> str:
         return self._tm.translate_text(text)

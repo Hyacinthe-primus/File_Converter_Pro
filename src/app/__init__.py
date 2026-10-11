@@ -15,7 +15,7 @@ Inheritance chain (MRO):
 """
 
 __version__ = "1.0.7"
-from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QTimer
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QTimer, Signal
 from PySide6.QtWidgets import QMainWindow
 
 from app.ui import AppUIMixin
@@ -24,7 +24,7 @@ from app.ui import AppUIMixin
 class FileConverterApp(AppUIMixin, QMainWindow):
     """Main application window — combines UI and logic mixins."""
 
-    pass
+    theme_changed = Signal(str)
 
 
 class FadingMainWindow(FileConverterApp):
