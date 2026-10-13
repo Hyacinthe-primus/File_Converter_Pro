@@ -7,12 +7,21 @@ Handles application settings, system theme detection, and secure storage.
 
 import json
 import os
+import sys
+from pathlib import Path
 
 from cryptography.fernet import Fernet
 from PySide6.QtWidgets import QApplication
 
-CONFIG_FILE = "file_converter_config.dat"
-KEY_FILE = "file_converter_key.key"
+# config.py lives in src/, so its parent is the src directory in dev mode.
+# When frozen (PyInstaller), keep user-writable files next to the executable.
+if getattr(sys, "frozen", False):
+    _BASE_DIR = Path(sys.executable).resolve().parent
+else:
+    _BASE_DIR = Path(__file__).resolve().parent
+
+CONFIG_FILE = str(_BASE_DIR / "file_converter_config.dat")
+KEY_FILE = str(_BASE_DIR / "file_converter_key.key")
 
 DEFAULT_CONFIG: dict = {
     "dark_mode": False,
