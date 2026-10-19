@@ -62,6 +62,11 @@ QSS_ALLOWLIST = {
     "TermsCheckBox",
     "TermsTextBrowser",
     "container",
+    "SettingsGroup",
+    "SettingsHint",
+    "SettingsLabel",
+    "SettingsActiveLabel",
+    "SettingsScrollInner",
 }
 
 

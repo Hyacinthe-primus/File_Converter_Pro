@@ -1,0 +1,321 @@
+QWidget {
+    background-color: #f8f9fa;
+    color: #212529;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+}
+
+QGroupBox {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 6px;
+    color: #6b7280;
+}
+
+QLabel { color: #212529; background: transparent; }
+
+QLabel#SettingsLabel {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+QLabel#SettingsActiveLabel {
+    font-weight: bold;
+    font-size: 13px;
+    color: #10B981;
+}
+
+QLabel#SettingsHint {
+    color: #6b7280;
+    font-size: 10px;
+    font-style: italic;
+    background: transparent;
+}
+
+QWidget#SettingsAutomationTab,
+QWidget#SettingsThemeTab,
+QWidget#SettingsLanguageTab {
+    background-color: #f8f9fa;
+}
+
+QFrame#SettingsCard {
+    border: 1px solid #dee2e6;
+    border-radius: 7px;
+    background-color: #ffffff;
+}
+
+QLabel#SettingsStatusDot {
+    font-size: 14px;
+    border: none;
+}
+
+QLabel#SettingsCardName {
+    font-weight: bold;
+    font-size: 12px;
+    color: #1c2526;
+    border: none;
+}
+
+QLabel#SettingsCardPath {
+    font-size: 10px;
+    color: #6b7280;
+    border: none;
+}
+
+QLabel#SettingsEmptyLabel {
+    color: #6b7280;
+    font-size: 11px;
+    font-style: italic;
+}
+
+QWidget#SettingsScrollInner {
+    background-color: #ffffff;
+}
+
+QGroupBox#SettingsGroup {
+    color: #6b7280;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+QGroupBox#SettingsGroup::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 6px;
+    color: #6b7280;
+}
+
+QPushButton {
+    background-color: #f6f8fa;
+    color: #1f2328;
+    border: 1px solid #d0d7de;
+    border-radius: 7px;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 8px 16px;
+}
+QPushButton:hover {
+    background-color: #eaeef2;
+    border-color: #8b949e;
+    color: #212529;
+}
+QPushButton:pressed { background-color: #e9ecef; }
+QPushButton:disabled { background-color: #e9ecef; color: #6b7280; border-color: #d0d7de; }
+
+QCheckBox {
+    color: #212529;
+    spacing: 8px;
+    font-size: 13px;
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #6b7280;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+QCheckBox::indicator:hover { border-color: #1d4ed8; }
+QCheckBox::indicator:checked { background-color: #1d4ed8; border-color: #1d4ed8; }
+
+QScrollArea, QScrollArea > QWidget, QScrollArea > QWidget > QWidget {
+    background-color: transparent;
+    border: none;
+}
+
+QScrollBar:vertical {
+    background: #f1f3f5;
+    width: 8px;
+    margin: 0;
+    border-radius: 4px;
+    border: none;
+}
+QScrollBar::handle:vertical {
+    background: #c9d1d9;
+    border-radius: 4px;
+    min-height: 28px;
+}
+QScrollBar::handle:vertical:hover { background: #adbac7; }
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
+
+QScrollBar:horizontal {
+    background: #f1f3f5;
+    height: 8px;
+    border-radius: 4px;
+    border: none;
+}
+QScrollBar::handle:horizontal {
+    background: #c9d1d9;
+    border-radius: 4px;
+    min-width: 28px;
+}
+QScrollBar::handle:horizontal:hover { background: #adbac7; }
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { width: 0; }
+
+QComboBox {
+    background: #ffffff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 140px;
+}
+QComboBox:hover { border-color: #1d4ed8; }
+QComboBox:focus { border-color: #1d4ed8; }
+QComboBox::drop-down { border: none; width: 24px; }
+QComboBox QAbstractItemView {
+    background: #ffffff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    selection-background-color: #eff6ff;
+    selection-color: #1d4ed8;
+}
+
+QListWidget {
+    background-color: #ffffff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+}
+QListWidget::item {
+    padding: 9px 12px;
+    border-bottom: 1px solid #f1f3f5;
+}
+QListWidget::item:hover { background-color: #eff6ff; }
+QListWidget::item:selected {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    border-left: 3px solid #1d4ed8;
+    font-weight: 600;
+}
+
+/* Settings dialog: language/theme list cards */
+
+QFrame#SettingsListCard {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #ffffff;
+    padding: 2px;
+}
+QFrame#SettingsListCard[active="true"] {
+    border: 2px solid #10B981;
+    background-color: #f0fdf4;
+}
+
+QLabel#SettingsListBadge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+    border: none;
+}
+QLabel#SettingsListBadge[kind="active"] { background-color: #10B981; color: #ffffff; }
+QLabel#SettingsListBadge[kind="builtin"] { background-color: #6366F1; color: #ffffff; }
+QLabel#SettingsListBadge[kind="external"] { background-color: #f59e0b; color: #1c2526; }
+
+QLabel#SettingsListName {
+    font-weight: bold;
+    font-size: 13px;
+    color: #1c2526;
+    border: none;
+    background: transparent;
+}
+
+QLabel#SettingsListMeta {
+    color: #6b7280;
+    font-size: 10px;
+    border: none;
+    background: transparent;
+}
+
+QLabel#SettingsListPreview {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background-color: #ffffff;
+}
+
+QPushButton#SettingsApplyBtn {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #93c5fd;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: bold;
+}
+QPushButton#SettingsApplyBtn:hover { background-color: #1d4ed8; color: #ffffff; }
+QPushButton#SettingsApplyBtn:pressed { background-color: #1e40af; color: #ffffff; }
+
+QPushButton#SettingsRemoveBtn {
+    background-color: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+    padding: 4px;
+    border-radius: 5px;
+    font-size: 13px;
+}
+QPushButton#SettingsRemoveBtn:hover { background-color: #ef4444; color: #ffffff; }
+
+/* Settings dialog: OK / Cancel / Restore / Browse buttons */
+
+QPushButton#SettingsOkBtn {
+    background-color: #10B981; color: #ffffff; border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+QPushButton#SettingsOkBtn:hover { background-color: #059669; }
+QPushButton#SettingsOkBtn:pressed { background-color: #047857; }
+
+QPushButton#SettingsBrowseBtn {
+    background-color: #374151; color: #ffffff; border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+QPushButton#SettingsBrowseBtn:hover { background-color: #4B5563; }
+QPushButton#SettingsBrowseBtn:pressed { background-color: #1F2937; }
+
+QPushButton#SettingsCancelBtn {
+    background-color: transparent; color: #6B7280; border: 1px solid #D1D5DB;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+QPushButton#SettingsCancelBtn:hover { background-color: #F3F4F6; color: #4B5563; border-color: #9CA3AF; }
+QPushButton#SettingsCancelBtn:pressed { background-color: #E5E7EB; color: #1F2937; }
+
+QPushButton#SettingsRestoreBtn {
+    background-color: transparent; color: #EF4444; border: 1px solid #EF4444;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+QPushButton#SettingsRestoreBtn:hover { background-color: #FEF2F2; border-color: #DC2626; color: #DC2626; }
+QPushButton#SettingsRestoreBtn:pressed { background-color: #FEE2E2; color: #B91C1C; border-color: #B91C1C; }
+
+/* Settings dialog: install / import buttons */
+
+QPushButton#SettingsImportBtn {
+    background-color: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd;
+    padding: 8px 16px; border-radius: 6px; font-weight: bold;
+}
+QPushButton#SettingsImportBtn:hover { background-color: #1d4ed8; color: #ffffff; }
+QPushButton#SettingsImportBtn:pressed { background-color: #1e40af; color: #ffffff; }

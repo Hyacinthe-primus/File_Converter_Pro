@@ -19,12 +19,30 @@ REQUIRED_FILES = {
     "dashboard.qss",
     "lang_scroll.qss",
     "scrollbar.qss",
+    "settings.qss",
     "templates.qss",
     "terms_html.css",
     "terms.qss",
 }
 
 METADATA_FILE = "metadata.ini"
+
+
+class ThemeMessage(str):
+    """English fallback message that also carries a translation key and its format args.
+
+    Behaves like a plain ``str`` for existing callers; the UI can call
+    ``translate_text(msg.key).format(*msg.args)`` to display it in the user's language.
+    """
+
+    key: str
+    args: tuple
+
+    def __new__(cls, key: str, fallback: str, *args):
+        obj = super().__new__(cls, fallback.format(*args))
+        obj.key = key
+        obj.args = args
+        return obj
 
 
 @dataclass
@@ -62,10 +80,6 @@ def get_custom_themes() -> list[ThemeMetadata]:
     return sorted(themes, key=lambda t: t.name.lower())
 
 
-def get_all_theme_names() -> list[str]:
-    return get_builtin_themes() + [t.folder_name for t in get_custom_themes()]
-
-
 def get_custom_theme_kind(folder_name: str) -> str:
     theme_dir = CUSTOM_THEMES_DIR / folder_name
     if not theme_dir.is_dir():
@@ -73,15 +87,6 @@ def get_custom_theme_kind(folder_name: str) -> str:
     meta = _read_metadata(theme_dir)
     return meta.kind if meta else "light"
 
-
-def get_theme_path(theme_name: str) -> Path | None:
-    builtin = THEMES_DIR / theme_name
-    if builtin.is_dir() and (builtin / "style.qss").exists():
-        return builtin
-    custom = CUSTOM_THEMES_DIR / theme_name
-    if custom.is_dir() and (custom / "style.qss").exists():
-        return custom
-    return None
 
 
 def import_theme(zip_path: str) -> tuple[bool, str]:
@@ -124,24 +129,22 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
                         break
 
             if not meta_name:
-                return False, "Metadata file missing in the theme."
+                return False, ThemeMessage("theme_err_metadata_missing", "Metadata file missing in the theme.")
 
             meta_content = zf.read(meta_prefix + meta_name).decode("utf-8")
             meta = _parse_metadata_content(meta_content)
             if not meta:
-                return False, "Unable to read metadata.ini."
+                return False, ThemeMessage("theme_err_metadata_unreadable", "Unable to read metadata.ini.")
 
             folder_name = _sanitize_folder_name(meta.name)
             theme_dir = CUSTOM_THEMES_DIR / folder_name
 
-            if theme_dir.exists():
-                import shutil
-
-                counter = 2
-                while (CUSTOM_THEMES_DIR / f"{folder_name}_{counter}").exists():
-                    counter += 1
-                folder_name = f"{folder_name}_{counter}"
-                theme_dir = CUSTOM_THEMES_DIR / folder_name
+            existing = get_custom_themes()
+            for t in existing:
+                if t.name.lower() == meta.name.lower():
+                    return False, ThemeMessage("theme_already_installed", "Theme '{}' is already installed.", meta.name)
+                if t.folder_name == folder_name:
+                    return False, ThemeMessage("theme_folder_exists", "Theme folder '{}' already exists.", folder_name)
 
             theme_dir.mkdir(parents=True)
 
@@ -187,20 +190,20 @@ def import_theme(zip_path: str) -> tuple[bool, str]:
                 import shutil
 
                 shutil.rmtree(theme_dir)
-                return False, f"Missing files : {', '.join(sorted(missing))}"
+                return False, ThemeMessage("theme_err_missing_files", "Missing files: {}", ", ".join(sorted(missing)))
 
             return True, meta.name
 
     except zipfile.BadZipFile:
-        return False, "The file is not a valid ZIP archive."
+        return False, ThemeMessage("theme_err_invalid_zip", "The file is not a valid ZIP archive.")
     except Exception as e:
-        return False, f"Error during import : {e}"
+        return False, ThemeMessage("theme_err_import_failed", "Error during import: {}", str(e))
 
 
 def remove_theme(folder_name: str) -> tuple[bool, str]:
     theme_dir = CUSTOM_THEMES_DIR / folder_name
     if not theme_dir.exists():
-        return False, "Theme not found."
+        return False, ThemeMessage("theme_err_not_found", "Theme not found.")
     import shutil
 
     shutil.rmtree(theme_dir)
@@ -245,11 +248,3 @@ def _sanitize_folder_name(name: str) -> str:
     return s[:50] or "custom_theme"
 
 
-def read_theme_preview(theme_path: Path) -> bytes | None:
-    meta = _read_metadata(theme_path)
-    if not meta or not meta.preview:
-        return None
-    preview_path = theme_path / meta.preview
-    if not preview_path.exists():
-        return None
-    return preview_path.read_bytes()

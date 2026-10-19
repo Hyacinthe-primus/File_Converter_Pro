@@ -25,6 +25,12 @@ QGroupBox::title {
 
 QLabel { color: #e6edf3; background: transparent; }
 
+QLabel#TemplateDetailsHeader {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e6edf3;
+}
+
 /* inputs */
 QLineEdit, QSpinBox, QTextEdit, QPlainTextEdit {
     background-color: #0d1117;

@@ -391,13 +391,22 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         self.setup_ui()
         self.load_statistics()
         self._apply_global_style()
+        parent = self.parent()
+        if parent is not None and hasattr(parent, "theme_changed"):
+            parent.theme_changed.connect(self._apply_global_style)
 
     def _get_dark_mode(self):
         return hasattr(self.parent(), "dark_mode") and self.parent().dark_mode
 
     def _apply_global_style(self):
         arrow_svg = _get_asset_path("Assets/down-arrow.svg")
-        qss = _load_qss("dashboard.qss", "dark" if self._dark else "light")
+        parent = self.parent()
+        custom_theme = getattr(parent, "current_theme", None) if parent else None
+        if custom_theme and custom_theme not in ("dark", "light"):
+            theme = custom_theme
+        else:
+            theme = "dark" if self._dark else "light"
+        qss = _load_qss("dashboard.qss", theme)
         self.setStyleSheet(qss.replace("{arrow_svg}", arrow_svg))
 
     def setup_ui(self):

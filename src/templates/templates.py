@@ -74,15 +74,21 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self.load_templates()
         self.setup_shortcuts()
         self.apply_theme_style()
+        parent = self.parent_window
+        if parent is not None and hasattr(parent, "theme_changed"):
+            parent.theme_changed.connect(self.apply_theme_style)
 
     def apply_theme_style(self):
-        """Apply style matching the main app theme (dark or light)."""
-        dark = hasattr(self.parent_window, "dark_mode") and self.parent_window.dark_mode
+        """Apply style matching the main app theme (dark, light, or custom)."""
+        parent = self.parent_window
+        custom_theme = getattr(parent, "current_theme", None) if parent else None
+        if custom_theme and custom_theme not in ("dark", "light"):
+            theme = custom_theme
+        else:
+            dark = hasattr(parent, "dark_mode") and parent.dark_mode
+            theme = "dark" if dark else "light"
 
-        self.setStyleSheet(_load_qss("templates.qss", "dark" if dark else "light"))
-        self.details_header.setStyleSheet(
-            f"font-size: 16px; font-weight: bold; color: {'#e6edf3' if dark else '#1f2328'};"
-        )
+        self.setStyleSheet(_load_qss("templates.qss", theme))
 
     def setup_shortcuts(self):
         """Configure keyboard shortcuts"""
@@ -257,7 +263,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self._header_row_layout.addWidget(self._header_icon_label, 0, Qt.AlignVCenter)
 
         self.details_header = QLabel(self.translate_text("Sélectionnez un template pour voir ses détails"))
-        self.details_header.setStyleSheet("font-size: 16px; font-weight: bold;")
+        self.details_header.setObjectName("TemplateDetailsHeader")
         self._header_row_layout.addWidget(self.details_header, 0, Qt.AlignVCenter)
         self._header_row_layout.addStretch()
 
@@ -802,7 +808,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
         file_extensions = {
             self.translate_text("Conversion PDF→Word"): [".pdf"],
-            self.translate_text("Conversion Word→PDF"): [".docx", ".doc"],
+            self.translate_text("Conversion Word→PDF"): [".docx", ".doc", ".odt"],
             self.translate_text("Conversion Images→PDF"): [
                 ".png",
                 ".jpeg",
@@ -831,7 +837,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 ".jfif",
             ],
             self.translate_text("Fusion PDF"): [".pdf"],
-            self.translate_text("Fusion Word"): [".docx", ".doc"],
+            self.translate_text("Fusion Word"): [".docx", ".doc", ".odt"],
             self.translate_text("Division PDF"): [".pdf"],
             self.translate_text("Protection PDF"): [".pdf"],
             self.translate_text("Compression"): [".*"],

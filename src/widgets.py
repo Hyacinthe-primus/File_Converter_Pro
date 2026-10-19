@@ -88,10 +88,6 @@ class AnimatedCheckBox(QCheckBox):
 
     rippleProgress = Property(float, _get_ripple, _set_ripple)
 
-    def setDarkTheme(self, dark: bool):
-        self._is_dark = dark
-        self.update()
-
     def setWordWrap(self, wrap: bool):
         """Wrap the label text onto multiple lines when it overflows its width."""
         self._word_wrap = wrap
@@ -419,11 +415,6 @@ class DraggableListWidget(QListWidget):
         self._glitch_timer.timeout.connect(self._tick_glitch)
         self._glitch_timer.start()
 
-    def set_translation_manager(self, tm):
-        """Inject or replace the TranslationManager (called from app)."""
-        self._tm = tm
-        self.viewport().update()
-
     def set_language(self, _lang: str = None):
         """Called by the app when language changes.
         The actual language state lives in the TranslationManager; we just
@@ -540,13 +531,10 @@ class DraggableListWidget(QListWidget):
 
         art = self._ASCII_ART
 
-        app = self._find_app()
-        dark = getattr(app, "dark_mode", True) if app else True
-        if dark:
-            bg = QColor(18, 18, 24)
-        else:
-            bg = QColor(245, 245, 252)
-        painter.fillRect(0, 0, w, h, bg)
+        # Background is already painted by the theme's QSS (super().paintEvent);
+        # reuse that color instead of overriding it with a hardcoded one.
+        vp = self.viewport()
+        bg = vp.palette().color(vp.backgroundRole())
 
         longest = max(len(line) for line in art) if art else 1
         font = painter.font()
