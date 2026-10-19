@@ -10,6 +10,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 _BATCH_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".tif", ".webp"}
+_OPENDOCUMENT_EXTS = {".odt", ".ods", ".odp"}
 _ENGINE_TO_PDF = {
     ".txt": "txt_to_pdf",
     ".rtf": "rtf_to_pdf",
@@ -124,14 +125,6 @@ class BatchMixin:
                     f"{success_count}/{len(files)} {self.translate_text('files converted to')} "
                     f"{self.translate_text(target_label)} ({total_time:.1f}s)",
                 )
-                template_type_map = {
-                    "pdf": "Conversion Word→PDF",
-                    "docx": "Conversion PDF→Word",
-                    "png": "Optimisation de fichiers",
-                }
-                tt = template_type_map.get(target_format)
-                if tt:
-                    self.maybe_auto_save_template(tt)
             else:
                 QMessageBox.warning(
                     self,

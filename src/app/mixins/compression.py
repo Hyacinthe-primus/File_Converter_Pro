@@ -281,6 +281,19 @@ class CompressionMixin(ArchiveEnginesMixin):
             )
 
         if success:
+            self.record_config_usage(
+                "Compression",
+                {
+                    "format": self._ui_label_to_key(archive_format, ["ZIP", "7Z", "TAR.GZ", "TAR"]),
+                    "compression_level": self._ui_label_to_key(
+                        compression_level, ["Normal", "Haute compression", "Compression maximale"]
+                    ),
+                    "encrypt": bool(use_password),
+                    "delete_originals": bool(delete_originals),
+                    "split_archive": bool(split_size),
+                    "split_size": split_size or 0,
+                },
+            )
             conversion_time = (datetime.now() - start_time).total_seconds()
 
             operation_type = "Compression (selection)" if selected_items else "Compression (all)"

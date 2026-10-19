@@ -41,7 +41,7 @@ DEFAULT_CONFIG: dict = {
     "pdf_to_word_mode": "with_images",
     "show_dashboard_on_startup": False,
     "keep_history_days": 365,
-    "auto_save_templates": True,
+    "auto_save_configs": True,
     "separate_image_pdfs": False,
     "use_system_theme": True,
     "image_to_icon_layer": "multi",

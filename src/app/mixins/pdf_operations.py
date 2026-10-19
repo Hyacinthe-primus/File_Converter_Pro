@@ -72,6 +72,7 @@ class PdfOperationsMixin:
             merged_doc = fitz.open(output_file)
             self.achievement_system.record_pdf_merge(len(merged_doc))
             merged_doc.close()
+            self.record_config_usage("Fusion PDF", {"merge_order": dialog.get_order_key()})
             self.show_progress(False)
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("merge_pdf")
@@ -144,6 +145,7 @@ class PdfOperationsMixin:
                 success=True,
             )
             self.achievement_system.record_conversion("merge_word", total_size, True)
+            self.record_config_usage("Fusion Word", {"merge_order": dialog.get_order_key()})
             QMessageBox.information(
                 self,
                 self.translate_text("Succès"),
@@ -234,6 +236,12 @@ class PdfOperationsMixin:
 
             pdf_document.close()
             self.achievement_system.record_pdf_split(total_pages)
+            if method == 0:
+                self.record_config_usage(
+                    "Division PDF", {"split_method": "Par pages", "pages_per_file": dialog.page_interval.value()}
+                )
+            elif method == 1:
+                self.record_config_usage("Division PDF", {"split_method": "Toutes les pages"})
             if not silent:
                 if self.config.get("enable_system_notifications", True):
                     self.system_notifier.send("split_pdf")

@@ -12,8 +12,8 @@ Responsibilities:
 """
 
 import json
-import time
-from datetime import datetime
+
+from .frequent_configs import FrequentConfigTracker
 
 
 class TemplateManager:
@@ -371,66 +371,6 @@ class TemplateManager:
 
         return config
 
-    def apply_pdf_to_word_template(self, config, parent_app):
-        """Apply a PDF to Word conversion template"""
-        mode_map = {
-            "Conserver les images et la mise en page": "with_images",
-            "Texte brut uniquement": "text_only",
-        }
-
-        mode = config.get("mode", "Conserver les images et la mise en page")
-        parent_app.config["pdf_to_word_mode"] = mode_map.get(mode, "with_images")
-
-        quality_map = {"Haute qualité": "high", "Qualité standard": "standard", "Optimisé pour la taille": "optimized"}
-        quality = config.get("quality", "Qualité standard")
-        parent_app.config["conversion_quality"] = quality_map.get(quality, "standard")
-
-        parent_app.config_manager.save_config(parent_app.config)
-
-    def apply_word_to_pdf_template(self, config, parent_app):
-        """Apply a Word to PDF conversion template"""
-        if not hasattr(parent_app, "active_templates"):
-            parent_app.active_templates = {}
-
-        parent_app.active_templates["word_to_pdf"] = config
-
-        page_format_map = {"A4": "a4", "Lettre": "letter", "A3": "a3", "Personnalisé": "custom"}
-
-        orientation_map = {"Portrait": "portrait", "Paysage": "landscape"}
-
-        quality_map = {"Haute (300 DPI)": 300, "Standard (150 DPI)": 150, "Basse (72 DPI)": 72}
-
-        config["page_format_value"] = page_format_map.get(config.get("page_format", "A4"), "a4")
-        config["orientation_value"] = orientation_map.get(config.get("orientation", "Portrait"), "portrait")
-        config["quality_value"] = quality_map.get(config.get("quality", "Standard (150 DPI)"), 150)
-
-    def apply_pdf_merge_template(self, config, parent_app):
-        """Apply a PDF merge template"""
-        if not hasattr(parent_app, "active_templates"):
-            parent_app.active_templates = {}
-
-        parent_app.active_templates["pdf_merge"] = config
-
-        name_template = config.get("name_template", "fusion_{date}_{heure}")
-        if "{date}" in name_template:
-            name_template = name_template.replace("{date}", datetime.now().strftime("%Y%m%d"))
-        if "{heure}" in name_template:
-            name_template = name_template.replace("{heure}", datetime.now().strftime("%H%M%S"))
-        if "{timestamp}" in name_template:
-            name_template = name_template.replace("{timestamp}", str(int(time.time())))
-
-        config["processed_name"] = name_template
-
-    def apply_quality_template(self, config, parent_app):
-        """Apply a quality preset template"""
-        quality_map = {"Haute qualité": "high", "Qualité standard": "standard", "Compressé": "compressed"}
-
-        parent_app.config["conversion_quality"] = quality_map.get(
-            config.get("preset_type", "Qualité standard"), "standard"
-        )
-        parent_app.config["compression_level"] = config.get("compression", 50)
-        parent_app.config_manager.save_config(parent_app.config)
-
     def get_default_template(self, template_type):
         """Return the (id, template) of the default template for a given type, or (None, None)."""
         template_type = self.normalize_type(template_type)
@@ -454,9 +394,19 @@ class TemplateManager:
                     self.db_manager.update_template_config(tid, json.dumps(tpl["config"]))
 
     def delete_template(self, template_id):
-        """Delete a template"""
+        """Delete a template. Deleting an auto-created one also stops it from being auto-created again."""
+        template = self.get_template_by_id(template_id)
+        if template and FrequentConfigTracker.is_auto_template(template):
+            FrequentConfigTracker(self).dismiss(template["type"], template["config"])
         self.db_manager.delete_template(template_id)
         self.load_templates()
+
+    def record_config_usage(self, template_type, config, label=None):
+        """Register one successful use of a configuration (may auto-create a template).
+
+        See templates.frequent_configs for the rules. Returns a RecordResult.
+        """
+        return FrequentConfigTracker(self).record(template_type, config, label)
 
     def export_templates(self, filepath):
         """Export all templates to a JSON file"""
@@ -501,73 +451,4 @@ class TemplateManager:
             print(f"Error importing templates: {e}")
             return 0
 
-    AUTO_SAVE_PREFIX = "[Auto] "
 
-    def auto_save_config(self, template_type: str, parent_app) -> bool:
-        """
-        Save or update an auto-generated template for the given type.
-        Returns True if a template was created or updated.
-        """
-        try:
-            config = self._build_config_from_app(template_type, parent_app)
-            if not config:
-                return False
-
-            existing = self.get_templates_by_type(template_type)
-            auto_name = f"{self.AUTO_SAVE_PREFIX}{template_type}"
-
-            for tid, tpl in existing.items():
-                if tpl["name"] == auto_name:
-                    self.db_manager.update_template_config(tid, json.dumps(config))
-                    self.load_templates()
-                    return True
-
-            self.db_manager.save_template(auto_name, template_type, config)
-            self.load_templates()
-            return True
-
-        except Exception as e:
-            print(f"Error auto-saving config: {e}")
-            return False
-
-    def _build_config_from_app(self, template_type: str, parent_app) -> dict | None:
-        """Build a config dict from the app's current settings for auto-save."""
-        cfg = parent_app.config
-
-        if template_type == "Conversion PDF→Word":
-            return {
-                "mode": cfg.get("pdf_to_word_mode", "with_images"),
-                "quality": cfg.get("conversion_quality", "standard"),
-                "keep_bookmarks": True,
-                "extract_images": False,
-            }
-        if template_type == "Conversion Word→PDF":
-            return {
-                "mode": cfg.get("word_to_pdf_mode", "preserve_all"),
-                "quality": "Standard (150 DPI)",
-                "compress_images": True,
-                "include_metadata": True,
-            }
-        if template_type == "Conversion Images→PDF":
-            return {
-                "separate": cfg.get("separate_image_pdfs", False),
-                "quality": "Standard (150 DPI)",
-            }
-        if template_type == "Compression":
-            return {
-                "format": "ZIP",
-                "compression_level": cfg.get("compression_level", "normal"),
-                "encrypt": False,
-                "delete_originals": False,
-                "split_archive": False,
-                "split_size": 0,
-            }
-        if template_type == "Optimisation de fichiers":
-            return {
-                "optimization_type": 2,
-                "quality_level": 1,
-                "remove_metadata": True,
-                "compress_images": True,
-                "keep_backup": True,
-            }
-        return None

@@ -94,7 +94,6 @@ class AppLogicMixin(
                 sys.exit(0)
 
         self.db_manager = DatabaseManager()
-        self.template_settings = {}
         self.template_manager = None
 
         self.adv_db_manager = None
@@ -236,17 +235,28 @@ class AppLogicMixin(
                 print(f"[ERROR] Could not delete temporary file {temp_file}: {e}")
         self.temp_files.clear()
 
-    def maybe_auto_save_template(self, template_type: str) -> None:
-        """Auto-save current config as a template if the setting is enabled."""
-        if not self.config.get("auto_save_templates", True):
+    def record_config_usage(self, template_type: str, config: dict) -> None:
+        """Report the configuration an operation just completed with.
+
+        Configs used often enough become a template (see templates.frequent_configs):
+        never a duplicate of an existing template, capped per type.
+        """
+        if not self.config.get("auto_save_configs", True):
             return
         tm = self._ensure_template_manager()
         if tm is None:
             return
         try:
-            tm.auto_save_config(template_type, self)
+            tm.record_config_usage(template_type, config, self.translate_text(template_type))
         except Exception as e:
-            print(f"[AUTO-SAVE] Failed to auto-save template: {e}")
+            print(f"[AUTO-SAVE] Could not record configuration usage: {e}")
+
+    def _ui_label_to_key(self, value, source_keys):
+        """Map a (possibly translated) UI label back to its French source key."""
+        for key in source_keys:
+            if value == key or value == self.translate_text(key):
+                return key
+        return value
 
     def create_temp_file(self, suffix=".tmp"):
         import tempfile

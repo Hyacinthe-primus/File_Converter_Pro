@@ -31,7 +31,6 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         self._tm = make_tm(language)
         self.files = list(files)
         self.file_type = file_type
-        self._pre_select_key = pre_select_key
         self.setWindowTitle(self.translate_text("Ordre de fusion"))
         self.setMinimumWidth(480)
         self.setMinimumHeight(400)
@@ -103,6 +102,13 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         btn_row.addWidget(cancel_btn)
         btn_row.addWidget(merge_btn)
         lay.addLayout(btn_row)
+
+    def get_order_key(self):
+        """Return the key of the chosen merge order (e.g. "alpha_az", "current")."""
+        for key, radio in self._radio_map.items():
+            if radio.isChecked():
+                return key
+        return "current"
 
     def get_ordered_files(self):
         """Return files in the chosen order."""

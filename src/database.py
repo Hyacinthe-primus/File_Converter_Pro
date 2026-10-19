@@ -76,6 +76,18 @@ class DatabaseManager:
         """)
 
         cursor.execute("""
+        CREATE TABLE IF NOT EXISTS config_usage (
+            template_type TEXT NOT NULL,
+            config_hash TEXT NOT NULL,
+            config_data TEXT,
+            use_count INTEGER DEFAULT 0,
+            last_used DATETIME,
+            status TEXT DEFAULT 'counting',
+            PRIMARY KEY (template_type, config_hash)
+        )
+        """)
+
+        cursor.execute("""
         CREATE TABLE IF NOT EXISTS daily_stats (
             date DATE PRIMARY KEY,
             total_conversions INTEGER DEFAULT 0,
@@ -344,4 +356,64 @@ class DatabaseManager:
         conn = self._conn
         cursor = conn.cursor()
         cursor.execute("DELETE FROM templates WHERE id = ?", (template_id,))
+        conn.commit()
+
+    # ------------------------------------------------------------------
+    # Frequent-configuration tracking (drives auto-created templates)
+    # ------------------------------------------------------------------
+
+    def get_config_usage(self, template_type, config_hash):
+        """Return (use_count, status) for a tracked config, or None if never seen."""
+        cursor = self._conn.cursor()
+        cursor.execute(
+            "SELECT use_count, status FROM config_usage WHERE template_type = ? AND config_hash = ?",
+            (template_type, config_hash),
+        )
+        return cursor.fetchone()
+
+    def increment_config_usage(self, template_type, config_hash, config_data):
+        """Count one more use of a config and return the new total."""
+        conn = self._conn
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+        INSERT INTO config_usage (template_type, config_hash, config_data, use_count, last_used)
+        VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)
+        ON CONFLICT(template_type, config_hash)
+        DO UPDATE SET use_count = use_count + 1, last_used = CURRENT_TIMESTAMP
+        """,
+            (template_type, config_hash, json.dumps(config_data)),
+        )
+        conn.commit()
+        row = self.get_config_usage(template_type, config_hash)
+        return row[0] if row else 1
+
+    def set_config_usage_status(self, template_type, config_hash, status, config_data=None, reset_count=False):
+        """Set a config's status ('counting', 'promoted' or 'dismissed'); creates the row if needed."""
+        conn = self._conn
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+        INSERT INTO config_usage (template_type, config_hash, config_data, use_count, last_used, status)
+        VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP, ?)
+        ON CONFLICT(template_type, config_hash)
+        DO UPDATE SET status = excluded.status
+        """,
+            (template_type, config_hash, json.dumps(config_data) if config_data is not None else None, status),
+        )
+        if reset_count:
+            cursor.execute(
+                "UPDATE config_usage SET use_count = 0 WHERE template_type = ? AND config_hash = ?",
+                (template_type, config_hash),
+            )
+        conn.commit()
+
+    def prune_config_usage(self, days=90):
+        """Forget configs that were counted but never became frequent and haven't been used for `days`."""
+        conn = self._conn
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM config_usage WHERE status = 'counting' AND last_used < datetime('now', ?)",
+            (f"-{int(days)} days",),
+        )
         conn.commit()

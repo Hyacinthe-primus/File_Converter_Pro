@@ -139,6 +139,18 @@ class OptimizationMixin(
         total_time = (datetime.now() - start_time).total_seconds()
         self.show_progress(False)
 
+        if success_count > 0:
+            self.record_config_usage(
+                "Optimisation de fichiers",
+                {
+                    "optimization_type": optimization_type,
+                    "quality_level": quality_level,
+                    "remove_metadata": remove_metadata,
+                    "compress_images": compress_images,
+                    "keep_backup": keep_backup,
+                },
+            )
+
         if total_original_size > 0:
             compression_rate = (total_original_size - total_compressed_size) / total_original_size * 100
             savings_mb = (total_original_size - total_compressed_size) / (1024 * 1024)
