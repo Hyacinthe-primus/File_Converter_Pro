@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from qss_helpers import _apply_dialog_btn, _load_qss, get_current_theme
+from qss_helpers import _load_qss, get_current_theme
 from theme_manager import (
     CUSTOM_THEMES_DIR,
     ThemeMessage,
@@ -968,13 +968,13 @@ class SettingsDialog(TranslationMixin, QDialog):
         open_btn = QPushButton("📂 " + self.translate_text("Ouvrir le dossier automation/"))
         open_btn.setProperty("i18n_key", "Ouvrir le dossier automation/")
         open_btn.setMinimumHeight(32)
-        _apply_dialog_btn(open_btn, "BtnOK")
+        open_btn.setObjectName("SettingsAutomationOpenBtn")
         open_btn.clicked.connect(self._open_automation_dir)
 
         reload_btn = QPushButton("🔄 " + self.translate_text("Recharger"))
         reload_btn.setProperty("i18n_key", "Recharger")
         reload_btn.setMinimumHeight(32)
-        _apply_dialog_btn(reload_btn, "BtnIndigo")
+        reload_btn.setObjectName("SettingsAutomationReloadBtn")
         reload_btn.clicked.connect(self._refresh_automation_tab)
 
         btn_row.addWidget(open_btn)

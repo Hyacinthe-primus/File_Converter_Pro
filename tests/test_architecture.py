@@ -40,6 +40,7 @@ LANG_FILES = [
     "languages/zh.lang",
     "languages/ru.lang",
     "languages/it.lang",
+    "languages/tr.lang",
     "languages/en-revisited.lang",
     "languages/blank.lang",
 ]

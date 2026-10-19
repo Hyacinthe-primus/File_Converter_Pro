@@ -173,3 +173,29 @@ class TestSettingsImportButtonQss:
                 "QPushButton#SettingsImportBtn:pressed",
             ):
                 assert selector in qss, f"{theme}/settings.qss is missing {selector}"
+
+
+class TestSettingsAutomationButtonQss:
+    """The automation folder / reload buttons must be themeable through settings.qss."""
+
+    def test_automation_buttons_use_settings_object_names(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1]
+        src = (root / "src" / "dialogs" / "settings_dialog.py").read_text(encoding="utf-8")
+        assert 'setObjectName("SettingsAutomationOpenBtn")' in src
+        assert 'setObjectName("SettingsAutomationReloadBtn")' in src
+        assert "_apply_dialog_btn(open_btn" not in src
+        assert "_apply_dialog_btn(reload_btn" not in src
+
+    def test_builtin_themes_style_the_automation_buttons(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1]
+        themes = root / "src" / "styles" / "themes"
+        for theme in ("dark", "light"):
+            qss = (themes / theme / "settings.qss").read_text(encoding="utf-8")
+            for name in ("SettingsAutomationOpenBtn", "SettingsAutomationReloadBtn"):
+                for suffix in (" {", ":hover", ":pressed"):
+                    selector = f"QPushButton#{name}{suffix}"
+                    assert selector in qss, f"{theme}/settings.qss is missing {selector}"

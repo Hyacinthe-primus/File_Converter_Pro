@@ -319,3 +319,19 @@ QPushButton#SettingsImportBtn {
 }
 QPushButton#SettingsImportBtn:hover { background-color: #388bfd; color: #ffffff; }
 QPushButton#SettingsImportBtn:pressed { background-color: #1158c7; color: #ffffff; }
+
+/* Settings dialog: automation action buttons */
+QPushButton#SettingsAutomationOpenBtn {
+    background-color: #10B981; color: #ffffff; border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+QPushButton#SettingsAutomationOpenBtn:hover { background-color: #059669; }
+QPushButton#SettingsAutomationOpenBtn:pressed { background-color: #047857; }
+QPushButton#SettingsAutomationReloadBtn {
+    background-color: #1f3a6e; color: #79c0ff; border: 1px solid #388bfd;
+    padding: 8px 16px; border-radius: 6px; font-weight: bold;
+}
+QPushButton#SettingsAutomationReloadBtn:hover { background-color: #388bfd; color: #ffffff; }
+QPushButton#SettingsAutomationReloadBtn:pressed { background-color: #1158c7; color: #ffffff; }
