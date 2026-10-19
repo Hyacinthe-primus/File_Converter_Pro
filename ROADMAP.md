@@ -79,8 +79,8 @@ ODT, ODS, and ODP files are now fully supported in Advanced Conversions:
 
 OpenDocument extensions are recognized in the file picker, context menu, notifications, and achievements.
 
-### Auto-Save Frequent Configurations
-When enabled in Settings, batch conversions automatically save the current configuration as an `[Auto]` template for that conversion type. The template updates each time you convert, so your preferred settings are always one click away.
+### Frequent-Configuration Templates
+When enabled in Settings, the app tracks how often each conversion configuration is used. Configurations used often enough are promoted to an `[Auto]` template automatically: duplicates of existing templates are skipped, and the number of auto templates is capped per conversion type. Deleting an auto template dismisses it so it is not recreated.
 
 ### Automatic Temp File Cleanup
 Temporary files created during conversion are now tracked and cleaned up automatically — both when the app closes and at the start of each batch conversion. Can be toggled in Settings.
@@ -95,7 +95,7 @@ The Advanced Conversions dialog now fully supports custom themes. All styling is
 The logo label now updates its color immediately when switching between dark, light, and custom themes. Previously it required an app restart to reflect the correct color.
 
 ### Expanded Test Suite
-279 tests covering the conversion engine, fallback chains, architecture invariants, external binary resolution, achievements isolation, OpenDocument conversions, custom theme support, and cross-platform compatibility.
+350 tests covering the conversion engine, fallback chains, architecture invariants, external binary resolution, achievements isolation, OpenDocument conversions, custom theme support, and cross-platform compatibility.
 
 ---
 
