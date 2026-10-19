@@ -146,5 +146,102 @@ class OfficeComConverters:
         return self._office_to_pdf_com(src, dst, "Excel.Application")
 
     def _pptx_to_pdf_com(self, src: str, dst: str) -> bool:
-        """PowerPoint → PDF via Microsoft Office COM automation (Windows + Office)."""
+        """PowerPoint -> PDF via Microsoft Office COM automation (Windows + Office)."""
+        return self._office_to_pdf_com(src, dst, "PowerPoint.Application")
+
+    def _odt_to_pdf_com(self, src: str, dst: str) -> bool:
+        """ODT -> PDF via Microsoft Word COM automation (Windows + Office)."""
+        return self._office_to_pdf_com(src, dst, "Word.Application")
+
+    def _odt_to_docx_com(self, src: str, dst: str) -> bool:
+        """ODT -> DOCX via Microsoft Word COM automation (Windows + Office)."""
+        try:
+            import comtypes
+            import comtypes.client
+
+            src_abs = str(Path(src).resolve())
+            dst_abs = str(Path(dst).resolve())
+            WD_DOCX = 16
+
+            app = comtypes.client.CreateObject("Word.Application")
+            try:
+                app.Visible = False
+            except Exception:
+                pass
+            try:
+                doc = app.Documents.Open(src_abs)
+                try:
+                    doc.SaveAs2(dst_abs, WD_DOCX)
+                finally:
+                    doc.Close(False)
+            finally:
+                app.Quit()
+            return Path(dst).exists()
+        except Exception as e:
+            print(f"[COM] Word ODT->DOCX failed: {e}")
+            return False
+
+    def _ods_to_xlsx_com(self, src: str, dst: str) -> bool:
+        """ODS -> XLSX via Microsoft Excel COM automation (Windows + Office)."""
+        try:
+            import comtypes
+            import comtypes.client
+
+            src_abs = str(Path(src).resolve())
+            dst_abs = str(Path(dst).resolve())
+            XL_XLSX = 51
+
+            app = comtypes.client.CreateObject("Excel.Application")
+            try:
+                app.Visible = False
+            except Exception:
+                pass
+            app.DisplayAlerts = False
+            try:
+                wb = app.Workbooks.Open(src_abs)
+                try:
+                    wb.SaveAs(dst_abs, XL_XLSX)
+                finally:
+                    wb.Close(False)
+            finally:
+                app.Quit()
+            return Path(dst).exists()
+        except Exception as e:
+            print(f"[COM] Excel ODS->XLSX failed: {e}")
+            return False
+
+    def _odp_to_pptx_com(self, src: str, dst: str) -> bool:
+        """ODP -> PPTX via Microsoft PowerPoint COM automation (Windows + Office)."""
+        try:
+            import comtypes
+            import comtypes.client
+
+            src_abs = str(Path(src).resolve())
+            dst_abs = str(Path(dst).resolve())
+            PP_PPTX = 24
+
+            app = comtypes.client.CreateObject("PowerPoint.Application")
+            try:
+                app.Visible = -1
+            except Exception:
+                pass
+            try:
+                prs = app.Presentations.Open(src_abs, WithWindow=False)
+                try:
+                    prs.SaveAs(dst_abs, PP_PPTX)
+                finally:
+                    prs.Close()
+            finally:
+                app.Quit()
+            return Path(dst).exists()
+        except Exception as e:
+            print(f"[COM] PowerPoint ODP->PPTX failed: {e}")
+            return False
+
+    def _ods_to_pdf_com(self, src: str, dst: str) -> bool:
+        """ODS -> PDF via Microsoft Excel COM automation (Windows + Office)."""
+        return self._office_to_pdf_com(src, dst, "Excel.Application")
+
+    def _odp_to_pdf_com(self, src: str, dst: str) -> bool:
+        """ODP -> PDF via Microsoft PowerPoint COM automation (Windows + Office)."""
         return self._office_to_pdf_com(src, dst, "PowerPoint.Application")

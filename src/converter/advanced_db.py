@@ -367,6 +367,12 @@ class AdvancedDatabaseManager:
             "html_to_pdf": "HTML→PDF",
             "pdf_to_html": "PDF→HTML",
             "epub_to_pdf": "EPUB→PDF",
+            "odt_to_docx": "ODT→DOCX",
+            "ods_to_xlsx": "ODS→XLSX",
+            "odp_to_pptx": "ODP→PPTX",
+            "odt_to_pdf": "ODT→PDF",
+            "ods_to_pdf": "ODS→PDF",
+            "odp_to_pdf": "ODP→PDF",
             # Images
             "image_to_png": "Image→PNG",
             "image_to_jpeg": "Image→JPEG",

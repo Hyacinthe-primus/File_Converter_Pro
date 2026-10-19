@@ -26,7 +26,7 @@ def _compare_versions(a: str, b: str) -> int:
     """Compare two dotted version strings numerically.
 
     Returns negative if a < b, 0 if equal, positive if a > b.
-    Non-numeric segments (e.g. "1.0.7-rc1") are ignored for ordering.
+    Non-numeric segments (e.g. "1.0.8-rc1") are ignored for ordering.
     """
     a_parts = [int(p) for p in re.findall(r"\d+", a)]
     b_parts = [int(p) for p in re.findall(r"\d+", b)]
@@ -103,10 +103,6 @@ class QtNotifier:
             self.tray.show()
         else:
             print("[NOTIFIER] No system tray available — desktop notifications disabled")
-
-    def notify(self, title: str, message: str) -> None:
-        if self.tray is not None:
-            self.tray.showMessage(title, message)
 
     def notify_with_actions(self, title: str, message: str, actions: list) -> None:
         if self.tray is None:
@@ -249,6 +245,12 @@ class SystemNotifier:
             "html_to_pdf": "HTML → PDF",
             "pdf_to_html": "PDF → HTML",
             "epub_to_pdf": "EPUB → PDF",
+            "odt_to_docx": "ODT → DOCX",
+            "ods_to_xlsx": "ODS → XLSX",
+            "odp_to_pptx": "ODP → PPTX",
+            "odt_to_pdf": "ODT → PDF",
+            "ods_to_pdf": "ODS → PDF",
+            "odp_to_pdf": "ODP → PDF",
             "image_to_png": "Image → PNG",
             "image_to_jpeg": "Image → JPEG",
             "image_to_jpg": "Image → JPG",
@@ -343,32 +345,6 @@ class SystemNotifier:
             import traceback
 
             traceback.print_exc()
-            return False
-
-    def send_custom(
-        self,
-        title: str,
-        message: str,
-        operation_type: str | None = None,
-        duration: str = "short",
-    ) -> bool:
-        """Send a custom notification (for advanced use)."""
-        if operation_type and not self.should_notify(operation_type):
-            return False
-
-        try:
-            self._bridge.notify_request.emit(
-                title,
-                message,
-                self._repo_button_label(),
-                self.REPO_URL,
-                duration,
-            )
-            self._play_sound()
-            return True
-
-        except Exception as e:
-            print(f"[NOTIFIER] Custom notification error: {e}")
             return False
 
     def check_and_notify_update(self) -> bool:

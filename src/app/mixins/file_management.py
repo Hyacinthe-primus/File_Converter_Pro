@@ -27,15 +27,11 @@ class FileManagementMixin:
 
     ICON_MAPPING = {
         ".pdf": ("pdf.ico", "📄"),
-        ".doc": ("word.ico", "📝"),
-        ".docx": ("word.ico", "📝"),
+        **{ext: ("word.ico", "📝") for ext in [".doc", ".docx", ".odt"]},
+        **{ext: ("pptx.ico", "📎") for ext in [".ppt", ".pptx", ".odp"]},
+        **{ext: ("xlsx.ico", "📎") for ext in [".xls", ".xlsx", ".ods"]},
+        **{ext: ("txt.ico", "📝") for ext in [".txt", ".md", ".markdown"]},
         ".rtf": ("rtf.ico", "📝"),
-        ".txt": ("txt.ico", "📝"),
-        ".md": ("txt.ico", "📝"),
-        ".markdown": ("txt.ico", "📝"),
-        ".ppt": ("pptx.ico", "📎"),
-        ".pptx": ("pptx.ico", "📎"),
-        ".xlsx": ("xlsx.ico", "📎"),
         ".csv": ("csv.ico", "📎"),
         ".epub": ("epub.ico", "📎"),
         ".html": ("html.ico", "📎"),
@@ -87,7 +83,7 @@ class FileManagementMixin:
             "",
             self.translate_text(
                 "Tous les fichiers supportés ("
-                "*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls "
+                "*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.odt *.ods *.odp "
                 "*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif "
                 "*.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 "
                 "*.mp3 *.wav *.aac *.flac *.ogg *.m4a "
@@ -95,7 +91,7 @@ class FileManagementMixin:
                 "*.html *.htm *.epub *.rtf *.txt *.md *.markdown "
                 "*.csv *.json "
                 "*.zip *.rar *.tar *.gz);;"
-                "Documents (*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.rtf *.txt *.md *.markdown *.epub *.html *.htm);;"  # noqa: E501
+                "Documents (*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.odt *.ods *.odp *.rtf *.txt *.md *.markdown *.epub *.html *.htm);;"  # noqa: E501
                 "PDF Files (*.pdf);;"
                 "Word / RTF (*.docx *.doc *.rtf *.txt);;"
                 "PowerPoint (*.pptx *.ppt);;"
@@ -232,6 +228,9 @@ class FileManagementMixin:
             ".ppt",
             ".xlsx",
             ".xls",
+            ".odt",
+            ".ods",
+            ".odp",
             ".epub",
             ".html",
             ".htm",

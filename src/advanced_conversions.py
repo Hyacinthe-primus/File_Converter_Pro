@@ -310,7 +310,6 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self._progress_widget.setVisible(True)
         self._cancel_btn.setEnabled(True)
         self._current_conversion_type = conversion_type
-        self._last_ok = 0
 
         _ach_sys = getattr(self.parent_window, "achievement_system", None)
         worker = _ConversionWorker(
@@ -472,7 +471,18 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
             (
                 self.tr_("EPUB (E-book)"),
                 [
-                    ("📚 EPUB → PDF", "epub_to_pdf", [".epub"]),
+                    ("EPUB → PDF", "epub_to_pdf", [".epub"]),
+                ],
+            ),
+            (
+                self.tr_("OpenDocument"),
+                [
+                    ("ODT → DOCX", "odt_to_docx", [".odt"]),
+                    ("ODS → XLSX", "ods_to_xlsx", [".ods"]),
+                    ("ODP → PPTX", "odp_to_pptx", [".odp"]),
+                    ("ODT → PDF", "odt_to_pdf", [".odt"]),
+                    ("ODS → PDF", "ods_to_pdf", [".ods"]),
+                    ("ODP → PDF", "odp_to_pdf", [".odp"]),
                 ],
             ),
         ]

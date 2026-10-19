@@ -265,7 +265,7 @@ class AppUIMixin(
         print("Launching file optimization")
 
         SUPPORTED_EXTS = {
-            "office": [".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls"],
+            "office": [".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".odt", ".ods", ".odp"],
             "image": [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".gif"],
             "audio": [".mp3", ".wav", ".aac", ".flac", ".ogg"],
             "video": [".mp4", ".avi", ".mkv", ".mov", ".webm"],
@@ -1266,12 +1266,6 @@ class AppUIMixin(
                 dlg.exec()
         except Exception as e:
             print(f"[DONOR] Could not show thank-you dialog: {e}")
-
-    def show_achievement_popup(self, achievement):
-        """Display the achievement acquisition popup"""
-        popup = AchievementPopup(achievement, self.achievement_system, self, language=self.current_language)
-        popup.set_translator(self.translation_manager)
-        popup.show()
 
     def show_achievements_admin(self):
         from achievements.achievements_manager import QuickAchievementsReset

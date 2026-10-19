@@ -1,12 +1,18 @@
-"""Document converters: txt, rtf, csv, json, xlsx, pptx."""
+"""Document converters: txt, rtf, csv, json, xlsx, pptx, odt, ods, odp."""
 
 from __future__ import annotations
 
 import csv
 import json
 import re
+import subprocess
+import zipfile
 from html import escape
 from pathlib import Path
+
+from external_binaries import resolve_binary
+
+_NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
 
 _MD_HTML_STYLE = """
   <style>
@@ -511,3 +517,104 @@ class DocumentConverters:
         except Exception as e:
             print(f"[pptx→pdf] {e}")
             return False
+
+    def _soffice_convert(self, src: str, dst: str, out_format: str) -> bool:
+        soffice = resolve_binary("libreoffice")
+        if not soffice:
+            return False
+        try:
+            output_dir = str(Path(dst).parent)
+            subprocess.run(
+                [soffice, "--headless", "--convert-to", out_format, "--outdir", output_dir, src],
+                capture_output=True,
+                text=True,
+                timeout=120,
+                creationflags=_NO_WINDOW,
+            )
+            expected = str(Path(output_dir) / f"{Path(src).stem}.{out_format}")
+            if Path(expected).exists():
+                if str(Path(expected).resolve()) != str(Path(dst).resolve()):
+                    import shutil
+
+                    shutil.move(expected, dst)
+                return True
+            return False
+        except Exception as e:
+            print(f"[soffice] {e}")
+            return False
+
+    def _odt_to_docx(self, src: str, dst: str) -> bool:
+        if self._soffice_convert(src, dst, "docx"):
+            return True
+        try:
+            from docx import Document
+
+            doc = Document()
+            with zipfile.ZipFile(src, "r") as zf:
+                with zf.open("content.xml") as f:
+                    content = f.read().decode("utf-8", errors="replace")
+            text = re.sub(r"<[^>]+>", "", content)
+            text = re.sub(r"\s+", " ", text).strip()
+            for para in text.split("\n"):
+                para = para.strip()
+                if para:
+                    doc.add_paragraph(para)
+            doc.save(dst)
+            return True
+        except Exception as e:
+            print(f"[odt→docx] {e}")
+            return False
+
+    def _ods_to_xlsx(self, src: str, dst: str) -> bool:
+        if self._soffice_convert(src, dst, "xlsx"):
+            return True
+        try:
+            import openpyxl
+
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            with zipfile.ZipFile(src, "r") as zf:
+                with zf.open("content.xml") as f:
+                    content = f.read().decode("utf-8", errors="replace")
+            rows = re.findall(r"<table:table-row[^>]*>(.*?)</table:table-row>", content, re.DOTALL)
+            for row in rows:
+                cells = re.findall(r"<table:table-cell[^>]*>(.*?)</table:table-cell>", row, re.DOTALL)
+                ws.append([re.sub(r"<[^>]+>", "", c).strip() for c in cells])
+            wb.save(dst)
+            return True
+        except Exception as e:
+            print(f"[ods→xlsx] {e}")
+            return False
+
+    def _odp_to_pptx(self, src: str, dst: str) -> bool:
+        if self._soffice_convert(src, dst, "pptx"):
+            return True
+        try:
+            from pptx import Presentation
+
+            prs = Presentation()
+            with zipfile.ZipFile(src, "r") as zf:
+                with zf.open("content.xml") as f:
+                    content = f.read().decode("utf-8", errors="replace")
+            slides = re.findall(r"<draw:page[^>]*>(.*?)</draw:page>", content, re.DOTALL)
+            for slide_content in slides:
+                slide = prs.slides.add_slide(prs.slide_layouts[1])
+                texts = re.findall(r"<text:p[^>]*>(.*?)</text:p>", slide_content, re.DOTALL)
+                for i, t in enumerate(texts):
+                    clean = re.sub(r"<[^>]+>", "", t).strip()
+                    if clean and i < len(slide.placeholders):
+                        slide.placeholders[i].text = clean
+            prs.save(dst)
+            return True
+        except Exception as e:
+            print(f"[odp→pptx] {e}")
+            return False
+
+    def _odt_to_pdf(self, src: str, dst: str) -> bool:
+        return self._soffice_convert(src, dst, "pdf")
+
+    def _ods_to_pdf(self, src: str, dst: str) -> bool:
+        return self._soffice_convert(src, dst, "pdf")
+
+    def _odp_to_pdf(self, src: str, dst: str) -> bool:
+        return self._soffice_convert(src, dst, "pdf")

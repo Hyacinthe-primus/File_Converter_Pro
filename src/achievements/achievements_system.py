@@ -12,7 +12,7 @@ import os
 import sqlite3
 import sys
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
@@ -755,7 +755,7 @@ class AchievementSystem(QObject):
                     "icon": "treasure.png",
                     "category": "advanced_conversions",
                     "tier": "legendary",
-                    "requirement": {"type": "adv_all_types_used", "value": 41},
+                    "requirement": {"type": "adv_all_types_used", "value": 47},
                     "reward_xp": 2000,
                     "secret": False,
                     "unlocked": False,
@@ -1551,14 +1551,6 @@ class AchievementSystem(QObject):
         except Exception as e:
             print(f"[ERROR] Cannot load achievements from DB: {e}")
 
-    def check_flash_gordon(self, files_count, time_seconds):
-        """Checks and triggers Flash Gordon if ≥50 files in ≤300s."""
-        if files_count >= 50 and time_seconds <= 300:
-            print(f"[DEBUG FLASH GORDON] Condition met: {files_count} files in {time_seconds:.2f}s")
-            self.check_achievement("flash_gordon")
-        else:
-            print(f"[DEBUG FLASH GORDON] Failed: {files_count} files in {time_seconds:.2f}s (threshold: ≥50 / ≤300s)")
-
     def unlock_achievement(self, achievement_id):
         try:
             achievement = self.achievements_data["achievements"][achievement_id]
@@ -1678,9 +1670,6 @@ class AchievementSystem(QObject):
     def get_all_achievements(self):
         self.update_all_progress()
         return self.achievements_data["achievements"]
-
-    def get_achievement(self, achievement_id):
-        return self.achievements_data["achievements"].get(achievement_id)
 
     def get_category(self, category_id):
         return self.achievements_data["categories"].get(category_id)
@@ -1913,6 +1902,12 @@ class AchievementSystem(QObject):
         "html_to_pdf": ("adv_doc_conversions", "adv_html_to_pdf", "adv_html_to_pdf_flag"),
         "pdf_to_html": ("adv_doc_conversions", None, "adv_pdf_to_html"),
         "epub_to_pdf": ("adv_doc_conversions", "adv_epub_to_pdf", "adv_epub_to_pdf_flag"),
+        "odt_to_docx": ("adv_doc_conversions", None, "adv_odt_to_docx"),
+        "ods_to_xlsx": ("adv_doc_conversions", None, "adv_ods_to_xlsx"),
+        "odp_to_pptx": ("adv_doc_conversions", None, "adv_odp_to_pptx"),
+        "odt_to_pdf": ("adv_doc_conversions", None, "adv_odt_to_pdf"),
+        "ods_to_pdf": ("adv_doc_conversions", None, "adv_ods_to_pdf"),
+        "odp_to_pdf": ("adv_doc_conversions", None, "adv_odp_to_pdf"),
         # Images (13 types unified image_to_* keys matching CATEGORY_MAP)
         "image_to_png": ("adv_image_conversions", None, "adv_image_to_png"),
         "image_to_jpeg": ("adv_image_conversions", None, "adv_image_to_jpeg"),
@@ -1973,6 +1968,14 @@ class AchievementSystem(QObject):
         "adv_video_to_wav",
         "adv_video_to_aac",
         "adv_video_to_flac",
+    ]
+    _ADV_OPENDOCUMENT_TYPE_FLAGS = [
+        "adv_odt_to_docx",
+        "adv_ods_to_xlsx",
+        "adv_odp_to_pptx",
+        "adv_odt_to_pdf",
+        "adv_ods_to_pdf",
+        "adv_odp_to_pdf",
     ]
 
     _TPL_CATEGORIES = {
@@ -2303,33 +2306,6 @@ class AchievementSystem(QObject):
 
         except Exception as e:
             print(f"Error saving daily stats: {e}")
-
-    def get_daily_stats(self, days=30):
-        try:
-            end_date = datetime.now().date()
-            start_date = end_date - timedelta(days=days - 1)
-
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-
-            cursor.execute(
-                """
-            SELECT date, conversions, previews, dark_mode_minutes
-            FROM daily_stats
-            WHERE date BETWEEN ? AND ?
-            ORDER BY date
-            """,
-                (start_date.isoformat(), end_date.isoformat()),
-            )
-
-            stats = cursor.fetchall()
-            conn.close()
-
-            return stats
-
-        except Exception as e:
-            print(f"Error retrieving daily stats: {e}")
-            return []
 
     def set_language(self, language: str) -> None:
         """Sync language with the app-wide TranslationManager."""

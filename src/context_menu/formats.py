@@ -487,6 +487,9 @@ CONVERSION_MAP: dict = {
     "markdown": ["markdown_to_html"],
     "html": ["html_to_pdf"],
     "epub": ["epub_to_pdf"],
+    "odt": ["odt_to_docx", "odt_to_pdf"],
+    "ods": ["ods_to_xlsx", "ods_to_pdf"],
+    "odp": ["odp_to_pptx", "odp_to_pdf"],
     "csv": ["csv_to_json"],
     "json": ["json_to_csv"],
     # Audio
@@ -602,6 +605,12 @@ LABELS: dict = {
     "html_to_pdf": "HTML → PDF",
     "pdf_to_html": "PDF → HTML",
     "epub_to_pdf": "EPUB → PDF",
+    "odt_to_docx": "ODT → DOCX",
+    "ods_to_xlsx": "ODS → XLSX",
+    "odp_to_pptx": "ODP → PPTX",
+    "odt_to_pdf": "ODT → PDF",
+    "ods_to_pdf": "ODS → PDF",
+    "odp_to_pdf": "ODP → PDF",
     "csv_to_json": "CSV → JSON",
     "json_to_csv": "JSON → CSV",
     # Merge PDF
