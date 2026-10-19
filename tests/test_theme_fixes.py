@@ -246,3 +246,59 @@ class TestSplashScreenTheme:
         for theme in ("dark", "light"):
             qss = _load_qss("splash.qss", theme)
             assert "QFrame#SplashContainer" in qss
+
+
+class TestQuickConvertCardTheme:
+    """The Quick Convert card must use the active theme's window_card.qss."""
+
+    def test_quick_convert_window_loads_themed_card(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1]
+        src = (root / "src" / "context_menu" / "window.py").read_text(encoding="utf-8")
+        assert '_load_qss("window_card.qss", self._theme_name())' in src
+        assert 'config.get("custom_theme")' in src
+        assert 'config.get("dark_mode")' in src
+
+    def test_builtin_themes_style_the_quick_convert_card(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1]
+        themes = root / "src" / "styles" / "themes"
+        for theme in ("dark", "light"):
+            qss = (themes / theme / "window_card.qss").read_text(encoding="utf-8")
+            for selector in (
+                "#card {",
+                "QLabel {",
+                "#title",
+                "#fileList",
+                "#separator",
+                "QComboBox {",
+                "QComboBox QAbstractItemView",
+                "selection-color:",
+                "QComboBox QAbstractItemView::item",
+                "QPushButton#convertBtn {",
+                "QPushButton#convertBtn:hover",
+                "QPushButton#convertBtn:disabled",
+                "QPushButton#cancelBtn {",
+                "QPushButton#cancelBtn:hover",
+                "QProgressBar {",
+                "QProgressBar::chunk",
+                "#statusOk",
+                "#statusErr",
+                "#conversionLabel",
+            ):
+                assert selector in qss, f"{theme}/window_card.qss is missing {selector}"
+
+    def test_loader_reads_window_card_qss_for_builtin_themes(self):
+        from qss_helpers import _load_qss
+
+        for theme in ("dark", "light"):
+            qss = _load_qss("window_card.qss", theme)
+            assert "#card" in qss
+
+    def test_window_card_qss_stays_optional(self):
+        from theme_manager import REQUIRED_FILES
+
+        assert "window_card.qss" not in REQUIRED_FILES
+        assert "splash.qss" not in REQUIRED_FILES

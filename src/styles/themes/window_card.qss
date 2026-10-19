@@ -1,4 +1,4 @@
-/* File Converter Pro — Contextual Theme */
+/* File Converter Pro - Contextual Theme (fallback for themes without window_card.qss) */
 
 #card {
     background: rgba(20, 22, 35, 0.92);
@@ -7,21 +7,24 @@
 }
 QLabel { color: rgba(255,255,255,0.85); font-family: 'Segoe UI'; }
 #title    { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.92); }
-#fileList { font-size: 11px; color: rgba(255,255,255,0.45); }
+#fileList { font-size: 11px; color: rgba(255,255,255,0.50); }
+#separator { background: rgba(255,255,255,0.14); min-height: 1px; max-height: 1px; border: none; }
 QComboBox {
     background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.85);
-    border: 1px solid rgba(255,255,255,0.10);
+    color: #e9ecef;
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 7px;
     padding: 7px 10px; font-size: 12px; font-family: 'Segoe UI';
     min-height: 16px;
 }
 QComboBox::drop-down { border: none; width: 20px; }
 QComboBox QAbstractItemView {
-    background: #1a1d2e; color: rgba(255,255,255,0.85);
-    selection-background-color: rgba(110,190,255,0.20);
-    border: 1px solid rgba(255,255,255,0.08); outline: none;
+    background: #1a1d2e; color: #e9ecef;
+    selection-background-color: rgb(110,190,255); selection-color: #10131a;
+    border: 1px solid rgba(255,255,255,0.10); outline: none;
 }
+QComboBox QAbstractItemView::item { color: #e9ecef; padding: 4px 6px; }
+QComboBox QAbstractItemView::item:selected { background: rgb(110,190,255); color: #10131a; }
 QPushButton#convertBtn {
     background: rgba(110,190,255,0.18);
     color: rgb(110,190,255);

@@ -510,13 +510,29 @@ class QuickConvertWindow(QWidget):
         if icon_path and os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
+    @staticmethod
+    def _theme_name() -> str:
+        """Resolve the persisted theme for this standalone window."""
+        try:
+            from config import ConfigManager
+            from theme_manager import get_custom_themes
+
+            config = ConfigManager().load_config()
+            custom = config.get("custom_theme")
+            if custom and custom not in ("dark", "light"):
+                if any(theme.folder_name == custom for theme in get_custom_themes()):
+                    return custom
+            return "dark" if config.get("dark_mode") else "light"
+        except Exception:
+            return "light"
+
     def _build_ui(self):
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
 
         self.card = QFrame()
         self.card.setObjectName("card")
-        self.card.setStyleSheet(_load_qss("window_card.qss"))
+        self.card.setStyleSheet(_load_qss("window_card.qss", self._theme_name()))
 
         inner = QVBoxLayout(self.card)
         inner.setSpacing(10)
@@ -549,8 +565,8 @@ class QuickConvertWindow(QWidget):
         inner.addWidget(file_label)
 
         sep = QFrame()
+        sep.setObjectName("separator")
         sep.setFrameShape(QFrame.HLine)
-        sep.setStyleSheet("background-color: #313244; max-height: 1px;")
         inner.addWidget(sep)
 
         self.combo = None
