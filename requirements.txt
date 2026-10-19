@@ -17,20 +17,21 @@ pikepdf==10.11.0
 reportlab==4.4.4
 
 # OCR (searchable PDF text layer)
-scanlayer==1.0.2
+scanlayer==1.1.0
 
 # Office docs Libraries
 python-docx==1.2.0
 docx2pdf==0.1.8
 python-pptx==1.0.2
 openpyxl==3.1.5
+odfpy==1.4.1
 docxcompose==2.1.0
 
 #Images
 Pillow==12.0.0
 pillow-heif==1.3.0
 rawpy==0.27.0
-CairoSVG==2.9.0
+vtracer==0.6.15
 Pillow-avif-plugin==1.5.5
 psd-tools==1.17.0
 

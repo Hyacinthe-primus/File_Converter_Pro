@@ -4,7 +4,7 @@
 ; Complete uninstallation support
 
 #define MyAppName "File Converter Pro"
-#define MyAppVersion "1.0.7"
+#define MyAppVersion "1.0.8"
 #define MyAppPublisher "Prime Enterprises"
 #define MyAppURL "https://github.com/Hyacinthe-primus/File-Converter-Pro"
 #define MyAppExeName "FCP.exe"
@@ -36,6 +36,7 @@ WizardSmallImageFile=installer_banner.png
 Compression=lzma2/ultra64
 SolidCompression=yes
 PrivilegesRequired=lowest
+MinVersion=10.0
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 CloseApplications=yes
@@ -46,77 +47,93 @@ Name: "english"; MessagesFile: "compiler:Default.isl"; LicenseFile: "..\src\LICE
 Name: "french";  MessagesFile: "compiler:Languages\French.isl"; LicenseFile: "..\src\LICENSE\LICENSE.txt"
 Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"; LicenseFile: "..\src\LICENSE\LICENSE.txt"
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"; LicenseFile: "..\src\LICENSE\LICENSE.txt"
+Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"; LicenseFile: "..\src\LICENSE\LICENSE.txt"
 
 [CustomMessages]
 french.AddAntivirusExclusion=Ajouter une exclusion Windows Defender (recommandé pour les performances)
 english.AddAntivirusExclusion=Add Windows Defender exclusion (recommended for performance)
 italian.AddAntivirusExclusion=Aggiungi un'esclusione a Windows Defender (consigliato per le prestazioni)
 russian.AddAntivirusExclusion=Добавить исключение в Windows Defender (рекомендуется для производительности)
+turkish.AddAntivirusExclusion=Windows Defender istisnası ekle (performans için önerilir)
 
 french.AppDescription=File Converter Pro - Le convertisseur de fichiers professionnel et rapide, entièrement gratuit
 english.AppDescription=File Converter Pro - Fast professional file converter, made for free
 italian.AppDescription=File Converter Pro - Il convertitore di file professionale e veloce, completamente gratuito
 russian.AppDescription=File Converter Pro - быстрый профессиональный конвертер файлов, совершенно бесплатный
+turkish.AppDescription=File Converter Pro - Hızlı profesyonel dosya dönüştürücü, tamamen ücretsiz
 
 french.AssocFileType=Associer les fichiers .fcproj avec File Converter Pro
 english.AssocFileType=Associate .fcproj files with File Converter Pro
 italian.AssocFileType=Associa i file .fcproj a File Converter Pro
 russian.AssocFileType=Связать файлы .fcproj с File Converter Pro
+turkish.AssocFileType=.fcproj dosyalarını File Converter Pro ile ilişkilendir
 
 french.AddContextMenu=Ajouter "Convertir avec FCP" au menu contextuel Windows
 english.AddContextMenu=Add "Convert with FCP" to Windows right-click menu
 italian.AddContextMenu=Aggiungi "Convertire con FCP" al menu contestuale di Windows
 russian.AddContextMenu=Добавить "Конвертировать с FCP" в контекстное меню Windows
+turkish.AddContextMenu=Windows sağ tık menüsüne "FCP ile Dönüştür" ekle
 
 french.ConvertWithFCP=Convertir avec FCP
 english.ConvertWithFCP=Convert with FCP
 italian.ConvertWithFCP=Convertire con FCP
 russian.ConvertWithFCP=Конвертировать с FCP
+english.ConvertWithFCP=Convert with FCP
+turkish.ConvertWithFCP=FCP ile Dönüştür
 
 french.MergeOrder=Fusionner (ordre)
 english.MergeOrder=Merge (order)
 italian.MergeOrder=Unisci (ordine)
 russian.MergeOrder=Объединить (порядок)
+turkish.MergeOrder=Birleştir (sıra)
 
 french.MergeAZ=Fusionner A→Z
 english.MergeAZ=Merge A→Z
 italian.MergeAZ=Unisci A→Z
 russian.MergeAZ=Объединить А→Я
+turkish.MergeAZ=Birleştir A→Z
 
 french.MergeZA=Fusionner Z→A
 english.MergeZA=Merge Z→A
 italian.MergeZA=Unisci Z→A
 russian.MergeZA=Объединить Я→А
+turkish.MergeZA=Birleştir Z→A
 
 french.MergeNumAsc=Fusionner 1→9
 english.MergeNumAsc=Merge 1→9
 italian.MergeNumAsc=Unisci 1→9
 russian.MergeNumAsc=Объединить 1→9
+turkish.MergeNumAsc=Birleştir 1→9
 
 french.MergeNumDesc=Fusionner 9→1
 english.MergeNumDesc=Merge 9→1
 italian.MergeNumDesc=Unisci 9→1
 russian.MergeNumDesc=Объединить 9→1
+turkish.MergeNumDesc=Birleştir 9→1
 
 french.MergeOldest=Fusionner les plus anciens
 english.MergeOldest=Merge oldest
 italian.MergeOldest=Unisci dal più vecchio
 russian.MergeOldest=Объединить сначала старые
+turkish.MergeOldest=Önce eskileri birleştir
 
 french.MergeNewest=Fusionner les plus récents
 english.MergeNewest=Merge newest
 italian.MergeNewest=Unisci dal più recente
 russian.MergeNewest=Объединить сначала новые
+turkish.MergeNewest=Önce yenileri birleştir
 
 french.ImagesToPdfMerged=Images → PDF (fusionné)
 english.ImagesToPdfMerged=Images → PDF (merged)
 italian.ImagesToPdfMerged=Immagini → PDF (unite)
 russian.ImagesToPdfMerged=Изображения → PDF (объединено)
+turkish.ImagesToPdfMerged=Görseller → PDF (birleştirilmiş)
 
 french.Requires64Bit=Cette application nécessite Windows 64 bits.
 english.Requires64Bit=This application requires Windows 64-bit.
 italian.Requires64Bit=Questa applicazione richiede Windows a 64 bit.
 russian.Requires64Bit=Это приложение требует 64-разрядную версию Windows.
+turkish.Requires64Bit=Bu uygulama Windows 64-bit gerektirir.
 
 [Tasks]
 Name: "desktopicon";   Description: "{cm:CreateDesktopIcon}";    GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
@@ -179,6 +196,8 @@ begin
     Result := 'it'
   else if ActiveLanguage() = 'russian' then
     Result := 'ru'
+  else if ActiveLanguage() = 'turkish' then
+    Result := 'tr'
   else
     Result := 'en';
 end;
@@ -283,6 +302,9 @@ begin
   DeleteContextMenuForExtension('mp3');
   DeleteContextMenuForExtension('mp4');
   DeleteContextMenuForExtension('nef');
+  DeleteContextMenuForExtension('odp');
+  DeleteContextMenuForExtension('ods');
+  DeleteContextMenuForExtension('odt');
   DeleteContextMenuForExtension('ogg');
   DeleteContextMenuForExtension('orf');
   DeleteContextMenuForExtension('pdf');
@@ -877,6 +899,15 @@ begin
     AddConversion(SubKey, '01_to_pdf', 'Excel → PDF', 'xlsx_to_pdf');
     AddConversion(SubKey, '02_to_csv', 'Excel → CSV', 'xlsx_to_csv');
     AddConversion(SubKey, '03_to_json', 'Excel → JSON', 'xlsx_to_json');
+  end else if Ext = 'odt' then begin
+    AddConversion(SubKey, '01_to_docx', 'ODT → Word', 'odt_to_docx');
+    AddConversion(SubKey, '02_to_pdf', 'ODT → PDF', 'odt_to_pdf');
+  end else if Ext = 'ods' then begin
+    AddConversion(SubKey, '01_to_xlsx', 'ODS → Excel', 'ods_to_xlsx');
+    AddConversion(SubKey, '02_to_pdf', 'ODS → PDF', 'ods_to_pdf');
+  end else if Ext = 'odp' then begin
+    AddConversion(SubKey, '01_to_pptx', 'ODP → PowerPoint', 'odp_to_pptx');
+    AddConversion(SubKey, '02_to_pdf', 'ODP → PDF', 'odp_to_pdf');
   end;
 end;
 
@@ -888,7 +919,7 @@ begin
   Exts := ['aac','apng','arw','avi','avif','bmp','cr2','cr3','csv','dng',
            'doc','docx','epub','flac','gif','heic','heif','html','j2k','jfif',
            'jp2','jpeg','jpg','jpx','json','markdown','md','m4a','mkv','mov','mp3','mp4',
-           'nef','ogg','orf','pdf','png','pptx','psd','raf','raw','rw2','rtf',
+           'nef','ogg','orf','odp','ods','odt','pdf','png','pptx','psd','raf','raw','rw2','rtf',
            'svg','tif','tiff','txt','wav','webm','webp','xlsx'];
   for I := 0 to GetArrayLength(Exts) - 1 do
     RegisterContextMenuForExt(Exts[I]);

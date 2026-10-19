@@ -72,6 +72,31 @@ Scanned PDFs are now supported by the optimizer with Ghostscript and native fall
 ### Security Policy
 A `SECURITY.md` was added with responsible disclosure guidelines, scope definitions tied to the actual codebase (file parsing, COM automation, external tools), and safe harbor terms.
 
+### OpenDocument Conversions
+ODT, ODS, and ODP files are now fully supported in Advanced Conversions:
+- ODT → DOCX, ODS → XLSX, ODP → PPTX (Office COM → LibreOffice → native fallback)
+- ODT → PDF, ODS → PDF, ODP → PDF (Office COM → LibreOffice → native fallback)
+
+OpenDocument extensions are recognized in the file picker, context menu, notifications, and achievements.
+
+### Auto-Save Frequent Configurations
+When enabled in Settings, batch conversions automatically save the current configuration as an `[Auto]` template for that conversion type. The template updates each time you convert, so your preferred settings are always one click away.
+
+### Automatic Temp File Cleanup
+Temporary files created during conversion are now tracked and cleaned up automatically — both when the app closes and at the start of each batch conversion. Can be toggled in Settings.
+
+### Backup Before Conversion
+An optional setting creates a `.bak` copy of each source file before conversion starts. Uses `shutil.copy2` for cross-platform metadata preservation. Can be toggled in Settings.
+
+### Custom Theme Support for Advanced Conversions
+The Advanced Conversions dialog now fully supports custom themes. All styling is QSS-driven (no inline styles), and the dialog listens to the `theme_changed` signal to re-apply styles instantly when the theme switches — no restart needed.
+
+### LogoLabel Theme Fix
+The logo label now updates its color immediately when switching between dark, light, and custom themes. Previously it required an app restart to reflect the correct color.
+
+### Expanded Test Suite
+279 tests covering the conversion engine, fallback chains, architecture invariants, external binary resolution, achievements isolation, OpenDocument conversions, custom theme support, and cross-platform compatibility.
+
 ---
 
 ## User Features
@@ -126,7 +151,6 @@ Everything stays local: the API binds to `localhost` only and never opens an ext
 Expand the supported format matrix over time. Candidates include:
 - **Markdown → PDF / DOCX** via Pandoc
 - **HTML → Markdown**
-- **ODT / ODS / ODP → Word**
 - **Word → ODT / ODS / ODP** (LibreOffice native formats)
 - **MP4 → GIF** / **GIF → WebP** for quick web-ready exports
 ### Conversion Engine Versioning

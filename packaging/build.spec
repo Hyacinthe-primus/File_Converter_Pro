@@ -97,8 +97,22 @@ try:
 except Exception:
     _rich_hidden = []
 
+try:
+    # odfpy: native ODT/ODS/ODP preview (pure Python, no data files)
+    _odf_hidden = _cs("odf")
+except Exception:
+    _odf_hidden = []
+
+try:
+    # vtracer: Rust-backed raster -> SVG tracer (compiled extension)
+    _vtracer_hidden = _cs("vtracer")
+except Exception:
+    _vtracer_hidden = []
+
 SHARED_HIDDEN = [
     *_rich_hidden,
+    *_odf_hidden,
+    *_vtracer_hidden,
 
     'cryptography.hazmat.primitives.kdf.pbkdf2',
     'cryptography.hazmat.primitives.hashes',
@@ -129,7 +143,7 @@ SHARED_HIDDEN = [
     'pdf2docx.layout.Sections', 'pdf2docx.layout.Layout',
     'pdf2docx.layout.Column',
     'docx', 'docx.document', 'docx.opc', 'docx.opc.constants',
-    'docx.opc.part', 'docx.opc.pkgreader', 'docx.opc.api',
+    'docx.opc.part', 'docx.opc.pkgreader',
     'docx.shared', 'docx.enum', 'docx.enum.style',
     'docx.enum.section', 'docx.enum.text', 'docx.enum.dml',
     'docx.oxml', 'docx.oxml.ns', 'docx.oxml.shared',
@@ -139,8 +153,8 @@ SHARED_HIDDEN = [
     'docx.table', 'docx.text', 'docx.text.paragraph',
     'docx.text.run', 'docx.text.parfmt', 'docx.image',
     'docx.image.png', 'docx.image.jpeg',
-    'docxcompose', 'docxcompose.composer', 'docxcompose.core',
-    'docxcompose.properties', 'docxcompose.registry',
+    'docxcompose', 'docxcompose.composer',
+    'docxcompose.properties',
     'reportlab', 'reportlab.lib', 'reportlab.lib.pagesizes',
     'reportlab.lib.units', 'reportlab.lib.styles',
     'reportlab.lib.colors', 'reportlab.lib.enums',
@@ -148,9 +162,9 @@ SHARED_HIDDEN = [
     'reportlab.platypus.flowables', 'reportlab.pdfbase',
     'reportlab.pdfbase.pdfmetrics', 'reportlab.pdfbase.ttfonts',
     'PIL', 'PIL.Image', 'PIL.ImageDraw', 'PIL.ImageFont', 'PIL.ImageOps',
-    'docx2pdf', 'docx2pdf.util',
+    'docx2pdf',
     'comtypes', 'comtypes.client', 'comtypes.gen',
-    'comtypes.persistence', 'comtypes.automation',
+    'comtypes.automation',
     'pythoncom', 'pywintypes',
     'pyzipper',
     'PySide6.QtMultimedia', 'PySide6.QtMultimediaWidgets',
@@ -163,8 +177,8 @@ SHARED_HIDDEN = [
     'matplotlib.figure', 'matplotlib.patches',
     'cycler', 'kiwisolver', 'dateutil', 'dateutil.parser',
     'dateutil.relativedelta', 'pytz',
-    'numpy', 'numpy.core', 'numpy.core.multiarray',
-    'numpy.core._multiarray_umath',
+    'numpy', 'numpy._core',
+    'numpy._core._multiarray_umath',
     'fontTools', 'fontTools.ttLib', 'fontTools.misc',
     'fontTools.misc.encodingTools', 'fontTools.misc.textTools',
     'openpyxl', 'openpyxl.styles', 'openpyxl.utils',
@@ -175,7 +189,7 @@ SHARED_HIDDEN = [
     'pillow_heif', 'weasyprint',
     'rawpy',
     'config', 'database', 'translations', 'widgets', 'external_binaries',
-    'utils', 'utils.translation_mixin',
+    'utils', 'utils.translation_mixin', 'utils.image_formats', 'utils.odf_preview',
     'dialogs', 'dialogs.terms_dialog', 'dialogs.word_to_pdf_dialog',
     'dialogs.pdf_to_word_dialog', 'dialogs.splash_screen', 'dialogs.preview_dialog',
     'dialogs.password_dialog', 'dialogs.split_dialog', 'dialogs.compression_dialog',
@@ -183,7 +197,7 @@ SHARED_HIDDEN = [
     'dialogs.settings_dialog', 'dialogs.conversion_options_dialog',
     'dialogs.pdf_protection_dialog', 'dialogs.merge_order_dialog',
     'dashboard', 'history',
-    'templates', 'templates.templates', 'templates.template_manager',
+    'templates', 'templates.templates', 'templates.template_manager', 'templates.frequent_configs',
     'templates.create_template_dialog', 'templates.template_editor_dialog',
     'app', 'app.logic', 'app.ui',
     'app.mixins', 'app.mixins.optimization', 'app.mixins.image_to_pdf',
@@ -239,6 +253,8 @@ SHARED_EXCLUDES = [
     'PySide6.QtWebEngineCore', 'PySide6.QtWebEngineWidgets',
     'PySide6.QtWebSockets',
     'PySide6.QtQml', 'PySide6.QtQuick', 'PySide6.QtQuickWidgets',
+    'cv2.gapi',
+    'charset_normalizer.md__mypyc',
 ]
 
 UPX_EXCLUDE = [
@@ -251,7 +267,14 @@ UPX_EXCLUDE = [
     'vcruntime*.dll', 'msvcp*.dll', 'msvcr*.dll',
     'api-ms-win*.dll', 'ucrtbase.dll',
     '_mupdf*.pyd', 'mupdf*.dll', '_fitz*.pyd',
+    '_uuid.pyd',
+    'libx265*.dll',
+    'opencv_videoio_ffmpeg*.dll',
 ]
+
+# GTK is installed by the user for WeasyPrint, MiKTeX and MSYS2 only leak in
+# through PATH. Anything resolved from these folders must not be bundled.
+FOREIGN_BIN_DIRS = ('miktex', 'msys64', 'gtk3-runtime')
 
 a = Analysis(
     ['../src/main.py'],
@@ -269,6 +292,11 @@ a = Analysis(
     noarchive=False,
     target_arch='x86_64',
 )
+
+a.binaries = [
+    b for b in a.binaries
+    if not any(d in str(b[1]).lower() for d in FOREIGN_BIN_DIRS)
+]
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 

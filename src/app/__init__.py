@@ -14,7 +14,7 @@ Inheritance chain (MRO):
 
 """
 
-__version__ = "1.0.7"
+__version__ = "1.0.8"
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QTimer, Signal
 from PySide6.QtWidgets import QMainWindow
 
