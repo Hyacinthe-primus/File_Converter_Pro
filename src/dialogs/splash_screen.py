@@ -34,7 +34,7 @@ class ModernSplashScreen(TranslationMixin, QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.container = QFrame()
-        self.container.setObjectName("container")
+        self.container.setObjectName("SplashContainer")
         container_layout = QVBoxLayout(self.container)
         container_layout.setAlignment(Qt.AlignCenter)
         container_layout.setSpacing(20)
@@ -45,48 +45,33 @@ class ModernSplashScreen(TranslationMixin, QWidget):
         logo_layout.setAlignment(Qt.AlignCenter)
 
         self.logo_label = QLabel("📦")
+        self.logo_label.setObjectName("SplashLogo")
         self.logo_label.setAlignment(Qt.AlignCenter)
-        self.logo_label.setStyleSheet("""
-            QLabel {
-                font-size: 60px;
-                background: transparent;
-            }
-        """)
         logo_layout.addWidget(self.logo_label)
 
         self.title_label = QLabel("FILE CONVERTER PRO")
+        self.title_label.setObjectName("SplashTitle")
         self.title_label.setAlignment(Qt.AlignCenter)
-        self.title_label.setStyleSheet("""
-            QLabel {
-                font-size: 32px;
-                font-weight: bold;
-                font-family: 'Segoe UI', Arial, sans-serif;
-            }
-        """)
 
         subtitle_text = self.translate_text("Initialisation de l'application...")
         self.subtitle_label = QLabel(subtitle_text)
+        self.subtitle_label.setObjectName("SplashSubtitle")
         self.subtitle_label.setAlignment(Qt.AlignCenter)
-        self.subtitle_label.setStyleSheet("""
-            QLabel {
-                font-size: 14px;
-                margin: 5px;
-            }
-        """)
 
         self.progress_container = QWidget()
         self.progress_container.setFixedWidth(300)
         progress_layout = QVBoxLayout(self.progress_container)
 
         self.progress_bar = QProgressBar()
+        self.progress_bar.setObjectName("SplashProgress")
         self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(0)
         self.progress_bar.setTextVisible(False)
         self.progress_bar.setFixedHeight(8)
 
         self.progress_text = QLabel("0%")
+        self.progress_text.setObjectName("SplashProgressText")
         self.progress_text.setAlignment(Qt.AlignCenter)
-        self.progress_text.setStyleSheet("font-size: 12px; margin-top: 5px;")
 
         progress_layout.addWidget(self.progress_bar)
         progress_layout.addWidget(self.progress_text)
@@ -102,55 +87,20 @@ class ModernSplashScreen(TranslationMixin, QWidget):
         self.apply_styles()
         self.setup_animations()
 
+    def _theme_name(self) -> str:
+        """Active custom theme when one is installed, otherwise dark/light."""
+        custom = self.config.get("custom_theme")
+        if custom and custom not in ("dark", "light"):
+            from theme_manager import get_custom_themes
+
+            if any(theme.folder_name == custom for theme in get_custom_themes()):
+                return custom
+        return "dark" if self.dark_mode else "light"
+
     def apply_styles(self):
-        if self.dark_mode:
-            self.setStyleSheet("""
-                #container {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                        stop:0 #1e2229, stop:1 #1a1d23);
-                    border-radius: 20px;
-                    border: 1px solid #495057;
-                }
-                QLabel {
-                    color: #e9ecef;
-                }
-                QProgressBar {
-                    background-color: #495057;
-                    border: none;
-                    border-radius: 4px;
-                }
-                QProgressBar::chunk {
-                    background-color: #4dabf7;
-                    border-radius: 4px;
-                }
-            """)
-            self.title_label.setStyleSheet("color: #e9ecef; font-size: 32px; font-weight: bold;")
-            self.subtitle_label.setStyleSheet("color: #adb5bd; font-size: 14px;")
-            self.progress_text.setStyleSheet("color: #adb5bd; font-size: 12px;")
-        else:
-            self.setStyleSheet("""
-                #container {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                        stop:0 #ffffff, stop:1 #f8f9fa);
-                    border-radius: 20px;
-                    border: 1px solid #e0e0e0;
-                }
-                QLabel {
-                    color: #2c3e50;
-                }
-                QProgressBar {
-                    background-color: #ecf0f1;
-                    border: none;
-                    border-radius: 4px;
-                }
-                QProgressBar::chunk {
-                    background-color: #3498db;
-                    border-radius: 4px;
-                }
-            """)
-            self.title_label.setStyleSheet("color: #2c3e50; font-size: 32px; font-weight: bold;")
-            self.subtitle_label.setStyleSheet("color: #7f8c8d; font-size: 14px;")
-            self.progress_text.setStyleSheet("color: #7f8c8d; font-size: 12px;")
+        from qss_helpers import _load_qss
+
+        self.setStyleSheet(_load_qss("splash.qss", self._theme_name()))
 
     def setup_animations(self):
         self.progress_animation = QPropertyAnimation(self.progress_bar, b"value")

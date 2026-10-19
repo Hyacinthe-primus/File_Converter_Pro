@@ -1,0 +1,46 @@
+/* Splash screen - light theme */
+
+QFrame#SplashContainer {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #ffffff, stop:1 #f8f9fa);
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+}
+
+QLabel#SplashLogo {
+    font-size: 60px;
+    background: transparent;
+}
+
+QLabel#SplashTitle {
+    color: #2c3e50;
+    font-size: 32px;
+    font-weight: bold;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: transparent;
+}
+
+QLabel#SplashSubtitle {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin: 5px;
+    background: transparent;
+}
+
+QProgressBar#SplashProgress {
+    background-color: #ecf0f1;
+    border: none;
+    border-radius: 4px;
+}
+
+QProgressBar#SplashProgress::chunk {
+    background-color: #3498db;
+    border-radius: 4px;
+}
+
+QLabel#SplashProgressText {
+    color: #7f8c8d;
+    font-size: 12px;
+    margin-top: 5px;
+    background: transparent;
+}

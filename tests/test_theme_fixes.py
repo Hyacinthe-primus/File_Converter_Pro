@@ -199,3 +199,50 @@ class TestSettingsAutomationButtonQss:
                 for suffix in (" {", ":hover", ":pressed"):
                     selector = f"QPushButton#{name}{suffix}"
                     assert selector in qss, f"{theme}/settings.qss is missing {selector}"
+
+
+class TestSplashScreenTheme:
+    """The splash screen must be styled by the active theme's splash.qss."""
+
+    def test_splash_widgets_use_object_names(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1]
+        src = (root / "src" / "dialogs" / "splash_screen.py").read_text(encoding="utf-8")
+        for name in (
+            "SplashContainer",
+            "SplashLogo",
+            "SplashTitle",
+            "SplashSubtitle",
+            "SplashProgress",
+            "SplashProgressText",
+        ):
+            assert f'setObjectName("{name}")' in src
+        assert 'setObjectName("container")' not in src
+        assert '_load_qss("splash.qss"' in src
+        assert 'config.get("custom_theme")' in src
+
+    def test_builtin_themes_style_the_splash(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1]
+        themes = root / "src" / "styles" / "themes"
+        for theme in ("dark", "light"):
+            qss = (themes / theme / "splash.qss").read_text(encoding="utf-8")
+            for selector in (
+                "QFrame#SplashContainer",
+                "QLabel#SplashLogo",
+                "QLabel#SplashTitle",
+                "QLabel#SplashSubtitle",
+                "QProgressBar#SplashProgress",
+                "QProgressBar#SplashProgress::chunk",
+                "QLabel#SplashProgressText",
+            ):
+                assert selector in qss, f"{theme}/splash.qss is missing {selector}"
+
+    def test_loader_reads_splash_qss_for_builtin_themes(self):
+        from qss_helpers import _load_qss
+
+        for theme in ("dark", "light"):
+            qss = _load_qss("splash.qss", theme)
+            assert "QFrame#SplashContainer" in qss
