@@ -113,6 +113,8 @@ class PreviewDialog(TranslationMixin, QDialog):
                 self.preview_image()
             elif ext in (".docx", ".doc"):
                 self.preview_word()
+            elif ext in (".odt", ".ods", ".odp"):
+                self.preview_opendocument()
             elif ext in (
                 ".txt",
                 ".log",
@@ -129,7 +131,7 @@ class PreviewDialog(TranslationMixin, QDialog):
                 ".bat",
                 ".sh",
             ):
-                self.preview_text(syntax=ext)
+                self.preview_text()
             elif ext == ".rtf":
                 self.preview_rtf()
             elif ext == ".csv":
@@ -223,7 +225,10 @@ class PreviewDialog(TranslationMixin, QDialog):
         """
         from PySide6.QtGui import QImage
 
-        ext = Path(path).suffix.lower()
+        from utils.image_formats import sniff_image_ext
+
+        # trust the content over the name: phones save HEIC photos as .png/.jpg
+        ext = sniff_image_ext(path, Path(path).suffix.lower())
 
         if ext in self._QPIXMAP_NATIVE:
             px = QPixmap(path)
@@ -291,6 +296,10 @@ class PreviewDialog(TranslationMixin, QDialog):
         try:
             from PIL import Image
 
+            from utils.image_formats import register_heif
+
+            register_heif()
+
             img = Image.open(path)
             try:
                 img.seek(0)
@@ -355,7 +364,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         except Exception as e:
             self._show_error(f"{self.translate_text('Impossible de prévisualiser le document Word')}\n{e}")
 
-    def preview_text(self, syntax=""):
+    def preview_text(self):
         try:
             from PySide6.QtGui import QFont
             from PySide6.QtWidgets import QTextEdit
@@ -393,7 +402,6 @@ class PreviewDialog(TranslationMixin, QDialog):
 
             ncols = max(len(r) for r in rows)
             table = QTableWidget(len(rows), ncols)
-            table.setHorizontalHeader
             header_row = rows[0]
             table.setHorizontalHeaderLabels(header_row + [""] * (ncols - len(header_row)))
             for ri, row in enumerate(rows[1:], 0):
@@ -482,6 +490,168 @@ class PreviewDialog(TranslationMixin, QDialog):
             self._show_error("openpyxl non installé — pip install openpyxl")
         except Exception as e:
             self._show_error(f"{self.translate_text('Erreur XLSX:')} {e}")
+
+    def preview_opendocument(self):
+        """ODT/ODS/ODP: native preview first; LibreOffice only if nothing could be read natively."""
+        try:
+            if self._preview_opendocument_native():
+                return
+        except Exception as e:
+            print(f"[PREVIEW] Native OpenDocument preview failed ({e}), trying fallbacks")
+
+        thumb = self._opendocument_thumbnail()
+        if thumb is not None:
+            self._clear_content()
+            self.content_layout.addWidget(self._thumbnail_label(thumb, 620))
+            return
+
+        self._preview_opendocument_soffice()
+
+    def _opendocument_thumbnail(self):
+        from utils.odf_preview import read_thumbnail
+
+        data = read_thumbnail(self.file_path)
+        if not data:
+            return None
+        pixmap = QPixmap()
+        return pixmap if pixmap.loadFromData(data) and not pixmap.isNull() else None
+
+    @staticmethod
+    def _thumbnail_label(pixmap, max_height):
+        lbl = QLabel()
+        if pixmap.height() > max_height:
+            pixmap = pixmap.scaledToHeight(max_height, Qt.SmoothTransformation)
+        lbl.setPixmap(pixmap)
+        lbl.setAlignment(Qt.AlignCenter)
+        return lbl
+
+    def _preview_opendocument_native(self) -> bool:
+        """Render the file from its XML. Returns False when there is nothing to show."""
+        from PySide6.QtWidgets import QTextEdit
+
+        from utils import odf_preview
+
+        ext = Path(self.file_path).suffix.lower()
+
+        if ext == ".odt":
+            result = odf_preview.odt_to_html(self.file_path)
+            if result.is_empty:
+                return False
+            from PySide6.QtCore import QUrl
+            from PySide6.QtGui import QImage, QTextDocument
+
+            te = QTextEdit()
+            te.setReadOnly(True)
+            for name, data in result.images.items():
+                image = QImage.fromData(data)
+                if not image.isNull():
+                    te.document().addResource(QTextDocument.ImageResource, QUrl(name), image)
+            te.setHtml(result.html)
+            self._clear_content()
+            self.content_layout.addWidget(te)
+            return True
+
+        if ext == ".ods":
+            sheets = odf_preview.ods_sheets(self.file_path)
+            if not sheets:
+                return False
+            tabs = QTabWidget()
+            for name, rows in sheets:
+                ncols = max(len(r) for r in rows)
+                table = QTableWidget(len(rows), ncols)
+                table.setHorizontalHeaderLabels([str(i + 1) for i in range(ncols)])
+                for ri, row in enumerate(rows):
+                    for ci, val in enumerate(row):
+                        table.setItem(ri, ci, QTableWidgetItem(val))
+                table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+                table.horizontalHeader().setStretchLastSection(True)
+                table.setEditTriggers(QTableWidget.NoEditTriggers)
+                tabs.addTab(table, name)
+            self._clear_content()
+            self.content_layout.addWidget(tabs)
+            return True
+
+        if ext == ".odp":
+            slides = odf_preview.odp_slides(self.file_path)
+            if not any(slides):
+                return False
+            from html import escape
+
+            te = QTextEdit()
+            te.setReadOnly(True)
+            parts = []
+            for i, lines in enumerate(slides, 1):
+                parts.append(f"<h3 style='color:gray'>{i} / {len(slides)}</h3>")
+                parts.extend(f"<p style='margin:2px 0'>{escape(line)}</p>" for line in lines)
+                parts.append("<hr>")
+            te.setHtml("".join(parts))
+            self._clear_content()
+            thumb = self._opendocument_thumbnail()
+            if thumb is not None:
+                self.content_layout.addWidget(self._thumbnail_label(thumb, 240))
+            self.content_layout.addWidget(te, 1)
+            return True
+
+        return False
+
+    def _preview_opendocument_soffice(self):
+        import subprocess
+
+        from external_binaries import resolve_binary
+
+        soffice = resolve_binary("libreoffice")
+        if not soffice:
+            self._show_error(self.translate_text("LibreOffice non trouvé, Impossible d'avoir un aperçu"))
+            return
+
+        try:
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                subprocess.run(
+                    [soffice, "--headless", "--convert-to", "pdf", "--outdir", tmp_dir, self.file_path],
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                pdf_path = os.path.join(tmp_dir, Path(self.file_path).stem + ".pdf")
+                if not os.path.exists(pdf_path):
+                    self._show_error(self.translate_text("Échec de la conversion du fichier OpenDocument"))
+                    return
+
+                pdf_document = fitz.open(pdf_path)
+                if len(pdf_document) == 0:
+                    self._show_error(self.translate_text("Document vide"))
+                    return
+
+                scroll = QScrollArea()
+                scroll.setWidgetResizable(True)
+                container = QWidget()
+                vbox = QVBoxLayout(container)
+                vbox.setSpacing(8)
+
+                max_pages = min(len(pdf_document), 5)
+                for i in range(max_pages):
+                    page = pdf_document.load_page(i)
+                    pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
+                    tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+                    tmp.close()
+                    pix.save(tmp.name)
+                    pixmap = QPixmap(tmp.name)
+                    os.unlink(tmp.name)
+                    if not pixmap.isNull():
+                        if pixmap.width() > 660:
+                            pixmap = pixmap.scaledToWidth(660, Qt.SmoothTransformation)
+                        lbl = QLabel()
+                        lbl.setPixmap(pixmap)
+                        lbl.setAlignment(Qt.AlignCenter)
+                        vbox.addWidget(lbl)
+
+                pdf_document.close()
+                scroll.setWidget(container)
+                self._clear_content()
+                self.content_layout.addWidget(scroll)
+        except Exception as e:
+            self._show_error(f"{self.translate_text('Erreur OpenDocument:')} {e}")
 
     def preview_html(self):
         try:
