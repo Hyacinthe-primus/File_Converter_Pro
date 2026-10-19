@@ -14,6 +14,16 @@ class ImageConverters:
     def _open_universal_image(self, src: str):
         """Open any image format using the best available library."""
         ext = Path(src).suffix.lower()
+        if ext == ".svg":
+            # PyMuPDF already renders SVG, so no CairoSVG/native-libcairo dependency is needed
+            import io
+
+            import fitz
+            from PIL import Image
+
+            with fitz.open(src) as doc:
+                png = doc[0].get_pixmap(alpha=True).tobytes("png")
+            return Image.open(io.BytesIO(png))
         if ext in (".heic", ".heif"):
             try:
                 from pillow_heif import register_heif_opener
@@ -62,7 +72,7 @@ class ImageConverters:
             fmt = fmt_map.get(ext, ext.upper())
             save_kwargs = {}
             if fmt == "JPEG":
-                img = img.convert("RGB")
+                img = self._flatten_jpeg(img)
                 save_kwargs["quality"] = 95
             elif fmt == "WEBP":
                 save_kwargs["quality"] = 90
@@ -121,19 +131,59 @@ class ImageConverters:
             return False
 
     def _image_to_svg(self, src: str, dst: str, conversion_type: str | None = None) -> bool:
+        """Vectorise the image into an SVG with VTracer.
+
+        PNG/JPEG/TIFF/... go straight to VTracer. HEIC/AVIF (even when misnamed)
+        are decoded to a temporary PNG by ``decodable_image_path``; anything else
+        VTracer cannot read is decoded by Pillow via ``_open_universal_image``.
+        """
         try:
-            import cairosvg
+            import vtracer
 
-            img = self._open_universal_image(src)
-            import io
+            from utils.image_formats import decodable_image_path
 
-            buf = io.BytesIO()
-            img.save(buf, format="PNG")
-            cairosvg.svg2png(bytestring=buf.getvalue(), write_to=dst)
-            return True
-        except Exception as e:
+            try:
+                with decodable_image_path(src) as readable:
+                    vtracer.convert_image_to_svg_py(readable, dst)
+            except (KeyboardInterrupt, SystemExit):
+                raise
+            except BaseException:
+                # VTracer panics on formats it cannot decode, and PanicException
+                # derives from BaseException rather than Exception.
+                self._vtracer_from_pillow(vtracer, src, dst)
+            if Path(dst).is_file() and Path(dst).stat().st_size > 0:
+                return True
+            raise RuntimeError("VTracer produced no output")
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except BaseException as e:
             print(f"[image→svg] {e}")
+            try:
+                if Path(dst).is_file() and Path(dst).stat().st_size == 0:
+                    Path(dst).unlink()
+            except OSError:
+                pass
             return False
+
+    def _vtracer_from_pillow(self, vtracer, src: str, dst: str) -> None:
+        """Decode an image VTracer cannot read directly, then trace the temporary PNG."""
+        import os
+        import tempfile
+
+        img = self._open_universal_image(src)
+        if img.mode not in ("RGB", "RGBA"):
+            has_alpha = "A" in img.getbands() or "transparency" in img.info
+            img = img.convert("RGBA" if has_alpha else "RGB")
+        fd, tmp_png = tempfile.mkstemp(suffix=".png")
+        os.close(fd)
+        try:
+            img.save(tmp_png, format="PNG")
+            vtracer.convert_image_to_svg_py(tmp_png, dst)
+        finally:
+            try:
+                os.remove(tmp_png)
+            except OSError:
+                pass
 
     def _image_convert_save(self, img, dst: str, ext: str) -> None:
         fmt_map = {
@@ -149,9 +199,21 @@ class ImageConverters:
         fmt = fmt_map.get(ext, ext.upper().lstrip("."))
         save_kwargs = {}
         if fmt == "JPEG":
-            img = img.convert("RGB")
+            img = self._flatten_jpeg(img)
             save_kwargs["quality"] = 95
         img.save(dst, format=fmt, **save_kwargs)
+
+    @staticmethod
+    def _flatten_jpeg(img):
+        """Composite transparent pixels onto white so JPEGs do not turn black."""
+        if img.mode in ("RGBA", "LA") or "transparency" in img.info:
+            from PIL import Image
+
+            rgba = img.convert("RGBA")
+            flat = Image.new("RGB", rgba.size, "white")
+            flat.paste(rgba, mask=rgba.split()[3])
+            return flat
+        return img.convert("RGB")
 
     def _raw_convert(self, src: str, dst: str, conversion_type: str | None = None) -> bool:
         try:
