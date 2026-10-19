@@ -356,9 +356,6 @@ class SchedulerManager:
         self._load_jobs()
         logger.info("[Scheduler] Reloaded — %d job(s).", len(self._scheduler.get_jobs()))
 
-    def is_running(self) -> bool:
-        return self._running
-
     def _load_jobs(self) -> None:
         for cfg in get_scheduled_task_configs():
             trigger = _build_trigger(cfg["trigger"])

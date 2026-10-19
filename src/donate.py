@@ -38,14 +38,12 @@ def _donor_flag_path(config_dir: str | None = None) -> Path:
     """
     if config_dir:
         return Path(config_dir) / "donor_pending.json"
-    try:
-        import sys
+    import sys
 
-        sys._MEIPASS
+    if hasattr(sys, "_MEIPASS"):
         return Path(os.environ.get("APPDATA", Path.home())) / "FileConverterPro" / "donor_pending.json"
-    except AttributeError:
-        from utils import SRC_DIR
-        return SRC_DIR / "donor_pending.json"
+    from utils import SRC_DIR
+    return SRC_DIR / "donor_pending.json"
 
 
 def mark_donor_pending(amount: str, config_dir: str | None = None):

@@ -552,9 +552,6 @@ class WatcherManager:
         if self._running:
             self._start_observers()
 
-    def is_running(self) -> bool:
-        return self._running and bool(self._observers)
-
     def _start_observers(self) -> None:
         for cfg in get_watch_folder_configs():
             path = cfg["path"]

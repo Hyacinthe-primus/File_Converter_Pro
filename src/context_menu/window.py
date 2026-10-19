@@ -488,7 +488,6 @@ class QuickConvertWindow(QWidget):
     def __init__(self, files: list, conversion_type: str | None = None):
         super().__init__()
         self.files = [f for f in files if os.path.isfile(f)]
-        self._converting = False
 
         self.ext = os.path.splitext(self.files[0])[1].lstrip(".").lower() if self.files else ""
         self.forced_conversion = conversion_type
@@ -607,7 +606,6 @@ class QuickConvertWindow(QWidget):
 
     def _start_conversion(self):
         conversion_type = self.forced_conversion if self.forced_conversion else self.combo.currentData()
-        self._converting = True
         self.convert_btn.setEnabled(False)
         self.cancel_btn.setEnabled(False)
         self.progress.show()
@@ -618,7 +616,6 @@ class QuickConvertWindow(QWidget):
         self._worker_thread.start()
 
     def _on_done(self, success: bool, message: str, out_dir: str):
-        self._converting = False
         self.progress.hide()
         self.status_label.show()
         self.adjustSize()

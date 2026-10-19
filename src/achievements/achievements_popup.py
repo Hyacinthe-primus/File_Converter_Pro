@@ -6,9 +6,8 @@ Achievements Popup
 import os
 import sys
 
-from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer, QUrl, Signal
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer, Signal
 from PySide6.QtGui import QImage, QPixmap
-from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import QDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QVBoxLayout
 
 from utils import SRC_DIR
@@ -322,36 +321,6 @@ class AchievementPopup(TranslationMixin, QDialog):
         """Track playback state"""
         state_names = {0: "Stopped", 1: "Playing", 2: "Paused"}
         print(f"Playback state: {state_names.get(state, state)}")
-
-    def on_sound_status_changed(self):
-        """Handle sound status change"""
-        status = self.sound_effect.status()
-        if status == QSoundEffect.Error:
-            print("Error during sound playback")
-        elif status == QSoundEffect.Loading:
-            print("Loading sound...")
-        elif status == QSoundEffect.Ready:
-            print("Sound loaded and ready")
-
-    def play_fallback_sound(self):
-        """Play a fallback sound"""
-        try:
-            fallback_sounds = ["trophy_progression.ogg", "first_step.ogg", "conversion_done.ogg"]
-
-            for sound_file in fallback_sounds:
-                sound_path = self.achievement_system.get_sound_path(sound_file)
-                if sound_path and os.path.exists(sound_path):
-                    self.sound_effect = QSoundEffect()
-                    self.sound_effect.setSource(QUrl.fromLocalFile(sound_path))
-                    self.sound_effect.setVolume(0.7)
-                    self.sound_effect.play()
-                    print(f"Fallback sound played: {sound_file}")
-                    return
-
-            print("No fallback sound found")
-
-        except Exception as e:
-            print(f"Fallback sound playback error: {e}")
 
     def hide_popup(self):
         """Hide the popup"""

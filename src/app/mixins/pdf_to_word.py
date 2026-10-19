@@ -63,7 +63,7 @@ class PdfToWordMixin:
         except Exception:
             return False
 
-    def handle_encrypted_pdfs(self, encrypted_pdfs, all_pdfs):
+    def handle_encrypted_pdfs(self, encrypted_pdfs):
         dialog = QDialog(self)
         dialog.setWindowTitle(self.translate_text("PDFs protégés par mot de passe"))
         dialog.setMinimumWidth(500)
@@ -320,49 +320,6 @@ class PdfToWordMixin:
             QMessageBox.warning(self, self.translate_text("Résultat déchiffrement"), error_message)
 
         return temp_files
-
-    def decrypt_single_pdf(self, pdf_path, password, output_path=None, remove_password=True):
-        try:
-            with open(pdf_path, "rb") as f:
-                pdf_reader = PdfReader(f)
-
-                if not pdf_reader.is_encrypted:
-                    return pdf_path
-
-                success = pdf_reader.decrypt(password)
-
-                if not success:
-                    for pwd_variation in [password, password.lower(), password.upper()]:
-                        try:
-                            success = pdf_reader.decrypt(pwd_variation)
-                            if success:
-                                break
-                        except Exception:
-                            continue
-
-                    if not success:
-                        raise Exception(self.translate_text("Mot de passe incorrect"))
-
-                pdf_writer = __import__("pypdf", fromlist=["PdfWriter"]).PdfWriter()
-
-                for page in pdf_reader.pages:
-                    pdf_writer.add_page(page)
-
-                if not output_path:
-                    output_path = self.create_temp_file(suffix="_decrypted.pdf")
-
-                with open(output_path, "wb") as output_file:
-                    if remove_password:
-                        pdf_writer.write(output_file)
-                    else:
-                        pdf_writer.encrypt(password)
-                        pdf_writer.write(output_file)
-
-                return output_path
-
-        except Exception as e:
-            print(f"Decryption error {pdf_path}: {e}")
-            raise
 
     def convert_pdfs_without_images(self, pdf_files):
         output_dir = self.get_output_directory()
@@ -985,28 +942,6 @@ class PdfToWordMixin:
         except Exception:
             self._solid_fitz_fallback(pdf_path, docx_path)
 
-    def convert_pdf_to_docx_fallback(self, pdf_path, docx_path):
-        self._solid_fitz_fallback(pdf_path, docx_path)
-
-    def convert_pdf_to_docx_basic(self, pdf_path, docx_path):
-        try:
-            self._solid_fitz_fallback(pdf_path, docx_path)
-        except Exception:
-            import fitz
-
-            doc = Document()
-            pdf_document = fitz.open(pdf_path)
-            doc.add_heading(f"Conversion de: {Path(pdf_path).name}", level=1)
-            for page_num in range(len(pdf_document)):
-                page = pdf_document.load_page(page_num)
-                text = page.get_text()
-                doc.add_paragraph(f"--- Page {page_num + 1} ---")
-                doc.add_paragraph(text if text.strip() else "[Graphical content]")
-                if page_num < len(pdf_document) - 1:
-                    doc.add_page_break()
-            pdf_document.close()
-            doc.save(docx_path)
-
     def convert_pdf_to_word(self):
         if not (hasattr(self, "active_templates") and "pdf_to_word" in self.active_templates):
             _def_id, _ = (self._ensure_template_manager() or object()).get_default_template("Conversion PDF→Word")
@@ -1052,7 +987,7 @@ class PdfToWordMixin:
                 print(f"PDF verification error {pdf_file}: {e}")
 
         if encrypted_pdfs:
-            response = self.handle_encrypted_pdfs(encrypted_pdfs, pdf_files)
+            response = self.handle_encrypted_pdfs(encrypted_pdfs)
             if response is False:
                 return
             elif response is not None:
@@ -1123,6 +1058,8 @@ class PdfToWordMixin:
         def _on_pdf_to_word_finished(s):
             self.show_progress(False)
             self._set_ui_enabled(True)
+            if s["success_count"] > 0:
+                self.record_config_usage("Conversion PDF→Word", {"mode": _mode})
             if s["success_count"] > 0 and self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("pdf_to_word")
             QMessageBox.information(

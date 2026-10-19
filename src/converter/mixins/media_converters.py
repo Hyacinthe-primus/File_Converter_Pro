@@ -20,14 +20,6 @@ class MediaConverters:
 
         return resolve_binary("ffmpeg")
 
-    def _has_audio_stream(self, src: str, ffmpeg_bin: str) -> bool:
-        try:
-            cmd = [ffmpeg_bin, "-i", src]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10, creationflags=_NO_WINDOW)
-            return "Audio:" in result.stderr
-        except Exception:
-            return False
-
     def _ffmpeg_convert(self, src: str, dst: str, conversion_type: str) -> bool:
         ffmpeg = self._find_ffmpeg()
         if not ffmpeg:

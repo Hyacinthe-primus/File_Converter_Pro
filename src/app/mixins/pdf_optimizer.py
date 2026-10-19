@@ -218,48 +218,6 @@ class PdfOptimizerMixin:
             self._gs_bin_cache = gs
         return gs
 
-    def check_ghostscript_status(self):
-        """Diagnostic helper - call this on its own (e.g. from a settings/about
-        screen) to know exactly what this app can and can't do, without
-        running an actual PDF through it. Returns a dict rather than printing,
-        so the caller can show it in the UI. Detection only, no download.
-        """
-        import subprocess
-
-        status = {"found": False, "path": None, "version": None, "source": None, "error": None}
-
-        cached = getattr(self, "_gs_bin_cache", None)
-        if cached and os.path.isfile(cached):
-            status["source"] = "cached"
-            candidate = cached
-        else:
-            from external_binaries import locate_binary
-
-            candidate, status["source"] = locate_binary("ghostscript", app_data_dir=os.path.dirname(self._gs_app_dir()))
-
-        if not candidate:
-            status["error"] = "Not found on PATH, in app-local folder, or common install paths."
-            return status
-
-        # Presence on disk isn't proof it runs — confirm with a real call.
-        try:
-            _no_window = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
-            result = subprocess.run(
-                [candidate, "--version"], capture_output=True, timeout=10, text=True, creationflags=_no_window
-            )
-            if result.returncode == 0:
-                status["found"] = True
-                status["path"] = candidate
-                status["version"] = result.stdout.strip()
-            else:
-                status["error"] = (
-                    f"Found at {candidate} but exited with code {result.returncode}: {result.stderr.strip()}"
-                )
-        except Exception as e:
-            status["error"] = f"Found at {candidate} but failed to execute: {e}"
-
-        return status
-
     def _gs_app_dir(self):
         """App-local folder Ghostscript may already be installed to (if the
         user installed it there manually, or a previous version of this app

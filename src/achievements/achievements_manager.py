@@ -22,7 +22,7 @@ _ROOT_DIR = str(SRC_DIR)
 if _ROOT_DIR not in sys.path:
     sys.path.insert(0, _ROOT_DIR)
 from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QShortcut
+from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -33,7 +33,6 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
-    QMenu,
     QMessageBox,
     QPushButton,
     QSpinBox,
@@ -760,12 +759,6 @@ class AchievementsManager(QDialog):
             return shiboken6_isValid(self)
         except Exception:
             return False
-
-    def apply_light_theme(self):
-        self.setStyleSheet(_LIGHT_STYLE)
-
-    def apply_dark_theme(self):
-        self.setStyleSheet(_DARK_STYLE)
 
     def setup_ui(self):
         """Configure the interface"""
@@ -1790,12 +1783,6 @@ class QuickAchievementsReset(QDialog):
         except Exception:
             return False
 
-    def apply_light_theme(self):
-        self.setStyleSheet(_LIGHT_STYLE)
-
-    def apply_dark_theme(self):
-        self.setStyleSheet(_DARK_STYLE)
-
     def setup_ui(self):
         """Configure the interface"""
         layout = QVBoxLayout(self)
@@ -2353,45 +2340,6 @@ def show_achievements_status_cli():
             print()
     except Exception as e:
         print(f"❌ Error: {e}")
-
-
-def add_achievements_admin_to_app(main_app):
-    """Add an admin menu for achievements in the main application"""
-    admin_action = QAction("🔧 Admin Succès", main_app)
-    admin_action.triggered.connect(lambda: open_achievements_admin(main_app))
-
-    if hasattr(main_app, "toolbar"):
-        main_app.toolbar.addAction(admin_action)
-
-    main_app.admin_menu = QMenu("&Admin", main_app)
-    main_app.admin_menu.addAction(admin_action)
-    main_app.menuBar().addMenu(main_app.admin_menu)
-    main_app.admin_menu.setVisible(False)
-
-    admin_shortcut = QShortcut(QKeySequence("Ctrl+Shift+A"), main_app)
-    admin_shortcut.activated.connect(lambda: main_app.admin_menu.setVisible(True))
-
-
-def open_achievements_admin(parent, base_path=None):
-    """Open the achievements admin interface"""
-    script_dir = get_app_dir()
-    db_path = os.path.join(script_dir, "achievements.db")
-
-    manager = QuickAchievementsReset(db_path, parent)
-
-    if parent is not None:
-        parent._achievements_manager_ref = manager
-
-    icon_path = resource_path(os.path.join("Assets", "manager_icon.ico"))
-    if base_path:
-        icon_path = os.path.join(base_path, "Assets", "manager_icon.ico")
-
-    try:
-        manager.setWindowIcon(QIcon(icon_path))
-    except Exception as e:
-        print(f"Error applying icon: {e} (Path tried: {icon_path})")
-
-    manager.exec()
 
 
 if __name__ == "__main__":

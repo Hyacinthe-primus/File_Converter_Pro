@@ -37,11 +37,6 @@ class ConversionWorker(QThread):
         super().__init__(parent)
         self._tasks = tasks
         self._runner_fn = runner_fn
-        self._abort = False
-
-    def abort(self):
-        """Request a graceful stop after the current file finishes."""
-        self._abort = True
 
     def run(self):
         import time
@@ -52,8 +47,6 @@ class ConversionWorker(QThread):
         failed = []
 
         for task in self._tasks:
-            if self._abort:
-                break
             try:
                 result = self._runner_fn(task)
             except Exception as exc:

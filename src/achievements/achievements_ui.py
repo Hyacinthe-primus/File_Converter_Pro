@@ -103,7 +103,6 @@ class _DSBase:
     GOLD_DIM = "#7A6520"
 
     GREEN = "#3FB950"
-    GREEN_DIM = "#1A4226"
     RED = "#F85149"
     RED_DIM = "#3D1C1A"
     BLUE = "#58A6FF"
@@ -137,7 +136,6 @@ class _DSLight(_DSBase):
     TEXT_SECONDARY = "#6B6355"
     TEXT_MUTED = "#A89F8F"
 
-    GREEN_DIM = "#D4EDDA"
     RED_DIM = "#FADBD8"
 
 
@@ -1319,24 +1317,6 @@ class AchievementsUI(TranslationMixin, QDialog):
             }}
         """)
 
-    def _global_bar_stylesheet(self) -> str:
-        """Kept for legacy compat (get_progress_bar_style uses it)."""
-        return f"""
-            QProgressBar {{
-                border-radius: 6px;
-                background: {DS.BG_RAISED};
-                border: none;
-                text-align: center;
-                font-size: 8px;
-                color: {DS.TEXT_MUTED};
-            }}
-            QProgressBar::chunk {{
-                background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
-                    stop:0 {DS.GOLD_DIM}, stop:1 {DS.GOLD});
-                border-radius: 6px;
-            }}
-        """
-
     def _progress_lbl_html(self, unlocked: int, total: int) -> str:
         return (
             f"<span style='font-size:22px; font-weight:bold; color:{DS.TEXT_PRIMARY}'>"
@@ -1812,9 +1792,6 @@ class AchievementsUI(TranslationMixin, QDialog):
             name = self.T(_n) if isinstance(_n, str) else _n.get(self.current_language, _n.get("fr", ""))
             self.tier_filter.addItem(name, tier_id)
 
-    def load_filters(self):
-        self._load_filters()
-
     def load_overview(self):
         ach_sys = self.achievement_system
         unlocked = ach_sys.get_unlocked_count()
@@ -1921,40 +1898,3 @@ class AchievementsUI(TranslationMixin, QDialog):
     def filter_achievements(self):
         self.load_achievements_list()
 
-    def filter_achievements_list(self, achievements: dict) -> dict:
-        return self._filter_achievements_list(achievements)
-
-    def create_achievement_widget(self, achievement: dict) -> QFrame:
-        tier_data = self.achievement_system.get_tier(achievement["tier"])
-        category_data = self.achievement_system.get_category(achievement["category"])
-        icon_path = self.achievement_system.get_achievement_icon_path(achievement["icon"])
-        dark_mode = getattr(self.parent(), "dark_mode", True) if self.parent() else True
-        return AchievementCard(
-            achievement=achievement,
-            tier_data=tier_data,
-            category_data=category_data,
-            icon_path=icon_path,
-            language=self.current_language,
-            dark_mode=dark_mode,
-        )
-
-    def get_progress_bar_style(self, progress: float, requirement_value: float) -> str:
-        pct = (progress / max(requirement_value, 1)) * 100
-        color = "#F85149" if pct < 33 else "#F0A030" if pct < 66 else "#3FB950"
-        return f"""
-            QProgressBar {{
-                height: 6px; border-radius: 3px;
-                border: 1px solid {DS.BORDER};
-                background-color: {DS.BG_RAISED};
-            }}
-            QProgressBar::chunk {{ background-color: {color}; border-radius: 3px; }}
-        """
-
-    def create_overview_tab(self):
-        return self.overview_tab
-
-    def create_list_tab(self):
-        return self.list_tab
-
-    def create_stats_tab(self):
-        return self.stats_tab

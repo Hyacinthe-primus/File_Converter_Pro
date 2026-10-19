@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import base64
 import os
-import time
 from pathlib import Path
 
 
@@ -26,11 +25,6 @@ class ConversionResult:
         engine = f" [{self.engine_used}]" if self.engine_used else ""
         return f"<ConversionResult {s}{engine} {self.source!r}→{self.target!r}>"
 
-
-def _timed(fn):
-    t0 = time.perf_counter()
-    fn()
-    return time.perf_counter() - t0
 
 
 def _build_dst(src, dst_dir, new_ext):
@@ -56,11 +50,6 @@ def _mime_for_ext(ext):
 
 def _safe_html(text):
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
-def _read_file_b64(path):
-    with open(path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
 
 
 def create_backup(src: str, suffix: str = ".bak") -> str | None:

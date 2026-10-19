@@ -50,9 +50,6 @@ class ProjectManagementMixin:
         else:
             lbl.setVisible(False)
 
-    def _active_tab_state(self):
-        return self._active_tab
-
     def _tab_label(self, name):
         return f"🗁  {name}"
 

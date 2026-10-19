@@ -115,27 +115,6 @@ class PdfProtectionDialog(QDialog):
     def get_password(self):
         return self.password_input.text() if self.is_advanced() else None
 
-    def get_permissions(self):
-        from pypdf.constants import UserAccessPermissions
-
-        flag = UserAccessPermissions(0)
-        if self.allow_print_check.isChecked():
-            flag |= UserAccessPermissions.PRINT
-            flag |= UserAccessPermissions.PRINT_TO_REPRESENTATION
-        if self.allow_copy_check.isChecked():
-            flag |= UserAccessPermissions.EXTRACT
-        if self.allow_copy_accessibility_check.isChecked():
-            flag |= UserAccessPermissions.EXTRACT_TEXT_AND_GRAPHICS
-        if self.allow_modify_check.isChecked():
-            flag |= UserAccessPermissions.MODIFY
-        if self.allow_annotations_check.isChecked():
-            flag |= UserAccessPermissions.ADD_OR_MODIFY
-        if self.allow_forms_check.isChecked():
-            flag |= UserAccessPermissions.FILL_FORM_FIELDS
-        if self.allow_assemble_check.isChecked():
-            flag |= UserAccessPermissions.ASSEMBLE_DOC
-        return flag
-
     def _validate(self):
         if self.is_advanced():
             pwd = self.password_input.text()

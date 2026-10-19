@@ -18,7 +18,6 @@ Modes of Execution:
 
 import os
 import sys
-import time
 from datetime import datetime
 
 from rich import box
@@ -99,13 +98,6 @@ def _fcp_err(msg: str) -> None:
     _console.print(f"  [fcp.err]✘[/fcp.err]  {msg}")
 
 
-def _fcp_typewriter(text: str, style: str = "bright_white", delay: float = 0.018) -> None:
-    """Print text character by character for dramatic effect."""
-    for ch in text:
-        _console.print(ch, style=style, end="", highlight=False)
-        time.sleep(delay)
-    _console.print()
-
 
 if getattr(sys, "frozen", False):
     os.chdir(os.path.dirname(sys.executable))
@@ -134,7 +126,6 @@ SOCKET_NAME = "FileConverterPro_SingleInstance"
 SPLASH_DELAY = 3000
 FADEIN_DELAY = 100
 STATUSBAR_DELAY = 700
-SPLASH_DELETE_DELAY = 1100
 
 CLI_COMMANDS = frozenset({"status", "reset", "unlock", "reset-all", "-h", "--help", "help", "--version"})
 
@@ -244,8 +235,6 @@ def get_forced_theme(argv: list[str]) -> str | None:
 
 class CLIHandler:
     """Parses and dispatches CLI achievement commands."""
-
-    HELP_TEXT = ""  # rendered via _cmd_help()
 
     @staticmethod
     def _build_commands_table() -> Table:
@@ -430,10 +419,6 @@ class CLIHandler:
                 f"Usage: [bright_cyan]main.py {command}[/bright_cyan] [italic white]<achievement_id>[/italic white]"
             )
             sys.exit(1)
-
-    @staticmethod
-    def _print_section(title: str) -> None:
-        _fcp_section(title)
 
     def _load_manager(self) -> None:
         """Lazy-load achievement CLI functions from achievements_manager."""

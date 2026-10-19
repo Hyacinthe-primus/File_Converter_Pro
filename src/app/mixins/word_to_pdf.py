@@ -184,6 +184,17 @@ class WordToPdfMixin:
             total = summary["total"]
             total_time = summary["total_time"]
             self.achievement_system.check_achievement("night_owl")
+            if sc > 0:
+                self.record_config_usage(
+                    "Conversion Word→PDF",
+                    {
+                        **_options,
+                        "quality": self._ui_label_to_key(
+                            _options.get("quality"),
+                            ["Haute qualité (300 DPI)", "Qualité standard (150 DPI)", "Optimisé (96 DPI)"],
+                        ),
+                    },
+                )
             mode_name = (
                 self.translate_text("Conserver toute la mise en forme")
                 if _options["mode"] == "preserve_all"
@@ -811,94 +822,6 @@ class WordToPdfMixin:
             print(f"[ERROR] Text-only conversion error: {e}")
             self.convert_docx_to_pdf_simple(docx_path, pdf_path)
 
-    def analyze_word_content(self, docx_path):
-        try:
-            doc = Document(docx_path)
-
-            content_info = {
-                "paragraphs": len(doc.paragraphs),
-                "tables": len(doc.tables),
-                "images": 0,
-                "has_complex_layout": False,
-                "total_text_length": 0,
-            }
-
-            for para in doc.paragraphs:
-                content_info["total_text_length"] += len(para.text)
-
-            for table in doc.tables:
-                for row in table.rows:
-                    for cell in row.cells:
-                        content_info["total_text_length"] += len(cell.text)
-
-            for rel in doc.part.rels.values():
-                if "image" in rel.reltype:
-                    content_info["images"] += 1
-
-            if content_info["tables"] > 3:
-                content_info["has_complex_layout"] = True
-            if content_info["images"] > 5:
-                content_info["has_complex_layout"] = True
-
-            return content_info
-
-        except Exception as e:
-            print(f"[Analyze] Error: {e}")
-            return {"paragraphs": 0, "tables": 0, "images": 0, "has_complex_layout": False, "total_text_length": 0}
-
-    def convert_docx_to_pdf_advanced(self, docx_path, pdf_path):
-        try:
-            doc = Document(docx_path)
-            c = canvas.Canvas(pdf_path, pagesize=A4)
-            width, height = A4
-            y = height - 72
-
-            for para in doc.paragraphs:
-                text = para.text.strip()
-                if not text:
-                    y -= 12
-                    continue
-
-                style_name = para.style.name if para.style else "Normal"
-
-                if "Heading 1" in style_name:
-                    font_name = "Helvetica-Bold"
-                    font_size = 16
-                    spacing = 20
-                elif "Heading 2" in style_name:
-                    font_name = "Helvetica-Bold"
-                    font_size = 14
-                    spacing = 16
-                elif "Heading 3" in style_name:
-                    font_name = "Helvetica-Bold"
-                    font_size = 12
-                    spacing = 14
-                else:
-                    font_name = "Helvetica"
-                    font_size = 11
-                    spacing = 14
-
-                lines = simpleSplit(text, font_name, font_size, width - 144)
-                total_height = len(lines) * spacing
-
-                if y - total_height < 72:
-                    c.showPage()
-                    y = height - 72
-
-                for line in lines:
-                    c.setFont(font_name, font_size)
-                    c.drawString(72, y, line)
-                    y -= spacing
-
-                y -= 4
-
-            c.save()
-            return True
-
-        except Exception as e:
-            print(f"[Word→PDF] Advanced error: {e}")
-            return False
-
     def convert_docx_to_pdf_simple(self, docx_path, pdf_path):
         try:
             doc = Document(docx_path)
@@ -935,120 +858,6 @@ class WordToPdfMixin:
 
         except Exception as e:
             print(f"[Word→PDF] Simple error: {e}")
-            return False
-
-    def extract_table_from_element(self, element, doc):
-        try:
-            from docx.oxml.ns import qn
-
-            tbl = element.find(qn("w:tbl"))
-            if tbl is None:
-                return None
-
-            rows = []
-            for tr in tbl.findall(qn("w:tr")):
-                cells = []
-                for tc in tr.findall(qn("w:tc")):
-                    text = ""
-                    for p in tc.findall(qn("w:p")):
-                        for r in p.findall(qn("w:r")):
-                            for t in r.findall(qn("w:t")):
-                                if t.text:
-                                    text += t.text
-                    cells.append(text)
-                rows.append(cells)
-
-            return rows
-
-        except Exception as e:
-            print(f"[Extract table] Error: {e}")
-            return None
-
-    def convert_docx_to_pdf_with_images(self, docx_path, pdf_path):
-        try:
-            doc = Document(docx_path)
-            c = canvas.Canvas(pdf_path, pagesize=A4)
-            width, height = A4
-            y = height - 72
-
-            for para in doc.paragraphs:
-                text = para.text.strip()
-                if not text:
-                    y -= 12
-                    continue
-
-                lines = simpleSplit(text, "Helvetica", 11, width - 144)
-
-                if y - len(lines) * 14 < 72:
-                    c.showPage()
-                    y = height - 72
-
-                for line in lines:
-                    c.setFont("Helvetica", 11)
-                    c.drawString(72, y, line)
-                    y -= 14
-
-                y -= 4
-
-            for table in doc.tables:
-                try:
-                    for row in table.rows:
-                        if y < 100:
-                            c.showPage()
-                            y = height - 72
-
-                        x = 72
-                        for cell in row.cells:
-                            c.rect(x, y - 20, 80, 20)
-                            c.setFont("Helvetica", 8)
-                            c.drawString(x + 2, y - 14, cell.text.strip()[:30])
-                            x += 82
-                        y -= 24
-                except Exception:
-                    pass
-
-            c.save()
-            return True
-
-        except Exception as e:
-            print(f"[Word→PDF] With images error: {e}")
-            return False
-
-    def convert_docx_to_pdf_fallback(self, docx_path, pdf_path):
-        try:
-            return self.convert_docx_to_pdf_simple(docx_path, pdf_path)
-        except Exception as e:
-            print(f"[Word→PDF] Fallback error: {e}")
-            self.create_empty_pdf_with_message(pdf_path, f"Erreur: {str(e)[:100]}")
-            return False
-
-    def create_minimal_pdf_from_docx(self, docx_path, pdf_path):
-        try:
-            doc = Document(docx_path)
-            c = canvas.Canvas(pdf_path, pagesize=A4)
-            width, height = A4
-
-            c.setFont("Helvetica-Bold", 14)
-            c.drawString(72, height - 72, Path(docx_path).stem[:50])
-
-            c.setFont("Helvetica", 11)
-            y = height - 100
-            for para in doc.paragraphs[:50]:
-                text = para.text.strip()
-                if text:
-                    lines = simpleSplit(text, "Helvetica", 11, width - 144)
-                    for line in lines[:3]:
-                        if y < 72:
-                            break
-                        c.drawString(72, y, line)
-                        y -= 14
-                    y -= 6
-
-            c.save()
-            return True
-
-        except Exception as e:
-            print(f"[Word→PDF] Minimal error: {e}")
             return False
 
     def create_empty_pdf_with_message(self, pdf_path, message):
