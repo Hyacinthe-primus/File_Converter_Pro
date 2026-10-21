@@ -46,7 +46,7 @@ class OptimizationMixin(
 
         IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".gif"}
         EXCEL_EXTS = {".xlsx", ".xls"}
-        AUDIO_EXTS = {".mp3", ".wav", ".aac", ".flac", ".ogg"}
+        AUDIO_EXTS = {".mp3", ".wav", ".aac", ".flac", ".ogg", ".opus"}
         VIDEO_EXTS = {".mp4", ".avi", ".mkv", ".mov", ".webm"}
         WEB_EXTS = {".json", ".html", ".htm"}
         EPUB_EXTS = {".epub"}

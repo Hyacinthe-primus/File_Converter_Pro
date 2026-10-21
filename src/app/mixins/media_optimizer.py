@@ -37,6 +37,11 @@ class MediaOptimizerMixin:
                         1: ["-codec:a", "libvorbis", "-q:a", "4"],
                         2: ["-codec:a", "libvorbis", "-q:a", "2"],
                     },
+                    "opus": {
+                        0: ["-codec:a", "libopus", "-b:a", "192k", "-vbr", "on"],
+                        1: ["-codec:a", "libopus", "-b:a", "128k", "-vbr", "on"],
+                        2: ["-codec:a", "libopus", "-b:a", "96k", "-vbr", "on"],
+                    },
                     "flac": {
                         0: ["-codec:a", "flac", "-compression_level", "5"],
                         1: ["-codec:a", "flac", "-compression_level", "8"],

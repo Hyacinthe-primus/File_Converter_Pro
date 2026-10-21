@@ -267,7 +267,7 @@ class AppUIMixin(
         SUPPORTED_EXTS = {
             "office": [".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".odt", ".ods", ".odp"],
             "image": [".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".gif"],
-            "audio": [".mp3", ".wav", ".aac", ".flac", ".ogg"],
+            "audio": [".mp3", ".wav", ".aac", ".flac", ".ogg", ".opus"],
             "video": [".mp4", ".avi", ".mkv", ".mov", ".webm"],
             "web": [".json", ".html", ".htm"],
             "ebook": [".epub"],

@@ -53,6 +53,7 @@ CATEGORY_MAP = {
     "audio_to_wav": "audio",
     "audio_to_aac": "audio",
     "audio_to_ogg": "audio",
+    "audio_to_opus": "audio",
     "audio_to_flac": "audio",
     "audio_to_m4a": "audio",
 }
@@ -110,6 +111,7 @@ DISPATCH = {
     "audio_to_wav": ("_ffmpeg_convert", "wav"),
     "audio_to_aac": ("_ffmpeg_convert", "aac"),
     "audio_to_ogg": ("_ffmpeg_convert", "ogg"),
+    "audio_to_opus": ("_ffmpeg_convert", "opus"),
     "audio_to_flac": ("_ffmpeg_convert", "flac"),
     "audio_to_m4a": ("_ffmpeg_convert", "m4a"),
 }

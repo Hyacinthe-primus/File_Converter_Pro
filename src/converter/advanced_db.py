@@ -402,6 +402,7 @@ class AdvancedDatabaseManager:
             "audio_to_wav": "Audio→WAV",
             "audio_to_aac": "Audio→AAC",
             "audio_to_ogg": "Audio→OGG",
+            "audio_to_opus": "Audio→OPUS",
             "audio_to_flac": "Audio→FLAC",
             "audio_to_m4a": "Audio→M4A",
         }

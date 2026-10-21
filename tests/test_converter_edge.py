@@ -82,3 +82,21 @@ def test_rtf_tokenize():
     token_types = [t[0] for t in tokens]
     assert "{" in token_types
     assert "}" in token_types
+
+
+def test_audio_to_opus_dispatch_and_context_menu():
+    """audio_to_opus must be dispatchable and offered for mp3 sources."""
+    from context_menu.formats import CONVERSION_MAP, LABELS
+
+    engine = AdvancedConverterEngine()
+    assert CATEGORY_MAP["audio_to_opus"] == "audio"
+    assert engine._DISPATCH["audio_to_opus"] == ("_ffmpeg_convert", "opus")
+    assert "audio_to_opus" in CONVERSION_MAP["mp3"]
+    assert LABELS["audio_to_opus"] == "Audio → OPUS"
+
+
+def test_opus_is_a_supported_audio_input():
+    """opus must be offered as a source format, not just an output."""
+    from context_menu.formats import CONVERSION_MAP
+
+    assert "audio_to_mp3" in CONVERSION_MAP["opus"]

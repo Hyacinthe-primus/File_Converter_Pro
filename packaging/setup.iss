@@ -306,6 +306,7 @@ begin
   DeleteContextMenuForExtension('ods');
   DeleteContextMenuForExtension('odt');
   DeleteContextMenuForExtension('ogg');
+  DeleteContextMenuForExtension('opus');
   DeleteContextMenuForExtension('orf');
   DeleteContextMenuForExtension('pdf');
   DeleteContextMenuForExtension('png');
@@ -672,6 +673,7 @@ begin
     AddConversion(SubKey, '03_to_flac', 'Audio → FLAC', 'audio_to_flac');
     AddConversion(SubKey, '04_to_ogg', 'Audio → OGG', 'audio_to_ogg');
     AddConversion(SubKey, '05_to_m4a', 'Audio → M4A', 'audio_to_m4a');
+    AddConversion(SubKey, '06_to_opus', 'Audio → OPUS', 'audio_to_opus');
   end else if Ext = 'mp4' then begin
     AddConversion(SubKey, '01_to_mkv', 'Video → MKV', 'video_to_mkv');
     AddConversion(SubKey, '02_to_avi', 'Video → AVI', 'video_to_avi');
@@ -702,6 +704,12 @@ begin
     AddConversion(SubKey, '02_to_wav', 'Audio → WAV', 'audio_to_wav');
     AddConversion(SubKey, '03_to_aac', 'Audio → AAC', 'audio_to_aac');
     AddConversion(SubKey, '04_to_flac', 'Audio → FLAC', 'audio_to_flac');
+  end else if Ext = 'opus' then begin
+    AddConversion(SubKey, '01_to_mp3', 'Audio → MP3', 'audio_to_mp3');
+    AddConversion(SubKey, '02_to_wav', 'Audio → WAV', 'audio_to_wav');
+    AddConversion(SubKey, '03_to_aac', 'Audio → AAC', 'audio_to_aac');
+    AddConversion(SubKey, '04_to_flac', 'Audio → FLAC', 'audio_to_flac');
+    AddConversion(SubKey, '05_to_ogg', 'Audio → OGG', 'audio_to_ogg');
   end else if Ext = 'orf' then begin
     AddConversion(SubKey, '01_to_jpg', 'Image → JPG', 'image_to_jpg');
     AddConversion(SubKey, '02_to_jpeg', 'Image → JPEG', 'image_to_jpeg');

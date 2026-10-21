@@ -36,6 +36,7 @@ class MediaConverters:
             "wav": ["-codec:a", "pcm_s16le"],
             "aac": ["-codec:a", "aac", "-b:a", "192k"],
             "ogg": ["-codec:a", "libvorbis", "-q:a", "4"],
+            "opus": ["-codec:a", "libopus", "-b:a", "128k", "-vbr", "on", "-application", "audio"],
             "flac": ["-codec:a", "flac"],
             "m4a": ["-codec:a", "aac", "-b:a", "192k"],
         }

@@ -545,7 +545,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
     def _build_av_tab(self) -> QWidget:
         _VID_EXTS = [".mp4", ".webm", ".mkv", ".mov", ".avi"]
-        _AUD_EXTS = [".mp3", ".wav", ".aac", ".ogg", ".flac", ".m4a"]
+        _AUD_EXTS = [".mp3", ".wav", ".aac", ".ogg", ".flac", ".m4a", ".opus"]
         groups = [
             (
                 self.tr_("Vidéo → Vidéo"),

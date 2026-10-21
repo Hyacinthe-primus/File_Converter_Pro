@@ -144,7 +144,7 @@ class PreviewDialog(TranslationMixin, QDialog):
                 self.preview_html()
             elif ext == ".epub":
                 self.preview_epub()
-            elif ext in (".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac", ".wma"):
+            elif ext in (".mp3", ".wav", ".flac", ".ogg", ".opus", ".m4a", ".aac", ".wma"):
                 self.preview_audio()
             elif ext in (".mp4", ".avi", ".mkv", ".mov", ".webm", ".wmv", ".flv"):
                 self.preview_video()

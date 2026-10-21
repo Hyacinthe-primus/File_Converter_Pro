@@ -69,7 +69,7 @@ class FileManagementMixin:
             ]
         },
         **{ext: ("video.ico", "📎") for ext in [".mp4", ".avi", ".mkv", ".mov", ".webm"]},
-        **{ext: ("audio.ico", "📎") for ext in [".mp3", ".wav", ".aac", ".flac", ".ogg"]},
+        **{ext: ("audio.ico", "📎") for ext in [".mp3", ".wav", ".aac", ".flac", ".ogg", ".opus"]},
         **{ext: ("archive.ico", "🗜️") for ext in [".zip", ".rar", ".tar", ".gz", ".7z"]},
         **{ext: ("database.ico", "📎") for ext in [".db", ".sqlite", ".sql"]},
     }
@@ -86,7 +86,7 @@ class FileManagementMixin:
                 "*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.odt *.ods *.odp "
                 "*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif "
                 "*.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 "
-                "*.mp3 *.wav *.aac *.flac *.ogg *.m4a "
+                "*.mp3 *.wav *.aac *.flac *.ogg *.opus *.m4a "
                 "*.mp4 *.avi *.mkv *.webm *.mov "
                 "*.html *.htm *.epub *.rtf *.txt *.md *.markdown "
                 "*.csv *.json "
@@ -100,7 +100,7 @@ class FileManagementMixin:
                 "HTML (*.html *.htm);;"
                 "Markdown (*.md *.markdown);;"
                 "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif *.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2);;"  # noqa: E501
-                "Audio (*.mp3 *.wav *.aac *.flac *.ogg *.m4a);;"
+                "Audio (*.mp3 *.wav *.aac *.flac *.ogg *.opus *.m4a);;"
                 "Vidéo (*.mp4 *.avi *.mkv *.webm *.mov);;"
                 "Données (*.csv *.json);;"
                 "Archives (*.zip *.rar *.tar *.gz);;"

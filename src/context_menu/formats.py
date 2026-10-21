@@ -494,11 +494,12 @@ CONVERSION_MAP: dict = {
     "json": ["json_to_csv"],
     # Audio
     "wav": ["audio_to_mp3", "audio_to_aac", "audio_to_flac", "audio_to_ogg", "audio_to_m4a", "audio_to_wav"],
-    "mp3": ["audio_to_wav", "audio_to_aac", "audio_to_flac", "audio_to_ogg", "audio_to_m4a", "audio_to_mp3"],
-    "aac": ["audio_to_mp3", "audio_to_wav", "audio_to_flac", "audio_to_ogg", "audio_to_m4a", "audio_to_aac"],
-    "flac": ["audio_to_mp3", "audio_to_wav", "audio_to_aac", "audio_to_ogg", "audio_to_m4a", "audio_to_flac"],
-    "ogg": ["audio_to_mp3", "audio_to_wav", "audio_to_aac", "audio_to_flac", "audio_to_m4a", "audio_to_ogg"],
-    "m4a": ["audio_to_mp3", "audio_to_wav", "audio_to_aac", "audio_to_flac", "audio_to_ogg", "audio_to_m4a"],
+    "mp3": ["audio_to_wav", "audio_to_aac", "audio_to_flac", "audio_to_ogg", "audio_to_opus", "audio_to_m4a", "audio_to_mp3"],
+    "aac": ["audio_to_mp3", "audio_to_wav", "audio_to_flac", "audio_to_ogg", "audio_to_opus", "audio_to_m4a", "audio_to_aac"],
+    "flac": ["audio_to_mp3", "audio_to_wav", "audio_to_aac", "audio_to_ogg", "audio_to_opus", "audio_to_m4a", "audio_to_flac"],
+    "ogg": ["audio_to_mp3", "audio_to_wav", "audio_to_aac", "audio_to_flac", "audio_to_opus", "audio_to_m4a", "audio_to_ogg"],
+    "opus": ["audio_to_mp3", "audio_to_wav", "audio_to_aac", "audio_to_flac", "audio_to_ogg", "audio_to_m4a", "audio_to_opus"],
+    "m4a": ["audio_to_mp3", "audio_to_wav", "audio_to_aac", "audio_to_flac", "audio_to_ogg", "audio_to_opus", "audio_to_m4a"],
     # Video
     "avi": [
         "video_to_mp4",
@@ -634,6 +635,7 @@ LABELS: dict = {
     "audio_to_wav": "Audio → WAV",
     "audio_to_aac": "Audio → AAC",
     "audio_to_ogg": "Audio → OGG",
+    "audio_to_opus": "Audio → OPUS",
     "audio_to_flac": "Audio → FLAC",
     "audio_to_m4a": "Audio → M4A",
     # Video
