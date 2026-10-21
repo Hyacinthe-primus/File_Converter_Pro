@@ -927,7 +927,7 @@ begin
   Exts := ['aac','apng','arw','avi','avif','bmp','cr2','cr3','csv','dng',
            'doc','docx','epub','flac','gif','heic','heif','html','j2k','jfif',
            'jp2','jpeg','jpg','jpx','json','markdown','md','m4a','mkv','mov','mp3','mp4',
-           'nef','ogg','orf','odp','ods','odt','pdf','png','pptx','psd','raf','raw','rw2','rtf',
+           'nef','ogg','opus','orf','odp','ods','odt','pdf','png','pptx','psd','raf','raw','rw2','rtf',
            'svg','tif','tiff','txt','wav','webm','webp','xlsx'];
   for I := 0 to GetArrayLength(Exts) - 1 do
     RegisterContextMenuForExt(Exts[I]);
