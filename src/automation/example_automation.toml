@@ -5,6 +5,7 @@ output_dir      = "C:/Users/User/Desktop/Converted"
 enabled         = true       # set to false to disable this watch folder without deleting its config
 recursive       = false      # set to true to also watch sub-folders
 convert_existing = false     # convert files already in the folder on startup
+ocr             = false      # set to true to OCR image → PDF rules into searchable PDFs
 
   # Rules: which input format converts to which output format(s)
   [watch_folders.inbox.rules]
@@ -14,11 +15,25 @@ convert_existing = false     # convert files already in the folder on startup
   docx = "pdf"              # Word → PDF
 
 
+# OCR example: images dropped in this folder become searchable PDFs
+[watch_folders.scans]
+path       = "C:/Users/User/Desktop/Scans"
+output_dir = "C:/Users/User/Desktop/ScansPDF"
+enabled    = false
+recursive  = false
+ocr        = true           # OCR the image → PDF rules below
+
+  [watch_folders.scans.rules]
+  png = "pdf"
+  jpg = "pdf"
+
+
 [scheduled_tasks.weekly_cleanup]
 path       = "C:/Users/User/Desktop/ToArchive"
 output_dir = "C:/Users/User/Desktop/Archives"
 enabled    = true
 recursive  = true
+ocr        = false          # works the same way for scheduled tasks
 
   # Trigger configuration: controls when the task runs.
   [scheduled_tasks.weekly_cleanup.trigger]
