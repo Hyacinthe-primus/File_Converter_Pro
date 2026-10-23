@@ -706,7 +706,14 @@ def main() -> None:
         if files:
             from PySide6.QtWidgets import QApplication
 
-            _app = QApplication(sys.argv)
+            _app = QApplication.instance() or QApplication(sys.argv)
+
+            config_manager = ConfigManager()
+            config = config_manager.load_config()
+            if config.get("use_system_theme", True):
+                config["dark_mode"] = is_dark_mode_qt()
+            TermsGuard(config, config_manager).enforce()
+
             from context_menu.window import run_context_menu
 
             run_context_menu(files, conversion_type=conversion_type)
