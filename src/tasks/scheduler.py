@@ -168,6 +168,7 @@ def get_scheduled_task_configs() -> list:
                 "recursive": cfg.get("recursive", False),
                 "trigger": trigger,
                 "toml_file": _find_toml_for_task(name),
+                "ocr": bool(cfg.get("ocr", False)),
             }
         )
     return result
@@ -192,6 +193,7 @@ def get_all_scheduled_task_configs() -> list:
                 "trigger": trigger,
                 "enabled": cfg.get("enabled", True),
                 "toml_file": _find_toml_for_task(name),
+                "ocr": bool(cfg.get("ocr", False)),
             }
         )
     return result
@@ -245,6 +247,7 @@ def _run_task(cfg: dict) -> None:
     path = cfg["path"]
     rules = cfg["rules"]
     recursive = cfg["recursive"]
+    ocr = bool(cfg.get("ocr", False))
 
     iterator = Path(path).rglob("*") if recursive else Path(path).iterdir()
 
@@ -271,7 +274,7 @@ def _run_task(cfg: dict) -> None:
                     continue
                 try:
                     logger.info("[Scheduler] %s → %s (%s)", f.name, fmt, cfg["name"])
-                    _run_conversion(conversion_type, str(f), output_dir)
+                    _run_conversion(conversion_type, str(f), output_dir, ocr=ocr)
                 except Exception as e:
                     logger.error("[Scheduler] %s → %s failed: %s", f.name, fmt, e)
 
@@ -302,7 +305,7 @@ def _run_task(cfg: dict) -> None:
                 output_dir,
                 cfg["name"],
             )
-            _run_merge(conversion_type, files, output_dir)
+            _run_merge(conversion_type, files, output_dir, ocr=ocr)
             _save_merge_state(output_dir, action, files)
         except Exception as e:
             logger.error("[Scheduler] Merge %s failed: %s", action, e)

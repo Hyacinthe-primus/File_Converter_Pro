@@ -174,6 +174,7 @@ def get_watch_folder_configs() -> list:
                 "rules": _normalise_rules(rules),
                 "recursive": cfg.get("recursive", False),
                 "convert_existing": cfg.get("convert_existing", False),
+                "ocr": bool(cfg.get("ocr", False)),
             }
         )
     return result
@@ -196,6 +197,7 @@ def get_all_watch_folder_configs() -> list:
                 "recursive": cfg.get("recursive", False),
                 "convert_existing": cfg.get("convert_existing", False),
                 "enabled": cfg.get("enabled", True),
+                "ocr": bool(cfg.get("ocr", False)),
             }
         )
     return result
@@ -250,12 +252,20 @@ def _build_conversion_type(src_ext: str, dst_fmt: str) -> str | None:
     return None
 
 
-def _run_conversion(conversion_type: str, src: str, output_dir: str) -> None:
+def _run_conversion(conversion_type: str, src: str, output_dir: str, ocr: bool = False) -> None:
     os.makedirs(output_dir, exist_ok=True)
     if conversion_type == "image_to_pdf":
-        from context_menu.window import _convert_image_to_pdf
+        if ocr:
+            from tasks.ocr_helpers import configure_scanlayer
+            from tasks.ocr_helpers import image_to_pdf as _ocr_image_to_pdf
 
-        _convert_image_to_pdf(src, output_dir)
+            orientation = configure_scanlayer()
+            logger.info("[OCR] %s → searchable PDF", Path(src).name)
+            _ocr_image_to_pdf(src, os.path.join(output_dir, f"{Path(src).stem}.pdf"), orientation)
+        else:
+            from context_menu.window import _convert_image_to_pdf
+
+            _convert_image_to_pdf(src, output_dir)
     elif conversion_type == "docx_to_pdf":
         from context_menu.window import _convert_docx_to_pdf
 
@@ -308,15 +318,28 @@ def _merge_conversion_type(action: str, sort: str) -> str | None:
     return None
 
 
-def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str) -> None:
+def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str, ocr: bool = False) -> None:
     os.makedirs(output_dir, exist_ok=True)
 
-    from context_menu.formats import MERGE_DISPATCH
-    from context_menu.window import _merge_docx, _merge_images_to_pdf, _merge_pdfs
-
     if conversion_type == "images_to_pdf_merged":
-        _merge_images_to_pdf(file_paths, output_dir)
+        if ocr:
+            import time as _time
+
+            from tasks.ocr_helpers import configure_scanlayer, merge_images_with_ocr
+
+            orientation = configure_scanlayer()
+            out = os.path.join(output_dir, f"merged_images_{_time.strftime('%Y%m%d_%H%M%S')}.pdf")
+            logger.info("[OCR] Merging %d image(s) → searchable PDF", len(file_paths))
+            if not merge_images_with_ocr(file_paths, out, orientation):
+                raise RuntimeError("OCR merge produced no output")
+        else:
+            from context_menu.window import _merge_images_to_pdf
+
+            _merge_images_to_pdf(file_paths, output_dir)
         return
+
+    from context_menu.formats import MERGE_DISPATCH
+    from context_menu.window import _merge_docx, _merge_pdfs
 
     if conversion_type in MERGE_DISPATCH:
         kind, order = MERGE_DISPATCH[conversion_type]
@@ -402,6 +425,7 @@ class _FolderEventHandler(FileSystemEventHandler):
     def __init__(self, config: dict):
         super().__init__()
         self.config = config
+        self._ocr = bool(config.get("ocr", False))
         self._lock = Lock()
         self._seen: set[str] = set()
 
@@ -450,7 +474,7 @@ class _FolderEventHandler(FileSystemEventHandler):
             return
         try:
             logger.info("[Watcher] %s → %s", Path(src).name, fmt)
-            _run_conversion(conversion_type, src, output_dir)
+            _run_conversion(conversion_type, src, output_dir, ocr=self._ocr)
         except Exception as e:
             logger.error("[Watcher] %s → %s failed: %s", Path(src).name, fmt, e)
 
@@ -513,7 +537,7 @@ class _FolderEventHandler(FileSystemEventHandler):
                 sort,
                 output_dir,
             )
-            _run_merge(conversion_type, files, output_dir)
+            _run_merge(conversion_type, files, output_dir, ocr=self._ocr)
             _save_merge_state(output_dir, action, files)
         except Exception as e:
             logger.error("[Watcher] Merge %s failed: %s", action, e)
@@ -583,6 +607,7 @@ class WatcherManager:
         path = cfg["path"]
         rules = cfg["rules"]
         recursive = cfg.get("recursive", False)
+        ocr = bool(cfg.get("ocr", False))
 
         iterator = Path(path).rglob("*") if recursive else Path(path).iterdir()
 
@@ -608,7 +633,7 @@ class WatcherManager:
                         continue
                     try:
                         logger.info("[Watcher] Existing: %s → %s", f.name, fmt)
-                        _run_conversion(conversion_type, str(f), output_dir)
+                        _run_conversion(conversion_type, str(f), output_dir, ocr=ocr)
                     except Exception as e:
                         logger.error("[Watcher] Existing: %s → %s failed: %s", f.name, fmt, e)
 
@@ -633,7 +658,7 @@ class WatcherManager:
                     sort,
                     output_dir,
                 )
-                _run_merge(conversion_type, files, output_dir)
+                _run_merge(conversion_type, files, output_dir, ocr=ocr)
                 _save_merge_state(output_dir, action, files)
             except Exception as e:
                 logger.error("[Watcher] Existing merge %s failed: %s", action, e)
