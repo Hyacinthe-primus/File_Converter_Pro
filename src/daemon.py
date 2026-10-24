@@ -86,6 +86,18 @@ def is_autostart_enabled() -> bool:
         return False
 
 
+def _terms_accepted() -> bool:
+    """Return True when the user accepted both the Terms and the Privacy Policy."""
+    try:
+        from config import ConfigManager
+
+        config = ConfigManager().load_config()
+    except Exception as e:
+        logging.getLogger(__name__).error("[Daemon] Could not read configuration: %s", e)
+        return False
+    return bool(config.get("accepted_terms", False) and config.get("accepted_privacy", False))
+
+
 def run_daemon_mode() -> None:
     import signal
 
@@ -95,6 +107,11 @@ def run_daemon_mode() -> None:
     _setup_logging()
     _trim_log_if_clean()
     logging.getLogger("apscheduler").setLevel(logging.WARNING)
+
+    if not _terms_accepted():
+        logging.getLogger(__name__).warning("[Daemon] Terms & Privacy not accepted; daemon will not start.")
+        return
+
     _app = QApplication(sys.argv)
 
     signal.signal(signal.SIGINT, lambda *_: _app.quit())
@@ -155,6 +172,10 @@ def main() -> None:
     _setup_logging()
     _trim_log_if_clean()
     logging.getLogger(__name__)
+
+    if not _terms_accepted():
+        logging.getLogger(__name__).warning("[Daemon] Terms & Privacy not accepted; daemon will not start.")
+        return
 
     if str(BASE_DIR) not in sys.path:
         sys.path.insert(0, str(BASE_DIR))

@@ -187,3 +187,153 @@ def test_context_menu_converts_after_acceptance(monkeypatch, tmp_path, qapp):
 
     assert calls[0:2] == ["guard", "enforce"]
     assert calls[2] == ("convert", [str(source)], None)
+
+
+def _patch_config_manager(monkeypatch, config):
+    import config as config_module
+
+    class FakeConfigManager:
+        def load_config(self):
+            return dict(config)
+
+    monkeypatch.setattr(config_module, "ConfigManager", FakeConfigManager)
+
+
+def test_daemon_terms_requires_both_flags(monkeypatch):
+    import daemon
+
+    _patch_config_manager(monkeypatch, {"accepted_terms": True, "accepted_privacy": True})
+    assert daemon._terms_accepted() is True
+
+    _patch_config_manager(monkeypatch, {"accepted_terms": True, "accepted_privacy": False})
+    assert daemon._terms_accepted() is False
+
+    _patch_config_manager(monkeypatch, {})
+    assert daemon._terms_accepted() is False
+
+
+def test_daemon_terms_false_when_config_unreadable(monkeypatch):
+    import config as config_module
+    import daemon
+
+    class BrokenConfigManager:
+        def load_config(self):
+            raise OSError("boom")
+
+    monkeypatch.setattr(config_module, "ConfigManager", BrokenConfigManager)
+
+    assert daemon._terms_accepted() is False
+
+
+def _patch_daemon_runtime(monkeypatch, started):
+    import PySide6.QtCore as qtcore
+    import PySide6.QtWidgets as qtwidgets
+
+    import tasks.scheduler as scheduler_module
+    import tasks.watcher as watcher_module
+
+    class FakeSignal:
+        def connect(self, fn):
+            pass
+
+    class FakeTimer:
+        def __init__(self):
+            self.timeout = FakeSignal()
+
+        def start(self, ms):
+            pass
+
+    class FakeApp:
+        def __init__(self, argv):
+            started.append("app")
+
+        def quit(self):
+            pass
+
+        def exec(self):
+            return 0
+
+    class FakeWatcher:
+        def start(self):
+            started.append("watcher")
+
+        def stop(self):
+            pass
+
+    class FakeScheduler:
+        def start(self):
+            started.append("scheduler")
+
+        def stop(self):
+            pass
+
+    monkeypatch.setattr(qtcore, "QTimer", FakeTimer)
+    monkeypatch.setattr(qtwidgets, "QApplication", FakeApp)
+    monkeypatch.setattr(watcher_module, "WatcherManager", FakeWatcher)
+    monkeypatch.setattr(scheduler_module, "SchedulerManager", FakeScheduler)
+
+
+def test_run_daemon_mode_blocked_without_terms(monkeypatch):
+    import PySide6.QtWidgets as qtwidgets
+
+    import daemon
+    import tasks.scheduler as scheduler_module
+    import tasks.watcher as watcher_module
+
+    started = []
+
+    class ExplodingApp:
+        def __init__(self, *args):
+            started.append("app")
+
+    class ExplodingManager:
+        def __init__(self):
+            started.append("manager")
+
+    monkeypatch.setattr(daemon, "_setup_logging", lambda: None)
+    monkeypatch.setattr(daemon, "_trim_log_if_clean", lambda: None)
+    monkeypatch.setattr(daemon, "_terms_accepted", lambda: False)
+    monkeypatch.setattr(qtwidgets, "QApplication", ExplodingApp)
+    monkeypatch.setattr(watcher_module, "WatcherManager", ExplodingManager)
+    monkeypatch.setattr(scheduler_module, "SchedulerManager", ExplodingManager)
+
+    daemon.run_daemon_mode()
+
+    assert started == []
+
+
+def test_run_daemon_mode_starts_when_terms_accepted(monkeypatch):
+    import daemon
+
+    started = []
+    _patch_daemon_runtime(monkeypatch, started)
+    monkeypatch.setattr(daemon, "_setup_logging", lambda: None)
+    monkeypatch.setattr(daemon, "_trim_log_if_clean", lambda: None)
+    monkeypatch.setattr(daemon, "_terms_accepted", lambda: True)
+    monkeypatch.setattr(daemon, "_get_toml_mtimes", lambda: {})
+
+    daemon.run_daemon_mode()
+
+    assert started == ["app", "watcher", "scheduler"]
+
+
+def test_daemon_main_blocked_without_terms(monkeypatch):
+    import daemon
+    import tasks.scheduler as scheduler_module
+    import tasks.watcher as watcher_module
+
+    started = []
+
+    class ExplodingManager:
+        def __init__(self):
+            started.append("manager")
+
+    monkeypatch.setattr(daemon, "_setup_logging", lambda: None)
+    monkeypatch.setattr(daemon, "_trim_log_if_clean", lambda: None)
+    monkeypatch.setattr(daemon, "_terms_accepted", lambda: False)
+    monkeypatch.setattr(watcher_module, "WatcherManager", ExplodingManager)
+    monkeypatch.setattr(scheduler_module, "SchedulerManager", ExplodingManager)
+
+    daemon.main()
+
+    assert started == []
