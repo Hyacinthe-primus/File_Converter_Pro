@@ -191,7 +191,7 @@ class FileManagementMixin:
 
     def calculate_folder_size(self, folder_path):
         total_size = 0
-        for dirpath, dirnames, filenames in os.walk(folder_path):
+        for dirpath, _dirnames, filenames in os.walk(folder_path):
             for filename in filenames:
                 filepath = os.path.join(dirpath, filename)
                 if os.path.exists(filepath):
@@ -279,7 +279,7 @@ class FileManagementMixin:
         }
         files = []
 
-        for root, dirs, filenames in os.walk(folder):
+        for root, _dirs, filenames in os.walk(folder):
             for filename in filenames:
                 file_path = os.path.join(root, filename)
                 file_ext = Path(file_path).suffix.lower()

@@ -620,7 +620,6 @@ class WindowTransition:
         from threading import Thread
 
         notifier = win.system_notifier
-        win._system_notifier = notifier
         Thread(target=notifier.check_and_notify_update, daemon=True).start()
 
         from daemon import is_autostart_enabled

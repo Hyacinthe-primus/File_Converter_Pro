@@ -740,7 +740,6 @@ class PreviewDialog(TranslationMixin, QDialog):
                 self._js_number = _fmt("#b5cea8")
                 self._js_comment = _fmt("#6a9955", italic=True)
                 self._js_regex = _fmt("#d16969")
-                self._js_operator = _fmt("#d4d4d4")
 
                 self._JS_KEYWORDS = {
                     "var",

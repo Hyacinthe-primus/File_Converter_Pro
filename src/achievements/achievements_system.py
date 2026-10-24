@@ -78,7 +78,6 @@ class AchievementSystem(QObject):
             "#FFD600",  # Legendary
             "#FF1744",  # Mythic
         ]
-        self.current_rank_index = 0
         self.last_rank_index = -1
         self.update_all_progress()
 

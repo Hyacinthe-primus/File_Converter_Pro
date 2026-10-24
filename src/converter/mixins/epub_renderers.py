@@ -178,32 +178,6 @@ class EpubRenderers:
             d = _decode(text)
             return d.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-        def _css_to_inline(style_str):
-            """Parse a CSS style attribute into reportlab-compatible markup hints."""
-            bold = False
-            italic = False
-            color = None
-            size = None
-            for decl in style_str.split(";"):
-                decl = decl.strip()
-                if not decl or ":" not in decl:
-                    continue
-                prop, _, val = decl.partition(":")
-                prop = prop.strip().lower()
-                val = val.strip()
-                if prop == "font-weight" and val in ("bold", "700", "800", "900"):
-                    bold = True
-                elif prop == "font-style" and val == "italic":
-                    italic = True
-                elif prop == "color":
-                    color = val
-                elif prop == "font-size":
-                    try:
-                        size = float(re.sub(r"[^0-9.]", "", val))
-                    except Exception:
-                        pass
-            return bold, italic, color, size
-
         def _inline_markup(frag):
             return inline_markup(frag, decode_fn=_decode, preserve_font_tags=True)
 

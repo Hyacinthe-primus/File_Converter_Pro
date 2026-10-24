@@ -182,7 +182,7 @@ class ArchiveEnginesMixin:
                             folder_name = Path(folder).name
                             print(f"[DEBUG] Adding folder: {folder_name}")
 
-                            for root, dirs, files in os.walk(folder):
+                            for root, _dirs, files in os.walk(folder):
                                 for file in files:
                                     full_path = os.path.join(root, file)
                                     rel_path = os.path.relpath(full_path, os.path.dirname(folder))
@@ -212,7 +212,7 @@ class ArchiveEnginesMixin:
                     folder_name = Path(folder).name
                     print(f"[DEBUG] Adding folder: {folder_name}")
 
-                    for root, dirs, files in os.walk(folder):
+                    for root, _dirs, files in os.walk(folder):
                         for file in files:
                             full_path = os.path.join(root, file)
                             rel_path = os.path.relpath(full_path, os.path.dirname(folder))

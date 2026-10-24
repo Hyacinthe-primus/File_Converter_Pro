@@ -265,7 +265,7 @@ class CompressionMixin(ArchiveEnginesMixin):
         else:
             all_files = files_to_compress.copy()
             for folder in folders_to_compress:
-                for root, dirs, files in os.walk(folder):
+                for root, _dirs, files in os.walk(folder):
                     for file in files:
                         all_files.append(os.path.join(root, file))
 
@@ -405,7 +405,7 @@ class CompressionMixin(ArchiveEnginesMixin):
             else:
                 all_files = []
                 for folder in folders:
-                    for root, dirs, files in os.walk(folder):
+                    for root, _dirs, files in os.walk(folder):
                         for file in files:
                             all_files.append(os.path.join(root, file))
 

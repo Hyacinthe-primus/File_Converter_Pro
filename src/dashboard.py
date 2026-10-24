@@ -129,7 +129,6 @@ class _FillBar(QWidget):
         self._fill_timer.setInterval(12)
         self._fill_timer.timeout.connect(self._fill_tick)
         self._fill_target = 0.0
-        self._fill_speed = 0.055
 
         self._shimmer_timer = QTimer(self)
         self._shimmer_timer.setInterval(14)
@@ -386,7 +385,6 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         # DB selector state
         self._main_db = db_manager
         self._adv_db = None
-        self._using_adv = False
 
         self.setup_ui()
         self.load_statistics()

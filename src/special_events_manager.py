@@ -216,7 +216,6 @@ class ParticleSystem:
     def __init__(self, palette: List[QColor]):
         self.palette = palette
         self.particles: List[Particle] = []
-        self._spawn_counter = 0
 
     def emit(self, x: float, y: float, count: int = 3):
         remaining = self.MAX_PARTICLES - len(self.particles)
