@@ -4,14 +4,14 @@
 
 <p><em>A free, offline, all-in-one file converter for Windows built to feel premium.</em></p>
 
-[![Version](https://img.shields.io/badge/version-1.0.7-4dabf7?style=flat-square)](#)
-[![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=flat-square&logo=windows)](#)
-[![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=flat-square&logo=qt&logoColor=white)](#)
-[![License](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)](#license)
-[![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat-square)](#)
-[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.13-3776AB?style=flat-square&logo=python&logoColor=white)](#)
-[![Downloads](https://img.shields.io/github/downloads/Hyacinthe-primus/File_Converter_Pro/total.svg)](https://github.com/Hyacinthe-primus/File_Converter_Pro/releases)
-[![Last Commit](https://img.shields.io/github/last-commit/Hyacinthe-primus/File_Converter_Pro)](https://github.com/Hyacinthe-primus/File_Converter_Pro)
+[![Version](https://img.shields.io/badge/version-1.0.7-4dabf7?style=for-the-badge)](#)
+[![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=for-the-badge&logo=windows&logoColor=white)](#)
+[![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=for-the-badge&logo=qt&logoColor=white)](#)
+[![License](https://img.shields.io/badge/license-GPLv3-blue?style=for-the-badge)](#license)
+[![Status](https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge)](#)
+[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](#)
+[![Downloads](https://img.shields.io/github/downloads/Hyacinthe-primus/File_Converter_Pro/total.svg?style=for-the-badge)](https://github.com/Hyacinthe-primus/File_Converter_Pro/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/Hyacinthe-primus/File_Converter_Pro?style=for-the-badge)](https://github.com/Hyacinthe-primus/File_Converter_Pro)
 
 <br/>
 
