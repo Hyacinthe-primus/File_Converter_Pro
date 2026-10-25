@@ -181,3 +181,32 @@ def test_batch_pdf_to_docx_native_fallback_with_image(tmp_path):
 
     converted = Document(str(out))
     assert len(converted.inline_shapes) >= 1
+
+
+def test_batch_rename_reattaches_preview_buttons(app, tmp_path, monkeypatch):
+    """Renaming rebuilds the file list; per-file preview buttons must survive."""
+    from PySide6.QtWidgets import QMessageBox
+
+    monkeypatch.setattr(QMessageBox, "information", staticmethod(lambda *a, **k: None))
+
+    old_paths = [tmp_path / "one.txt", tmp_path / "two.txt"]
+    for path in old_paths:
+        path.write_text("x", encoding="utf-8")
+
+    app.files_list = []
+    app.files_list_widget.clear()
+    app.add_files_to_list([str(p) for p in old_paths])
+    assert app.files_list_widget.count() == 2
+
+    plan = [
+        (str(old_paths[0]), "renamed_one.txt"),
+        (str(old_paths[1]), "renamed_two.txt"),
+    ]
+    app.process_batch_rename(plan)
+
+    assert (tmp_path / "renamed_one.txt").exists()
+    assert (tmp_path / "renamed_two.txt").exists()
+    assert app.files_list_widget.count() == 2
+    for i in range(app.files_list_widget.count()):
+        item = app.files_list_widget.item(i)
+        assert app.files_list_widget.itemWidget(item) is not None

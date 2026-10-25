@@ -354,11 +354,12 @@ class BatchMixin:
                     f"{idx}. {icon} {display_name}"
                 )
             item.setData(Qt.UserRole, file_path)
-            item.setData(Qt.UserRole + 1, "file")
+            item.setData(Qt.UserRole + 1, "folder" if os.path.isdir(file_path) else "file")
             if os.path.isfile(file_path):
                 item.setData(Qt.UserRole + 4, self.format_size(os.path.getsize(file_path)))
             item.setToolTip(file_path)
             self.files_list_widget.addItem(item)
+            self._attach_preview_btn(item, file_path)
 
         self.update_file_counter()
         QMessageBox.information(
