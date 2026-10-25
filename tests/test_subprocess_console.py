@@ -62,6 +62,15 @@ def test_tesseract_registration_delegates(fake_popen):
     assert proc.kwargs["creationflags"] & subprocess.CREATE_NO_WINDOW
 
 
+def test_patched_popen_remains_subclassable(fake_popen):
+    subprocess_console.suppress_console_for("ffplay")
+
+    class Subprocess(subprocess.Popen):
+        pass
+
+    assert issubclass(Subprocess, fake_popen)
+
+
 def test_suppress_console_for_is_idempotent(fake_popen):
     subprocess_console.suppress_console_for("ffplay")
     subprocess_console.suppress_console_for("tesseract")

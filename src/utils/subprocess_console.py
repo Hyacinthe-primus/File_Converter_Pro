@@ -38,13 +38,16 @@ def _install() -> None:
     _orig_popen = subprocess.Popen
     _no_window = subprocess.CREATE_NO_WINDOW
 
-    def _popen_hidden(cmd, *args, **kwargs):
-        if _exe_name(cmd) in _hidden:
-            flags = kwargs.get("creationflags", 0) or 0
-            kwargs["creationflags"] = flags | _no_window
-        return _orig_popen(cmd, *args, **kwargs)
+    # Keep Popen a class: asyncio.windows_utils subclasses subprocess.Popen,
+    # so replacing it with a plain function breaks "import asyncio".
+    class _HiddenPopen(_orig_popen):
+        def __init__(self, cmd, *args, **kwargs):
+            if _exe_name(cmd) in _hidden:
+                flags = kwargs.get("creationflags", 0) or 0
+                kwargs["creationflags"] = flags | _no_window
+            super().__init__(cmd, *args, **kwargs)
 
-    subprocess.Popen = _popen_hidden
+    subprocess.Popen = _HiddenPopen
 
 
 def suppress_console_for(*executables: str) -> None:
