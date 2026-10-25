@@ -124,6 +124,12 @@ class _NotifierBridge(QObject):
 
 
 try:
+    from utils.subprocess_console import suppress_console_for
+
+    # playsound3 probes every backend at import time (Ffplay.check runs
+    # "ffplay -version"), which flashes a console window in the GUI build.
+    suppress_console_for("ffplay")
+
     from playsound3 import playsound
 
     PLAY_SOUND_AVAILABLE = True
