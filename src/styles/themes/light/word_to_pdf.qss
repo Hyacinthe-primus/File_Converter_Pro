@@ -1,0 +1,44 @@
+/* Word → PDF preview */
+
+QTextEdit {
+    background-color: #f8f9fa;
+    color: #212529;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 12px;
+}
+
+QScrollBar:vertical {
+    background: #e9ecef;
+    width: 8px;
+    border-radius: 4px;
+    margin: 0;
+}
+QScrollBar::handle:vertical {
+    background: #ced4da;
+    border-radius: 4px;
+    min-height: 24px;
+}
+QScrollBar::handle:vertical:hover { background: #4dabf7; }
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical { height: 0; }
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical { background: none; }
+
+QScrollBar:horizontal {
+    background: #e9ecef;
+    height: 8px;
+    border-radius: 4px;
+    margin: 0;
+}
+QScrollBar::handle:horizontal {
+    background: #ced4da;
+    border-radius: 4px;
+    min-width: 24px;
+}
+QScrollBar::handle:horizontal:hover { background: #4dabf7; }
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal { width: 0; }
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal { background: none; }

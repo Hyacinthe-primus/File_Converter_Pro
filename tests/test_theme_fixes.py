@@ -302,3 +302,39 @@ class TestQuickConvertCardTheme:
 
         assert "window_card.qss" not in REQUIRED_FILES
         assert "splash.qss" not in REQUIRED_FILES
+
+
+class TestDialogButtonsTheme:
+    """Dialog action buttons must be themeable through each theme's buttons.qss."""
+
+    def test_builtin_themes_style_dialog_buttons(self):
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1]
+        themes = root / "src" / "styles" / "themes"
+        selectors = (
+            "QPushButton#BtnOK {",
+            "QPushButton#BtnCancel {",
+            "QPushButton#BtnDecline {",
+            "QPushButton#BtnCancelGlassy {",
+            "QPushButton#BtnReconvert {",
+            "QPushButton#BtnDeleteSelection {",
+            "QPushButton#BtnFolderAsItem {",
+            "QPushButton#BtnFolderContent {",
+        )
+        for theme in ("dark", "light"):
+            qss = (themes / theme / "buttons.qss").read_text(encoding="utf-8")
+            for selector in selectors:
+                assert selector in qss, f"{theme}/buttons.qss is missing {selector}"
+
+    def test_loader_reads_buttons_qss_for_builtin_themes(self):
+        from qss_helpers import _load_qss
+
+        for theme in ("dark", "light"):
+            qss = _load_qss("buttons.qss", theme)
+            assert "QPushButton#BtnFolderContent" in qss
+
+    def test_buttons_qss_stays_optional(self):
+        from theme_manager import REQUIRED_FILES
+
+        assert "buttons.qss" not in REQUIRED_FILES

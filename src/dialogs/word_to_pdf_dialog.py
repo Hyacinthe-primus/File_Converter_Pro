@@ -18,17 +18,12 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from qss_helpers import _apply_dialog_btn, _load_qss
+from qss_helpers import _apply_dialog_btn, _load_qss, get_current_theme
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
 from widgets import AnimatedCheckBox
 
 _DARK = {
-    "preview_bg": "#0d1117",
-    "preview_fg": "#c9d1d9",
-    "sb_bg": "#161b22",
-    "sb_handle": "#30363d",
-    "sb_handle_hv": "#4dabf7",
     "title_active": "#4dabf7",
     "title_accent": "#74c0fc",
     "title_muted": "#6c757d",
@@ -37,11 +32,6 @@ _DARK = {
 }
 
 _LIGHT = {
-    "preview_bg": "#f8f9fa",
-    "preview_fg": "#212529",
-    "sb_bg": "#e9ecef",
-    "sb_handle": "#ced4da",
-    "sb_handle_hv": "#4dabf7",
     "title_active": "#1971c2",
     "title_accent": "#339af0",
     "title_muted": "#adb5bd",
@@ -174,43 +164,7 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
 
     def _build_preview_stylesheet(self) -> str:
         """Return the QTextEdit + slim scrollbar stylesheet for the current theme."""
-        c = _DARK if self.is_dark_mode else _LIGHT
-        return f"""
-            QTextEdit {{
-                background-color: {c["preview_bg"]};
-                color: {c["preview_fg"]};
-                border: none;
-                border-radius: 8px;
-                padding: 8px;
-                font-size: 12px;
-            }}
-            QScrollBar:vertical {{
-                background: {c["sb_bg"]}; width: 8px;
-                border-radius: 4px; margin: 0;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {c["sb_handle"]};
-                border-radius: 4px; min-height: 24px;
-            }}
-            QScrollBar::handle:vertical:hover  {{ background: {c["sb_handle_hv"]}; }}
-            QScrollBar::add-line:vertical,
-            QScrollBar::sub-line:vertical      {{ height: 0; }}
-            QScrollBar::add-page:vertical,
-            QScrollBar::sub-page:vertical      {{ background: none; }}
-            QScrollBar:horizontal {{
-                background: {c["sb_bg"]}; height: 8px;
-                border-radius: 4px; margin: 0;
-            }}
-            QScrollBar::handle:horizontal {{
-                background: {c["sb_handle"]};
-                border-radius: 4px; min-width: 24px;
-            }}
-            QScrollBar::handle:horizontal:hover {{ background: {c["sb_handle_hv"]}; }}
-            QScrollBar::add-line:horizontal,
-            QScrollBar::sub-line:horizontal     {{ width: 0; }}
-            QScrollBar::add-page:horizontal,
-            QScrollBar::sub-page:horizontal     {{ background: none; }}
-        """
+        return _load_qss("word_to_pdf.qss", get_current_theme(self.is_dark_mode))
 
     def _build_buttons(self) -> QDialogButtonBox:
         """Create and style the OK / Cancel button box."""
