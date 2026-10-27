@@ -4,7 +4,7 @@ File Converter Pro
 
 Headless OCR helpers for watch folders and scheduled tasks.
 
-When a task sets `ocr = true`, image → PDF conversions produce searchable
+When a task sets ocr = true, image → PDF conversions produce searchable
 PDFs through scanlayer, using the orientation configured in the app. Images
 scanlayer cannot read fall back to a plain image embed, exactly like the
 interactive OCR path.
@@ -24,7 +24,7 @@ OCR_MERGE_WORKERS = 4
 
 
 def resolve_orientation(raw=None):
-    """Map the `ocr_orientation` config string to the scanlayer orientation.
+    """Map the ocr_orientation config string to the scanlayer orientation.
 
     "auto" -> None (auto-detect), "none"/empty -> "none" (disabled),
     otherwise -> float angle in degrees. When *raw* is None the value is read

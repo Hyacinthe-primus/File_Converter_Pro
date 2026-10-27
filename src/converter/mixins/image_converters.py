@@ -15,7 +15,6 @@ class ImageConverters:
         """Open any image format using the best available library."""
         ext = Path(src).suffix.lower()
         if ext == ".svg":
-            # PyMuPDF already renders SVG, so no CairoSVG/native-libcairo dependency is needed
             import io
 
             import fitz
@@ -134,8 +133,8 @@ class ImageConverters:
         """Vectorise the image into an SVG with VTracer.
 
         PNG/JPEG/TIFF/... go straight to VTracer. HEIC/AVIF (even when misnamed)
-        are decoded to a temporary PNG by ``decodable_image_path``; anything else
-        VTracer cannot read is decoded by Pillow via ``_open_universal_image``.
+        are decoded to a temporary PNG by decodable_image_path ; anything else
+        VTracer cannot read is decoded by Pillow via _open_universal_image.
         """
         try:
             import vtracer
