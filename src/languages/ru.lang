@@ -816,6 +816,7 @@
         "theme_integrated_desc": "Встроенная тема File Converter",
         "theme_import_btn": "Установить тему (.fctheme)",
         "theme_import_hint": "Файлы .fctheme — это ZIP-архивы, содержащие файлы QSS/CSS темы и metadata.ini.",
+        "theme_get_themes_btn": "Получить темы",
         "theme_import_ok_title": "Тема установлена",
         "theme_import_ok_msg": "Тема «{}» успешно установлена.",
         "theme_import_err": "Не удалось установить тему: {}",

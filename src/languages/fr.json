@@ -848,6 +848,7 @@
     "theme_integrated_desc": "Thème intégré File Converter",
     "theme_import_btn": "Installer un thème (.fctheme)",
     "theme_import_hint": "Les fichiers .fctheme sont des archives ZIP contenant les fichiers QSS/CSS du thème et un metadata.ini.",
+    "theme_get_themes_btn": "Obtenir des thèmes",
     "theme_import_ok_title": "Thème installé",
     "theme_import_ok_msg": "Thème «{}» installé avec succès.",
     "theme_import_err": "Impossible d'installer le thème : {}",

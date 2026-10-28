@@ -152,15 +152,18 @@ class TestAdvancedConversionsCustomTheme:
 class TestSettingsImportButtonQss:
     """The .lang / .fctheme install buttons must be themeable through settings.qss."""
 
-    def test_both_import_buttons_use_the_settings_object_name(self):
+    def test_import_button_and_theme_link_are_themeable(self):
         from pathlib import Path
 
         root = Path(__file__).resolve().parents[1]
         src = (root / "src" / "dialogs" / "settings_dialog.py").read_text(encoding="utf-8")
         assert src.count('setObjectName("SettingsImportBtn")') == 2
         assert '_apply_dialog_btn(import_btn, "BtnIndigo")' not in src
+        assert 'THEMES_URL = "https://github.com/Hyacinthe-primus/FCP-themes"' in src
+        assert 'setObjectName("SettingsLink")' in src
+        assert "setOpenExternalLinks(True)" in src
 
-    def test_builtin_themes_style_the_import_button(self):
+    def test_builtin_themes_style_the_import_button_and_theme_link(self):
         from pathlib import Path
 
         root = Path(__file__).resolve().parents[1]
@@ -171,6 +174,7 @@ class TestSettingsImportButtonQss:
                 "QPushButton#SettingsImportBtn {",
                 "QPushButton#SettingsImportBtn:hover",
                 "QPushButton#SettingsImportBtn:pressed",
+                "QLabel#SettingsLink {",
             ):
                 assert selector in qss, f"{theme}/settings.qss is missing {selector}"
 

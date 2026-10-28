@@ -821,6 +821,7 @@
         "theme_integrated_desc": "File Converter 内置主题",
         "theme_import_btn": "安装主题 (.fctheme)",
         "theme_import_hint": ".fctheme 文件是包含主题 QSS/CSS 文件和 metadata.ini 的 ZIP 压缩包。",
+        "theme_get_themes_btn": "获取主题",
         "theme_import_ok_title": "主题已安装",
         "theme_import_ok_msg": "主题「{}」安装成功。",
         "theme_import_err": "无法安装主题：{}",

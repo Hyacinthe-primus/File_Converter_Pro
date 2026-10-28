@@ -42,6 +42,12 @@ QLabel#SettingsHint {
     background: transparent;
 }
 
+QLabel#SettingsLink {
+    font-size: 12px;
+    font-weight: bold;
+    background: transparent;
+}
+
 QWidget#SettingsAutomationTab,
 QWidget#SettingsThemeTab,
 QWidget#SettingsLanguageTab {

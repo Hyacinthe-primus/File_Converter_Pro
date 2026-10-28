@@ -41,6 +41,8 @@ from widgets import AnimatedCheckBox
 
 from .terms_dialog import TermsAndPrivacyDialog
 
+THEMES_URL = "https://github.com/Hyacinthe-primus/FCP-themes"
+
 
 class SettingsDialog(TranslationMixin, QDialog):
     def __init__(self, config, parent=None, language="fr"):
@@ -592,6 +594,15 @@ class SettingsDialog(TranslationMixin, QDialog):
         import_btn.setObjectName("SettingsImportBtn")
         import_btn.clicked.connect(self._import_theme_file)
         layout.addWidget(import_btn)
+
+        link_color = "#79c0ff" if self._lang_is_dark() else "#1d4ed8"
+        get_themes_link = QLabel(
+            f'<a href="{THEMES_URL}" style="color:{link_color};">'
+            f"{self.translate_text('theme_get_themes_btn')}</a>"
+        )
+        get_themes_link.setObjectName("SettingsLink")
+        get_themes_link.setOpenExternalLinks(True)
+        layout.addWidget(get_themes_link)
 
         hint = QLabel("ℹ️ " + self.translate_text("theme_import_hint"))
         hint.setWordWrap(True)

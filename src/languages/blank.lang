@@ -816,6 +816,7 @@
         "theme_integrated_desc": "",
         "theme_import_btn": "",
         "theme_import_hint": "",
+        "theme_get_themes_btn": "",
         "theme_import_ok_title": "",
         "theme_import_ok_msg": "",
         "theme_import_err": "",

@@ -868,6 +868,7 @@
         "theme_integrated_desc": "File Converter dahili teması",
         "theme_import_btn": "Bir tema yükle (.fctheme)",
         "theme_import_hint": ".fctheme dosyaları, temanın QSS/CSS dosyalarını ve bir metadata.ini dosyasını içeren ZIP arşivleridir.",
+        "theme_get_themes_btn": "Temaları keşfet",
         "theme_import_ok_title": "Tema yüklendi",
         "theme_import_ok_msg": "'{}' teması başarıyla yüklendi.",
         "theme_import_err": "Tema yüklenemiyor: {}",
