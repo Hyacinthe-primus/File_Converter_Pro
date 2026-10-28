@@ -17,10 +17,11 @@ Classes:
 """
 
 import os
+import re
 
 from PySide6.QtCore import Property, QEasingCurve, QPointF, QPropertyAnimation, QRect, QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QDragEnterEvent, QDropEvent, QFontMetrics, QLinearGradient, QPainter, QPen
-from PySide6.QtWidgets import QCheckBox, QListWidget, QPushButton, QStyle, QStyledItemDelegate
+from PySide6.QtWidgets import QApplication, QCheckBox, QListWidget, QPushButton, QStyle, QStyledItemDelegate
 
 
 class AnimatedCheckBox(QCheckBox):
@@ -291,15 +292,86 @@ class AnimatedCheckBox(QCheckBox):
         return QSize(max(width, 120), max(height, 32))
 
 
+_QSS_SELECTED_ITEM_RE = re.compile(
+    r"QListWidget(?:#[\w-]+)?\s*::\s*item\s*:\s*selected\s*\{([^}]*)\}",
+    re.IGNORECASE,
+)
+_QSS_LIST_RE = re.compile(r"QListWidget(?:#[\w-]+)?\s*\{([^}]*)\}", re.IGNORECASE)
+_QSS_COLOR_RE = re.compile(r"(?<![\w-])color\s*:\s*([^;]+)", re.IGNORECASE)
+_QSS_SELECTION_COLOR_RE = re.compile(r"(?<![\w-])selection-color\s*:\s*([^;]+)", re.IGNORECASE)
+_QSS_RGB_RE = re.compile(
+    r"rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*([\d.]+))?\s*\)",
+    re.IGNORECASE,
+)
+
+
+def _qss_color(value: str) -> QColor | None:
+    value = value.strip().split("!important", 1)[0].strip()
+    match = _QSS_RGB_RE.fullmatch(value)
+    if match:
+        red, green, blue = (int(match.group(i)) for i in range(1, 4))
+        alpha = round(float(match.group(4)) * 255) if match.group(4) else 255
+        color = QColor(red, green, blue, alpha)
+        return color if color.isValid() else None
+    color = QColor(value)
+    return color if color.isValid() else None
+
+
+def _active_stylesheet(widget) -> str:
+    if widget is not None:
+        sheet = widget.styleSheet()
+        if sheet:
+            return sheet
+        window = widget.window()
+        if window is not widget:
+            sheet = window.styleSheet()
+            if sheet:
+                return sheet
+    app = QApplication.instance()
+    return app.styleSheet() if app is not None and hasattr(app, "styleSheet") else ""
+
+
+def _selection_text_color(widget, fallback: QColor) -> QColor:
+    sheet = _active_stylesheet(widget)
+    if sheet:
+        for block in reversed(_QSS_SELECTED_ITEM_RE.findall(sheet)):
+            match = _QSS_COLOR_RE.search(block)
+            if match:
+                color = _qss_color(match.group(1))
+                if color is not None:
+                    return color
+        for block in reversed(_QSS_LIST_RE.findall(sheet)):
+            match = _QSS_SELECTION_COLOR_RE.search(block)
+            if match:
+                color = _qss_color(match.group(1))
+                if color is not None:
+                    return color
+    return QColor(fallback)
+
+
 class FileSizeDelegate(QStyledItemDelegate):
     """
     Lets Qt draw everything normally, then paints the size string
     (stored in UserRole+4) on top, right-aligned.
-    Selected: green (dark mode) / blue (light mode).
+    Selected: the theme's selected-item text color.
     Unselected: muted grey.
     """
 
     RIGHT_MARGIN = 10
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._selection_color_key = None
+        self._selection_color = None
+
+    def _selected_text_color(self, option):
+        fallback = option.palette.highlightedText().color()
+        sheet = _active_stylesheet(option.widget)
+        key = (hash(sheet), fallback.rgba())
+        if key != self._selection_color_key:
+            self._selection_color_key = key
+            self._selection_color = _selection_text_color(option.widget, fallback)
+        return self._selection_color
 
     def paint(self, painter, option, index):
         super().paint(painter, option, index)
@@ -324,12 +396,8 @@ class FileSizeDelegate(QStyledItemDelegate):
         )
 
         if option.state & QStyle.State_Selected:
-            bg = option.palette.window().color()
-            is_dark = (bg.red() * 0.299 + bg.green() * 0.587 + bg.blue() * 0.114) < 128
-            if is_dark:
-                color = QColor(80, 220, 140, 230)
-            else:
-                color = QColor(50, 130, 240, 230)
+            color = QColor(self._selected_text_color(option))
+            color.setAlpha(230)
         else:
             color = QColor(110, 125, 150, 210)
 

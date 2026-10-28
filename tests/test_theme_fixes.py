@@ -338,3 +338,58 @@ class TestDialogButtonsTheme:
         from theme_manager import REQUIRED_FILES
 
         assert "buttons.qss" not in REQUIRED_FILES
+
+
+class TestFileSizeSelectionColor:
+    """The selected file-size label must follow the theme, not a fixed color."""
+
+    def test_uses_item_selected_text_color(self, qapp):
+        from PySide6.QtGui import QColor
+        from PySide6.QtWidgets import QListWidget
+
+        from widgets import _selection_text_color
+
+        widget = QListWidget()
+        widget.setStyleSheet(
+            "QListWidget::item:selected {"
+            " background-color: #ffd23f; color: #14162a;"
+            " border-left: 4px solid #ff5c8a; }"
+        )
+        assert _selection_text_color(widget, QColor("#ffffff")).name() == "#14162a"
+        widget.deleteLater()
+
+    def test_delegate_uses_theme_selected_text_color(self, qapp):
+        from PySide6.QtWidgets import QListWidget, QStyle, QStyleOptionViewItem
+
+        from widgets import FileSizeDelegate
+
+        widget = QListWidget()
+        widget.setStyleSheet("QListWidget::item:selected { color: #14162a; }")
+        option = QStyleOptionViewItem()
+        option.initFrom(widget)
+        option.widget = widget
+        option.state |= QStyle.State_Selected
+        delegate = FileSizeDelegate(widget)
+        assert delegate._selected_text_color(option).name() == "#14162a"
+        widget.deleteLater()
+
+    def test_uses_list_selection_color_fallback(self, qapp):
+        from PySide6.QtGui import QColor
+        from PySide6.QtWidgets import QListWidget
+
+        from widgets import _selection_text_color
+
+        widget = QListWidget()
+        widget.setStyleSheet("QListWidget { selection-color: #123456; }")
+        assert _selection_text_color(widget, QColor("#ffffff")).name() == "#123456"
+        widget.deleteLater()
+
+    def test_falls_back_to_palette_color(self, qapp):
+        from PySide6.QtGui import QColor
+        from PySide6.QtWidgets import QListWidget
+
+        from widgets import _selection_text_color
+
+        widget = QListWidget()
+        assert _selection_text_color(widget, QColor("#abcdef")).name() == "#abcdef"
+        widget.deleteLater()
