@@ -12,7 +12,7 @@ class BatchConvertDialog(TranslationMixin, QDialog):
         super().__init__(parent)
         self.language = language
         self._tm = make_tm(language)
-        self.setWindowTitle(self.translate_text("Conversion par Lot"))
+        self.setWindowTitle(self.translate_text("batch_conversion"))
         self.setup_ui()
 
     def setup_ui(self):
@@ -22,19 +22,19 @@ class BatchConvertDialog(TranslationMixin, QDialog):
         self.format_codes = ["pdf", "docx", "png"]
         self.format_combo.addItem(self.translate_text("PDF"), "pdf")
         self.format_combo.addItem(self.translate_text("DOCX"), "docx")
-        self.format_combo.addItem(self.translate_text("Images PNG"), "png")
+        self.format_combo.addItem(self.translate_text("png_images"), "png")
 
         self.quality_combo = QComboBox()
         self.quality_combo.addItems(
             [
-                self.translate_text("Haute qualité"),
-                self.translate_text("Qualité standard"),
-                self.translate_text("Compressé"),
+                self.translate_text("high_quality"),
+                self.translate_text("standard_quality_2"),
+                self.translate_text("compressed"),
             ]
         )
 
-        layout.addRow(self.translate_text("Format cible:"), self.format_combo)
-        layout.addRow(self.translate_text("Qualité:"), self.quality_combo)
+        layout.addRow(self.translate_text("target_format"), self.format_combo)
+        layout.addRow(self.translate_text("quality"), self.quality_combo)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         ok_button = buttons.button(QDialogButtonBox.Ok)

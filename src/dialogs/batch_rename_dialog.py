@@ -40,7 +40,7 @@ class BatchRenameDialog(QDialog):
         super().__init__(parent)
         self.files = list(files)
         self._tm = _make_tm(language)
-        self.setWindowTitle(self.tr_("Renommage par Lot"))
+        self.setWindowTitle(self.tr_("batch_rename_2"))
         self.setMinimumSize(740, 600)
         self._setup_ui()
         self._refresh_preview()
@@ -111,12 +111,12 @@ class BatchRenameDialog(QDialog):
         self.order_combo.addItems(
             [
                 self.tr_("br_order_current"),
-                self.tr_("Alphabétique (A→Z)"),
-                self.tr_("Alphabétique (Z→A)"),
-                self.tr_("Numérique (1→9)"),
-                self.tr_("Numérique (9→1)"),
-                self.tr_("Date (ancien→nouveau)"),
-                self.tr_("Date (nouveau→ancien)"),
+                self.tr_("alphabetical_a_to_z"),
+                self.tr_("alphabetical_z_to_a"),
+                self.tr_("numeric_1_to_9"),
+                self.tr_("numeric_9_to_1"),
+                self.tr_("date_oldest_to_newest"),
+                self.tr_("date_newest_to_oldest"),
             ]
         )
         self.order_combo.currentIndexChanged.connect(self._refresh_preview)
@@ -189,7 +189,7 @@ class BatchRenameDialog(QDialog):
         self.rename_btn = QPushButton("✅ " + self.tr_("br_apply"))
         self.rename_btn.setMinimumHeight(36)
         _apply_dialog_btn(self.rename_btn, "BtnOK")
-        cancel_btn = QPushButton(self.tr_("Annuler"))
+        cancel_btn = QPushButton(self.tr_("cancel"))
         cancel_btn.setMinimumHeight(36)
         _apply_dialog_btn(cancel_btn, "BtnDecline")
         self.rename_btn.clicked.connect(self.accept)

@@ -13,7 +13,7 @@ class SplitDialog(TranslationMixin, QDialog):
         self.total_pages = total_pages
         self.language = language
         self._tm = make_tm(language)
-        self.setWindowTitle(self.translate_text("Diviser PDF"))
+        self.setWindowTitle(self.translate_text("split_pdf"))
         self.setup_ui()
 
     def setup_ui(self):
@@ -22,9 +22,9 @@ class SplitDialog(TranslationMixin, QDialog):
         self.split_method = QComboBox()
         self.split_method.addItems(
             [
-                self.translate_text("Par pages"),
-                self.translate_text("Toutes les pages"),
-                self.translate_text("Plage de pages"),
+                self.translate_text("by_pages"),
+                self.translate_text("all_pages"),
+                self.translate_text("page_range"),
             ]
         )
 
@@ -43,10 +43,10 @@ class SplitDialog(TranslationMixin, QDialog):
         self.end_page.setMaximum(self.total_pages)
         self.end_page.setValue(self.total_pages)
 
-        layout.addRow(self.translate_text("Méthode de division:"), self.split_method)
-        layout.addRow(self.translate_text("Intervalle (pages):"), self.page_interval)
-        layout.addRow(self.translate_text("Page de début:"), self.start_page)
-        layout.addRow(self.translate_text("Page de fin:"), self.end_page)
+        layout.addRow(self.translate_text("split_method"), self.split_method)
+        layout.addRow(self.translate_text("interval_pages"), self.page_interval)
+        layout.addRow(self.translate_text("start_page"), self.start_page)
+        layout.addRow(self.translate_text("end_page"), self.end_page)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         ok_button = buttons.button(QDialogButtonBox.Ok)

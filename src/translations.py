@@ -45,6 +45,24 @@ def _get_languages_dir():
 _LANGUAGES_DIR = _get_languages_dir()
 
 
+def _load_legacy_aliases() -> dict:
+    """Load the old-key to semantic-key aliases used by pre-rename .lang files."""
+    path = os.path.join(_LANGUAGES_DIR, "legacy_aliases.json")
+    if not os.path.isfile(path):
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return {str(key): str(value) for key, value in data.items() if isinstance(value, str)}
+    except Exception as e:
+        print(f"[TranslationManager] Failed to load legacy_aliases.json: {e}")
+    return {}
+
+
+_LEGACY_ALIASES = _load_legacy_aliases()
+
+
 def _starts_with_flag(name: str) -> bool:
     """True if the name already begins with a flag emoji (two regional indicators)."""
     count = 0
@@ -156,11 +174,18 @@ class TranslationManager:
             data = json.load(f)
 
         meta = data.get("meta", {})
-        strings = data.get("strings", {})
+        raw_strings = data.get("strings", {})
         code = meta.get("code", "").strip().lower()
 
-        if not code or not isinstance(strings, dict):
+        if not code or not isinstance(raw_strings, dict):
             raise ValueError("Missing code or strings.")
+
+        strings = {}
+        for key, value in raw_strings.items():
+            new_key = _LEGACY_ALIASES.get(key, key)
+            if key in _LEGACY_ALIASES and str(strings.get(new_key, "")).strip():
+                continue
+            strings[new_key] = value
 
         if code not in self.translations:
             self.translations[code] = {}
@@ -191,9 +216,17 @@ class TranslationManager:
         return True, ""
 
     def translate_text(self, text):
+        if not isinstance(text, str):
+            return text
+
+        key = _LEGACY_ALIASES.get(text, text)
         if self.current_language in self.translations:
             lang_dict = self.translations[self.current_language]
-            result = lang_dict.get(text, text)
+            result = lang_dict.get(key)
+            if result is None and key != text:
+                result = lang_dict.get(text)
+            if result is None:
+                result = text
             if isinstance(result, str) and chr(92) + "n" in result:
                 result = result.replace(chr(92) + "n", chr(10)).replace(chr(92) + "t", chr(9))
             return result

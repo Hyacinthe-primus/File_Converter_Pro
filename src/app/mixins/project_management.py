@@ -44,7 +44,7 @@ class ProjectManagementMixin:
                 tip += f"\n\n{notes}"
             created = self._project_data.get("created_at", "")
             if created:
-                tip += f"\n\n{self.translate_text('Créé :')} {created[:10]}"
+                tip += f"\n\n{self.translate_text('created')} {created[:10]}"
             lbl.setToolTip(tip)
             lbl.setVisible(True)
         else:
@@ -66,8 +66,8 @@ class ProjectManagementMixin:
 
     def _show_tab_context_menu(self, state, global_pos):
         menu = QMenu(self)
-        act_info = menu.addAction(self.translate_text("Informations du projet"))
-        act_close = menu.addAction(self.translate_text("Fermer l'onglet"))
+        act_info = menu.addAction(self.translate_text("project_information"))
+        act_close = menu.addAction(self.translate_text("close_tab"))
         chosen = menu.exec(global_pos)
         if chosen is act_info:
             if state is not self._active_tab:
@@ -80,12 +80,12 @@ class ProjectManagementMixin:
         if len(self._project_tabs) >= self.MAX_PROJECT_TABS:
             QMessageBox.warning(
                 self,
-                self.translate_text("Limite de projets"),
+                self.translate_text("project_limit"),
                 self.translate_text("project_tabs_limit"),
             )
             return None
 
-        name = (project_data or {}).get("name") or self.translate_text("Nouveau projet")
+        name = (project_data or {}).get("name") or self.translate_text("new_project_3")
         container = QWidget()
         container.setObjectName("ProjectTab")
         lay = QHBoxLayout(container)
@@ -216,7 +216,7 @@ class ProjectManagementMixin:
         if bar is None:
             return
         for state in self._project_tabs:
-            name = (state["project_data"] or {}).get("name") or self.translate_text("Nouveau projet")
+            name = (state["project_data"] or {}).get("name") or self.translate_text("new_project_3")
             container = state["widget"]
             btn = container.findChild(ProjectTabButton, "ProjectTabBtn")
             if btn is None:
@@ -231,7 +231,7 @@ class ProjectManagementMixin:
             if tip:
                 btn.setToolTip(tip)
             else:
-                btn.setToolTip(self.translate_text("Cliquez pour renommer / ajouter des notes"))
+                btn.setToolTip(self.translate_text("click_to_rename_or_add_notes"))
         bar.setVisible(bool(self._project_tabs))
         if self._project_tabs:
             lbl = getattr(self, "project_name_lbl", None)
@@ -249,18 +249,18 @@ class ProjectManagementMixin:
             return
 
         d = QDialog(self)
-        d.setWindowTitle(self.translate_text("Informations du projet"))
+        d.setWindowTitle(self.translate_text("project_information"))
         d.setMinimumWidth(380)
         lay = QVBoxLayout(d)
         lay.setSpacing(12)
         lay.setContentsMargins(18, 18, 18, 18)
 
-        lay.addWidget(QLabel(self.translate_text("Nom du projet :")))
+        lay.addWidget(QLabel(self.translate_text("project_name")))
         name_input = QLineEdit(self._project_data.get("name", ""))
         name_input.setMinimumHeight(34)
         lay.addWidget(name_input)
 
-        lay.addWidget(QLabel(self.translate_text("Notes :")))
+        lay.addWidget(QLabel(self.translate_text("notes")))
         notes_input = QTextEdit()
         notes_input.setPlainText(self._project_data.get("notes", ""))
         notes_input.setFixedHeight(88)
@@ -269,9 +269,9 @@ class ProjectManagementMixin:
         created = self._project_data.get("created_at", "")[:16].replace("T", "  ")
         modified = self._project_data.get("modified_at", "")[:16].replace("T", "  ")
         if created:
-            lbl_created = self.translate_text("Créé :")
-            lbl_modified = self.translate_text("Modifié :")
-            lbl_files = self.translate_text("fichier(s)")
+            lbl_created = self.translate_text("created")
+            lbl_modified = self.translate_text("modified")
+            lbl_files = self.translate_text("files_2")
             info_lbl = QLabel(
                 f"<small style='color:gray;'>{lbl_created} {created}"
                 + (f"&nbsp;&nbsp;&nbsp;{lbl_modified} {modified}" if modified else "")
@@ -282,10 +282,10 @@ class ProjectManagementMixin:
 
         btn_row = QHBoxLayout()
         btn_row.setSpacing(8)
-        btn_cancel = QPushButton(self.translate_text("Annuler"))
+        btn_cancel = QPushButton(self.translate_text("cancel"))
         btn_cancel.setMinimumHeight(36)
         _apply_dialog_btn(btn_cancel, "BtnCancelGlassy")
-        btn_ok = QPushButton(self.translate_text("✓  Enregistrer"))
+        btn_ok = QPushButton(self.translate_text("save"))
         btn_ok.setMinimumHeight(36)
         btn_ok.setStyleSheet(
             "QPushButton{background:#0969da;color:white;border:none;"
@@ -328,7 +328,7 @@ class ProjectManagementMixin:
                 self._switch_project_tab(existing_tab)
             QMessageBox.information(
                 self,
-                self.translate_text("Projet déjà ouvert"),
+                self.translate_text("project_already_open_2"),
                 self.translate_text("project_already_open"),
             )
             return
@@ -379,41 +379,41 @@ class ProjectManagementMixin:
             if missing_count > 0:
                 QMessageBox.warning(
                     self,
-                    self.translate_text("Fichiers manquants"),
+                    self.translate_text("missing_files"),
                     self.translate_text("project_missing_files").format(n=missing_count),
                 )
 
         except Exception as e:
             QMessageBox.critical(
-                self, self.translate_text("Erreur"), self.translate_text("project_open_error").format(error=str(e))
+                self, self.translate_text("error"), self.translate_text("project_open_error").format(error=str(e))
             )
 
     def new_project(self):
         d = QDialog(self)
-        d.setWindowTitle(self.translate_text("Nouveau projet"))
+        d.setWindowTitle(self.translate_text("new_project_3"))
         d.setMinimumWidth(360)
         lay = QVBoxLayout(d)
         lay.setSpacing(12)
         lay.setContentsMargins(18, 18, 18, 18)
 
-        lay.addWidget(QLabel(self.translate_text("Nom du projet :")))
+        lay.addWidget(QLabel(self.translate_text("project_name")))
         name_input = QLineEdit()
-        name_input.setPlaceholderText(self.translate_text("Mon projet"))
+        name_input.setPlaceholderText(self.translate_text("my_project"))
         name_input.setMinimumHeight(34)
         lay.addWidget(name_input)
 
-        lay.addWidget(QLabel(self.translate_text("Notes (optionnel) :")))
+        lay.addWidget(QLabel(self.translate_text("notes_optional")))
         notes_input = QTextEdit()
-        notes_input.setPlaceholderText(self.translate_text("Description, contexte…"))
+        notes_input.setPlaceholderText(self.translate_text("description_context"))
         notes_input.setFixedHeight(72)
         lay.addWidget(notes_input)
 
         btn_row = QHBoxLayout()
         btn_row.setSpacing(8)
-        btn_cancel = QPushButton(self.translate_text("Annuler"))
+        btn_cancel = QPushButton(self.translate_text("cancel"))
         btn_cancel.setMinimumHeight(36)
         _apply_dialog_btn(btn_cancel, "BtnCancelGlassy")
-        btn_ok = QPushButton("✓  " + self.translate_text("Créer"))
+        btn_ok = QPushButton("✓  " + self.translate_text("create"))
         btn_ok.setMinimumHeight(36)
         btn_ok.setStyleSheet(
             "QPushButton{background:#0969da;color:white;border:none;"
@@ -430,7 +430,7 @@ class ProjectManagementMixin:
         if d.exec() != QDialog.Accepted:
             return
 
-        proj_name = name_input.text().strip() or self.translate_text("Nouveau projet")
+        proj_name = name_input.text().strip() or self.translate_text("new_project_3")
         proj_notes = notes_input.toPlainText().strip()
         now = datetime.now().isoformat(timespec="seconds")
 
@@ -454,12 +454,12 @@ class ProjectManagementMixin:
         self.update_file_counter()
         self._update_tab_title()
         self.status_bar.showMessage(
-            self.translate_text("Nouveau projet créé") + ":" + f" {proj_name}" if proj_name else ""
+            self.translate_text("new_project_created") + ":" + f" {proj_name}" if proj_name else ""
         )
 
     def open_project(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, self.translate_text("Ouvrir un projet"), "", self.translate_text("Projets File Converter (*.fcproj)")
+            self, self.translate_text("open_a_project"), "", self.translate_text("file_converter_projects_fcproj")
         )
         if file_path:
             self.open_project_file(file_path)
@@ -470,8 +470,8 @@ class ProjectManagementMixin:
         if not self.files_list:
             QMessageBox.warning(
                 self,
-                self.translate_text("Avertissement"),
-                self.translate_text("Aucun fichier à sauvegarder dans le projet"),
+                self.translate_text("warning"),
+                self.translate_text("no_files_to_save_in_the_project"),
             )
             return
 
@@ -481,9 +481,9 @@ class ProjectManagementMixin:
 
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            self.translate_text("Sauvegarder le projet"),
+            self.translate_text("save_project_2"),
             "",
-            self.translate_text("Projets File Converter (*.fcproj)"),
+            self.translate_text("file_converter_projects_fcproj"),
         )
 
         if file_path:
@@ -530,6 +530,6 @@ class ProjectManagementMixin:
         except Exception as e:
             QMessageBox.critical(
                 self,
-                self.translate_text("Erreur"),
+                self.translate_text("error"),
                 self.translate_text(f"Impossible de sauvegarder le projet: {str(e)}"),
             )

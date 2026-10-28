@@ -378,7 +378,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
             self._translation_manager = TranslationManager()
             self._translation_manager.set_language(language)
-        self.setWindowTitle(self.translate_text("📊 Tableau de Bord & Statistiques"))
+        self.setWindowTitle(self.translate_text("dashboard_statistics"))
         self.setMinimumSize(1100, 700)
         self.setWindowFlag(Qt.FramelessWindowHint, False)
         self._dark = self._get_dark_mode()
@@ -416,11 +416,11 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
         top_bar = QHBoxLayout()
 
-        title_lbl = QLabel(self.translate_text("📊 Tableau de Bord & Statistiques"))
+        title_lbl = QLabel(self.translate_text("dashboard_statistics"))
         title_lbl.setStyleSheet("font-size: 20px; font-weight: 800; letter-spacing: -0.5px; background: transparent;")
         top_bar.addWidget(title_lbl, 1)
 
-        self.refresh_btn = QPushButton("🔄  " + self.translate_text("Rafraîchir les statistiques"))
+        self.refresh_btn = QPushButton("🔄  " + self.translate_text("refresh_statistics"))
         self.refresh_btn.clicked.connect(self._animate_refresh)
         self.refresh_btn.setStyleSheet(self._btn_style("#28a745", "#218838", "#1a6e2e"))
         self.refresh_btn.setCursor(Qt.PointingHandCursor)
@@ -440,13 +440,13 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         self.tab_widget.currentChanged.connect(self._on_tab_changed)
 
         self.overview_tab = self.create_overview_tab()
-        self.tab_widget.addTab(self.overview_tab, "  " + self.translate_text("Vue d'ensemble") + "  ")
+        self.tab_widget.addTab(self.overview_tab, "  " + self.translate_text("overview") + "  ")
 
         self.charts_tab = self.create_charts_tab()
-        self.tab_widget.addTab(self.charts_tab, "  " + self.translate_text("Graphiques") + "  ")
+        self.tab_widget.addTab(self.charts_tab, "  " + self.translate_text("charts") + "  ")
 
         self.details_tab = self.create_details_tab()
-        self.tab_widget.addTab(self.details_tab, "  " + self.translate_text("Détails") + "  ")
+        self.tab_widget.addTab(self.details_tab, "  " + self.translate_text("details") + "  ")
 
         layout.addWidget(self.tab_widget, 1)
 
@@ -480,10 +480,10 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         cards_layout = QHBoxLayout()
         cards_layout.setSpacing(14)
 
-        self.card_conversions = AnimatedStatCard("🔄", self.translate_text("Conversions totales:"), "#4dabf7", dm)
-        self.card_size = AnimatedStatCard("💾", self.translate_text("Taille totale traitée:"), "#28a745", dm)
-        self.card_time_saved = AnimatedStatCard("⏱️", self.translate_text("Temps économisé:"), "#ff6b6b", dm)
-        self.card_avg_time = AnimatedStatCard("⚡", self.translate_text("Temps moyen par conversion:"), "#ffd166", dm)
+        self.card_conversions = AnimatedStatCard("🔄", self.translate_text("total_conversions"), "#4dabf7", dm)
+        self.card_size = AnimatedStatCard("💾", self.translate_text("total_size_processed"), "#28a745", dm)
+        self.card_time_saved = AnimatedStatCard("⏱️", self.translate_text("time_saved"), "#ff6b6b", dm)
+        self.card_avg_time = AnimatedStatCard("⚡", self.translate_text("average_conversion_time"), "#ffd166", dm)
 
         for card in [self.card_conversions, self.card_size, self.card_time_saved, self.card_avg_time]:
             card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -529,14 +529,14 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             return container
 
         formats_section = make_section(
-            self.translate_text("📁 Formats les plus utilisés"),
+            self.translate_text("most_used_formats"),
             "formats_table",
-            [self.translate_text("Format"), self.translate_text("Utilisations")],
+            [self.translate_text("Format"), self.translate_text("uses")],
         )
         operations_section = make_section(
-            self.translate_text("⚡ Opérations les plus fréquentes"),
+            self.translate_text("most_frequent_operations"),
             "operations_table",
-            [self.translate_text("Opération"), self.translate_text("Nombre")],
+            [self.translate_text("operation"), self.translate_text("count")],
         )
 
         hlayout.addWidget(formats_section, 1)
@@ -568,30 +568,30 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         controls_layout = QHBoxLayout()
         controls_layout.setSpacing(10)
 
-        period_lbl = QLabel(self.translate_text("Période:"))
+        period_lbl = QLabel(self.translate_text("period"))
         period_lbl.setStyleSheet("font-weight: 600; font-size: 12px; background: transparent;")
 
         self.period_combo = QComboBox()
         self.period_combo.addItems(
             [
-                self.translate_text("7 derniers jours"),
-                self.translate_text("30 derniers jours"),
-                self.translate_text("3 derniers mois"),
-                self.translate_text("6 derniers mois"),
+                self.translate_text("last_7_days"),
+                self.translate_text("last_30_days"),
+                self.translate_text("last_3_months"),
+                self.translate_text("last_6_months"),
             ]
         )
         self.period_combo.currentIndexChanged.connect(self._smooth_update_charts)
 
-        chart_lbl = QLabel(self.translate_text("Type de graphique:"))
+        chart_lbl = QLabel(self.translate_text("chart_type"))
         chart_lbl.setStyleSheet("font-weight: 600; font-size: 12px; background: transparent;")
 
         self.chart_type_combo = QComboBox()
         self.chart_type_combo.addItems(
             [
-                self.translate_text("Conversions par jour"),
-                self.translate_text("Taille traitée par jour"),
-                self.translate_text("Types d'opérations"),
-                self.translate_text("Évolution des formats"),
+                self.translate_text("conversions_per_day"),
+                self.translate_text("size_processed_per_day"),
+                self.translate_text("operation_types"),
+                self.translate_text("format_evolution"),
             ]
         )
         self.chart_type_combo.currentIndexChanged.connect(self._smooth_update_charts)
@@ -667,17 +667,17 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         self.start_date_edit.calendarWidget().setStyleSheet(_load_qss("history_calendar.qss"))
         self.end_date_edit.calendarWidget().setStyleSheet(_load_qss("history_calendar.qss"))
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText(self.translate_text("Rechercher dans l'historique..."))
+        self.search_input.setPlaceholderText(self.translate_text("search_in_history"))
 
-        self.apply_filters_btn = QPushButton("🔍  " + self.translate_text("Appliquer les filtres"))
+        self.apply_filters_btn = QPushButton("🔍  " + self.translate_text("apply_filters"))
         self.apply_filters_btn.setStyleSheet(self._btn_style("#4361ee", "#3451d1", "#2a3fbf"))
         self.apply_filters_btn.setCursor(Qt.PointingHandCursor)
         self.apply_filters_btn.setFixedHeight(34)
         self.apply_filters_btn.clicked.connect(self.load_statistics)
 
-        filters_layout.addWidget(flbl(self.translate_text("Du:")))
+        filters_layout.addWidget(flbl(self.translate_text("from")))
         filters_layout.addWidget(self.start_date_edit)
-        filters_layout.addWidget(flbl(self.translate_text("Au:")))
+        filters_layout.addWidget(flbl(self.translate_text("to")))
         filters_layout.addWidget(self.end_date_edit)
         filters_layout.addWidget(self.search_input, 1)
         filters_layout.addWidget(self.apply_filters_btn)
@@ -685,13 +685,13 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
         self.detailed_table = self._make_table(
             [
-                self.translate_text("Date/Heure"),
-                self.translate_text("Opération"),
+                self.translate_text("date_time"),
+                self.translate_text("operation"),
                 self.translate_text("Source"),
-                self.translate_text("Cible"),
-                self.translate_text("Taille"),
-                self.translate_text("Temps"),
-                self.translate_text("Statut"),
+                self.translate_text("target"),
+                self.translate_text("size"),
+                self.translate_text("time"),
+                self.translate_text("status"),
             ]
         )
         from PySide6.QtWidgets import QHeaderView as _HV
@@ -709,13 +709,13 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         export_layout = QHBoxLayout()
         export_layout.setSpacing(10)
 
-        export_csv_btn = QPushButton("📊  " + self.translate_text("Exporter en CSV"))
+        export_csv_btn = QPushButton("📊  " + self.translate_text("export_to_csv"))
         export_csv_btn.setStyleSheet(self._btn_style("#4361ee", "#3451d1", "#2a3fbf"))
         export_csv_btn.setCursor(Qt.PointingHandCursor)
         export_csv_btn.setFixedHeight(34)
         export_csv_btn.clicked.connect(lambda: self.export_history("csv"))
 
-        export_json_btn = QPushButton("📋  " + self.translate_text("Exporter en JSON"))
+        export_json_btn = QPushButton("📋  " + self.translate_text("export_to_json"))
         export_json_btn.setStyleSheet(self._btn_style("#7c3aed", "#6d28d9", "#5b21b6"))
         export_json_btn.setCursor(Qt.PointingHandCursor)
         export_json_btn.setFixedHeight(34)
@@ -764,20 +764,20 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
     def _animate_refresh(self):
         self.refresh_btn.setEnabled(False)
-        self.refresh_btn.setText("⏳  " + self.translate_text("Rafraîchir les statistiques"))
+        self.refresh_btn.setText("⏳  " + self.translate_text("refresh_statistics"))
         QTimer.singleShot(300, self._do_refresh)
 
     def _do_refresh(self):
         self.load_statistics()
-        self.refresh_btn.setText("🔄  " + self.translate_text("Rafraîchir les statistiques"))
+        self.refresh_btn.setText("🔄  " + self.translate_text("refresh_statistics"))
         self.refresh_btn.setEnabled(True)
 
     def load_statistics(self):
         days_map = {
-            self.translate_text("7 derniers jours"): 7,
-            self.translate_text("30 derniers jours"): 30,
-            self.translate_text("3 derniers mois"): 90,
-            self.translate_text("6 derniers mois"): 180,
+            self.translate_text("last_7_days"): 7,
+            self.translate_text("last_30_days"): 30,
+            self.translate_text("last_3_months"): 90,
+            self.translate_text("last_6_months"): 180,
         }
         days = days_map.get(self.period_combo.currentText(), 30)
         stats = self.db_manager.get_statistics(days)
@@ -860,10 +860,10 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         label_color = "#cbd5e0" if dm else "#374151"
 
         days_map = {
-            self.translate_text("7 derniers jours"): 7,
-            self.translate_text("30 derniers jours"): 30,
-            self.translate_text("3 derniers mois"): 90,
-            self.translate_text("6 derniers mois"): 180,
+            self.translate_text("last_7_days"): 7,
+            self.translate_text("last_30_days"): 30,
+            self.translate_text("last_3_months"): 90,
+            self.translate_text("last_6_months"): 180,
         }
         days = days_map.get(self.period_combo.currentText(), 30)
         stats = self.db_manager.get_statistics(days)
@@ -881,7 +881,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
         chart_type = self.chart_type_combo.currentText()
 
-        if chart_type == self.translate_text("Conversions par jour") and stats["daily_stats"]:
+        if chart_type == self.translate_text("conversions_per_day") and stats["daily_stats"]:
             dates = [datetime.strptime(r[0], "%Y-%m-%d") for r in stats["daily_stats"]]
             conversions = [r[1] for r in stats["daily_stats"]]
             x_pos = range(len(dates))
@@ -920,14 +920,14 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             ax.yaxis.set_tick_params(labelcolor=text_color)
 
             ax.set_xlabel(self.translate_text("Date"), color=label_color, fontsize=11)
-            ax.set_ylabel(self.translate_text("Nombre de conversions"), color=label_color, fontsize=11)
+            ax.set_ylabel(self.translate_text("number_of_conversions"), color=label_color, fontsize=11)
             ax.set_title(
-                self.translate_text("Conversions par jour"), color=text_color, fontsize=14, fontweight="bold", pad=14
+                self.translate_text("conversions_per_day"), color=text_color, fontsize=14, fontweight="bold", pad=14
             )
             ax.margins(x=0.01)
             self.chart_canvas.figure.tight_layout()
 
-        elif chart_type == self.translate_text("Taille traitée par jour") and stats["daily_stats"]:
+        elif chart_type == self.translate_text("size_processed_per_day") and stats["daily_stats"]:
             dates = [datetime.strptime(r[0], "%Y-%m-%d") for r in stats["daily_stats"]]
             sizes_mb = [r[2] / (1024 * 1024) for r in stats["daily_stats"]]
 
@@ -967,9 +967,9 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                 )
 
             ax.set_xlabel(self.translate_text("Date"), color=label_color, fontsize=11)
-            ax.set_ylabel(self.translate_text("Taille (Mo)"), color=label_color, fontsize=11)
+            ax.set_ylabel(self.translate_text("size_mb"), color=label_color, fontsize=11)
             ax.set_title(
-                self.translate_text("Taille de fichiers traitée par jour"),
+                self.translate_text("size_of_files_processed_per_day"),
                 color=text_color,
                 fontsize=14,
                 fontweight="bold",
@@ -981,7 +981,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             self.chart_canvas.figure.autofmt_xdate()
             self.chart_canvas.figure.tight_layout()
 
-        elif chart_type == self.translate_text("Types d'opérations") and stats["top_operations"]:
+        elif chart_type == self.translate_text("operation_types") and stats["top_operations"]:
             operations = [self.translate_operation_type(r[0]) for r in stats["top_operations"]]
             counts = [r[1] for r in stats["top_operations"]]
             total = sum(counts)
@@ -1034,7 +1034,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                     at.set_fontsize(9)
 
             ax.set_title(
-                self.translate_text("Répartition des types d'opérations"),
+                self.translate_text("distribution_of_operation_types"),
                 fontsize=14,
                 fontweight="bold",
                 pad=20,
@@ -1045,7 +1045,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             legend = ax.legend(
                 wedges,
                 legend_labels,
-                title=self.translate_text("Types d'opérations"),
+                title=self.translate_text("operation_types"),
                 loc="center left",
                 bbox_to_anchor=(1, 0, 0.5, 1),
                 fontsize=9,
@@ -1060,12 +1060,12 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
             self.chart_canvas.figure.tight_layout(rect=[0.18, 0, 0.8, 1])
 
-            ops_label = self.translate_text("\nOpérations")
+            ops_label = self.translate_text("operations")
             center_text = f"Total: {total}{ops_label}"
             ax.text(0, 0, center_text, ha="center", va="center", fontsize=12, fontweight="bold", color=text_color)
 
             if any(p < 10 for p in percentages):
-                note = self.translate_text("•Les pourcentages < 10% ne sont affichés\nque dans la légende")
+                note = self.translate_text("percentages_10_are_only_shown_in_the_legend")
                 ax.text(
                     -1.9,
                     0,
@@ -1077,7 +1077,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                     style="italic",
                 )
 
-        elif chart_type == self.translate_text("Évolution des formats") and stats["top_formats"]:
+        elif chart_type == self.translate_text("format_evolution") and stats["top_formats"]:
             formats = [r[0] for r in stats["top_formats"]]
             counts = [r[1] for r in stats["top_formats"]]
             n = len(formats)
@@ -1090,9 +1090,9 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                 linewidth=0.8,
                 height=0.65,
             )
-            ax.set_xlabel(self.translate_text("Nombre d'utilisations"), color=label_color, fontsize=11)
+            ax.set_xlabel(self.translate_text("number_of_uses"), color=label_color, fontsize=11)
             ax.set_title(
-                self.translate_text("Formats les plus utilisés"),
+                self.translate_text("most_used_formats_2"),
                 color=label_color,
                 fontsize=14,
                 fontweight="bold",
@@ -1121,18 +1121,18 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
     def export_history(self, format_type):
         file_filter = "CSV (*.csv)" if format_type == "csv" else "JSON (*.json)"
-        filepath, _ = QFileDialog.getSaveFileName(self, self.translate_text("Exporter l'historique"), "", file_filter)
+        filepath, _ = QFileDialog.getSaveFileName(self, self.translate_text("export_history"), "", file_filter)
         if filepath:
             try:
                 self.db_manager.export_history(filepath, format_type)
                 QMessageBox.information(
                     self,
-                    self.translate_text("Succès"),
+                    self.translate_text("success"),
                     self.translate_text(f"Historique exporté avec succès vers {filepath}"),
                 )
             except Exception as e:
                 QMessageBox.critical(
-                    self, self.translate_text("Erreur"), self.translate_text(f"Erreur lors de l'export: {str(e)}")
+                    self, self.translate_text("error"), self.translate_text(f"Erreur lors de l'export: {str(e)}")
                 )
 
     def _build_db_selector_bar(self) -> QWidget:
@@ -1148,27 +1148,27 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             f"background:#1e2535; color:#8b9ab0; {btn_base}" if dm else f"background:#e2e8f0; color:#4a5568; {btn_base}"
         )
 
-        lbl = QLabel(self.translate_text("Base de données :"))
+        lbl = QLabel(self.translate_text("database"))
         lbl.setStyleSheet(
             f"color:{'#8b9ab0' if dm else '#6b7280'}; font-size:11px; font-weight:600; background: transparent;"
         )
         row.addWidget(lbl)
 
-        self._btn_main_db = QPushButton(self.translate_text("📁 Base principale"))
+        self._btn_main_db = QPushButton(self.translate_text("main_database"))
         self._btn_main_db.setStyleSheet(btn_active)
         self._btn_main_db.setCursor(Qt.PointingHandCursor)
         self._btn_main_db.setFixedHeight(28)
         self._btn_main_db.clicked.connect(lambda: self._switch_db("main"))
         row.addWidget(self._btn_main_db)
 
-        self._btn_adv_db = QPushButton(self.translate_text("🔄 Conversions avancées"))
+        self._btn_adv_db = QPushButton(self.translate_text("advanced_conversions"))
         self._btn_adv_db.setStyleSheet(btn_normal)
         self._btn_adv_db.setCursor(Qt.PointingHandCursor)
         self._btn_adv_db.setFixedHeight(28)
         self._btn_adv_db.clicked.connect(lambda: self._switch_db("advanced"))
         row.addWidget(self._btn_adv_db)
 
-        btn_custom = QPushButton(self.translate_text("📂 Charger une DB…"))
+        btn_custom = QPushButton(self.translate_text("load_a_db"))
         btn_custom.setStyleSheet(btn_normal)
         btn_custom.setCursor(Qt.PointingHandCursor)
         btn_custom.setFixedHeight(28)
@@ -1211,7 +1211,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         elif mode == "custom":
             path, _ = QFileDialog.getOpenFileName(
                 self,
-                self.translate_text("Choisir une base de données"),
+                self.translate_text("choose_a_database"),
                 "",
                 "SQLite databases (*.db *.sqlite *.sqlite3);;All files (*)",
             )
@@ -1240,7 +1240,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                 except Exception as exc2:
                     QMessageBox.critical(
                         self,
-                        self.translate_text("Erreur"),
+                        self.translate_text("error"),
                         self.translate_text(f"Impossible d'ouvrir la base : {exc2}"),
                     )
                     return

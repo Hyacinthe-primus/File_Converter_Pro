@@ -90,7 +90,7 @@ class RankPopup(TranslationMixin, QDialog):
 
         content_layout = QVBoxLayout()
 
-        rank_up_text = self.translate_text("Rank Up!")
+        rank_up_text = self.translate_text("rank_up")
         self.rank_up_label = QLabel(rank_up_text.upper())
         self.rank_up_label.setAttribute(Qt.WA_TranslucentBackground)
         self.rank_up_label.setStyleSheet("""
@@ -104,7 +104,7 @@ class RankPopup(TranslationMixin, QDialog):
         """)
         content_layout.addWidget(self.rank_up_label, alignment=Qt.AlignCenter)
 
-        title_label = QLabel(self.translate_text("🏆 NOUVEAU TITRE 🏆"))
+        title_label = QLabel(self.translate_text("advanced_to_a_new_tier"))
         title_label.setAttribute(Qt.WA_TranslucentBackground)
         text_color = self.rank_data.get("color", "#FFFFFF")
         title_label.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {text_color};")

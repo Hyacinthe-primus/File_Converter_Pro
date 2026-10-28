@@ -98,7 +98,7 @@ class AchievementPopup(TranslationMixin, QDialog):
         content_layout = QVBoxLayout()
         content_layout.setSpacing(5)
 
-        title_text = self.translate_text("SUCCÈS DÉBLOQUÉ")
+        title_text = self.translate_text("achievement_unlocked")
         title_label = QLabel(f"🏆 {title_text} 🏆")
         title_label.setStyleSheet("""
             font-size: 14px;

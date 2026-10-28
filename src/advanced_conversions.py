@@ -208,7 +208,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self._worker: _ConversionWorker | None = None
         self._current_conversion_type: str | None = None
 
-        self.setWindowTitle(self.tr_("Plus de Conversions"))
+        self.setWindowTitle(self.tr_("more_conversions_2"))
         self.setMinimumSize(900, 720)
         self.setModal(False)
 
@@ -263,7 +263,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
         folder = QFileDialog.getExistingDirectory(
             self,
-            self.tr_("Choisir le dossier de sortie"),
+            self.tr_("choose_output_folder"),
             self._last_dst_dir or str(Path.home()),
         )
         if folder:
@@ -284,7 +284,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
             self._thread = None
             self._worker = None
         if running:
-            QMessageBox.warning(self, self.tr_("En cours"), self.tr_("Une conversion est déjà en cours."))
+            QMessageBox.warning(self, self.tr_("in_progress"), self.tr_("a_conversion_is_already_running"))
             return
 
         self.conversion_requested.emit(conversion_type)
@@ -293,10 +293,9 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         if not sources:
             QMessageBox.information(
                 self,
-                self.tr_("Aucun fichier"),
+                self.tr_("no_files"),
                 self.tr_(
-                    "Aucun fichier compatible trouvé dans la liste.\n"
-                    "Ajoutez des fichiers dans la fenêtre principale d'abord."
+                    "no_compatible_files_found_in_the_list_add_files_in_the_main_wind"
                 ),
             )
             return
@@ -374,11 +373,11 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         layout.setContentsMargins(15, 15, 15, 15)
         layout.setSpacing(12)
 
-        title = QLabel(self.tr_("🔄 Conversions Avancées"))
+        title = QLabel(self.tr_("advanced_conversions_3"))
         title.setObjectName("AdvConvTitle")
         layout.addWidget(title)
 
-        subtitle = QLabel(self.tr_("Sélectionnez un format de conversion ci-dessous"))
+        subtitle = QLabel(self.tr_("select_a_conversion_format_below"))
         subtitle.setObjectName("AdvConvSubtitle")
         layout.addWidget(subtitle)
 
@@ -386,9 +385,9 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self.tab_widget.currentChanged.connect(self._on_tab_changed)
         self.tab_widget.setProperty("active_tab", "documents")
 
-        self.tab_widget.addTab(self._build_documents_tab(), self.tr_("📄 Documents"))
-        self.tab_widget.addTab(self._build_images_tab(), self.tr_("🖼️ Images"))
-        self.tab_widget.addTab(self._build_av_tab(), self.tr_("🎵 Audio/Vidéo"))
+        self.tab_widget.addTab(self._build_documents_tab(), self.tr_("documents"))
+        self.tab_widget.addTab(self._build_images_tab(), self.tr_("images"))
+        self.tab_widget.addTab(self._build_av_tab(), self.tr_("audio_video"))
 
         layout.addWidget(self.tab_widget)
 
@@ -412,7 +411,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         layout.addWidget(self._progress_widget)
 
         btn_row = QHBoxLayout()
-        self._cancel_btn = QPushButton(self.tr_("⛔ Annuler la conversion"))
+        self._cancel_btn = QPushButton(self.tr_("cancel_conversion"))
         self._cancel_btn.setEnabled(False)
         _apply_dialog_btn(self._cancel_btn, "BtnCancel")
         self._cancel_btn.clicked.connect(self._cancel_conversion)
@@ -420,7 +419,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
 
         btn_row.addStretch()
 
-        close_btn = QPushButton(self.tr_("Fermer"))
+        close_btn = QPushButton(self.tr_("close"))
         close_btn.setMinimumHeight(38)
         _apply_dialog_btn(close_btn, "BtnDecline")
         close_btn.clicked.connect(self.close)
@@ -431,7 +430,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
     def _build_documents_tab(self) -> QWidget:
         groups = [
             (
-                self.tr_("TXT / RTF"),
+                self.tr_("txt_rtf"),
                 [
                     ("📄 TXT → PDF", "txt_to_pdf", [".txt"]),
                     ("📄 RTF → PDF", "rtf_to_pdf", [".rtf"]),
@@ -440,14 +439,14 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
                 ],
             ),
             (
-                self.tr_("CSV / JSON"),
+                self.tr_("csv_json"),
                 [
                     ("📊 CSV → JSON", "csv_to_json", [".csv"]),
                     ("📊 JSON → CSV", "json_to_csv", [".json"]),
                 ],
             ),
             (
-                self.tr_("XLSX (Excel)"),
+                self.tr_("xlsx_excel"),
                 [
                     ("📊 XLSX → PDF", "xlsx_to_pdf", [".xlsx", ".xls"]),
                     ("📊 XLSX → JSON", "xlsx_to_json", [".xlsx", ".xls"]),
@@ -455,7 +454,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
                 ],
             ),
             (
-                self.tr_("PPTX (PowerPoint)"),
+                self.tr_("pptx_powerpoint"),
                 [
                     ("📽️ PPTX → PDF", "pptx_to_pdf", [".pptx", ".ppt"]),
                 ],
@@ -469,7 +468,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
                 ],
             ),
             (
-                self.tr_("EPUB (E-book)"),
+                self.tr_("epub_e_book"),
                 [
                     ("EPUB → PDF", "epub_to_pdf", [".epub"]),
                 ],
@@ -535,7 +534,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
                 ],
             ),
             (
-                self.tr_("ICO (Icône)"),
+                self.tr_("ico_icon"),
                 [
                     ("🎨 Image → ICO", "image_to_ico", _IMG_EXTS),
                 ],
@@ -548,7 +547,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         _AUD_EXTS = [".mp3", ".wav", ".aac", ".ogg", ".flac", ".m4a"]
         groups = [
             (
-                self.tr_("Vidéo → Vidéo"),
+                self.tr_("video_to_video"),
                 [
                     ("🎬 Video → MP4", "video_to_mp4", _VID_EXTS),
                     ("🎬 Video → WEBM", "video_to_webm", _VID_EXTS),
@@ -558,7 +557,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
                 ],
             ),
             (
-                self.tr_("Vidéo → Audio"),
+                self.tr_("video_to_audio"),
                 [
                     ("🎬 Video → MP3", "video_to_mp3", _VID_EXTS),
                     ("🎬 Video → WAV", "video_to_wav", _VID_EXTS),
@@ -567,7 +566,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
                 ],
             ),
             (
-                self.tr_("Audio → Audio"),
+                self.tr_("audio_to_audio"),
                 [
                     ("🎵 Audio → MP3", "audio_to_mp3", _AUD_EXTS),
                     ("🎵 Audio → WAV", "audio_to_wav", _AUD_EXTS),

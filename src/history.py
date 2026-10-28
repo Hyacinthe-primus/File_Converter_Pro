@@ -96,7 +96,7 @@ class HistoryDialog(TranslationMixin, QDialog):
         self._tm = _make_tm(language)
         self.parent_window = parent
         self._loader_thread = None
-        self.setWindowTitle(self.translate_text("📋 Historique des Conversions"))
+        self.setWindowTitle(self.translate_text("conversion_history"))
         self.setModal(False)
         self.setMinimumSize(1000, 700)
         self.setup_ui()
@@ -125,8 +125,8 @@ class HistoryDialog(TranslationMixin, QDialog):
         source_layout = QHBoxLayout()
         source_layout.setSpacing(8)
 
-        self.btn_main_db = QPushButton("🗂️ " + self.translate_text("Conversions principales"))
-        self.btn_adv_db = QPushButton("⚙️ " + self.translate_text("Conversions avancées"))
+        self.btn_main_db = QPushButton("🗂️ " + self.translate_text("main_conversions"))
+        self.btn_adv_db = QPushButton("⚙️ " + self.translate_text("advanced_conversions_2"))
         self.btn_main_db.setFixedHeight(30)
         self.btn_adv_db.setFixedHeight(30)
 
@@ -167,7 +167,7 @@ class HistoryDialog(TranslationMixin, QDialog):
 
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(
-            self.translate_text("Rechercher par nom de fichier ou type d'opération...")
+            self.translate_text("search_by_filename_or_operation_type")
         )
         self.search_input.textChanged.connect(self.load_history)
 
@@ -204,13 +204,13 @@ class HistoryDialog(TranslationMixin, QDialog):
         self.limit_combo.currentIndexChanged.connect(self.load_history)
         self.limit_combo.setFixedWidth(75)
 
-        filter_layout.addWidget(QLabel(self.translate_text("Recherche:")))
+        filter_layout.addWidget(QLabel(self.translate_text("search")))
         filter_layout.addWidget(self.search_input, 1)  # stretch
-        filter_layout.addWidget(QLabel(self.translate_text("Du:")))
+        filter_layout.addWidget(QLabel(self.translate_text("from")))
         filter_layout.addWidget(self.start_date_edit)
-        filter_layout.addWidget(QLabel(self.translate_text("Au:")))
+        filter_layout.addWidget(QLabel(self.translate_text("to")))
         filter_layout.addWidget(self.end_date_edit)
-        filter_layout.addWidget(QLabel(self.translate_text("Nombre:")))
+        filter_layout.addWidget(QLabel(self.translate_text("number")))
         filter_layout.addWidget(self.limit_combo)
 
         layout.addLayout(filter_layout)
@@ -219,13 +219,13 @@ class HistoryDialog(TranslationMixin, QDialog):
         self.history_table.setColumnCount(8)
         self.history_table.setHorizontalHeaderLabels(
             [
-                self.translate_text("Date/Heure"),
+                self.translate_text("date_time"),
                 self.translate_text("Type"),
-                self.translate_text("Fichier Source"),
-                self.translate_text("Format Source"),
-                self.translate_text("Fichier Cible"),
-                self.translate_text("Format Cible"),
-                self.translate_text("Statut"),
+                self.translate_text("source_file"),
+                self.translate_text("source_format"),
+                self.translate_text("target_file"),
+                self.translate_text("target_format_2"),
+                self.translate_text("status"),
                 self.translate_text("Actions"),
             ]
         )
@@ -260,29 +260,29 @@ class HistoryDialog(TranslationMixin, QDialog):
 
         button_layout = QHBoxLayout()
 
-        self.reconvert_btn = QPushButton("🔄 " + self.translate_text("Reconvertir la sélection"))
+        self.reconvert_btn = QPushButton("🔄 " + self.translate_text("reconvert_selection"))
         _apply_dialog_btn(self.reconvert_btn, "BtnReconvert")
         self.reconvert_btn.clicked.connect(self.reconvert_selected)
         self.reconvert_btn.setEnabled(False)
 
-        self.delete_btn = QPushButton("🗑️ " + self.translate_text("Supprimer la sélection"))
+        self.delete_btn = QPushButton("🗑️ " + self.translate_text("delete_selection"))
         _apply_dialog_btn(self.delete_btn, "BtnDeleteSelection")
         self.delete_btn.clicked.connect(self.delete_selected)
         self.delete_btn.setEnabled(False)
 
-        self.clear_all_btn = QPushButton("🧹 " + self.translate_text("Effacer tout l'historique"))
+        self.clear_all_btn = QPushButton("🧹 " + self.translate_text("clear_all_history"))
         _apply_dialog_btn(self.clear_all_btn, "BtnClearAll")
         self.clear_all_btn.clicked.connect(self.clear_all_history)
 
-        print_pdf_btn = QPushButton("🖨️ " + self.translate_text("Imprimer en PDF"))
+        print_pdf_btn = QPushButton("🖨️ " + self.translate_text("print_to_pdf"))
         _apply_dialog_btn(print_pdf_btn, "BtnPrintPdf")
         print_pdf_btn.clicked.connect(self.print_pdf)
 
-        export_json_btn = QPushButton("📋 " + self.translate_text("Exporter en JSON"))
+        export_json_btn = QPushButton("📋 " + self.translate_text("export_to_json"))
         _apply_dialog_btn(export_json_btn, "BtnExportJson")
         export_json_btn.clicked.connect(self.export_json)
 
-        close_btn = QPushButton(self.translate_text("Fermer"))
+        close_btn = QPushButton(self.translate_text("close"))
         _apply_dialog_btn(close_btn, "BtnHistoryClose")
         close_btn.clicked.connect(self.close)
 
@@ -387,19 +387,19 @@ class HistoryDialog(TranslationMixin, QDialog):
 
             reconvert_action = QPushButton("🔄")
             reconvert_action.setFixedSize(26, 26)
-            reconvert_action.setToolTip(self.translate_text("Reconvertir ce fichier"))
+            reconvert_action.setToolTip(self.translate_text("reconvert_this_file"))
             reconvert_action.setStyleSheet(small_btn_style)
             reconvert_action.clicked.connect(lambda checked, idx=i: self.reconvert_single(idx))
 
             open_action = QPushButton("📂")
             open_action.setFixedSize(26, 26)
-            open_action.setToolTip(self.translate_text("Ouvrir le fichier"))
+            open_action.setToolTip(self.translate_text("open_file"))
             open_action.setStyleSheet(small_btn_style)
             open_action.clicked.connect(lambda checked, idx=i: self.open_file(idx))
 
             delete_action = QPushButton("🗑️")
             delete_action.setFixedSize(26, 26)
-            delete_action.setToolTip(self.translate_text("Supprimer cet enregistrement"))
+            delete_action.setToolTip(self.translate_text("delete_this_record"))
             delete_action.setStyleSheet(small_btn_style)
             delete_action.clicked.connect(lambda checked, idx=i: self.delete_single(idx))
 
@@ -420,10 +420,10 @@ class HistoryDialog(TranslationMixin, QDialog):
     def show_context_menu(self, position):
         menu = QMenu()
 
-        reconvert_action = menu.addAction("🔄 " + self.translate_text("Reconvertir la sélection"))
-        delete_action = menu.addAction("🗑️ " + self.translate_text("Supprimer la sélection"))
-        open_source_action = menu.addAction("📂 " + self.translate_text("Ouvrir le fichier source"))
-        open_target_action = menu.addAction("📂 " + self.translate_text("Ouvrir le fichier cible"))
+        reconvert_action = menu.addAction("🔄 " + self.translate_text("reconvert_selection"))
+        delete_action = menu.addAction("🗑️ " + self.translate_text("delete_selection"))
+        open_source_action = menu.addAction("📂 " + self.translate_text("open_source_file"))
+        open_target_action = menu.addAction("📂 " + self.translate_text("open_target_file"))
 
         action = menu.exec(self.history_table.mapToGlobal(position))
 
@@ -468,7 +468,7 @@ class HistoryDialog(TranslationMixin, QDialog):
             else:
                 QMessageBox.warning(
                     self,
-                    self.translate_text("Fichier introuvable"),
+                    self.translate_text("file_not_found"),
                     self.translate_text(f"Le fichier source n'existe plus: {source_file}"),
                 )
 
@@ -511,7 +511,7 @@ class HistoryDialog(TranslationMixin, QDialog):
         reply = QMessageBox.question(
             self,
             self.translate_text("Confirmation"),
-            self.translate_text("Voulez-vous vraiment supprimer TOUT l'historique ? Cette action est irréversible."),
+            self.translate_text("do_you_really_want_to_delete_all_history_this_action_is_irrevers"),
             QMessageBox.Yes | QMessageBox.No,
         )
 
@@ -543,12 +543,12 @@ class HistoryDialog(TranslationMixin, QDialog):
             except Exception as e:
                 QMessageBox.warning(
                     self,
-                    self.translate_text("Erreur"),
+                    self.translate_text("error"),
                     self.translate_text(f"Impossible d'ouvrir le fichier: {str(e)}"),
                 )
         else:
             QMessageBox.warning(
-                self, self.translate_text("Fichier introuvable"), self.translate_text("Le fichier cible n'existe plus.")
+                self, self.translate_text("file_not_found"), self.translate_text("target_file_no_longer_exists")
             )
 
     def open_source_files(self, rows):
@@ -582,7 +582,7 @@ class HistoryDialog(TranslationMixin, QDialog):
     def print_pdf(self):
         """Generate a colored PDF report of the conversion history, grouped by operation type."""
         filepath, _ = QFileDialog.getSaveFileName(
-            self, self.translate_text("Imprimer en PDF"), "historique_conversions.pdf", "PDF (*.pdf)"
+            self, self.translate_text("print_to_pdf"), "historique_conversions.pdf", "PDF (*.pdf)"
         )
         if not filepath:
             return
@@ -646,32 +646,32 @@ class HistoryDialog(TranslationMixin, QDialog):
 
             from datetime import datetime as _dt
 
-            story.append(Paragraph("📋 " + self.translate_text("Historique des Conversions"), title_style))
+            story.append(Paragraph("📋 " + self.translate_text("conversion_history_2"), title_style))
             story.append(
                 Paragraph(
-                    self.translate_text("Généré le")
+                    self.translate_text("generated_on")
                     + " "
                     + _dt.now().strftime("%d/%m/%Y")
                     + " "
-                    + self.translate_text("à")
+                    + self.translate_text("at")
                     + " "
                     + _dt.now().strftime("%H:%M")
                     + "  —  "
                     + str(self.history_table.rowCount())
                     + " "
-                    + self.translate_text("entrée(s)"),
+                    + self.translate_text("entry_ies"),
                     subtitle_style,
                 )
             )
             story.append(HRFlowable(width="100%", thickness=1, color=COLOR_HEADER_BG, spaceAfter=10))
 
             col_headers = [
-                self.translate_text("Date/Heure"),
-                self.translate_text("Fichier Source"),
-                self.translate_text("Fmt src"),
-                self.translate_text("Fichier Cible"),
-                self.translate_text("Fmt cible"),
-                self.translate_text("Statut"),
+                self.translate_text("date_time"),
+                self.translate_text("source_file"),
+                self.translate_text("src_fmt"),
+                self.translate_text("target_file"),
+                self.translate_text("tgt_fmt"),
+                self.translate_text("status"),
             ]
             col_widths = [3.2 * cm, 4.8 * cm, 1.6 * cm, 4.8 * cm, 1.6 * cm, 1.4 * cm]
 
@@ -723,18 +723,18 @@ class HistoryDialog(TranslationMixin, QDialog):
 
             QMessageBox.information(
                 self,
-                self.translate_text("Succès"),
-                self.translate_text("Historique exporté avec succès vers") + f"\n{filepath}",
+                self.translate_text("success"),
+                self.translate_text("history_successfully_exported_to") + f"\n{filepath}",
             )
 
         except Exception as e:
             QMessageBox.critical(
-                self, self.translate_text("Erreur"), self.translate_text("Erreur lors de l'export:") + f"\n{str(e)}"
+                self, self.translate_text("error"), self.translate_text("error_during_export") + f"\n{str(e)}"
             )
 
     def export_json(self):
         filepath, _ = QFileDialog.getSaveFileName(
-            self, self.translate_text("Exporter l'historique en JSON"), "", "JSON (*.json)"
+            self, self.translate_text("export_history_to_json"), "", "JSON (*.json)"
         )
 
         if filepath:
@@ -742,12 +742,12 @@ class HistoryDialog(TranslationMixin, QDialog):
                 self.db_manager.export_history(filepath, "json")
                 QMessageBox.information(
                     self,
-                    self.translate_text("Succès"),
+                    self.translate_text("success"),
                     self.translate_text(f"Historique exporté avec succès vers {filepath}"),
                 )
             except Exception as e:
                 QMessageBox.critical(
-                    self, self.translate_text("Erreur"), self.translate_text(f"Erreur lors de l'export: {str(e)}")
+                    self, self.translate_text("error"), self.translate_text(f"Erreur lors de l'export: {str(e)}")
                 )
 
     def translate_operation_type(self, operation_key):

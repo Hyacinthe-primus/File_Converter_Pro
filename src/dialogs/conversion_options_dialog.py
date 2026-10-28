@@ -17,18 +17,18 @@ class ConversionOptionsDialog(QDialog):
     conversion_chosen = Signal(str)
 
     _CARDS = [
-        ("PDF → Word/Docx", "launch_pdf_to_word_conversion", "pdf_word.png", "#4dabf7", "#1971c2"),
-        ("Word/Docx → PDF", "launch_word_to_pdf_conversion", "word_pdf.png", "#69db7c", "#2f9e44"),
-        ("Images → PDF", "launch_image_to_pdf_conversion", "image_pdf.png", "#ffa94d", "#e67700"),
-        ("Fusionner PDF", "launch_merge_pdf", "merge_pdf.png", "#f783ac", "#c2255c"),
-        ("Fusionner Word", "launch_merge_word", "merge_word.png", "#da77f2", "#9c36b5"),
-        ("Optimiser les fichiers", "launch_optimization", "compress_files.png", "#63e6be", "#0ca678"),
+        ("pdf_to_word_2", "launch_pdf_to_word_conversion", "pdf_word.png", "#4dabf7", "#1971c2"),
+        ("word_to_pdf_2", "launch_word_to_pdf_conversion", "word_pdf.png", "#69db7c", "#2f9e44"),
+        ("images_to_pdf_3", "launch_image_to_pdf_conversion", "image_pdf.png", "#ffa94d", "#e67700"),
+        ("merge_pdf", "launch_merge_pdf", "merge_pdf.png", "#f783ac", "#c2255c"),
+        ("merge_word", "launch_merge_word", "merge_word.png", "#da77f2", "#9c36b5"),
+        ("optimize_files", "launch_optimization", "compress_files.png", "#63e6be", "#0ca678"),
     ]
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._dark = getattr(parent, "dark_mode", True)
-        self.setWindowTitle(parent.translate_text("Lancer la Conversion"))
+        self.setWindowTitle(parent.translate_text("start_conversion_3"))
         self.setFixedWidth(560)
 
         flags = Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowCloseButtonHint
@@ -65,11 +65,11 @@ class ConversionOptionsDialog(QDialog):
         root.setContentsMargins(24, 20, 24, 20)
         root.setSpacing(0)
 
-        title = QLabel(parent.translate_text("Lancer la Conversion"))
+        title = QLabel(parent.translate_text("start_conversion_3"))
         title.setStyleSheet(f"font-size: 17px; font-weight: 700; color: {title_col}; background: transparent;")
         root.addWidget(title)
 
-        sub = QLabel(parent.translate_text("Sélectionnez la catégorie de conversion à lancer :"))
+        sub = QLabel(parent.translate_text("select_the_conversion_category_to_start"))
         sub.setStyleSheet(f"font-size: 12px; color: {sub_col}; background: transparent; margin-bottom: 14px;")
         root.addWidget(sub)
         root.addSpacing(10)
@@ -91,7 +91,7 @@ class ConversionOptionsDialog(QDialog):
         root.addLayout(grid)
         root.addSpacing(16)
 
-        cancel = QPushButton(parent.translate_text("Annuler"))
+        cancel = QPushButton(parent.translate_text("cancel"))
         cancel.setFixedHeight(36)
         cancel.setStyleSheet(f"""
             QPushButton {{

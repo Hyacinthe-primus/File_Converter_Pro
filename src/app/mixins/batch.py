@@ -30,7 +30,7 @@ class BatchMixin:
         """Show batch conversion dialog and process selected format."""
         if not self.files_list:
             QMessageBox.warning(
-                self, self.translate_text("Avertissement"), self.translate_text("La liste de fichiers est vide")
+                self, self.translate_text("warning"), self.translate_text("the_file_list_is_empty")
             )
             return
         from dialogs import BatchConvertDialog
@@ -39,7 +39,9 @@ class BatchMixin:
         if dialog.exec() != QDialog.Accepted:
             return
         target_format = dialog.selected_format()
-        output_dir = QFileDialog.getExistingDirectory(self, self.translate_text("Sélectionner le dossier de sortie"))
+        output_dir = QFileDialog.getExistingDirectory(
+            self, self.translate_text("choose_output_folder")
+        )
         if not output_dir:
             return
         self.process_batch_conversion(output_dir, target_format)
@@ -60,11 +62,11 @@ class BatchMixin:
 
         if not files:
             QMessageBox.warning(
-                self, self.translate_text("Avertissement"), self.translate_text("La liste de fichiers est vide")
+                self, self.translate_text("warning"), self.translate_text("the_file_list_is_empty")
             )
             return
 
-        self.show_progress(True, self.translate_text("Conversion par Lot"))
+        self.show_progress(True, self.translate_text("batch_conversion"))
         success_count = 0
         start_time = datetime.now()
 
@@ -117,19 +119,19 @@ class BatchMixin:
             self.show_progress(False)
             total_time = (datetime.now() - start_time).total_seconds()
             self.achievement_system.record_batch_conversion(len(files))
-            target_label = {"pdf": "PDF", "docx": "DOCX", "png": "Images PNG"}.get(target_format, target_format.upper())
+            target_label = {"pdf": "PDF", "docx": "DOCX", "png": "png_images"}.get(target_format, target_format.upper())
             if success_count:
                 QMessageBox.information(
                     self,
-                    self.translate_text("Batch Conversion Result"),
-                    f"{success_count}/{len(files)} {self.translate_text('files converted to')} "
+                    self.translate_text("batch_conversion_result"),
+                    f"{success_count}/{len(files)} {self.translate_text('files_converted_to')} "
                     f"{self.translate_text(target_label)} ({total_time:.1f}s)",
                 )
             else:
                 QMessageBox.warning(
                     self,
-                    self.translate_text("Batch Conversion Result"),
-                    self.translate_text("No files converted. Check supported formats."),
+                    self.translate_text("batch_conversion_result"),
+                    self.translate_text("no_files_converted_check_supported_formats"),
                 )
 
         from conversion_worker import ConversionWorker
@@ -363,7 +365,7 @@ class BatchMixin:
 
         self.update_file_counter()
         QMessageBox.information(
-            self, self.translate_text("Succès"), f"{success_count} {self.translate_text('files renamed')}"
+            self, self.translate_text("success"), f"{success_count} {self.translate_text('files_renamed')}"
         )
 
     def get_output_directory(self, filename: str | None = None) -> str:
@@ -374,14 +376,14 @@ class BatchMixin:
             )
             ext = Path(filename).suffix.lower()
             if ext == ".pdf":
-                file_filter = self.translate_text("PDF files (*.pdf)")
+                file_filter = self.translate_text("pdf_files_pdf_2")
             elif ext in (".docx", ".doc"):
                 file_filter = "Word Files (*.docx)"
             else:
                 file_filter = "All files (*.*)"
-            return QFileDialog.getSaveFileName(self, self.translate_text("Save file"), start_dir, file_filter)[0]
+            return QFileDialog.getSaveFileName(self, self.translate_text("save_file"), start_dir, file_filter)[0]
         else:
             if default_dir and os.path.exists(default_dir):
                 return default_dir
             else:
-                return QFileDialog.getExistingDirectory(self, self.translate_text("Select destination folder"))
+                return QFileDialog.getExistingDirectory(self, self.translate_text("select_destination_folder_2"))

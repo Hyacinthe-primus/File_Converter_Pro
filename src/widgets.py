@@ -438,8 +438,8 @@ class DraggableListWidget(QListWidget):
         Each block comes from a translation key that holds newline-separated
         rows — so .lang files can override them freely.
         """
-        raw1 = self._tr("dropzone_line1")
-        raw2 = self._tr("dropzone_line2")
+        raw1 = self._tr("dropzone_line_1")
+        raw2 = self._tr("dropzone_line_2")
         block1 = raw1.split("\n") if raw1 else []
         block2 = raw2.split("\n") if raw2 else []
         return block1 + [""] + block2

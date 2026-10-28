@@ -161,4 +161,4 @@ class OptimizationMixin(
             message = self.translate_text("msg_4").format(success_count, len(office_files))
         from PySide6.QtWidgets import QMessageBox
 
-        QMessageBox.information(self, self.translate_text("Succès"), self.translate_text(message))
+        QMessageBox.information(self, self.translate_text("success"), self.translate_text(message))

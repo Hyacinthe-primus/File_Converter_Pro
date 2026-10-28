@@ -60,11 +60,11 @@ class WordToPdfMixin:
 
         if not word_files:
             msg = (
-                self.translate_text("Veuillez sélectionner au moins un fichier Word")
+                self.translate_text("please_select_at_least_one_word_file")
                 if selected_items
-                else self.translate_text("La liste doit contenir au moins un fichier Word")
+                else self.translate_text("the_list_must_contain_at_least_one_word_file")
             )
-            QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
+            QMessageBox.warning(self, self.translate_text("warning"), msg)
             return
 
         has_formatted_content = False
@@ -196,9 +196,9 @@ class WordToPdfMixin:
                     },
                 )
             mode_name = (
-                self.translate_text("Conserver toute la mise en forme")
+                self.translate_text("preserve_all_formatting")
                 if _options["mode"] == "preserve_all"
-                else self.translate_text("Texte seulement")
+                else self.translate_text("only_plain_text")
             )
             formatted_time = f"{total_time:.1f}"
             msg = self.translate_text("word_to_pdf_success_sum").format(sc, total, formatted_time, mode_name)
@@ -208,7 +208,7 @@ class WordToPdfMixin:
                 self.achievement_system.update_stat("recent_batch_files", sc)
                 self.achievement_system.update_stat("recent_batch_time", total_time)
                 self.achievement_system.check_speed_conversion(sc, total_time)
-            QMessageBox.information(self, self.translate_text("Succès"), self.translate_text(msg))
+            QMessageBox.information(self, self.translate_text("success"), self.translate_text(msg))
 
         self._worker = ConversionWorker(tasks, _run_word_to_pdf)
         self._worker.progress.connect(self.progress_bar.setValue)

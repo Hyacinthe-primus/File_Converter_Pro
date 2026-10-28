@@ -168,47 +168,47 @@ class AppUIMixin(
         self.config_manager.save_config(self.config)
 
         mode_name = (
-            self.translate_text("Conserver toute la mise en forme")
+            self.translate_text("preserve_all_formatting")
             if new_mode == "preserve_all"
-            else self.translate_text("Texte seulement")
+            else self.translate_text("only_plain_text")
         )
         self.status_bar.showMessage(f"Mode Word->PDF: {mode_name}", 3000)
 
     def setup_tooltips_with_shortcuts(self):
         """Configure tooltips with keyboard shortcuts"""
 
-        self.add_files_btn.setToolTip(self.translate_text("Charger des fichiers (Ctrl+O)"))
-        self.add_folder_btn.setToolTip(self.translate_text("Ajouter un dossier (Ctrl+P)"))
-        self.remove_file_btn.setToolTip(self.translate_text("Supprimer les fichiers sélectionnés"))
-        self.clear_all_btn.setToolTip(self.translate_text("Effacer toute la liste (Ctrl+Delete)"))
+        self.add_files_btn.setToolTip(self.translate_text("load_files_ctrl_o"))
+        self.add_folder_btn.setToolTip(self.translate_text("add_a_folder_ctrl_p"))
+        self.remove_file_btn.setToolTip(self.translate_text("remove_selected_files"))
+        self.clear_all_btn.setToolTip(self.translate_text("clear_entire_list_ctrl_delete"))
 
-        self.pdf_to_word_btn.setToolTip(self.translate_text("Convertir PDF en Word (Ctrl+Shift+C)"))
-        self.word_to_pdf_btn.setToolTip(self.translate_text("Convertir Word en PDF (Ctrl+Shift+C)"))
-        self.image_to_pdf_btn.setToolTip(self.translate_text("Convertir des images en PDF (Ctrl+Shift+C)"))
-        self.more_conversions_btn.setToolTip(self.translate_text("Plus d'options de conversion (Ctrl+Shift+C)"))
+        self.pdf_to_word_btn.setToolTip(self.translate_text("convert_pdf_to_word_ctrl_shift_c"))
+        self.word_to_pdf_btn.setToolTip(self.translate_text("convert_word_to_pdf_ctrl_shift_c"))
+        self.image_to_pdf_btn.setToolTip(self.translate_text("convert_images_to_pdf_ctrl_shift_c"))
+        self.more_conversions_btn.setToolTip(self.translate_text("more_conversion_options_ctrl_shift_c"))
 
-        self.merge_pdf_btn.setToolTip(self.translate_text("Fusionner des fichiers PDF"))
-        self.merge_word_btn.setToolTip(self.translate_text("Fusionner des documents Word"))
+        self.merge_pdf_btn.setToolTip(self.translate_text("merge_pdf_files"))
+        self.merge_word_btn.setToolTip(self.translate_text("merge_word_documents"))
 
-        self.split_pdf_btn.setToolTip(self.translate_text("Diviser un PDF"))
-        self.protect_pdf_btn.setToolTip(self.translate_text("Protéger un PDF avec mot de passe"))
-        self.compress_files_btn.setToolTip(self.translate_text("Compresser des fichiers"))
+        self.split_pdf_btn.setToolTip(self.translate_text("split_a_pdf"))
+        self.protect_pdf_btn.setToolTip(self.translate_text("protect_a_pdf_with_a_password"))
+        self.compress_files_btn.setToolTip(self.translate_text("compress_files_2"))
 
-        self.batch_convert_btn.setToolTip(self.translate_text("Conversion par lot"))
-        self.batch_rename_btn.setToolTip(self.translate_text("Renommage par lot"))
+        self.batch_convert_btn.setToolTip(self.translate_text("batch_conversion_2"))
+        self.batch_rename_btn.setToolTip(self.translate_text("batch_renaming"))
 
-        self.dashboard_btn.setToolTip(self.translate_text("Tableau de bord et statistiques"))
-        self.history_btn.setToolTip(self.translate_text("Historique des conversions (Ctrl+H)"))
-        self.templates_btn.setToolTip(self.translate_text("Modèles et templates"))
-        self.achievements_btn.setToolTip(self.translate_text("Succès et réalisations"))
+        self.dashboard_btn.setToolTip(self.translate_text("dashboard_and_statistics"))
+        self.history_btn.setToolTip(self.translate_text("conversion_history_ctrl_h"))
+        self.templates_btn.setToolTip(self.translate_text("models_and_templates"))
+        self.achievements_btn.setToolTip(self.translate_text("achievements_and_accomplishments"))
 
-        self.settings_btn.setToolTip(self.translate_text("Paramètres de l'application (Ctrl+,)"))
+        self.settings_btn.setToolTip(self.translate_text("application_settings_ctrl"))
 
-        self.new_action.setToolTip(self.translate_text("Nouveau projet (Ctrl+N)"))
-        self.open_action.setToolTip(self.translate_text("Ouvrir un projet existant (Ctrl+Shift+O)"))
-        self.save_action.setToolTip(self.translate_text("Enregistrer le projet (Ctrl+S)"))
-        self.theme_action.setToolTip(self.translate_text("Basculer entre mode clair et sombre"))
-        self.language_action.setToolTip(self.translate_text("Changer la langue"))
+        self.new_action.setToolTip(self.translate_text("new_project_ctrl_n"))
+        self.open_action.setToolTip(self.translate_text("open_an_existing_project_ctrl_shift_o"))
+        self.save_action.setToolTip(self.translate_text("save_the_project_ctrl_s"))
+        self.theme_action.setToolTip(self.translate_text("toggle_light_and_dark_mode"))
+        self.language_action.setToolTip(self.translate_text("change_language_2"))
 
     def launch_conversion_options(self):
         """
@@ -231,7 +231,7 @@ class AppUIMixin(
         else:
             QMessageBox.warning(
                 self,
-                self.translate_text("Erreur Interne"),
+                self.translate_text("internal_error"),
                 self.translate_text(f"Méthode de conversion '{method_name}' non trouvée ou non appelable."),
             )
 
@@ -289,15 +289,13 @@ class AppUIMixin(
         if not office_files:
             if selected_items:
                 msg = self.translate_text(
-                    "Aucun fichier optimisable sélectionné. "
-                    "Formats supportés : PDF, Word, PowerPoint, Excel, images, audio, vidéo, JSON, HTML, EPUB."
+                    "no_optimizable_file_selected_supported_formats_pdf_word_powerpoi"
                 )
             else:
                 msg = self.translate_text(
-                    "Aucun fichier optimisable dans la liste. "
-                    "Ajoutez des fichiers PDF, Word, PowerPoint, Excel, images, audio, vidéo, JSON, HTML ou EPUB d'abord."
+                    "no_optimizable_file_in_the_list_add_pdf_word_powerpoint_excel_im"
                 )
-            QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
+            QMessageBox.warning(self, self.translate_text("warning"), msg)
             return
 
         _def_id, _ = (
@@ -321,7 +319,7 @@ class AppUIMixin(
             return
 
         d = QDialog(self)
-        d.setWindowTitle(self.translate_text("Optimiser les fichiers"))
+        d.setWindowTitle(self.translate_text("optimize_files"))
         d.setMinimumWidth(430)
         root = QVBoxLayout(d)
         root.setSpacing(14)
@@ -336,15 +334,18 @@ class AppUIMixin(
             cat = _ext_cat.get(Path(f).suffix.lower(), "autre")
             cat_counts[cat] = cat_counts.get(cat, 0) + 1
         cat_labels = {
-            "office": self.translate_text("bureautique"),
-            "image": self.translate_text("image(s)"),
+            "office": self.translate_text("office"),
+            "image": self.translate_text("Images"),
             "audio": self.translate_text("audio"),
-            "video": self.translate_text("vidéo"),
+            "video": self.translate_text("video"),
             "web": self.translate_text("web"),
             "ebook": self.translate_text("ebook"),
         }
         summary_parts = [f"{v} {cat_labels.get(k, k)}" for k, v in cat_counts.items()]
-        summary_text = f"<b>{len(office_files)}</b> fichier(s) : {', '.join(summary_parts)}"
+        summary_text = (
+            f"<b>{len(office_files)}</b> {self.translate_text('files_2')}: "
+            f"{', '.join(summary_parts)}"
+        )
 
         summary_lbl = QLabel(summary_text)
         summary_lbl.setWordWrap(True)
@@ -354,13 +355,13 @@ class AppUIMixin(
         root.addWidget(summary_lbl)
 
         # Mode (radio buttons)
-        mode_group = QGroupBox(self.translate_text("Mode d'optimisation"))
+        mode_group = QGroupBox(self.translate_text("optimization_mode"))
         mode_layout = QVBoxLayout(mode_group)
         mode_layout.setSpacing(6)
 
-        radio_compress = QRadioButton("🗜  " + self.translate_text("Compression  –  réduit la taille du fichier"))
-        radio_clean = QRadioButton("🧹  " + self.translate_text("Nettoyage  –  supprime uniquement les métadonnées"))
-        radio_both = QRadioButton("⚡  " + self.translate_text("Compression + Nettoyage  –  recommandé"))
+        radio_compress = QRadioButton("🗜  " + self.translate_text("compression_reduces_file_size"))
+        radio_clean = QRadioButton("🧹  " + self.translate_text("cleaning_removes_metadata_only"))
+        radio_both = QRadioButton("⚡  " + self.translate_text("compression_cleaning_recommended"))
         radio_both.setChecked(True)
 
         for r in (radio_compress, radio_clean, radio_both):
@@ -369,13 +370,13 @@ class AppUIMixin(
         root.addWidget(mode_group)
 
         # Quality slider
-        quality_group = QGroupBox(self.translate_text("Niveau de compression"))
+        quality_group = QGroupBox(self.translate_text("compression_level_2"))
         quality_outer = QVBoxLayout(quality_group)
 
         quality_labels_list = [
-            self.translate_text("Haute qualité  (gain modéré)"),
-            self.translate_text("Équilibré  (recommandé)"),
-            self.translate_text("Maximum  (qualité réduite)"),
+            self.translate_text("high_quality_moderate_gain"),
+            self.translate_text("balanced_recommended"),
+            self.translate_text("maximum_reduced_quality"),
         ]
 
         from PySide6.QtWidgets import QSlider
@@ -464,13 +465,13 @@ class AppUIMixin(
         options_layout = QVBoxLayout(options_group)
         options_layout.setSpacing(6)
 
-        remove_metadata_check = AnimatedCheckBox(self.translate_text("Supprimer les métadonnées personnelles"))
+        remove_metadata_check = AnimatedCheckBox(self.translate_text("remove_personal_metadata"))
         remove_metadata_check.setChecked(True)
 
-        compress_images_check = AnimatedCheckBox(self.translate_text("Recompresser les images intégrées"))
+        compress_images_check = AnimatedCheckBox(self.translate_text("recompress_embedded_images"))
         compress_images_check.setChecked(True)
 
-        keep_backup_check = AnimatedCheckBox(self.translate_text("Garder une copie des originaux"))
+        keep_backup_check = AnimatedCheckBox(self.translate_text("keep_a_copy_of_the_originals_2"))
         keep_backup_check.setChecked(True)
 
         for cb in (remove_metadata_check, compress_images_check, keep_backup_check):
@@ -481,11 +482,11 @@ class AppUIMixin(
         btn_row = QHBoxLayout()
         btn_row.setSpacing(10)
 
-        btn_cancel = QPushButton(self.translate_text("Annuler"))
+        btn_cancel = QPushButton(self.translate_text("cancel"))
         btn_cancel.setMinimumHeight(38)
         _apply_dialog_btn(btn_cancel, "BtnCancelGlassy")
 
-        btn_ok = QPushButton("✓  " + self.translate_text("Optimiser"))
+        btn_ok = QPushButton("✓  " + self.translate_text("optimize"))
         btn_ok.setMinimumHeight(38)
         btn_ok.setStyleSheet(
             "QPushButton{background:#28a745;color:white;border:none;"
@@ -540,120 +541,120 @@ class AppUIMixin(
         menubar = self.menuBar()
         menubar.clear()
 
-        file_menu_title = self.translate_text("&Fichier")
+        file_menu_title = self.translate_text("file")
         file_menu = menubar.addMenu(file_menu_title)
 
-        new_action = QAction(self.translate_text("&Nouveau projet"), self)
+        new_action = QAction(self.translate_text("new_project_2"), self)
         new_action.setShortcut("Ctrl+N")
         new_action.triggered.connect(self.new_project)
-        new_action.setToolTip(self.translate_text("Créer un nouveau projet (Ctrl+N)"))
+        new_action.setToolTip(self.translate_text("create_a_new_project_ctrl_n"))
         file_menu.addAction(new_action)
 
-        open_action = QAction(self.translate_text("&Ouvrir projet..."), self)
+        open_action = QAction(self.translate_text("open_project_2"), self)
         open_action.setShortcut("Ctrl+Shift+O")
         open_action.triggered.connect(self.open_project)
-        open_action.setToolTip(self.translate_text("Ouvrir un projet existant (Ctrl+Shift+O)"))
+        open_action.setToolTip(self.translate_text("open_an_existing_project_ctrl_shift_o"))
         file_menu.addAction(open_action)
 
-        save_action = QAction(self.translate_text("&Enregistrer projet"), self)
+        save_action = QAction(self.translate_text("save_project_3"), self)
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self.save_project)
-        save_action.setToolTip(self.translate_text("Enregistrer le projet courant (Ctrl+S)"))
+        save_action.setToolTip(self.translate_text("save_current_project_ctrl_s"))
         file_menu.addAction(save_action)
 
         file_menu.addSeparator()
 
-        add_files_action = QAction(self.translate_text("&Ajouter des fichiers..."), self)
+        add_files_action = QAction(self.translate_text("add_files_2"), self)
         add_files_action.setShortcut("Ctrl+O")
         add_files_action.triggered.connect(self.add_files)
-        add_files_action.setToolTip(self.translate_text("Ajouter des fichiers au projet (Ctrl+O)"))
+        add_files_action.setToolTip(self.translate_text("add_files_to_the_project_ctrl_o"))
         file_menu.addAction(add_files_action)
 
-        add_folder_action = QAction(self.translate_text("Ajouter un &dossier..."), self)
+        add_folder_action = QAction(self.translate_text("add_a_folder"), self)
         add_folder_action.setShortcut("Ctrl+P")
         add_folder_action.triggered.connect(self.add_folder)
-        add_folder_action.setToolTip(self.translate_text("Ajouter un dossier complet (Ctrl+P)"))
+        add_folder_action.setToolTip(self.translate_text("add_an_entire_folder_ctrl_p"))
         file_menu.addAction(add_folder_action)
 
         file_menu.addSeparator()
 
-        select_all_action = QAction(self.translate_text("&Tout sélectionner"), self)
+        select_all_action = QAction(self.translate_text("select_all"), self)
         select_all_action.setShortcut("Ctrl+A")
         select_all_action.triggered.connect(self.select_all_files)
-        select_all_action.setToolTip(self.translate_text("Sélectionner tous les fichiers (Ctrl+A)"))
+        select_all_action.setToolTip(self.translate_text("select_all_files_ctrl_a"))
         file_menu.addAction(select_all_action)
 
-        clear_action = QAction(self.translate_text("&Effacer la liste"), self)
+        clear_action = QAction(self.translate_text("clear_list"), self)
         clear_action.setShortcut("Ctrl+Delete")
         clear_action.triggered.connect(self.clear_file_list)
-        clear_action.setToolTip(self.translate_text("Effacer toute la liste de fichiers (Ctrl+Delete)"))
+        clear_action.setToolTip(self.translate_text("clear_entire_file_list_ctrl_delete"))
         file_menu.addAction(clear_action)
 
         file_menu.addSeparator()
 
-        quit_action = QAction(self.translate_text("&Quitter"), self)
+        quit_action = QAction(self.translate_text("quit"), self)
         quit_action.setShortcut("Ctrl+Q")
         quit_action.triggered.connect(self.close)
-        quit_action.setToolTip(self.translate_text("Quitter l'application (Ctrl+Q)"))
+        quit_action.setToolTip(self.translate_text("quit_the_application_ctrl_q"))
         file_menu.addAction(quit_action)
 
-        edit_menu_title = self.translate_text("&Edition")
+        edit_menu_title = self.translate_text("edit")
         edit_menu = menubar.addMenu(edit_menu_title)
 
-        convert_action = QAction(self.translate_text("&Lancer la conversion"), self)
+        convert_action = QAction(self.translate_text("start_conversion"), self)
         convert_action.setShortcut("Ctrl+Shift+C")
         convert_action.triggered.connect(self.launch_conversion_options)
-        convert_action.setToolTip(self.translate_text("Lancer la conversion des fichiers (Ctrl+Shift+C)"))
+        convert_action.setToolTip(self.translate_text("start_file_conversion_ctrl_shift_c"))
         edit_menu.addAction(convert_action)
 
-        view_menu_title = self.translate_text("&Affichage")
+        view_menu_title = self.translate_text("view")
         view_menu = menubar.addMenu(view_menu_title)
 
-        settings_action = QAction(self.translate_text("&Paramètres..."), self)
+        settings_action = QAction(self.translate_text("settings_2"), self)
         settings_action.setShortcut("Ctrl+,")
         settings_action.triggered.connect(self.show_settings)
-        settings_action.setToolTip(self.translate_text("Ouvrir les paramètres (Ctrl+,)"))
+        settings_action.setToolTip(self.translate_text("open_settings_ctrl"))
         view_menu.addAction(settings_action)
 
-        history_action = QAction(self.translate_text("&Historique..."), self)
+        history_action = QAction(self.translate_text("history_2"), self)
         history_action.setShortcut("Ctrl+H")
         history_action.triggered.connect(self.show_history)
-        history_action.setToolTip(self.translate_text("Ouvrir l'historique des conversions (Ctrl+H)"))
+        history_action.setToolTip(self.translate_text("open_conversion_history_ctrl_h"))
         view_menu.addAction(history_action)
 
-        dashboard_action = QAction(self.translate_text("&Tableau de bord..."), self)
+        dashboard_action = QAction(self.translate_text("dashboard_2"), self)
         dashboard_action.triggered.connect(self.show_dashboard)
-        dashboard_action.setToolTip(self.translate_text("Ouvrir le tableau de bord et statistiques"))
+        dashboard_action.setToolTip(self.translate_text("open_dashboard_and_statistics"))
         view_menu.addAction(dashboard_action)
 
-        templates_action = QAction(self.translate_text("&Modèles..."), self)
+        templates_action = QAction(self.translate_text("templates_2"), self)
         templates_action.triggered.connect(self.show_templates)
-        templates_action.setToolTip(self.translate_text("Ouvrir les modèles et templates"))
+        templates_action.setToolTip(self.translate_text("open_templates"))
         view_menu.addAction(templates_action)
 
-        achievements_action = QAction(self.translate_text("&Succès..."), self)
+        achievements_action = QAction(self.translate_text("achievements"), self)
         achievements_action.triggered.connect(self.show_achievements)
-        achievements_action.setToolTip(self.translate_text("Ouvrir les succès et réalisations"))
+        achievements_action.setToolTip(self.translate_text("open_achievements"))
         view_menu.addAction(achievements_action)
 
         view_menu.addSeparator()
 
-        theme_action = QAction(self.translate_text("&Basculer le thème"), self)
+        theme_action = QAction(self.translate_text("toggle_theme"), self)
         theme_action.setShortcut("F2")
         theme_action.triggered.connect(self.toggle_theme)
-        theme_action.setToolTip(self.translate_text("Basculer entre mode clair et sombre (F2)"))
+        theme_action.setToolTip(self.translate_text("toggle_light_and_dark_mode_f2"))
         view_menu.addAction(theme_action)
 
-        language_action = QAction(self.translate_text("&Changer la langue"), self)
+        language_action = QAction(self.translate_text("change_language"), self)
         language_action.setShortcut("F3")
         language_action.triggered.connect(self.toggle_language)
-        language_action.setToolTip(self.translate_text("Changer la langue de l'interface (F3)"))
+        language_action.setToolTip(self.translate_text("change_the_interface_language_f3"))
         view_menu.addAction(language_action)
 
-        help_action = QAction(self.translate_text("A&ide"), self)
+        help_action = QAction(self.translate_text("help"), self)
         help_action.setShortcut("F1")
         help_action.triggered.connect(self.show_shortcuts_help)
-        help_action.setToolTip(self.translate_text("Afficher la liste des raccourcis clavier (F1)"))
+        help_action.setToolTip(self.translate_text("show_keyboard_shortcuts_list_f1"))
         menubar.addAction(help_action)
 
     def show_shortcuts_help(self):
@@ -661,48 +662,48 @@ class AppUIMixin(
         t = self.translate_text
 
         shortcuts_text = f"""
-        <h2>{t("Raccourcis clavier - File Converter Pro")}</h2>
+        <h2>{t("keyboard_shortcuts_file_converter_pro")}</h2>
 
-        <h3>{t("Gestion de projets")}</h3>
+        <h3>{t("project_management")}</h3>
         <ul>
-        <li><b>Ctrl+N</b> : {t("Nouveau projet")}</li>
-        <li><b>Ctrl+Shift+O</b> : {t("Ouvrir un projet")}</li>
-        <li><b>Ctrl+S</b> : {t("Enregistrer le projet")}</li>
+        <li><b>Ctrl+N</b> : {t("new_project_3")}</li>
+        <li><b>Ctrl+Shift+O</b> : {t("open_a_project")}</li>
+        <li><b>Ctrl+S</b> : {t("save_project_4")}</li>
         </ul>
 
-        <h3>{t("Gestion des fichiers")}</h3>
+        <h3>{t("file_management_2")}</h3>
         <ul>
-        <li><b>Ctrl+O</b> : {t("Ajouter des fichiers")}</li>
-        <li><b>Ctrl+P</b> : {t("Ajouter un dossier")}</li>
-        <li><b>Ctrl+A</b> : {t("Tout sélectionner")}</li>
-        <li><b>Ctrl+Delete</b> : {t("Effacer la liste")}</li>
+        <li><b>Ctrl+O</b> : {t("add_files_3")}</li>
+        <li><b>Ctrl+P</b> : {t("add_folder_2")}</li>
+        <li><b>Ctrl+A</b> : {t("select_all_2")}</li>
+        <li><b>Ctrl+Delete</b> : {t("clear_list_2")}</li>
         </ul>
 
         <h3>{t("Conversions")}</h3>
         <ul>
-        <li><b>Ctrl+Shift+C</b> : {t("Lancer la conversion")}</li>
+        <li><b>Ctrl+Shift+C</b> : {t("start_conversion_2")}</li>
         </ul>
 
         <h3>{t("Navigation")}</h3>
         <ul>
-        <li><b>Ctrl+H</b> : {t("Historique")}</li>
-        <li><b>Ctrl+,</b> : {t("Paramètres")}</li>
-        <li><b>F2</b> : {t("Basculer le thème")}</li>
-        <li><b>F3</b> : {t("Changer la langue")}</li>
-        <li><b>{t("Échap")}</b> : {t("Fermer les fenêtres secondaires")}</li>
+        <li><b>Ctrl+H</b> : {t("history")}</li>
+        <li><b>Ctrl+,</b> : {t("settings")}</li>
+        <li><b>F2</b> : {t("toggle_theme_2")}</li>
+        <li><b>F3</b> : {t("change_language_2")}</li>
+        <li><b>{t("esc")}</b> : {t("close_secondary_windows")}</li>
         </ul>
 
         <h3>{t("Application")}</h3>
         <ul>
-        <li><b>Ctrl+Q</b> : {t("Quitter")}</li>
-        <li><b>F1</b> : {t("Aide des raccourcis")}</li>
+        <li><b>Ctrl+Q</b> : {t("quit_2")}</li>
+        <li><b>F1</b> : {t("shortcuts_help")}</li>
         </ul>
-        <h3>{t("Support en ligne")}</h3>
-        <p><a href="https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/How-To-Use">{t("Guide d'utilisation complet")}</a></p>
+        <h3>{t("online_support")}</h3>
+        <p><a href="https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/How-To-Use">{t("full_user_guide")}</a></p>
         """
 
         msg_box = QMessageBox(self)
-        msg_box.setWindowTitle(t("Raccourcis clavier"))
+        msg_box.setWindowTitle(t("keyboard_shortcuts_2"))
         msg_box.setTextFormat(Qt.RichText)
         msg_box.setText(shortcuts_text)
         msg_box.setIcon(QMessageBox.Information)
@@ -710,7 +711,7 @@ class AppUIMixin(
         msg_box.exec()
 
     def setup_ui(self):
-        self.setWindowTitle(self.translate_text("File Converter Pro - Convertisseur de Fichiers Professionnel"))
+        self.setWindowTitle(self.translate_text("file_converter_pro_professional_file_converter_2"))
         self.setGeometry(100, 100, 1400, 900)
         self.setMinimumSize(1000, 680)
 
@@ -753,12 +754,11 @@ class AppUIMixin(
             b.setObjectName("NavBtn")
             return b
 
-        self.nav_dashboard_btn = _nav_btn("📊", "Tableau de Bord")
-        self.nav_history_btn = _nav_btn("📋", "Historique")
-        self.nav_templates_btn = _nav_btn("🎨", "Modèles")
-        self.nav_achievements_btn = _nav_btn("🏆", "Trophées")
-        self.nav_donate_btn = _nav_btn("❤️", "Soutenir le développement")
-
+        self.nav_dashboard_btn = _nav_btn("📊", "dashboard")
+        self.nav_history_btn = _nav_btn("📋", "history")
+        self.nav_templates_btn = _nav_btn("🎨", "templates")
+        self.nav_achievements_btn = _nav_btn("🏆", "achievements_2")
+        self.nav_donate_btn = _nav_btn("❤️", "support_the_development")
         for b in [
             self.nav_dashboard_btn,
             self.nav_history_btn,
@@ -770,7 +770,7 @@ class AppUIMixin(
 
         sidebar_layout.addStretch()
 
-        self.nav_settings_btn = _nav_btn("⚙️", "Paramètres")
+        self.nav_settings_btn = _nav_btn("⚙️", "settings")
         sidebar_layout.addWidget(self.nav_settings_btn, alignment=Qt.AlignHCenter)
         sidebar_layout.addSpacing(12)
 
@@ -789,7 +789,7 @@ class AppUIMixin(
         topbar_layout.setContentsMargins(20, 0, 20, 0)
         topbar_layout.setSpacing(12)
 
-        title_lbl = QLabel(self.translate_text("File Converter Pro"))
+        title_lbl = QLabel(self.translate_text("app_name"))
         title_lbl.setObjectName("TitleLabel")
         topbar_layout.addWidget(title_lbl)
 
@@ -805,13 +805,13 @@ class AppUIMixin(
         self.project_name_lbl.setObjectName("ProjectNameLabel")
         self.project_name_lbl.setVisible(False)
         self.project_name_lbl.setCursor(Qt.PointingHandCursor)
-        self.project_name_lbl.setToolTip(self.translate_text("Cliquez pour renommer / ajouter des notes"))
+        self.project_name_lbl.setToolTip(self.translate_text("click_to_rename_or_add_notes"))
         self.project_name_lbl.mousePressEvent = lambda e: self.edit_project_info()
         topbar_layout.addWidget(self.project_name_lbl)
 
         topbar_layout.addStretch()
 
-        self.file_counter = QLabel(self.translate_text("Aucun fichier sélectionné"))
+        self.file_counter = QLabel(self.translate_text("no_files_selected"))
         self.file_counter.setObjectName("FileCounter")
         topbar_layout.addWidget(self.file_counter)
 
@@ -834,7 +834,7 @@ class AppUIMixin(
 
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage(self.translate_text("Prêt - Sélectionnez des fichiers pour commencer"))
+        self.status_bar.showMessage(self.translate_text("ready_select_files_to_start"))
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
@@ -1059,16 +1059,16 @@ class AppUIMixin(
         toolbar.setMovable(False)
         self.addToolBar(toolbar)
 
-        self.theme_action = QAction("🌙 " + self.translate_text("Mode Sombre"), self)
+        self.theme_action = QAction("🌙 " + self.translate_text("dark_mode"), self)
         self.language_action = QAction(self._get_language_label(self.current_language), self)
 
         toolbar.addAction(self.theme_action)
         toolbar.addAction(self.language_action)
         toolbar.addSeparator()
 
-        self.new_action = QAction("🆕 " + self.translate_text("Nouveau Projet"), self)
-        self.open_action = QAction("📂 " + self.translate_text("Ouvrir Projet"), self)
-        self.save_action = QAction("💾 " + self.translate_text("Enregistrer Projet"), self)
+        self.new_action = QAction("🆕 " + self.translate_text("new_project"), self)
+        self.open_action = QAction("📂 " + self.translate_text("open_project"), self)
+        self.save_action = QAction("💾 " + self.translate_text("save_project"), self)
 
         toolbar.addAction(self.new_action)
         toolbar.addAction(self.open_action)
@@ -1126,8 +1126,8 @@ class AppUIMixin(
 
             item.data(Qt.UserRole)
 
-            preview_action = menu.addAction("👁️ " + self.translate_text("Aperçu du fichier"))
-            remove_action = menu.addAction("🗑️ " + self.translate_text("Supprimer"))
+            preview_action = menu.addAction("👁️ " + self.translate_text("file_preview"))
+            remove_action = menu.addAction("🗑️ " + self.translate_text("remove"))
 
             action = menu.exec(self.files_list_widget.mapToGlobal(position))
 
@@ -1147,7 +1147,7 @@ class AppUIMixin(
                 else:
                     QMessageBox.warning(
                         self,
-                        self.translate_text("Fichier introuvable"),
+                        self.translate_text("file_not_found"),
                         self.translate_text(f"Le fichier n'existe pas ou le chemin est invalide: {file_path}"),
                     )
 
@@ -1194,16 +1194,18 @@ class AppUIMixin(
     def on_template_applied(self, template):
         """Called when a template is applied"""
 
-        message = self.translate_text(f"Template '{template['name']}' appliqué")
-        if template["type"] == self.translate_text("Fusion PDF"):
-            message += self.translate_text(" - Ajoutez des fichiers PDF et lancez la fusion")
-        elif template["type"] == self.translate_text("Conversion PDF→Word"):
-            message += self.translate_text(" - Lancez une conversion PDF vers Word pour utiliser ces paramètres")
+        message = f"{self.translate_text('template_applied')}: '{template['name']}'"
+        if template["type"] == self.translate_text("pdf_merge"):
+            message += self.translate_text("add_pdf_files_and_launch_the_merge")
+        elif template["type"] == self.translate_text("pdf_to_word_conversion"):
+            message += self.translate_text("launch_a_pdf_to_word_conversion_to_use_these_settings")
 
         self.status_bar.showMessage(message)
 
-        if template["type"] == self.translate_text("Optimisation de fichiers"):
-            message += self.translate_text(" - Lancez Optimiser les fichiers pour utiliser ces paramètres")
+        if template["type"] == self.translate_text("file_optimization"):
+            message += " - " + self.translate_text(
+                "launch_optimize_files_to_use_these_settings"
+            )
 
     def create_template_from_current_settings(self):
         """Create a template from the current settings"""
@@ -1212,20 +1214,20 @@ class AppUIMixin(
             self.template_manager = TemplateManager(self.db_manager)
 
         dialog = QInputDialog(self)
-        dialog.setWindowTitle(self.translate_text("Créer un template"))
-        dialog.setLabelText(self.translate_text("Nom du template:"))
-        dialog.setTextValue(self.translate_text("Template actuel"))
+        dialog.setWindowTitle(self.translate_text("create_a_template"))
+        dialog.setLabelText(self.translate_text("template_name"))
+        dialog.setTextValue(self.translate_text("current_template"))
 
         if dialog.exec() == QDialog.Accepted:
             name = dialog.textValue().strip()
             if name:
                 (self._ensure_template_manager() or object()).create_template_from_current_settings(
-                    name, self.translate_text("Conversion PDF→Word"), self
+                    name, self.translate_text("pdf_to_word_conversion"), self
                 )
 
                 QMessageBox.information(
                     self,
-                    self.translate_text("Succès"),
+                    self.translate_text("success"),
                     self.translate_text(f"Template '{name}' créé à partir des paramètres actuels!"),
                 )
 
@@ -1290,7 +1292,7 @@ class AppUIMixin(
             self.config_manager.save_config(self.config)
 
             QMessageBox.information(
-                self, self.translate_text("Succès"), self.translate_text("Paramètres sauvegardés avec succès!")
+                self, self.translate_text("success"), self.translate_text("settings_saved_successfully")
             )
 
     def _apply_achievements_btn_state(self):
@@ -1299,7 +1301,7 @@ class AppUIMixin(
         if btn is None:
             return
         btn.setVisible(enabled)
-        btn.setToolTip(self.translate_text("Succès et réalisations") if enabled else "")
+        btn.setToolTip(self.translate_text("achievements_and_accomplishments") if enabled else "")
 
     def _set_ui_enabled(self, enabled: bool):
         """Disable/re-enable interactive controls during async conversion."""

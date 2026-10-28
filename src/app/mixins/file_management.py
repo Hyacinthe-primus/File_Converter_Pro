@@ -76,13 +76,10 @@ class FileManagementMixin:
 
     _icon_cache: dict = {}
 
-    def add_files(self):
-        files, _ = QFileDialog.getOpenFileNames(
-            self,
-            self.translate_text("Sélectionner des fichiers"),
-            "",
-            self.translate_text(
-                "Tous les fichiers supportés ("
+    def _file_dialog_filter(self):
+        filters = (
+            (
+                "all_supported_files",
                 "*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.odt *.ods *.odp "
                 "*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif "
                 "*.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2 "
@@ -90,47 +87,66 @@ class FileManagementMixin:
                 "*.mp4 *.avi *.mkv *.webm *.mov "
                 "*.html *.htm *.epub *.rtf *.txt *.md *.markdown "
                 "*.csv *.json "
-                "*.zip *.rar *.tar *.gz);;"
-                "Documents (*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.odt *.ods *.odp *.rtf *.txt *.md *.markdown *.epub *.html *.htm);;"  # noqa: E501
-                "PDF Files (*.pdf);;"
-                "Word / RTF (*.docx *.doc *.rtf *.txt);;"
-                "PowerPoint (*.pptx *.ppt);;"
-                "Excel (*.xlsx *.xls);;"
-                "EPUB (*.epub);;"
-                "HTML (*.html *.htm);;"
-                "Markdown (*.md *.markdown);;"
-                "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif *.avif *.psd *.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2);;"  # noqa: E501
-                "Audio (*.mp3 *.wav *.aac *.flac *.ogg *.m4a);;"
-                "Vidéo (*.mp4 *.avi *.mkv *.webm *.mov);;"
-                "Données (*.csv *.json);;"
-                "Archives (*.zip *.rar *.tar *.gz);;"
-                "Tous les fichiers (*.*)"
+                "*.zip *.rar *.tar *.gz",
             ),
+            (
+                "documents",
+                "*.pdf *.docx *.doc *.pptx *.ppt *.xlsx *.xls *.odt *.ods *.odp *.rtf "
+                "*.txt *.md *.markdown *.epub *.html *.htm",
+            ),
+            ("pdf_files", "*.pdf"),
+            ("word_rtf_files", "*.docx *.doc *.rtf *.txt"),
+            ("pptx_powerpoint", "*.pptx *.ppt"),
+            ("xlsx_excel", "*.xlsx *.xls"),
+            ("epub_e_book", "*.epub"),
+            ("HTML", "*.html *.htm"),
+            ("markdown_files", "*.md *.markdown"),
+            (
+                "Images",
+                "*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.jfif *.avif *.psd "
+                "*.svg *.dng *.j2k *.jp2 *.jpx *.cr2 *.cr3 *.nef *.arw *.orf *.rw2",
+            ),
+            ("audio", "*.mp3 *.wav *.aac *.flac *.ogg *.m4a"),
+            ("video", "*.mp4 *.avi *.mkv *.webm *.mov"),
+            ("data_files", "*.csv *.json"),
+            ("Archives", "*.zip *.rar *.tar *.gz"),
+            ("all_files", "*.*"),
+        )
+        return ";;".join(
+            f"{self.translate_text(key)} ({patterns})" for key, patterns in filters
+        )
+
+    def add_files(self):
+        files, _ = QFileDialog.getOpenFileNames(
+            self,
+            self.translate_text("select_files"),
+            "",
+            self._file_dialog_filter(),
         )
         self.add_files_to_list(files)
 
     def add_folder(self):
         dialog = QDialog(self)
-        dialog.setWindowTitle(self.translate_text("Ajouter un dossier"))
+        dialog.setWindowTitle(self.translate_text("add_folder_2"))
         dialog.setMinimumWidth(400)
 
         layout = QVBoxLayout(dialog)
 
-        title_label = QLabel(self.translate_text("Comment voulez-vous ajouter le dossier ?"))
+        title_label = QLabel(self.translate_text("how_would_you_like_to_add_the_folder"))
         title_label.setStyleSheet("font-weight: bold; font-size: 14px; padding: 10px;")
         layout.addWidget(title_label)
 
-        option1_btn = QPushButton("📦 " + self.translate_text("Ajouter le dossier (pour compression)"))
+        option1_btn = QPushButton("📦 " + self.translate_text("add_folder_for_compression"))
         option1_btn.setMinimumHeight(45)
         _apply_dialog_btn(option1_btn, "BtnFolderAsItem")
-        option1_btn.setToolTip(self.translate_text("Ajoute le dossier en tant qu'élément unique pour la compression"))
+        option1_btn.setToolTip(self.translate_text("adds_the_folder_as_a_single_item_for_compression"))
 
-        option2_btn = QPushButton("📄 " + self.translate_text("Ajouter le contenu du dossier"))
+        option2_btn = QPushButton("📄 " + self.translate_text("add_folder_contents"))
         option2_btn.setMinimumHeight(45)
         _apply_dialog_btn(option2_btn, "BtnFolderContent")
-        option2_btn.setToolTip(self.translate_text("Ajoute tous les fichiers du dossier individuellement"))
+        option2_btn.setToolTip(self.translate_text("adds_all_files_from_the_folder_individually"))
 
-        cancel_btn = QPushButton(self.translate_text("Annuler"))
+        cancel_btn = QPushButton(self.translate_text("cancel"))
         cancel_btn.setMinimumHeight(35)
         _apply_dialog_btn(cancel_btn, "BtnCancelGlassy")
 
@@ -149,7 +165,7 @@ class FileManagementMixin:
         if dialog:
             dialog.accept()
 
-        folder = QFileDialog.getExistingDirectory(self, self.translate_text("Sélectionner un dossier à ajouter"))
+        folder = QFileDialog.getExistingDirectory(self, self.translate_text("select_a_folder_to_add"))
         if folder:
             self.files_list.append(folder)
 
@@ -212,7 +228,7 @@ class FileManagementMixin:
         if dialog:
             dialog.accept()
 
-        folder = QFileDialog.getExistingDirectory(self, self.translate_text("Sélectionner un dossier"))
+        folder = QFileDialog.getExistingDirectory(self, self.translate_text("select_a_folder"))
         if not folder:
             return
 
@@ -354,7 +370,7 @@ class FileManagementMixin:
         btn = QPushButton("👁")
         btn.setFixedSize(24, 22)
         btn.setCursor(Qt.PointingHandCursor)
-        btn.setToolTip(self.translate_text("Aperçu"))
+        btn.setToolTip(self.translate_text("preview"))
         btn.setStyleSheet("""
             QPushButton {
                 background: rgba(110,190,255,0.12);
@@ -400,8 +416,8 @@ class FileManagementMixin:
         if not selected_items:
             QMessageBox.warning(
                 self,
-                self.translate_text("Avertissement"),
-                self.translate_text("Veuillez sélectionner au moins un fichier à supprimer"),
+                self.translate_text("warning"),
+                self.translate_text("please_select_at_least_one_file_to_remove"),
             )
             return
 
@@ -427,7 +443,7 @@ class FileManagementMixin:
 
         if not valid_items:
             QMessageBox.warning(
-                self, self.translate_text("Avertissement"), self.translate_text("Aucun fichier valide sélectionné")
+                self, self.translate_text("warning"), self.translate_text("no_valid_file_selected")
             )
             return
 
@@ -543,7 +559,7 @@ class FileManagementMixin:
             self.files_list_widget.clear()
 
             self.update_file_counter()
-            self.status_bar.showMessage(self.translate_text("Liste de fichiers effacée"))
+            self.status_bar.showMessage(self.translate_text("file_list_cleared"))
             self.animate_clear_button()
 
     def update_file_order(self):
@@ -574,15 +590,15 @@ class FileManagementMixin:
         file_count = count - folder_count
 
         if count == 0:
-            self.file_counter.setText(self.translate_text("Aucun fichier sélectionné"))
+            self.file_counter.setText(self.translate_text("no_files_selected"))
         else:
             text = ""
             if folder_count > 0:
-                text += f"{folder_count} {self.translate_text('dossier(s)')}"
+                text += f"{folder_count} {self.translate_text('folders')}"
                 if file_count > 0:
-                    text += f", {file_count} {self.translate_text('fichier(s)')}"
+                    text += f", {file_count} {self.translate_text('files_2')}"
             else:
-                text = f"{file_count} {self.translate_text('fichier(s)')}"
+                text = f"{file_count} {self.translate_text('files_2')}"
 
             self.file_counter.setText(text)
 
@@ -599,7 +615,7 @@ class FileManagementMixin:
     def batch_rename(self):
         if not self.files_list:
             QMessageBox.warning(
-                self, self.translate_text("Avertissement"), self.translate_text("Aucun fichier sélectionné")
+                self, self.translate_text("warning"), self.translate_text("no_files_selected")
             )
             return
 

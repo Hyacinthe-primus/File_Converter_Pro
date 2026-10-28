@@ -27,11 +27,11 @@ class PdfOperationsMixin:
 
         if len(pdf_files) < 2:
             msg = (
-                self.translate_text("Veuillez sélectionner au moins 2 fichiers PDF")
+                self.translate_text("please_select_at_least_2_pdf_files")
                 if selected_items
-                else self.translate_text("La liste doit contenir au moins 2 fichiers PDF")
+                else self.translate_text("the_list_must_contain_at_least_2_pdf_files")
             )
-            QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
+            QMessageBox.warning(self, self.translate_text("warning"), msg)
             return
 
         dialog = MergeOrderDialog(pdf_files, ".pdf", parent=self, language=self.current_language)
@@ -44,7 +44,7 @@ class PdfOperationsMixin:
         if not output_file:
             return
 
-        self.show_progress(True, self.translate_text("Fusion PDF"))
+        self.show_progress(True, self.translate_text("pdf_merge"))
         start_time = datetime.now()
         total_size = sum(os.path.getsize(f) for f in ordered_files)
 
@@ -78,14 +78,14 @@ class PdfOperationsMixin:
                 self.system_notifier.send("merge_pdf")
             QMessageBox.information(
                 self,
-                self.translate_text("Succès"),
+                self.translate_text("success"),
                 self.translate_text("pdf_merge_success").format(
                     count=len(ordered_files), time=f"{conversion_time:.1f}"
                 ),
             )
         except Exception as e:
             self.show_progress(False)
-            QMessageBox.critical(self, self.translate_text("Erreur"),
+            QMessageBox.critical(self, self.translate_text("error"),
                                  self.translate_text("error_merge").format(error=str(e)))
 
     def merge_word_docs(self):
@@ -105,8 +105,8 @@ class PdfOperationsMixin:
             word_files = [f for f in self.files_list if f.lower().endswith(('.docx', '.doc'))]
 
         if len(word_files) < 2:
-            QMessageBox.warning(self, self.translate_text("Avertissement"),
-                                self.translate_text("Veuillez sélectionner au moins 2 fichiers Word"))
+            QMessageBox.warning(self, self.translate_text("warning"),
+                                self.translate_text("please_select_at_least_2_word_files"))
             return
 
         dialog = MergeOrderDialog(word_files, ".docx", parent=self, language=self.current_language)
@@ -119,7 +119,7 @@ class PdfOperationsMixin:
         if not output_file:
             return
 
-        self.show_progress(True, self.translate_text("Fusion Word"))
+        self.show_progress(True, self.translate_text("word_merge"))
         start_time = datetime.now()
         total_size = sum(os.path.getsize(f) for f in ordered_files)
 
@@ -148,14 +148,14 @@ class PdfOperationsMixin:
             self.record_config_usage("Fusion Word", {"merge_order": dialog.get_order_key()})
             QMessageBox.information(
                 self,
-                self.translate_text("Succès"),
+                self.translate_text("success"),
                 self.translate_text("word_merge_success").format(
                     count=len(word_files), time=f"{conversion_time:.1f}"
                 ),
             )
         except Exception as e:
             self.show_progress(False)
-            QMessageBox.critical(self, self.translate_text("Erreur"),
+            QMessageBox.critical(self, self.translate_text("error"),
                                  self.translate_text("error_merge").format(error=str(e)))
 
     def split_pdf(self):
@@ -172,8 +172,8 @@ class PdfOperationsMixin:
             pdf_files = [f for f in self.files_list if f.lower().endswith('.pdf')]
 
         if not pdf_files:
-            QMessageBox.warning(self, self.translate_text("Avertissement"),
-                                self.translate_text("Veuillez sélectionner au moins un fichier PDF"))
+            QMessageBox.warning(self, self.translate_text("warning"),
+                                self.translate_text("please_select_at_least_one_pdf_file"))
             return
 
         for pdf_file in pdf_files:
@@ -186,7 +186,7 @@ class PdfOperationsMixin:
             total_pages = len(pdf_document)
             pdf_document.close()
         except Exception as e:
-            QMessageBox.critical(self, self.translate_text("Erreur"), str(e))
+            QMessageBox.critical(self, self.translate_text("error"), str(e))
             return
 
         if dialog is None:
@@ -245,10 +245,10 @@ class PdfOperationsMixin:
             if not silent:
                 if self.config.get("enable_system_notifications", True):
                     self.system_notifier.send("split_pdf")
-                QMessageBox.information(self, self.translate_text("Succès"),
+                QMessageBox.information(self, self.translate_text("success"),
                                         self.translate_text("pdf_split_into_files").format(total_pages=success_count))
         except Exception as e:
-            QMessageBox.critical(self, self.translate_text("Erreur"),
+            QMessageBox.critical(self, self.translate_text("error"),
                                  self.translate_text("split_error").format(error=str(e)))
 
     def protect_pdf(self):
@@ -265,8 +265,8 @@ class PdfOperationsMixin:
             pdf_files = [f for f in self.files_list if f.lower().endswith('.pdf')]
 
         if not pdf_files:
-            QMessageBox.warning(self, self.translate_text("Avertissement"),
-                                self.translate_text("Veuillez sélectionner au moins un fichier PDF"))
+            QMessageBox.warning(self, self.translate_text("warning"),
+                                self.translate_text("please_select_at_least_one_pdf_file"))
             return
 
         from dialogs import PasswordDialog
@@ -276,15 +276,15 @@ class PdfOperationsMixin:
 
         password = dialog.get_password()
         if not password:
-            QMessageBox.warning(self, self.translate_text("Avertissement"),
-                                self.translate_text("Mot de passe requis"))
+            QMessageBox.warning(self, self.translate_text("warning"),
+                                self.translate_text("password_required"))
             return
 
         output_dir = self.get_output_directory()
         if not output_dir:
             return
 
-        self.show_progress(True, self.translate_text("Protection PDF"))
+        self.show_progress(True, self.translate_text("pdf_protection"))
         success_count = 0
 
         import fitz
@@ -304,7 +304,7 @@ class PdfOperationsMixin:
             self.achievement_system.record_pdf_protection(success_count, len(password))
         QMessageBox.information(
             self,
-            self.translate_text("Succès"),
+            self.translate_text("success"),
             self.translate_text("all_pdfs_protected").format(
                 success_count=success_count, total_time=0.0
             ),

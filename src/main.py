@@ -664,7 +664,7 @@ class WindowTransition:
 
         QTimer.singleShot(
             STATUSBAR_DELAY,
-            lambda: win.status_bar.showMessage(win.translate_text("Prêt - Sélectionnez des fichiers pour commencer")),
+            lambda: win.status_bar.showMessage(win.translate_text("ready_select_files_to_start")),
         )
 
         if self.dropped_files:

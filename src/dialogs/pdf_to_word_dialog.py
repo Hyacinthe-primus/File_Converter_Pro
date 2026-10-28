@@ -13,22 +13,22 @@ class PdfToWordDialog(TranslationMixin, QDialog):
         self.language = language
         self._tm = make_tm(language)
         self.current_mode = current_mode
-        self.setWindowTitle(self.translate_text("Options de conversion PDF vers Word"))
+        self.setWindowTitle(self.translate_text("pdf_to_word_conversion_options"))
         self.setModal(True)
         self.setup_ui()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
-        mode_group = QGroupBox(self.translate_text("Mode de conversion"))
+        mode_group = QGroupBox(self.translate_text("conversion_mode"))
         mode_layout = QVBoxLayout(mode_group)
 
         self.mode_group = QButtonGroup(self)
 
         self.with_images_radio = QRadioButton(
-            self.translate_text("Conserver les images et la mise en page (recommandé)")
+            self.translate_text("keep_images_and_layout_recommended")
         )
-        self.text_only_radio = QRadioButton(self.translate_text("Texte brut uniquement (plus rapide)"))
+        self.text_only_radio = QRadioButton(self.translate_text("text_only_faster"))
 
         self.mode_group.addButton(self.with_images_radio, 1)
         self.mode_group.addButton(self.text_only_radio, 2)

@@ -87,7 +87,7 @@ def iter_python_files():
 
 
 def translate_text_literals():
-    """All constant string literals passed to translate_text(...) in code."""
+    """All constant string literals passed to translation methods in code."""
     keys = set()
     for path in iter_python_files():
         with open(path, encoding="utf-8") as fh:
@@ -97,7 +97,7 @@ def translate_text_literals():
                 continue
         for node in ast.walk(tree):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-                if node.func.attr == "translate_text" and node.args:
+                if node.func.attr in {"translate_text", "tr_", "T"} and node.args:
                     arg = node.args[0]
                     if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                         keys.add(arg.value)
@@ -165,6 +165,23 @@ def all_styling_text():
 
 
 class TestTranslationConsistency:
+    def test_language_keys_are_identifiers(self):
+        for filename, keys in load_lang_keys().items():
+            invalid = sorted(k for k in keys if not re.fullmatch(r"[A-Za-z0-9_]+", k))
+            assert not invalid, f"{filename} has non-identifier keys: {invalid[:10]}"
+
+    def test_translation_literals_are_named_keys(self):
+        invalid = sorted(
+            k for k in translate_text_literals() if not re.fullmatch(r"[A-Za-z0-9_]+", k)
+        )
+        assert not invalid, f"hardcoded translation literals remain: {invalid[:10]}"
+
+    def test_language_keys_exist_in_en(self):
+        en = load_lang_keys()["languages/en.json"]
+        for filename, keys in load_lang_keys().items():
+            extra = sorted(keys - en)
+            assert not extra, f"{filename} has keys missing from en.json: {extra[:10]}"
+
     def test_fr_keys_present_in_all_language_files(self):
         fr = json.load(open(os.path.join(SRC, "languages/fr.json"), encoding="utf-8"))
         if isinstance(fr, dict) and isinstance(fr.get("strings"), dict):

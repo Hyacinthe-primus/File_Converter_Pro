@@ -66,7 +66,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self.parent_window = parent
         self.selected_template_id = None
 
-        self.setWindowTitle(self.translate_text("🎨 Gestionnaire de Templates"))
+        self.setWindowTitle(self.translate_text("template_manager"))
         self.setModal(False)
         self.setMinimumSize(1000, 700)
 
@@ -115,31 +115,31 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
     def create_from_current_settings(self):
         """Create a template from the current application settings"""
         dialog = QDialog(self)
-        dialog.setWindowTitle(self.translate_text("Créer un template à partir des paramètres actuels"))
+        dialog.setWindowTitle(self.translate_text("create_template_from_current_settings"))
         layout = QVBoxLayout(dialog)
 
-        layout.addWidget(QLabel(self.translate_text("Sélectionnez le type de template à créer:")))
+        layout.addWidget(QLabel(self.translate_text("select_the_type_of_template_to_create")))
 
         template_type_combo = QComboBox()
         template_type_combo.addItems(
             [
-                self.translate_text("Conversion PDF→Word"),
-                self.translate_text("Conversion Word→PDF"),
-                self.translate_text("Conversion Images→PDF"),
-                self.translate_text("Fusion PDF"),
-                self.translate_text("Fusion Word"),
-                self.translate_text("Division PDF"),
-                self.translate_text("Protection PDF"),
+                self.translate_text("pdf_to_word_conversion"),
+                self.translate_text("word_to_pdf_conversion"),
+                self.translate_text("images_to_pdf_conversion"),
+                self.translate_text("pdf_merge"),
+                self.translate_text("word_merge"),
+                self.translate_text("pdf_split"),
+                self.translate_text("pdf_protection"),
                 self.translate_text("Compression"),
-                self.translate_text("Optimisation de fichiers"),
+                self.translate_text("file_optimization"),
             ]
         )
         layout.addWidget(template_type_combo)
 
         name_layout = QHBoxLayout()
-        name_layout.addWidget(QLabel(self.translate_text("Nom du template:")))
+        name_layout.addWidget(QLabel(self.translate_text("template_name")))
         name_input = QLineEdit()
-        name_input.setPlaceholderText(self.translate_text("ex: Ma configuration habituelle"))
+        name_input.setPlaceholderText(self.translate_text("ex_my_usual_configuration"))
         name_layout.addWidget(name_input)
         layout.addLayout(name_layout)
 
@@ -159,7 +159,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
             if not name:
                 QMessageBox.warning(
-                    self, self.translate_text("Erreur"), self.translate_text("Veuillez entrer un nom pour le template.")
+                    self, self.translate_text("error"), self.translate_text("please_enter_a_name_for_the_template")
                 )
                 return
 
@@ -168,10 +168,10 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             )
 
             if config:
-                message = self.translate_text("Template '{name}' créé avec succès à partir des paramètres actuels!")
+                message = self.translate_text("template_successfully_created_from_current_settings")
                 message = message.replace("{name}", name)
 
-                QMessageBox.information(self, self.translate_text("Succès"), message)
+                QMessageBox.information(self, self.translate_text("success"), message)
                 self.load_templates()
 
     def setup_ui(self):
@@ -182,21 +182,21 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         toolbar = QToolBar()
         toolbar.setIconSize(QSize(24, 24))
 
-        self.create_template_action = QAction("➕ " + self.translate_text("Créer"), self)
+        self.create_template_action = QAction("➕ " + self.translate_text("create"), self)
         self.create_template_action.triggered.connect(self.create_new_template_dialog)
 
         self.create_from_current_action = QAction(
-            "📝 " + self.translate_text("Créer à partir des paramètres actuels"), self
+            "📝 " + self.translate_text("create_from_current_settings"), self
         )
         self.create_from_current_action.triggered.connect(self.create_from_current_settings)
 
-        self.import_action = QAction("📥 " + self.translate_text("Importer"), self)
+        self.import_action = QAction("📥 " + self.translate_text("import"), self)
         self.import_action.triggered.connect(self.import_templates)
 
-        self.export_action = QAction("📤 " + self.translate_text("Exporter"), self)
+        self.export_action = QAction("📤 " + self.translate_text("export"), self)
         self.export_action.triggered.connect(self.export_templates)
 
-        self.refresh_action = QAction("🔄 " + self.translate_text("Rafraîchir"), self)
+        self.refresh_action = QAction("🔄 " + self.translate_text("refresh"), self)
         self.refresh_action.triggered.connect(self.load_templates)
 
         toolbar.addAction(self.create_template_action)
@@ -210,29 +210,29 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         filter_layout = QHBoxLayout()
 
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText(self.translate_text("Rechercher un template..."))
+        self.search_input.setPlaceholderText(self.translate_text("search_for_a_template"))
         self.search_input.textChanged.connect(self.filter_templates)
 
         self.type_filter_combo = QComboBox()
         self.type_filter_combo.addItems(
             [
-                self.translate_text("Tous les types"),
-                self.translate_text("Conversion PDF→Word"),
-                self.translate_text("Conversion Word→PDF"),
-                self.translate_text("Conversion Images→PDF"),
-                self.translate_text("Fusion PDF"),
-                self.translate_text("Fusion Word"),
-                self.translate_text("Division PDF"),
-                self.translate_text("Protection PDF"),
+                self.translate_text("all_types"),
+                self.translate_text("pdf_to_word_conversion"),
+                self.translate_text("word_to_pdf_conversion"),
+                self.translate_text("images_to_pdf_conversion"),
+                self.translate_text("pdf_merge"),
+                self.translate_text("word_merge"),
+                self.translate_text("pdf_split"),
+                self.translate_text("pdf_protection"),
                 self.translate_text("Compression"),
-                self.translate_text("Optimisation de fichiers"),
+                self.translate_text("file_optimization"),
             ]
         )
         self.type_filter_combo.currentIndexChanged.connect(self.filter_templates)
 
-        filter_layout.addWidget(QLabel(self.translate_text("Recherche:")))
+        filter_layout.addWidget(QLabel(self.translate_text("search")))
         filter_layout.addWidget(self.search_input, 2)
-        filter_layout.addWidget(QLabel(self.translate_text("Type:")))
+        filter_layout.addWidget(QLabel(self.translate_text("type")))
         filter_layout.addWidget(self.type_filter_combo, 1)
 
         main_layout.addLayout(filter_layout)
@@ -262,7 +262,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self._header_icon_label.hide()
         self._header_row_layout.addWidget(self._header_icon_label, 0, Qt.AlignVCenter)
 
-        self.details_header = QLabel(self.translate_text("Sélectionnez un template pour voir ses détails"))
+        self.details_header = QLabel(self.translate_text("select_a_template_to_see_its_details"))
         self.details_header.setObjectName("TemplateDetailsHeader")
         self._header_row_layout.addWidget(self.details_header, 0, Qt.AlignVCenter)
         self._header_row_layout.addStretch()
@@ -280,17 +280,17 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self.details_buttons = QWidget()
         self.details_buttons_layout = QHBoxLayout(self.details_buttons)
 
-        self.apply_btn = QPushButton("🚀 " + self.translate_text("Appliquer ce template"))
+        self.apply_btn = QPushButton("🚀 " + self.translate_text("apply_this_template"))
         self.apply_btn.setObjectName("TemplateApplyBtn")
         self.apply_btn.clicked.connect(self.apply_selected_template)
         self.apply_btn.setEnabled(False)
 
-        self.edit_btn = QPushButton("✏️ " + self.translate_text("Modifier"))
+        self.edit_btn = QPushButton("✏️ " + self.translate_text("edit_2"))
         self.edit_btn.setObjectName("TemplateEditBtn")
         self.edit_btn.clicked.connect(self.edit_selected_template)
         self.edit_btn.setEnabled(False)
 
-        self.delete_btn = QPushButton("🗑️ " + self.translate_text("Supprimer"))
+        self.delete_btn = QPushButton("🗑️ " + self.translate_text("remove"))
         self.delete_btn.setObjectName("TemplateDeleteBtn")
         self.delete_btn.clicked.connect(self.delete_selected_template)
         self.delete_btn.setEnabled(False)
@@ -310,7 +310,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
         button_layout = QHBoxLayout()
 
-        self.close_btn = QPushButton(self.translate_text("Fermer"))
+        self.close_btn = QPushButton(self.translate_text("close"))
         self.close_btn.setObjectName("TemplateCloseBtn")
         self.close_btn.clicked.connect(self.close)
 
@@ -346,7 +346,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         filter_type = self.type_filter_combo.currentText()
 
         for template_id, template in self.template_manager.current_templates.items():
-            if filter_type != self.translate_text("Tous les types") and template["type"] != filter_type:
+            if filter_type != self.translate_text("all_types") and template["type"] != filter_type:
                 continue
 
             is_default = template["config"].get("is_default", False)
@@ -358,17 +358,17 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             item.setData(Qt.UserRole, template_id)
 
             tooltip = f"{template['type']}\n"
-            tooltip += f"{self.translate_text('Créé le:')} {template['created_at']}\n"
+            tooltip += f"{self.translate_text('created_on')} {template['created_at']}\n"
             if template["last_used"]:
-                tooltip += f"{self.translate_text('Dernière utilisation:')} {template['last_used']}"
+                tooltip += f"{self.translate_text('last_used')} {template['last_used']}"
             else:
-                tooltip += self.translate_text("Jamais utilisé")
+                tooltip += self.translate_text("never_used")
 
             item.setToolTip(tooltip)
             self.templates_list.addItem(item)
 
         if self.templates_list.count() == 0:
-            item = QListWidgetItem(self.translate_text("Aucun template disponible"))
+            item = QListWidgetItem(self.translate_text("no_templates_available"))
             item.setFlags(Qt.NoItemFlags)
             item.setForeground(QColor(150, 150, 150))
             self.templates_list.addItem(item)
@@ -389,7 +389,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
             show_item = True
 
-            if filter_type != self.translate_text("Tous les types") and template["type"] != filter_type:
+            if filter_type != self.translate_text("all_types") and template["type"] != filter_type:
                 show_item = False
 
             if search_text:
@@ -412,7 +412,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
         selected_items = self.templates_list.selectedItems()
         if not selected_items:
-            self.details_header.setText(self.translate_text("Sélectionnez un template pour voir ses détails"))
+            self.details_header.setText(self.translate_text("select_a_template_to_see_its_details"))
             self.apply_btn.setEnabled(False)
             self.edit_btn.setEnabled(False)
             self.delete_btn.setEnabled(False)
@@ -439,9 +439,9 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             self._header_icon_label.hide()
 
         self._default_btn = QPushButton(
-            self.translate_text("✅ Template par défaut — Retirer")
+            self.translate_text("default_template_remove")
             if is_default
-            else self.translate_text("⭐ Définir comme template par défaut")
+            else self.translate_text("set_as_default_template_2")
         )
         _dark_d = hasattr(self.parent_window, "dark_mode") and self.parent_window.dark_mode
         if is_default:
@@ -467,14 +467,14 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self._default_btn.clicked.connect(lambda: self._toggle_default(template_id, template["type"]))
         self.details_content_layout.addWidget(self._default_btn)
 
-        info_group = QGroupBox(self.translate_text("Informations générales"))
+        info_group = QGroupBox(self.translate_text("general_information"))
         info_layout = QFormLayout(info_group)
 
-        info_layout.addRow(self.translate_text("Type:"), QLabel(template["type"]))
-        info_layout.addRow(self.translate_text("Créé le:"), QLabel(template["created_at"]))
+        info_layout.addRow(self.translate_text("type"), QLabel(template["type"]))
+        info_layout.addRow(self.translate_text("created_on"), QLabel(template["created_at"]))
 
-        last_used = template["last_used"] if template["last_used"] else self.translate_text("Jamais")
-        info_layout.addRow(self.translate_text("Dernière utilisation:"), QLabel(last_used))
+        last_used = template["last_used"] if template["last_used"] else self.translate_text("never")
+        info_layout.addRow(self.translate_text("last_used"), QLabel(last_used))
 
         self.details_content_layout.addWidget(info_group)
 
@@ -521,9 +521,9 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
         t = TemplateManager.normalize_type(template_type)
 
-        oui = self.translate_text("Oui")
-        non = self.translate_text("Non")
-        ns = self.translate_text("Non spécifié")
+        oui = self.translate_text("yes")
+        non = self.translate_text("no")
+        ns = self.translate_text("not_specified")
 
         def tv(val, fallback=None):
             if val is None:
@@ -534,58 +534,58 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         def translate_name_template(tpl):
             if not tpl:
                 return tpl
-            return tpl.replace("{heure}", self.translate_text("{heure}"))
+            return tpl.replace("{heure}", self.translate_text("text_2"))
 
         if t == "Conversion PDF→Word":
             return f"""
             <div style="{style}">
-            📋 <b>{self.translate_text("Mode de conversion:")}</b> {tv(config.get("mode"))}
+            📋 <b>{self.translate_text("conversion_mode_2")}</b> {tv(config.get("mode"))}
             </div>
             """
         elif t == "Conversion Word→PDF":
             return f"""
             <div style="{style}">
-            🔄 <b>{self.translate_text("Mode de conversion:")}</b> {tv(config.get("mode"))}<br>
-            🎨 <b>{self.translate_text("Qualité d'image:")}</b> {tv(config.get("quality"))}<br>
-            📝 <b>{self.translate_text("Inclure métadonnées:")}</b> {oui if config.get("include_metadata", False) else non}<br>
-            🗜️ <b>{self.translate_text("Compresser le PDF:")}</b> {oui if config.get("compress_images", False) else non}
+            🔄 <b>{self.translate_text("conversion_mode_2")}</b> {tv(config.get("mode"))}<br>
+            🎨 <b>{self.translate_text("image_quality")}</b> {tv(config.get("quality"))}<br>
+            📝 <b>{self.translate_text("include_metadata_2")}</b> {oui if config.get("include_metadata", False) else non}<br>
+            🗜️ <b>{self.translate_text("compress_pdf_2")}</b> {oui if config.get("compress_images", False) else non}
             </div>
             """
         elif t == "Conversion Images→PDF":
             separate = config.get("separate", False)
             return f"""
             <div style="{style}">
-            📄 <b>{self.translate_text("Mode:")}</b> {self.translate_text("Un PDF par image") if separate else self.translate_text("Fusionner en un seul PDF")}
+            📄 <b>{self.translate_text("mode")}</b> {self.translate_text("one_pdf_per_image") if separate else self.translate_text("merge_into_a_single_pdf")}
             </div>
             """
         elif t == "Fusion PDF":
             return f"""
             <div style="{style}">
-            🔢 <b>{self.translate_text("Ordre de fusion:")}</b> {tv(config.get("merge_order"))}<br>
-            📄 <b>{self.translate_text("Template de nom:")}</b> {translate_name_template(config.get("name_template", ns))}
+            🔢 <b>{self.translate_text("merge_order_2")}</b> {tv(config.get("merge_order"))}<br>
+            📄 <b>{self.translate_text("filename_template_2")}</b> {translate_name_template(config.get("name_template", ns))}
             </div>
             """
         elif t == "Fusion Word":
             return f"""
             <div style="{style}">
-            🔢 <b>{self.translate_text("Ordre de fusion:")}</b> {tv(config.get("merge_order"))}<br>
-            📄 <b>{self.translate_text("Template de nom:")}</b> {translate_name_template(config.get("name_template", ns))}
+            🔢 <b>{self.translate_text("merge_order_2")}</b> {tv(config.get("merge_order"))}<br>
+            📄 <b>{self.translate_text("filename_template_2")}</b> {translate_name_template(config.get("name_template", ns))}
             </div>
             """
         elif t == "Division PDF":
             return f"""
             <div style="{style}">
-            ✂️ <b>{self.translate_text("Méthode de division:")}</b> {tv(config.get("split_method"))}<br>
-            📄 <b>{self.translate_text("Pages par fichier:")}</b> {config.get("pages_per_file", 1)}
+            ✂️ <b>{self.translate_text("split_method")}</b> {tv(config.get("split_method"))}<br>
+            📄 <b>{self.translate_text("pages_per_file")}</b> {config.get("pages_per_file", 1)}
             </div>
             """
         elif t == "Protection PDF":
             return f"""
             <div style="{style}">
-            🔒 <b>{self.translate_text("Mode:")}</b> {tv(config.get("mode"))}<br>
-            🖨️ <b>{self.translate_text("Autoriser l'impression:")}</b> {oui if config.get("allow_printing", True) else non}<br>
-            📋 <b>{self.translate_text("Autoriser la copie de texte:")}</b> {oui if config.get("allow_copying", True) else non}<br>
-            ✏️ <b>{self.translate_text("Autoriser les modifications:")}</b> {oui if config.get("allow_modifications", False) else non}
+            🔒 <b>{self.translate_text("mode")}</b> {tv(config.get("mode"))}<br>
+            🖨️ <b>{self.translate_text("allow_printing_2")}</b> {oui if config.get("allow_printing", True) else non}<br>
+            📋 <b>{self.translate_text("allow_text_copying")}</b> {oui if config.get("allow_copying", True) else non}<br>
+            ✏️ <b>{self.translate_text("allow_modifications_2")}</b> {oui if config.get("allow_modifications", False) else non}
             </div>
             """
         elif t == "Compression":
@@ -594,12 +594,12 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             split_size = config.get("split_size", 0)
             return f"""
             <div style="{style}">
-            📦 <b>{self.translate_text("Format d'archive:")}</b> {tv(config.get("format"))}<br>
-            🗜️ <b>{self.translate_text("Niveau de compression:")}</b> {tv(config.get("compression_level"))}<br>
-            🔒 <b>{self.translate_text("Protéger par mot de passe:")}</b> {oui if encrypt else non}<br>
-            🗑️ <b>{self.translate_text("Supprimer les originaux:")}</b> {oui if delete_orig else non}<br>
-            📂 <b>{self.translate_text("Fractionnement:")}</b> {oui if split_size > 0 else non}<br>
-            📏 <b>{self.translate_text("Taille par partie:")}</b> {split_size} Mo
+            📦 <b>{self.translate_text("archive_format")}</b> {tv(config.get("format"))}<br>
+            🗜️ <b>{self.translate_text("compression_level")}</b> {tv(config.get("compression_level"))}<br>
+            🔒 <b>{self.translate_text("protect_with_password")}</b> {oui if encrypt else non}<br>
+            🗑️ <b>{self.translate_text("delete_original_files_after_compression")}</b> {oui if delete_orig else non}<br>
+            📂 <b>{self.translate_text("splitting")}</b> {oui if split_size > 0 else non}<br>
+            📏 <b>{self.translate_text("part_size")}</b> {split_size} Mo
             </div>
             """
         elif t == "Optimisation de fichiers":
@@ -607,11 +607,11 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             _ql_labels = {0: "I — Haute qualité", 1: "II — Équilibré", 2: "III — Maximum"}
             return f"""
             <div style="{style}">
-            🗜️ <b>{self.translate_text("Mode d'optimisation:")}</b> {_mode_labels.get(config.get("optimization_type", 2), "—")}<br>
-            📊 <b>{self.translate_text("Niveau de compression:")}</b> {_ql_labels.get(config.get("quality_level", 1), "—")}<br>
-            🗑️ <b>{self.translate_text("Supprimer métadonnées:")}</b> {"✓" if config.get("remove_metadata", True) else "✗"}<br>
-            🖼️ <b>{self.translate_text("Recompresser images:")}</b> {"✓" if config.get("compress_images", True) else "✗"}<br>
-            💾 <b>{self.translate_text("Garder copie originaux:")}</b> {"✓" if config.get("keep_backup", True) else "✗"}
+            🗜️ <b>{self.translate_text("optimization_mode")}</b> {_mode_labels.get(config.get("optimization_type", 2), "—")}<br>
+            📊 <b>{self.translate_text("compression_level")}</b> {_ql_labels.get(config.get("quality_level", 1), "—")}<br>
+            🗑️ <b>{self.translate_text("remove_personal_metadata")}</b> {"✓" if config.get("remove_metadata", True) else "✗"}<br>
+            🖼️ <b>{self.translate_text("recompress_embedded_images")}</b> {"✓" if config.get("compress_images", True) else "✗"}<br>
+            💾 <b>{self.translate_text("keep_a_copy_of_the_originals")}</b> {"✓" if config.get("keep_backup", True) else "✗"}
             </div>
             """
         else:
@@ -631,10 +631,10 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
         menu = QMenu()
 
-        apply_action = menu.addAction("🚀 " + self.translate_text("Appliquer"))
-        duplicate_action = menu.addAction("📋 " + self.translate_text("Dupliquer"))
-        export_single_action = menu.addAction("💾 " + self.translate_text("Exporter ce template"))
-        delete_action = menu.addAction("🗑️ " + self.translate_text("Supprimer"))
+        apply_action = menu.addAction("🚀 " + self.translate_text("apply"))
+        duplicate_action = menu.addAction("📋 " + self.translate_text("duplicate"))
+        export_single_action = menu.addAction("💾 " + self.translate_text("export_this_template"))
+        delete_action = menu.addAction("🗑️ " + self.translate_text("remove"))
 
         action = menu.exec(self.templates_list.mapToGlobal(position))
 
@@ -656,7 +656,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         """Apply the template and immediately launch the corresponding operation."""
         template = self.template_manager.get_template_by_id(template_id)
         if not template:
-            QMessageBox.warning(self, self.translate_text("Erreur"), self.translate_text("Template introuvable."))
+            QMessageBox.warning(self, self.translate_text("error"), self.translate_text("template_not_found"))
             return
 
         t_type = template["type"]
@@ -666,7 +666,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         success = self.template_manager.apply_template(template_id, self.parent_window)
         if not success:
             QMessageBox.warning(
-                self, self.translate_text("Erreur"), self.translate_text("Erreur lors de l'application du template.")
+                self, self.translate_text("error"), self.translate_text("error_applying_template")
             )
             return
 
@@ -681,16 +681,15 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 pass
         if compatible:
             msg = self.translate_text(
-                "{n} fichier(s) compatible(s) trouvé(s) dans la liste.\n"
-                "Appliquer sur ces fichiers ou en sélectionner d'autres ?"
+                "compatible_files_found_in_the_list_apply_to_these_files_or_selec"
             ).format(n=len(compatible))
         else:
             msg = self.translate_text(
-                "Aucun fichier compatible dans la liste.\nVoulez-vous sélectionner des fichiers ?"
+                "no_compatible_files_in_the_list_do_you_want_to_select_files"
             )
 
         dialog = QDialog(self)
-        dialog.setWindowTitle(self.translate_text("Appliquer le template"))
+        dialog.setWindowTitle(self.translate_text("apply_template"))
         dialog.setMinimumWidth(380)
         lay = QVBoxLayout(dialog)
 
@@ -745,7 +744,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             )
         )
         if compatible:
-            btn_current = QPushButton("▶  " + self.translate_text("Fichiers actuels ({n})").format(n=len(compatible)))
+            btn_current = QPushButton("▶  " + self.translate_text("current_files").format(n=len(compatible)))
             btn_current.setMinimumHeight(36)
             btn_current.setStyleSheet(_ss_green)
 
@@ -757,14 +756,14 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             btn_current.clicked.connect(_use_current)
             btn_row.addWidget(btn_current)
 
-        btn_select = QPushButton("📁  " + self.translate_text("Sélectionner des fichiers"))
+        btn_select = QPushButton("📁  " + self.translate_text("select_files"))
         btn_select.setMinimumHeight(36)
         btn_select.setStyleSheet(_ss_blue)
 
         def _select():
             dialog.accept()
             files, _ = QFileDialog.getOpenFileNames(
-                self, self.translate_text("Sélectionner des fichiers"), "", ext_filter
+                self, self.translate_text("select_files"), "", ext_filter
             )
             if files:
                 pw.add_files_to_list(files)
@@ -774,7 +773,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         btn_select.clicked.connect(_select)
         btn_row.addWidget(btn_select)
 
-        btn_cancel = QPushButton(self.translate_text("Annuler"))
+        btn_cancel = QPushButton(self.translate_text("cancel"))
         btn_cancel.setMinimumHeight(36)
         btn_cancel.setStyleSheet(_ss_grey)
         btn_cancel.clicked.connect(dialog.reject)
@@ -788,13 +787,13 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         pw = self.parent_window
         tr = self.translate_text
         ops = {
-            tr("Conversion PDF→Word"): pw.convert_pdf_to_word,
-            tr("Conversion Word→PDF"): pw.convert_word_to_pdf,
-            tr("Conversion Images→PDF"): pw.convert_images_to_pdf,
-            tr("Fusion PDF"): pw.merge_pdfs,
-            tr("Fusion Word"): pw.merge_word_docs,
-            tr("Division PDF"): pw.split_pdf,
-            tr("Protection PDF"): pw.protect_pdf,
+            tr("pdf_to_word_conversion"): pw.convert_pdf_to_word,
+            tr("word_to_pdf_conversion"): pw.convert_word_to_pdf,
+            tr("images_to_pdf_conversion"): pw.convert_images_to_pdf,
+            tr("pdf_merge"): pw.merge_pdfs,
+            tr("word_merge"): pw.merge_word_docs,
+            tr("pdf_split"): pw.split_pdf,
+            tr("pdf_protection"): pw.protect_pdf,
             tr("Compression"): pw.compress_files,
         }
         op = ops.get(template_type)
@@ -807,9 +806,9 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             return []
 
         file_extensions = {
-            self.translate_text("Conversion PDF→Word"): [".pdf"],
-            self.translate_text("Conversion Word→PDF"): [".docx", ".doc", ".odt"],
-            self.translate_text("Conversion Images→PDF"): [
+            self.translate_text("pdf_to_word_conversion"): [".pdf"],
+            self.translate_text("word_to_pdf_conversion"): [".docx", ".doc", ".odt"],
+            self.translate_text("images_to_pdf_conversion"): [
                 ".png",
                 ".jpeg",
                 ".jpg",
@@ -836,10 +835,10 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 ".raf",
                 ".jfif",
             ],
-            self.translate_text("Fusion PDF"): [".pdf"],
-            self.translate_text("Fusion Word"): [".docx", ".doc", ".odt"],
-            self.translate_text("Division PDF"): [".pdf"],
-            self.translate_text("Protection PDF"): [".pdf"],
+            self.translate_text("pdf_merge"): [".pdf"],
+            self.translate_text("word_merge"): [".docx", ".doc", ".odt"],
+            self.translate_text("pdf_split"): [".pdf"],
+            self.translate_text("pdf_protection"): [".pdf"],
             self.translate_text("Compression"): [".*"],
         }
 
@@ -858,19 +857,19 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
     def get_file_extensions_for_template(self, template_type):
         """Return file extensions for a given template type"""
-        if template_type == self.translate_text("Conversion PDF→Word"):
+        if template_type == self.translate_text("pdf_to_word_conversion"):
             return "Fichiers PDF (*.pdf)"
-        elif template_type == self.translate_text("Conversion Word→PDF"):
+        elif template_type == self.translate_text("word_to_pdf_conversion"):
             return "Fichiers Word (*.docx *.doc)"
-        elif template_type == self.translate_text("Conversion Images→PDF"):
+        elif template_type == self.translate_text("images_to_pdf_conversion"):
             return "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.psd *.svg *.dng)"
-        elif template_type == self.translate_text("Fusion PDF"):
+        elif template_type == self.translate_text("pdf_merge"):
             return "Fichiers PDF (*.pdf)"
-        elif template_type == self.translate_text("Fusion Word"):
+        elif template_type == self.translate_text("word_merge"):
             return "Fichiers Word (*.docx *.doc)"
-        elif template_type == self.translate_text("Division PDF"):
+        elif template_type == self.translate_text("pdf_split"):
             return "Fichiers PDF (*.pdf)"
-        elif template_type == self.translate_text("Protection PDF"):
+        elif template_type == self.translate_text("pdf_protection"):
             return "Fichiers PDF (*.pdf)"
         elif template_type == self.translate_text("Compression"):
             return "Tous les fichiers (*.*)"
@@ -880,8 +879,8 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
     def duplicate_template(self, template_id, template):
         """Duplicate a template"""
         dialog = QInputDialog(self)
-        dialog.setWindowTitle(self.translate_text("Dupliquer le template"))
-        dialog.setLabelText(self.translate_text("Nouveau nom pour le template:"))
+        dialog.setWindowTitle(self.translate_text("duplicate_template"))
+        dialog.setLabelText(self.translate_text("new_name_for_the_template"))
         dialog.setTextValue(f"{template['name']} - Copie")
 
         if dialog.exec() == QDialog.Accepted:
@@ -890,7 +889,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 self.template_manager.db_manager.save_template(new_name, template["type"], template["config"])
 
                 QMessageBox.information(
-                    self, self.translate_text("Succès"), self.translate_text("Template dupliqué avec succès!")
+                    self, self.translate_text("success"), self.translate_text("template_duplicated_successfully")
                 )
 
                 self.load_templates()
@@ -898,7 +897,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
     def export_single_template(self, template_id, template):
         """Export a single template"""
         filepath, _ = QFileDialog.getSaveFileName(
-            self, self.translate_text("Exporter le template"), f"{template['name']}.json", "JSON (*.json)"
+            self, self.translate_text("export_template"), f"{template['name']}.json", "JSON (*.json)"
         )
 
         if filepath:
@@ -920,7 +919,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                     pass
 
             QMessageBox.information(
-                self, self.translate_text("Succès"), self.translate_text(f"Template exporté vers {filepath}")
+                self, self.translate_text("success"), self.translate_text(f"Template exporté vers {filepath}")
             )
 
     def edit_selected_template(self):
@@ -954,7 +953,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 self.load_templates()
 
                 QMessageBox.information(
-                    self, self.translate_text("Succès"), self.translate_text("Template modifié avec succès!")
+                    self, self.translate_text("success"), self.translate_text("template_modified_successfully")
                 )
 
                 ach = self._ach()
@@ -969,7 +968,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             except Exception as e:
                 QMessageBox.critical(
                     self,
-                    self.translate_text("Erreur"),
+                    self.translate_text("error"),
                     self.translate_text(f"Erreur lors de la modification: {str(e)}"),
                 )
 
@@ -998,7 +997,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             name = template["name"] if template else "?"
             msg = self.translate_text("template_deleted").format(name)
         else:
-            msg = self.translate_text("Voulez-vous vraiment supprimer {n} templates ?").format(n=count)
+            msg = self.translate_text("do_you_really_want_to_delete_templates").format(n=count)
 
         msg_box = QMessageBox(self)
         msg_box.setWindowTitle(self.translate_text("Confirmation"))
@@ -1054,7 +1053,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
     def import_templates(self):
         """Import templates from a file"""
         filepath, _ = QFileDialog.getOpenFileName(
-            self, self.translate_text("Importer des templates"), "", "JSON (*.json)"
+            self, self.translate_text("import_templates"), "", "JSON (*.json)"
         )
 
         if filepath:
@@ -1069,7 +1068,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                         pass
                 QMessageBox.information(
                     self,
-                    self.translate_text("Succès"),
+                    self.translate_text("success"),
                     self.translate_text(f"{imported_count} template(s) importé(s) avec succès!"),
                 )
                 self.load_templates()
@@ -1077,13 +1076,13 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 QMessageBox.warning(
                     self,
                     self.translate_text("Information"),
-                    self.translate_text("Aucun nouveau template importé (déjà existant ou fichier vide)."),
+                    self.translate_text("no_new_templates_imported_already_exists_or_empty_file"),
                 )
 
     def export_templates(self):
         """Export all templates"""
         filepath, _ = QFileDialog.getSaveFileName(
-            self, self.translate_text("Exporter tous les templates"), "templates_backup.json", "JSON (*.json)"
+            self, self.translate_text("export_all_templates"), "templates_backup.json", "JSON (*.json)"
         )
 
         if filepath:
@@ -1096,7 +1095,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                     pass
             QMessageBox.information(
                 self,
-                self.translate_text("Succès"),
+                self.translate_text("success"),
                 self.translate_text(f"{exported_count} template(s) exporté(s) vers {filepath}"),
             )
 

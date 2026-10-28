@@ -1156,7 +1156,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         else:
             DS.use_light()
 
-        self.setWindowTitle(self.T("🏆 Succès & Trophées"))
+        self.setWindowTitle(self.T("achievements_trophies"))
         self.setMinimumSize(920, 720)
         self.resize(980, 760)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -1322,7 +1322,7 @@ class AchievementsUI(TranslationMixin, QDialog):
             f"<span style='font-size:22px; font-weight:bold; color:{DS.TEXT_PRIMARY}'>"
             f"{unlocked}</span>"
             f"<span style='font-size:14px; color:{DS.TEXT_SECONDARY}'>"
-            f" / {total}  {self.T('Succès débloqués')}</span>"
+            f" / {total}  {self.T('achievements_unlocked')}</span>"
         )
 
     def _refresh_header(self):
@@ -1384,9 +1384,9 @@ class AchievementsUI(TranslationMixin, QDialog):
 
         self._nav_pills = []
         nav_labels = [
-            self.T("Vue d'ensemble"),
-            self.T("Liste des succès"),
-            self.T("Statistiques"),
+            self.T("overview"),
+            self.T("achievements_3"),
+            self.T("statistics"),
         ]
         for i, lbl in enumerate(nav_labels):
             pill = NavPill(lbl)
@@ -1428,7 +1428,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         lay = QHBoxLayout(w)
         lay.setContentsMargins(DS.PAD, DS.PAD_S, DS.PAD, DS.PAD_S)
 
-        title = QLabel(self.T("🏆 Succès & Trophées"))
+        title = QLabel(self.T("achievements_trophies"))
         title.setStyleSheet(f"""
             font-size: 20px; font-weight: bold;
             color: {DS.GOLD};
@@ -1445,7 +1445,7 @@ class AchievementsUI(TranslationMixin, QDialog):
 
         self._header_chips = []
         for chip_text, chip_color in [
-            (f"{unlocked}/{total}  {self.T('Succès débloqués')}", DS.GREEN),
+            (f"{unlocked}/{total}  {self.T('achievements_unlocked')}", DS.GREEN),
             (f"{xp}  {self.T('XP')}", DS.GOLD),
         ]:
             chip = QLabel(chip_text)
@@ -1469,7 +1469,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addStretch()
 
-        btn = QPushButton(self.T("Fermer"))
+        btn = QPushButton(self.T("close"))
         btn.setFixedSize(110, 36)
         btn.setCursor(Qt.PointingHandCursor)
         btn.setStyleSheet(f"""
@@ -1536,7 +1536,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         icon_path = self.achievement_system.get_achievement_icon_path(f"{rank_key}.png")
 
         rank_row = QHBoxLayout()
-        rank_lbl = QLabel(f"{self.T('Rang')}:")
+        rank_lbl = QLabel(f"{self.T('rank')}:")
         rank_lbl.setStyleSheet(f"color:{DS.TEXT_SECONDARY}; font-size:11px; background:transparent;")
         rank_row.addWidget(rank_lbl)
 
@@ -1550,12 +1550,12 @@ class AchievementsUI(TranslationMixin, QDialog):
         lay.addLayout(top_row)
 
         # Category tree
-        cat_group = QGroupBox(self.T("Catégories").upper())
+        cat_group = QGroupBox(self.T("categories").upper())
         cat_lay = QVBoxLayout(cat_group)
         cat_lay.setContentsMargins(DS.PAD_S, DS.PAD_S, DS.PAD_S, DS.PAD_S)
 
         self._category_tree = QTreeWidget()
-        self._category_tree.setHeaderLabels([self.T("Catégorie"), self.T("Progression")])
+        self._category_tree.setHeaderLabels([self.T("category"), self.T("progress")])
         self._category_tree.setColumnWidth(0, 200)
         self._category_tree.setAlternatingRowColors(True)
         self._category_tree.setRootIsDecorated(False)
@@ -1581,7 +1581,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         self._cards_layout.setSpacing(10)
         self._cards_layout.setContentsMargins(2, 2, 2, 2)
 
-        self._skeleton_lbl = QLabel(f"⏳  {self.T('Chargement des succès...')}")
+        self._skeleton_lbl = QLabel(f"⏳  {self.T('loading_achievements')}")
         self._skeleton_lbl.setAlignment(Qt.AlignCenter)
         self._skeleton_lbl.setStyleSheet(f"color: {DS.TEXT_MUTED}; font-size: 14px; padding: 40px;")
         self._cards_layout.addWidget(self._skeleton_lbl, 0, 0, 1, 2)
@@ -1605,25 +1605,25 @@ class AchievementsUI(TranslationMixin, QDialog):
         lay.setSpacing(8)
 
         self.category_filter = QComboBox()
-        self.category_filter.addItem(self.T("Toutes les catégories"))
+        self.category_filter.addItem(self.T("all"))
         self.category_filter.currentIndexChanged.connect(self.filter_achievements)
 
         self.tier_filter = QComboBox()
-        self.tier_filter.addItem(self.T("Tous les tiers"))
+        self.tier_filter.addItem(self.T("all_2"))
         self.tier_filter.currentIndexChanged.connect(self.filter_achievements)
 
         self.status_filter = QComboBox()
-        self.status_filter.addItem(self.T("Tous les statuts"), "all")
-        self.status_filter.addItem(self.T("✅ Débloqués"), "unlocked")
-        self.status_filter.addItem(self.T("🔒 Verrouillés"), "locked")
+        self.status_filter.addItem(self.T("all_3"), "all")
+        self.status_filter.addItem(self.T("unlocked_2"), "unlocked")
+        self.status_filter.addItem(self.T("locked_2"), "locked")
         self.status_filter.currentIndexChanged.connect(self.filter_achievements)
 
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText(self.T("Rechercher"))
+        self.search_input.setPlaceholderText(self.T("search_2"))
         self.search_input.setFixedWidth(180)
         self.search_input.textChanged.connect(self.filter_achievements)
 
-        self.show_secrets_check = QPushButton(self.T("Afficher les secrets"))
+        self.show_secrets_check = QPushButton(self.T("secrets"))
         self.show_secrets_check.setCheckable(True)
         self.show_secrets_check.setFixedHeight(28)
         self._update_secrets_btn_style()
@@ -1675,7 +1675,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         inn_lay.setContentsMargins(DS.PAD_S, DS.PAD_S, DS.PAD_S, DS.PAD_S)
         inn_lay.setSpacing(4)
 
-        group = QGroupBox(self.T("Statistiques détaillées").upper())
+        group = QGroupBox(self.T("detailed_statistics").upper())
         g_lay = QVBoxLayout(group)
         g_lay.setSpacing(2)
         g_lay.setContentsMargins(DS.PAD, DS.PAD, DS.PAD, DS.PAD)
@@ -1683,17 +1683,17 @@ class AchievementsUI(TranslationMixin, QDialog):
         stats = self.achievement_system.stats
 
         self._stat_defs = [
-            (self.T("Conversions totales"), "total_conversions", DS.BLUE),
-            (self.T("Images converties en PDF"), "images_to_pdf", DS.PURPLE),
-            (self.T("Conversions Word/PDF"), "word_pdf_conversions", DS.GOLD),
-            (self.T("PDF protégés"), "pdf_protected", DS.GREEN),
-            (self.T("Archives créées"), "archives_created", "#FF9F43"),
-            (self.T("Aperçus utilisés"), "previews_used", DS.BLUE),
-            (self.T("Minutes mode sombre"), "dark_mode_minutes", "#6C8EBF"),
-            (self.T("Pages OCR"), "ocr_pages", DS.PURPLE),
-            (self.T("Go compressés"), "compressed_gb", DS.GREEN),
-            (self.T("Succès consécutifs"), "consecutive_success", DS.GOLD),
-            (self.T("Jours uniques"), "unique_days", DS.BLUE),
+            (self.T("total_conversions_2"), "total_conversions", DS.BLUE),
+            (self.T("images_to_pdf_2"), "images_to_pdf", DS.PURPLE),
+            (self.T("word_pdf"), "word_pdf_conversions", DS.GOLD),
+            (self.T("protected_pdfs"), "pdf_protected", DS.GREEN),
+            (self.T("archives_created"), "archives_created", "#FF9F43"),
+            (self.T("previews_used"), "previews_used", DS.BLUE),
+            (self.T("dark_mode_2"), "dark_mode_minutes", "#6C8EBF"),
+            (self.T("ocr_pages"), "ocr_pages", DS.PURPLE),
+            (self.T("compressed_data"), "compressed_gb", DS.GREEN),
+            (self.T("consecutive"), "consecutive_success", DS.GOLD),
+            (self.T("unique_days"), "unique_days", DS.BLUE),
         ]
 
         raw_vals = []

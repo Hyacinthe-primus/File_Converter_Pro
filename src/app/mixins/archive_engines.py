@@ -29,7 +29,9 @@ class ArchiveEnginesMixin:
         QMessageBox.warning(
             self,
             self.translate_text("Information"),
-            self.translate_text("7-Zip not found for archive creation.\nInstallation required."),
+            self.translate_text(
+                "seven_zip_not_found_for_archive_creation_installation_required"
+            ),
         )
         return None
 
@@ -140,14 +142,14 @@ class ArchiveEnginesMixin:
         if method == "zip":
             level_map = {
                 self.translate_text("Normal"): "-mx=3",
-                self.translate_text("Haute compression"): "-mx=7",
-                self.translate_text("Compression maximale"): "-mx=9",
+                self.translate_text("high_compression"): "-mx=7",
+                self.translate_text("maximum_compression"): "-mx=9",
             }
         else:
             level_map = {
                 self.translate_text("Normal"): "-mx=3",
-                self.translate_text("Haute compression"): "-mx=7",
-                self.translate_text("Compression maximale"): "-mx=9 -md128M",
+                self.translate_text("high_compression"): "-mx=7",
+                self.translate_text("maximum_compression"): "-mx=9 -md128M",
             }
         return level_map.get(compression_level, "-mx=3")
 
@@ -159,8 +161,8 @@ class ArchiveEnginesMixin:
 
             compression_map = {
                 self.translate_text("Normal"): zipfile.ZIP_STORED,
-                self.translate_text("Haute compression"): zipfile.ZIP_DEFLATED,
-                self.translate_text("Compression maximale"): zipfile.ZIP_LZMA,
+                self.translate_text("high_compression"): zipfile.ZIP_DEFLATED,
+                self.translate_text("maximum_compression"): zipfile.ZIP_LZMA,
             }
 
             compression_method = compression_map.get(compression_level, zipfile.ZIP_DEFLATED)
@@ -441,7 +443,7 @@ class ArchiveEnginesMixin:
                     QMessageBox.warning(
                         self,
                         self.translate_text("Information"),
-                        self.translate_text("pyzipper is not installed. Encryption not available."),
+                        self.translate_text("pyzipper_is_not_installed_encryption_not_available"),
                     )
                     password = None
 
@@ -489,7 +491,7 @@ class ArchiveEnginesMixin:
             "TAR": "tar",
             self.translate_text("ZIP"): "zip",
             self.translate_text("7Z"): "7z",
-            self.translate_text("TAR.GZ"): "tar.gz",
+            self.translate_text("tar_gz"): "tar.gz",
             self.translate_text("TAR"): "tar",
             self.translate_text("RAR"): "rar",
         }
@@ -499,8 +501,8 @@ class ArchiveEnginesMixin:
         try:
             compression_map = {
                 self.translate_text("Normal"): zipfile.ZIP_STORED,
-                self.translate_text("Haute compression"): zipfile.ZIP_DEFLATED,
-                self.translate_text("Compression maximale"): zipfile.ZIP_LZMA,
+                self.translate_text("high_compression"): zipfile.ZIP_DEFLATED,
+                self.translate_text("maximum_compression"): zipfile.ZIP_LZMA,
             }
 
             compression_method = compression_map.get(compression_level, zipfile.ZIP_DEFLATED)
@@ -541,7 +543,7 @@ class ArchiveEnginesMixin:
                     QMessageBox.warning(
                         self,
                         self.translate_text("Information"),
-                        self.translate_text("pyzipper is not installed. Encryption not available."),
+                        self.translate_text("pyzipper_is_not_installed_encryption_not_available"),
                     )
                     password = None
 
@@ -774,7 +776,7 @@ class ArchiveEnginesMixin:
                     success = self.create_zip_archive(archive_path, files, compression_level, password)
             elif archive_format in ["7Z", self.translate_text("7Z"), "RAR", self.translate_text("RAR")]:
                 success = self.create_7z_archive(archive_path, files, compression_level, password, split_size)
-            elif archive_format in ["TAR.GZ", self.translate_text("TAR.GZ"), "TAR", self.translate_text("TAR")]:
+            elif archive_format in ["TAR.GZ", self.translate_text("tar_gz"), "TAR", self.translate_text("TAR")]:
                 success = self.create_tar_archive(archive_path, files, archive_format, compression_level)
             else:
                 success = self.create_zip_archive(archive_path, files, compression_level, password)

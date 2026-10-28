@@ -36,7 +36,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         self.language = language
         self.dark_mode = dark_mode
         self._tm = make_tm(language)
-        self.setWindowTitle(self.translate_text("Conditions d'utilisation et Politique de confidentialité"))
+        self.setWindowTitle(self.translate_text("terms_of_use_and_privacy_policy"))
         self.setModal(True)
         self.setMinimumSize(800, 650)
         self.setWindowIcon(QIcon(self.get_icon_path()))
@@ -119,7 +119,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         terms_layout.setContentsMargins(15, 12, 15, 15)
 
         title_color = "#ffffff" if self.dark_mode else "#212529"
-        translated_msg = self.translate_text("Conditions d'utilisation")
+        translated_msg = self.translate_text("terms_of_use")
         terms_title = QLabel(f"<h2 style='color: {title_color}; margin: 0 0 8px 0;'>{translated_msg}</h2>")
         terms_title.setStyleSheet(f"background-color: transparent; color: {title_color};")
         terms_layout.addWidget(terms_title)
@@ -140,7 +140,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         privacy_layout.setContentsMargins(15, 12, 15, 15)
 
         privacy_title = QLabel(
-            f"<h2 style='color: {title_color}; margin: 0 0 8px 0;'>{self.translate_text('Politique de confidentialité')}</h2>"
+            f"<h2 style='color: {title_color}; margin: 0 0 8px 0;'>{self.translate_text('privacy_policy')}</h2>"
         )
         privacy_title.setStyleSheet(f"background-color: transparent; color: {title_color};")
         privacy_layout.addWidget(privacy_title)
@@ -155,8 +155,8 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         self.privacy_text.document().setDefaultStyleSheet(self.get_html_theme_css())
         privacy_layout.addWidget(self.privacy_text)
 
-        self.tab_widget.addTab(self.terms_tab, self.translate_text("Conditions d'utilisation"))
-        self.tab_widget.addTab(self.privacy_tab, self.translate_text("Politique de confidentialité"))
+        self.tab_widget.addTab(self.terms_tab, self.translate_text("terms_of_use"))
+        self.tab_widget.addTab(self.privacy_tab, self.translate_text("privacy_policy"))
 
         layout.addWidget(self.tab_widget, 1)
 
@@ -188,11 +188,11 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         checkbox_layout = QHBoxLayout()
         checkbox_layout.setSpacing(15)
 
-        self.terms_checkbox = AnimatedCheckBox(self.translate_text("J'accepte les conditions d'utilisation"))
+        self.terms_checkbox = AnimatedCheckBox(self.translate_text("i_accept_the_terms_of_use"))
         self.terms_checkbox.setObjectName("TermsCheckBox")
         self.terms_checkbox.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
 
-        self.privacy_checkbox = AnimatedCheckBox(self.translate_text("J'accepte la politique de confidentialité"))
+        self.privacy_checkbox = AnimatedCheckBox(self.translate_text("i_accept_the_privacy_policy"))
         self.privacy_checkbox.setObjectName("TermsCheckBox")
         self.privacy_checkbox.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
 
@@ -203,8 +203,8 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         button_layout = QHBoxLayout()
         button_layout.setSpacing(12)
 
-        self.decline_button = QPushButton(self.translate_text("Refuser"))
-        self.accept_button = QPushButton(self.translate_text("Accepter"))
+        self.decline_button = QPushButton(self.translate_text("decline"))
+        self.accept_button = QPushButton(self.translate_text("accept"))
         self.accept_button.setEnabled(False)
 
         self.accept_button.setStyleSheet(f"""
@@ -396,9 +396,9 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         else:
             QMessageBox.information(
                 self,
-                self.translate_text("Conditions requises"),
+                self.translate_text("required_conditions"),
                 self.translate_text(
-                    "Vous devez accepter les conditions d'utilisation et la politique de confidentialité pour utiliser cette application."
+                    "you_must_accept_the_terms_of_use_and_privacy_policy_to_use_this"
                 ),
             )
             super().reject()

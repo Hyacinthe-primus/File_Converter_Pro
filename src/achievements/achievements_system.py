@@ -55,16 +55,16 @@ class AchievementSystem(QObject):
         self.load_stats()
         self.load_achievements_from_db()
         self.ranks = [
-            ("Rookie", "Débutant"),
-            ("Initiate", "Initié"),
-            ("Adept", "Adepte"),
-            ("Veteran", "Vétéran"),
-            ("Elite", "Élite"),
+            ("Rookie", "starter"),
+            ("Initiate", "initiate"),
+            ("Adept", "adept"),
+            ("Veteran", "veteran"),
+            ("Elite", "elite"),
             ("Champion", "Champion"),
-            ("Master", "Maître"),
-            ("Grand Master", "Grand Maître"),
-            ("Legendary", "Légendaire"),
-            ("Mythic", "Mythique"),
+            ("Master", "master"),
+            ("Grand Master", "grand_master"),
+            ("Legendary", "legendary"),
+            ("Mythic", "mythic"),
         ]
         self.rank_colors = [
             "#B0BEC5",  # Rookie
@@ -907,35 +907,35 @@ class AchievementSystem(QObject):
             self.achievements_data["achievements"] = achievements
 
             categories = {
-                "progression": {"name": "Progression Globale", "icon": "trophy_icon.png", "color": "#FFD700"},
+                "progression": {"name": "global_progression", "icon": "trophy_icon.png", "color": "#FFD700"},
                 "conversion": {"name": "Conversion", "icon": "convert_icon.png", "color": "#4dabf7"},
-                "pdf_tools": {"name": "Outils PDF", "icon": "pdf_icon.png", "color": "#FF6B6B"},
+                "pdf_tools": {"name": "pdf_tools", "icon": "pdf_icon.png", "color": "#FF6B6B"},
                 "compression": {"name": "Compression", "icon": "compress_icon.png", "color": "#51CF66"},
-                "security": {"name": "Sécurité", "icon": "security_icon.png", "color": "#FFA94D"},
-                "technical": {"name": "Exploits Techniques", "icon": "tech_icon.png", "color": "#CC5DE8"},
-                "usage": {"name": "Utilisation", "icon": "usage_icon.png", "color": "#339AF0"},
-                "completion": {"name": "Complétude", "icon": "completion_icon.png", "color": "#20C997"},
-                "ultimate": {"name": "Ultime", "icon": "ultimate_icon.png", "color": "#9775FA"},
-                "fun": {"name": "Fun & Easter Eggs", "icon": "fun_icon.png", "color": "#FF8787"},
-                "advanced_conversions": {"name": "Conversions Avancées", "icon": "tech_icon.png", "color": "#22d3ee"},
+                "security": {"name": "security", "icon": "security_icon.png", "color": "#FFA94D"},
+                "technical": {"name": "technical_exploits", "icon": "tech_icon.png", "color": "#CC5DE8"},
+                "usage": {"name": "usage", "icon": "usage_icon.png", "color": "#339AF0"},
+                "completion": {"name": "completion", "icon": "completion_icon.png", "color": "#20C997"},
+                "ultimate": {"name": "ultimate", "icon": "ultimate_icon.png", "color": "#9775FA"},
+                "fun": {"name": "fun_easter_eggs", "icon": "fun_icon.png", "color": "#FF8787"},
+                "advanced_conversions": {"name": "advanced_conversions_4", "icon": "tech_icon.png", "color": "#22d3ee"},
                 "templates": {"name": "Templates", "icon": "tech_icon.png", "color": "#a78bfa"},
             }
 
             self.achievements_data["categories"] = categories
 
             tiers = {
-                "starter": {"name": "Débutant", "color": "#A8DADC", "order": 1},
+                "starter": {"name": "starter", "color": "#A8DADC", "order": 1},
                 "bronze": {"name": "Bronze", "color": "#CD7F32", "order": 2},
-                "steel": {"name": "Acier", "color": "#71797E", "order": 3},
-                "silver": {"name": "Argent", "color": "#C0C0C0", "order": 4},
+                "steel": {"name": "steel", "color": "#71797E", "order": 3},
+                "silver": {"name": "silver", "color": "#C0C0C0", "order": 4},
                 "platinum_tier": {"name": "Electrum", "color": "#C18D30", "order": 5},
-                "gold": {"name": "Or", "color": "#FFD700", "order": 6},
+                "gold": {"name": "gold", "color": "#FFD700", "order": 6},
                 "rare": {"name": "Rare", "color": "#4169E1", "order": 7},
-                "epic": {"name": "Épique", "color": "#9370DB", "order": 8},
-                "legendary": {"name": "Légendaire", "color": "#FF8C00", "order": 9},
-                "diamond": {"name": "Diamant", "color": "#B9F2FF", "order": 10},
-                "platinum": {"name": "Platine Ultime", "color": "#E5E4E2", "order": 11},
-                "advanced": {"name": "Avancé", "color": "#22d3ee", "order": 7},
+                "epic": {"name": "epic", "color": "#9370DB", "order": 8},
+                "legendary": {"name": "legendary", "color": "#FF8C00", "order": 9},
+                "diamond": {"name": "diamond", "color": "#B9F2FF", "order": 10},
+                "platinum": {"name": "ultimate_platinum", "color": "#E5E4E2", "order": 11},
+                "advanced": {"name": "advanced", "color": "#22d3ee", "order": 7},
             }
 
             self.achievements_data["tiers"] = tiers

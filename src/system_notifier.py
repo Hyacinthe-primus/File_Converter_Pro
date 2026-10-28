@@ -219,7 +219,7 @@ class SystemNotifier:
     def _repo_button_label(self) -> str:
         """Return the GitHub button label via TranslationManager."""
         if self._tm is not None:
-            label = self._tm.translate_text("📂 Ouvrir le dépôt GitHub")
+            label = self._tm.translate_text("open_github_repository")
             if label != "📂 Ouvrir le dépôt GitHub":
                 return label
         return "📂 Open GitHub Repository" if self.language != "fr" else "📂 Ouvrir le dépôt GitHub"
@@ -227,16 +227,16 @@ class SystemNotifier:
     def _get_task_display_name(self, operation_key: str) -> str:
         """Convert an operation key into a human-readable name for the notification."""
         task_names = {
-            "pdf_to_word": "PDF → Word",
-            "word_to_pdf": "Word → PDF",
-            "image_to_pdf": "Images → PDF",
-            "image_to_pdf_s": "Images → PDF (séparés)",
-            "merge_pdf": "Fusion PDF",
-            "merge_word": "Fusion Word",
-            "split_pdf": "Division PDF",
-            "batch_conversion": "Conversion par lot",
-            "batch_rename": "Renommage par lot",
-            "file_compression": "Compression de fichiers",
+            "pdf_to_word": "pdf_to_word_2",
+            "word_to_pdf": "word_to_pdf_2",
+            "image_to_pdf": "images_to_pdf_3",
+            "image_to_pdf_s": "images_to_pdf_separate",
+            "merge_pdf": "pdf_merge",
+            "merge_word": "word_merge",
+            "split_pdf": "pdf_split",
+            "batch_conversion": "batch_conversion_2",
+            "batch_rename": "batch_renaming",
+            "file_compression": "file_compression",
             "txt_to_pdf": "TXT → PDF",
             "rtf_to_pdf": "RTF → PDF",
             "txt_to_docx": "TXT → DOCX",

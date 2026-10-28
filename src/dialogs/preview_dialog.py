@@ -31,7 +31,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         self.language = language
         self._tm = make_tm(language)
         self._media_player = None  # QMediaPlayer ref kept alive
-        self.setWindowTitle(self.translate_text("Aperçu -") + f" {Path(file_path).name}")
+        self.setWindowTitle(self.translate_text("preview_2") + f" {Path(file_path).name}")
         self.setModal(False)
         self.setMinimumSize(700, 600)
         self.resize(800, 680)
@@ -57,7 +57,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         self.preview_label.setWordWrap(True)
         self.content_layout.addWidget(self.preview_label)
 
-        self.close_btn = QPushButton(self.translate_text("Fermer l'aperçu"))
+        self.close_btn = QPushButton(self.translate_text("close_preview"))
         self.close_btn.setFixedHeight(36)
         self.close_btn.clicked.connect(self.close)
         layout.addWidget(self.close_btn)
@@ -151,14 +151,14 @@ class PreviewDialog(TranslationMixin, QDialog):
             else:
                 self.preview_unsupported()
         except Exception as e:
-            translated_msg = self.translate_text("Erreur lors du chargement de l'aperçu:")
+            translated_msg = self.translate_text("error_loading_preview")
             self._show_error(f"{translated_msg}\n{e}")
 
     def preview_pdf(self):
         try:
             pdf_document = fitz.open(self.file_path)
             if len(pdf_document) == 0:
-                self._show_error(self.translate_text("PDF vide"))
+                self._show_error(self.translate_text("empty_pdf"))
                 return
 
             scroll = QScrollArea()
@@ -185,7 +185,7 @@ class PreviewDialog(TranslationMixin, QDialog):
                     vbox.addWidget(lbl)
 
             if len(pdf_document) > max_pages:
-                more = QLabel(f"… {len(pdf_document) - max_pages} {self.translate_text('pages supplémentaires')}")
+                more = QLabel(f"… {len(pdf_document) - max_pages} {self.translate_text('additional_pages')}")
                 more.setAlignment(Qt.AlignCenter)
                 more.setStyleSheet("color: gray; font-style: italic; padding: 6px;")
                 vbox.addWidget(more)
@@ -197,7 +197,7 @@ class PreviewDialog(TranslationMixin, QDialog):
             self.content_layout.addWidget(scroll)
 
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur PDF:')} {e}")
+            self._show_error(f"{self.translate_text('pdf_error')} {e}")
 
     _QPIXMAP_NATIVE = frozenset(
         {
@@ -320,7 +320,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         try:
             pixmap = self._load_pixmap(self.file_path)
             if pixmap.isNull():
-                self._show_error(self.translate_text("Format d'image non supporté"))
+                self._show_error(self.translate_text("unsupported_image_format"))
                 return
             pixmap = pixmap.scaled(660, 580, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             scroll = QScrollArea()
@@ -332,7 +332,7 @@ class PreviewDialog(TranslationMixin, QDialog):
             self._clear_content()
             self.content_layout.addWidget(scroll)
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur image:')} {e}")
+            self._show_error(f"{self.translate_text('image_error')} {e}")
 
     def preview_word(self):
         try:
@@ -358,11 +358,11 @@ class PreviewDialog(TranslationMixin, QDialog):
                     html_parts.append(f"<p style='margin:2px 0'>{text}</p>")
             if len(doc.paragraphs) > 80:
                 html_parts.append("<p style='color:gray;font-style:italic'>[...]</p>")
-            te.setHtml("".join(html_parts) if html_parts else self.translate_text("Document vide"))
+            te.setHtml("".join(html_parts) if html_parts else self.translate_text("empty_document"))
             self._clear_content()
             self.content_layout.addWidget(te)
         except Exception as e:
-            self._show_error(f"{self.translate_text('Impossible de prévisualiser le document Word')}\n{e}")
+            self._show_error(f"{self.translate_text('cannot_preview_word_document')}\n{e}")
 
     def preview_text(self):
         try:
@@ -378,14 +378,14 @@ class PreviewDialog(TranslationMixin, QDialog):
             self._clear_content()
             self.content_layout.addWidget(te)
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur texte:')} {e}")
+            self._show_error(f"{self.translate_text('text_error')} {e}")
 
     def preview_rtf(self):
         name = Path(self.file_path).name
         self.preview_label.setParent(self.content_area)
         self.content_layout.addWidget(self.preview_label)
         self.preview_label.setText(
-            f"🚫  {self.translate_text('Aperçu non disponible pour ce type de fichier')}\n({name})"
+            f"🚫  {self.translate_text('preview_not_available_for_this_file_type')}\n({name})"
         )
 
     def preview_csv(self):
@@ -397,7 +397,7 @@ class PreviewDialog(TranslationMixin, QDialog):
                 rows = [r for _, r in zip(range(200), reader)]
 
             if not rows:
-                self._show_error(self.translate_text("Fichier CSV vide"))
+                self._show_error(self.translate_text("empty_csv_file"))
                 return
 
             ncols = max(len(r) for r in rows)
@@ -413,7 +413,7 @@ class PreviewDialog(TranslationMixin, QDialog):
             self._clear_content()
             self.content_layout.addWidget(table)
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur CSV:')} {e}")
+            self._show_error(f"{self.translate_text('csv_error')} {e}")
 
     def preview_json(self):
         try:
@@ -460,7 +460,7 @@ class PreviewDialog(TranslationMixin, QDialog):
             self._clear_content()
             self.content_layout.addWidget(te)
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur JSON:')} {e}")
+            self._show_error(f"{self.translate_text('json_error')} {e}")
 
     def preview_xlsx(self):
         try:
@@ -489,7 +489,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         except ImportError:
             self._show_error("openpyxl non installé — pip install openpyxl")
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur XLSX:')} {e}")
+            self._show_error(f"{self.translate_text('xlsx_error')} {e}")
 
     def preview_opendocument(self):
         """ODT/ODS/ODP: native preview first; LibreOffice only if nothing could be read natively."""
@@ -601,7 +601,7 @@ class PreviewDialog(TranslationMixin, QDialog):
 
         soffice = resolve_binary("libreoffice")
         if not soffice:
-            self._show_error(self.translate_text("LibreOffice non trouvé, Impossible d'avoir un aperçu"))
+            self._show_error(self.translate_text("libreoffice_not_found_cannot_preview"))
             return
 
         try:
@@ -615,12 +615,12 @@ class PreviewDialog(TranslationMixin, QDialog):
                 )
                 pdf_path = os.path.join(tmp_dir, Path(self.file_path).stem + ".pdf")
                 if not os.path.exists(pdf_path):
-                    self._show_error(self.translate_text("Échec de la conversion du fichier OpenDocument"))
+                    self._show_error(self.translate_text("failed_to_convert_opendocument_file"))
                     return
 
                 pdf_document = fitz.open(pdf_path)
                 if len(pdf_document) == 0:
-                    self._show_error(self.translate_text("Document vide"))
+                    self._show_error(self.translate_text("empty_document"))
                     return
 
                 scroll = QScrollArea()
@@ -651,7 +651,7 @@ class PreviewDialog(TranslationMixin, QDialog):
                 self._clear_content()
                 self.content_layout.addWidget(scroll)
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur OpenDocument:')} {e}")
+            self._show_error(f"{self.translate_text('opendocument_error')} {e}")
 
     def preview_html(self):
         try:
@@ -938,7 +938,7 @@ class PreviewDialog(TranslationMixin, QDialog):
                     if len(html_parts) >= 3:
                         break
             if not html_parts:
-                self._show_error(self.translate_text("EPUB vide ou contenu non extractible"))
+                self._show_error(self.translate_text("empty_epub_or_unextractable_content"))
                 return
             combined = "<hr>".join(html_parts[:3])
             te = QTextEdit()
@@ -949,7 +949,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         except ImportError:
             self._show_error("ebooklib non installé — pip install ebooklib")
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur EPUB:')} {e}")
+            self._show_error(f"{self.translate_text('epub_error')} {e}")
 
     def preview_audio(self):
         try:
@@ -987,9 +987,9 @@ class PreviewDialog(TranslationMixin, QDialog):
             hbox = QHBoxLayout(ctrl)
             hbox.setSpacing(12)
 
-            play_btn = QPushButton("▶  " + self.translate_text("Lire"))
+            play_btn = QPushButton("▶  " + self.translate_text("play"))
             pause_btn = QPushButton("⏸  " + self.translate_text("Pause"))
-            stop_btn = QPushButton("⏹  " + self.translate_text("Arrêter"))
+            stop_btn = QPushButton("⏹  " + self.translate_text("stop"))
             for btn in (play_btn, pause_btn, stop_btn):
                 btn.setFixedHeight(34)
                 hbox.addWidget(btn)
@@ -1040,7 +1040,7 @@ class PreviewDialog(TranslationMixin, QDialog):
         except ImportError as e:
             self._show_error(f"PySide6.QtMultimedia manquant: {e}")
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur audio:')} {e}")
+            self._show_error(f"{self.translate_text('audio_error')} {e}")
 
     def preview_video(self):
         try:
@@ -1078,9 +1078,9 @@ class PreviewDialog(TranslationMixin, QDialog):
             hbox = QHBoxLayout(ctrl)
             hbox.setSpacing(10)
 
-            play_btn = QPushButton("▶  " + self.translate_text("Lire"))
+            play_btn = QPushButton("▶  " + self.translate_text("play"))
             pause_btn = QPushButton("⏸  " + self.translate_text("Pause"))
-            stop_btn = QPushButton("⏹  " + self.translate_text("Arrêter"))
+            stop_btn = QPushButton("⏹  " + self.translate_text("stop"))
             for btn in (play_btn, pause_btn, stop_btn):
                 btn.setFixedHeight(32)
                 hbox.addWidget(btn)
@@ -1125,14 +1125,14 @@ class PreviewDialog(TranslationMixin, QDialog):
         except ImportError as e:
             self._show_error(f"PySide6.QtMultimediaWidgets manquant: {e}")
         except Exception as e:
-            self._show_error(f"{self.translate_text('Erreur vidéo:')} {e}")
+            self._show_error(f"{self.translate_text('video_error')} {e}")
 
     def preview_unsupported(self):
         ext = Path(self.file_path).suffix.upper() or "?"
         self.preview_label.setParent(self.content_area)
         self.content_layout.addWidget(self.preview_label)
         self.preview_label.setText(
-            f"🚫  {self.translate_text('Aperçu non disponible pour ce type de fichier')}\n({ext})"
+            f"🚫  {self.translate_text('preview_not_available_for_this_file_type')}\n({ext})"
         )
 
     def closeEvent(self, event):

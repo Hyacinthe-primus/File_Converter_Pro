@@ -20,7 +20,7 @@ class ModernSplashScreen(TranslationMixin, QWidget):
         self.setFixedSize(500, 400)
         self.setWindowIcon(QIcon(self.get_icon_path()))
         self.setup_ui()
-        self.setWindowTitle(self.translate_text("File Converter Pro - convertisseur de fichiers professionnels"))
+        self.setWindowTitle(self.translate_text("file_converter_pro_professional_file_converter"))
 
     def get_icon_path(self):
         """Find icon.ico robustly (dev + PyInstaller)"""
@@ -53,7 +53,7 @@ class ModernSplashScreen(TranslationMixin, QWidget):
         self.title_label.setObjectName("SplashTitle")
         self.title_label.setAlignment(Qt.AlignCenter)
 
-        subtitle_text = self.translate_text("Initialisation de l'application...")
+        subtitle_text = self.translate_text("initializing_application")
         self.subtitle_label = QLabel(subtitle_text)
         self.subtitle_label.setObjectName("SplashSubtitle")
         self.subtitle_label.setAlignment(Qt.AlignCenter)
@@ -115,15 +115,15 @@ class ModernSplashScreen(TranslationMixin, QWidget):
         self.progress_text.setText(f"{int(value)}%")
 
         if value < 25:
-            current_text = "Initialisation de l'application..."
+            current_text = "initializing_application"
         elif value < 50:
-            current_text = "Chargement des modules..."
+            current_text = "loading_modules"
         elif value < 75:
-            current_text = "Préparation de l'interface..."
+            current_text = "preparing_interface"
         elif value < 95:
-            current_text = "Presque terminé..."
+            current_text = "almost_done"
         else:
-            current_text = "Prêt!"
+            current_text = "ready_2"
 
         self.subtitle_label.setText(self.translate_text(current_text))
 

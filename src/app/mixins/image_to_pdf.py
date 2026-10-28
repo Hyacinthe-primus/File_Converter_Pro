@@ -62,8 +62,8 @@ class ImageToPdfMixin:
         if not image_files:
             QMessageBox.warning(
                 self,
-                self.translate_text("Avertissement"),
-                self.translate_text("Aucun fichier image compatible sélectionné ou dans la liste."),
+                self.translate_text("warning"),
+                self.translate_text("no_compatible_image_file_selected_or_in_the_list"),
             )
             return
 
@@ -241,7 +241,7 @@ class ImageToPdfMixin:
             self.system_notifier.send("image_to_pdf_s")
         QMessageBox.information(
             self,
-            self.translate_text("Succès"),
+            self.translate_text("success"),
             self.translate_text("images_converted_separate").format(
                 success_count=success_count, num_images=num_images, output_dir=output_dir
             ),
@@ -287,7 +287,7 @@ class ImageToPdfMixin:
                     self.system_notifier.send("image_to_pdf")
                 QMessageBox.information(
                     self,
-                    self.translate_text("Succès"),
+                    self.translate_text("success"),
                     self.translate_text("images_merged_success").format(
                         num_images=num_images, conversion_time=round(conversion_time, 1)
                     ),
@@ -310,13 +310,13 @@ class ImageToPdfMixin:
                     self.system_notifier.send("image_to_pdf")
                 QMessageBox.information(
                     self,
-                    self.translate_text("Succès"),
+                    self.translate_text("success"),
                     self.translate_text("image_to_pdf_success").format(time=round(conversion_time, 1)),
                 )
         except Exception as e:
             self.show_progress(False)
             QMessageBox.critical(
-                self, self.translate_text("Erreur"), self.translate_text("error_conversion_fusion").format(error=str(e))
+                self, self.translate_text("error"), self.translate_text("error_conversion_fusion").format(error=str(e))
             )
 
     # scanlayer's maximum for parallel pages in a merge (it also caps by CPU count and page count)
@@ -474,7 +474,7 @@ class ImageToPdfMixin:
             self.system_notifier.send("image_to_pdf_s")
         QMessageBox.information(
             self,
-            self.translate_text("Succès"),
+            self.translate_text("success"),
             self.translate_text("images_converted_separate").format(
                 success_count=success_count, num_images=num_images, output_dir=output_dir
             ),
@@ -536,7 +536,7 @@ class ImageToPdfMixin:
                     self.system_notifier.send("image_to_pdf")
                 QMessageBox.information(
                     self,
-                    self.translate_text("Succès"),
+                    self.translate_text("success"),
                     self.translate_text("images_merged_success").format(
                         num_images=num_images, conversion_time=round(conversion_time, 1)
                     ),
@@ -558,13 +558,13 @@ class ImageToPdfMixin:
                     self.system_notifier.send("image_to_pdf")
                 QMessageBox.information(
                     self,
-                    self.translate_text("Succès"),
+                    self.translate_text("success"),
                     self.translate_text("image_to_pdf_success").format(time=round(conversion_time, 1)),
                 )
         except Exception as e:
             self.show_progress(False)
             QMessageBox.critical(
-                self, self.translate_text("Erreur"), self.translate_text("error_conversion_fusion").format(error=str(e))
+                self, self.translate_text("error"), self.translate_text("error_conversion_fusion").format(error=str(e))
             )
 
     def _open_image_for_pdf(self, file_path: str):

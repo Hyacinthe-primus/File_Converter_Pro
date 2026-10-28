@@ -31,7 +31,7 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         self._tm = make_tm(language)
         self.files = list(files)
         self.file_type = file_type
-        self.setWindowTitle(self.translate_text("Ordre de fusion"))
+        self.setWindowTitle(self.translate_text("merge_order"))
         self.setMinimumWidth(480)
         self.setMinimumHeight(400)
         self._setup_ui()
@@ -43,19 +43,19 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         lay = QVBoxLayout(self)
         lay.setSpacing(10)
 
-        order_group = QGroupBox(self.translate_text("Choisir l'ordre"))
+        order_group = QGroupBox(self.translate_text("choose_order"))
         order_lay = QVBoxLayout(order_group)
 
         self.order_buttons = QButtonGroup(self)
         orders = [
-            ("alpha_az", "🔤 " + self.translate_text("Alphabétique (A→Z)")),
-            ("alpha_za", "🔤 " + self.translate_text("Alphabétique (Z→A)")),
-            ("num_asc", "🔢 " + self.translate_text("Numérique (1→9)")),
-            ("num_desc", "🔢 " + self.translate_text("Numérique (9→1)")),
-            ("date_asc", "📅 " + self.translate_text("Date (ancien→nouveau)")),
-            ("date_desc", "📅 " + self.translate_text("Date (nouveau→ancien)")),
-            ("manual", "✋ " + self.translate_text("Manuel (glisser-déposer)")),
-            ("current", "📋 " + self.translate_text("Ordre actuel (liste principale)")),
+            ("alpha_az", "🔤 " + self.translate_text("alphabetical_a_to_z")),
+            ("alpha_za", "🔤 " + self.translate_text("alphabetical_z_to_a")),
+            ("num_asc", "🔢 " + self.translate_text("numeric_1_to_9")),
+            ("num_desc", "🔢 " + self.translate_text("numeric_9_to_1")),
+            ("date_asc", "📅 " + self.translate_text("date_oldest_to_newest")),
+            ("date_desc", "📅 " + self.translate_text("date_newest_to_oldest")),
+            ("manual", "✋ " + self.translate_text("manual_drag_and_drop")),
+            ("current", "📋 " + self.translate_text("current_order_main_list")),
         ]
         self._radio_map = {}
         for key, label in orders:
@@ -67,9 +67,9 @@ class MergeOrderDialog(TranslationMixin, QDialog):
 
         lay.addWidget(order_group)
 
-        self._manual_group = QGroupBox(self.translate_text("Réordonner les fichiers"))
+        self._manual_group = QGroupBox(self.translate_text("reorder_files"))
         manual_lay = QVBoxLayout(self._manual_group)
-        hint = QLabel(self.translate_text("Glissez-déposez pour réordonner, puis cliquez sur Fusionner."))
+        hint = QLabel(self.translate_text("drag_and_drop_to_reorder_then_click_merge"))
         hint.setStyleSheet("color: gray; font-size: 11px;")
         manual_lay.addWidget(hint)
 
@@ -86,14 +86,14 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         self._radio_map["manual"].toggled.connect(self._manual_group.setVisible)
 
         btn_row = QHBoxLayout()
-        merge_btn = QPushButton("🔗 " + self.translate_text("Fusionner"))
+        merge_btn = QPushButton("🔗 " + self.translate_text("merge"))
         merge_btn.setMinimumHeight(36)
         merge_btn.setStyleSheet("""
             QPushButton { background:#28a745; color:white; border:none;
                           border-radius:6px; font-weight:bold; padding:6px 16px; }
             QPushButton:hover { background:#218838; }
         """)
-        cancel_btn = QPushButton(self.translate_text("Annuler"))
+        cancel_btn = QPushButton(self.translate_text("cancel"))
         cancel_btn.setMinimumHeight(36)
         _apply_dialog_btn(cancel_btn, "BtnCancelGlassy")
         merge_btn.clicked.connect(self.accept)

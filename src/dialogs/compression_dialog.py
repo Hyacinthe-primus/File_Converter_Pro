@@ -27,7 +27,7 @@ class CompressionDialog(TranslationMixin, QDialog):
         super().__init__(parent)
         self.language = language
         self._tm = make_tm(language)
-        self.setWindowTitle(self.translate_text("Compresser des Fichiers"))
+        self.setWindowTitle(self.translate_text("compress_files_3"))
         self.setup_ui()
 
     def setup_ui(self):
@@ -39,7 +39,7 @@ class CompressionDialog(TranslationMixin, QDialog):
         layout.addWidget(selection_info)
 
         format_layout = QHBoxLayout()
-        format_layout.addWidget(QLabel(self.translate_text("Format d'archive:")))
+        format_layout.addWidget(QLabel(self.translate_text("archive_format")))
         self.format_combo = QComboBox()
         self.format_combo.addItems(["ZIP", "7Z", "TAR.GZ", "TAR"])
         self.format_combo.currentIndexChanged.connect(self.update_format_info)
@@ -47,20 +47,20 @@ class CompressionDialog(TranslationMixin, QDialog):
         layout.addLayout(format_layout)
 
         level_layout = QHBoxLayout()
-        level_layout.addWidget(QLabel(self.translate_text("Niveau de compression:")))
+        level_layout.addWidget(QLabel(self.translate_text("compression_level")))
         self.compression_level = QComboBox()
         self.compression_level.addItems(
             [
                 self.translate_text("Normal"),
-                self.translate_text("Haute compression"),
-                self.translate_text("Compression maximale"),
+                self.translate_text("high_compression"),
+                self.translate_text("maximum_compression"),
             ]
         )
         level_layout.addWidget(self.compression_level)
         layout.addLayout(level_layout)
 
         name_layout = QHBoxLayout()
-        name_layout.addWidget(QLabel(self.translate_text("Nom de l'archive:")))
+        name_layout.addWidget(QLabel(self.translate_text("archive_name")))
         self.filename_input = QLineEdit()
         self.filename_input.setText("archive_compressee")
         name_layout.addWidget(self.filename_input)
@@ -69,18 +69,18 @@ class CompressionDialog(TranslationMixin, QDialog):
         options_group = QGroupBox(self.translate_text("Options"))
         options_layout = QVBoxLayout(options_group)
 
-        self.encryption_checkbox = AnimatedCheckBox(self.translate_text("Protéger par mot de passe"))
+        self.encryption_checkbox = AnimatedCheckBox(self.translate_text("protect_with_password"))
         self.encryption_checkbox.stateChanged.connect(self.on_encryption_changed)
 
-        self.split_checkbox = AnimatedCheckBox(self.translate_text("Fractionner l'archive en plusieurs parties"))
+        self.split_checkbox = AnimatedCheckBox(self.translate_text("split_archive_into_multiple_parts"))
         self.split_checkbox.setChecked(False)
         self.split_checkbox.stateChanged.connect(self.on_split_changed)
 
         self.delete_original_checkbox = AnimatedCheckBox(
-            self.translate_text("Supprimer les fichiers originaux après compression")
+            self.translate_text("delete_original_files_after_compression")
         )
 
-        QLabel(self.translate_text("Taille par partie:"))
+        QLabel(self.translate_text("part_size"))
 
         self.split_size_spin = QSpinBox()
         self.split_size_spin.setRange(1, 10000)
@@ -94,18 +94,18 @@ class CompressionDialog(TranslationMixin, QDialog):
             [
                 "10 MB (Email)",
                 "25 MB (Email)",
-                self.translate_text("100 MB (Partage web)"),
+                self.translate_text("n_100_mb_web_sharing"),
                 "700 MB (CD)",
                 "4.7 GB (DVD)",
-                self.translate_text("8.5 GB (Double couche DVD)"),
-                self.translate_text("Personnalisé"),
+                self.translate_text("n_8_5_gb_dual_layer_dvd"),
+                self.translate_text("custom"),
             ]
         )
         self.split_preset_combo.setEnabled(False)
         self.split_preset_combo.setCurrentIndex(2)
 
         split_size_layout = QHBoxLayout()
-        split_size_layout.addWidget(QLabel(self.translate_text("Taille par partie:")))
+        split_size_layout.addWidget(QLabel(self.translate_text("part_size")))
         split_size_layout.addWidget(self.split_size_spin)
         split_size_layout.addWidget(self.split_preset_combo)
         split_size_layout.addStretch()
@@ -133,8 +133,7 @@ class CompressionDialog(TranslationMixin, QDialog):
         self.split_note_label.setWordWrap(True)
         self.split_note_label.setText(
             self.translate_text(
-                "Note: Le fractionnement n'est disponible que pour les formats ZIP et 7Z. "
-                "Les archives TAR/TAR.GZ ne peuvent pas être fractionnées."
+                "note_splitting_is_only_available_for_zip_and_7z_formats_tar_tar"
             )
         )
         self.split_note_label.setVisible(False)
@@ -165,7 +164,7 @@ class CompressionDialog(TranslationMixin, QDialog):
 
     def update_split_controls_state(self):
         is_split_enabled = self.split_checkbox.isChecked()
-        is_custom = self.split_preset_combo.currentText() == self.translate_text("Personnalisé")
+        is_custom = self.split_preset_combo.currentText() == self.translate_text("custom")
 
         self.split_preset_combo.setEnabled(is_split_enabled)
         self.split_size_spin.setEnabled(is_split_enabled and is_custom)
@@ -250,7 +249,7 @@ class CompressionDialog(TranslationMixin, QDialog):
 
     def on_split_size_changed(self, value):
         if self.split_checkbox.isChecked() and self.split_preset_combo.currentText() == self.translate_text(
-            "Personnalisé"
+            "custom"
         ):
             template = self.translate_text("split_info_custom")
             message = template.format(value)
@@ -263,7 +262,7 @@ class CompressionDialog(TranslationMixin, QDialog):
     def on_split_preset_changed(self, index):
         preset_text = self.split_preset_combo.currentText()
 
-        if preset_text == self.translate_text("Personnalisé"):
+        if preset_text == self.translate_text("custom"):
             self.split_size_spin.setEnabled(True)
         else:
             self.split_size_spin.setEnabled(False)
@@ -287,7 +286,7 @@ class CompressionDialog(TranslationMixin, QDialog):
             preset_text = self.split_preset_combo.currentText()
             size_value = self.split_size_spin.value()
 
-            if preset_text == self.translate_text("Personnalisé"):
+            if preset_text == self.translate_text("custom"):
                 template = self.translate_text("split_info_custom")
                 message = template.format(size_value)
             else:
@@ -315,7 +314,7 @@ class CompressionDialog(TranslationMixin, QDialog):
 
             if self.split_checkbox.isChecked():
                 self.split_preset_combo.setEnabled(True)
-                if self.split_preset_combo.currentText() == self.translate_text("Personnalisé"):
+                if self.split_preset_combo.currentText() == self.translate_text("custom"):
                     self.split_size_spin.setEnabled(True)
                 else:
                     self.split_size_spin.setEnabled(False)
@@ -329,41 +328,28 @@ class CompressionDialog(TranslationMixin, QDialog):
 
     def on_encryption_changed(self, state):
         if state == Qt.Checked:
+            message = self.translate_text("zip_7z_encryption_information")
             parent = self.parent()
             if hasattr(parent, "files_list"):
                 total_size = sum(os.path.getsize(f) for f in parent.files_list if os.path.exists(f))
                 total_size_mb = total_size / (1024 * 1024)
 
                 if total_size_mb > 100:
-                    message = self.translate_text(
-                        f"⚠️ Attention: Vous allez chiffrer {total_size_mb:.1f} Mo de données.\n"
-                        "Le chiffrement peut ralentir la compression."
+                    message = self.translate_text("large_encryption_warning").format(
+                        size=total_size_mb
                     )
-                else:
-                    message = self.translate_text(
-                        "Le chiffrement ZIP utilise AES-256 (pyzipper si installé). Le format 7Z "
-                        "utilise AES-256 avec chiffrement de l'en-tête via 7-Zip."
-                    )
-            else:
-                message = self.translate_text(
-                    "Le chiffrement ZIP utilise AES-256 (pyzipper si installé). Le format 7Z "
-                    "utilise AES-256 avec chiffrement de l'en-tête via 7-Zip."
-                )
 
-            QMessageBox.information(self, self.translate_text("Information sur le chiffrement"), message)
+            QMessageBox.information(self, self.translate_text("encryption_information"), message)
 
     def update_format_info(self):
         format_info = {
             "ZIP": self.translate_text(
-                "Format universel, compatible avec tous les systèmes. Supporte le chiffrement et le fractionnement."
+                "universal_format_compatible_with_all_systems_supports_encryption"
             ),
-            "7Z": self.translate_text(
-                "Format 7-Zip: meilleure compression, multiplateforme. Supporte le chiffrement (AES-256) "
-                "et le fractionnement."
-            ),
-            "TAR.GZ": self.translate_text("Standard Unix/Linux, bonne compression. Ne supporte PAS le fractionnement."),
+            "7Z": self.translate_text("seven_zip_format_information"),
+            "TAR.GZ": self.translate_text("standard_unix_linux_good_compression_does_not_support_splitting"),
             "TAR": self.translate_text(
-                "Archive non compressée, préférable pour sauvegarde rapide. Ne supporte PAS le fractionnement."
+                "uncompressed_archive_preferable_for_quick_backup_does_not_suppor"
             ),
         }
 

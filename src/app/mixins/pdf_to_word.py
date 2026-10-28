@@ -65,7 +65,7 @@ class PdfToWordMixin:
 
     def handle_encrypted_pdfs(self, encrypted_pdfs):
         dialog = QDialog(self)
-        dialog.setWindowTitle(self.translate_text("PDFs protégés par mot de passe"))
+        dialog.setWindowTitle(self.translate_text("password_protected_pdfs"))
         dialog.setMinimumWidth(500)
 
         layout = QVBoxLayout(dialog)
@@ -76,9 +76,9 @@ class PdfToWordMixin:
             message = self.translate_text(f"{len(encrypted_pdfs)} fichiers PDF sont protégés par mot de passe.")
 
         message += "\n\n" + self.translate_text(
-            "Pour convertir ces fichiers en Word, vous devez fournir les mots de passe.\n\n"
+            "to_convert_these_files_to_word_you_must_provide_the_passwords"
         )
-        message += self.translate_text("Options :")
+        message += self.translate_text("options")
 
         info_label = QLabel(message)
         info_label.setWordWrap(True)
@@ -94,9 +94,9 @@ class PdfToWordMixin:
             single_layout.addWidget(QLabel(self.translate_text(f"Fichier : {Path(encrypted_pdfs[0]).name}")))
             single_password_input = QLineEdit()
             single_password_input.setEchoMode(QLineEdit.Password)
-            single_password_input.setPlaceholderText(self.translate_text("Mot de passe du PDF"))
+            single_password_input.setPlaceholderText(self.translate_text("pdf_password"))
 
-            single_layout.addWidget(QLabel(self.translate_text("Mot de passe :")))
+            single_layout.addWidget(QLabel(self.translate_text("password_2")))
             single_layout.addWidget(single_password_input)
 
             dialog.single_password_input = single_password_input
@@ -118,9 +118,9 @@ class PdfToWordMixin:
 
                 password_input = QLineEdit()
                 password_input.setEchoMode(QLineEdit.Password)
-                password_input.setPlaceholderText(self.translate_text("Mot de passe (laisser vide si aucun)"))
+                password_input.setPlaceholderText(self.translate_text("password_leave_empty_if_none"))
 
-                group_layout.addWidget(QLabel(self.translate_text("Mot de passe :")))
+                group_layout.addWidget(QLabel(self.translate_text("password_2")))
                 group_layout.addWidget(password_input)
 
                 password_inputs[pdf_file] = password_input
@@ -138,32 +138,32 @@ class PdfToWordMixin:
 
         same_password_input = QLineEdit()
         same_password_input.setEchoMode(QLineEdit.Password)
-        same_password_input.setPlaceholderText(self.translate_text("Mot de passe commun à tous les PDF"))
+        same_password_input.setPlaceholderText(self.translate_text("common_password_for_all_pdfs"))
 
-        same_layout.addWidget(QLabel(self.translate_text("Ce mot de passe sera essayé sur tous les PDF chiffrés.")))
-        same_layout.addWidget(QLabel(self.translate_text("Mot de passe commun :")))
+        same_layout.addWidget(QLabel(self.translate_text("this_password_will_be_tried_on_all_encrypted_pdfs")))
+        same_layout.addWidget(QLabel(self.translate_text("common_password_2")))
         same_layout.addWidget(same_password_input)
 
         dialog.same_password_input = same_password_input
 
         if len(encrypted_pdfs) == 1:
-            tab_widget.addTab(single_tab, self.translate_text("PDF unique"))
+            tab_widget.addTab(single_tab, self.translate_text("single_pdf"))
         else:
-            tab_widget.addTab(multiple_tab, self.translate_text("PDF multiples"))
-            tab_widget.addTab(same_tab, self.translate_text("Mot de passe commun"))
+            tab_widget.addTab(multiple_tab, self.translate_text("multiple_pdfs"))
+            tab_widget.addTab(same_tab, self.translate_text("common_password"))
 
         layout.addWidget(tab_widget)
 
-        options_group = QGroupBox(self.translate_text("Options de sortie"))
+        options_group = QGroupBox(self.translate_text("output_options"))
         options_layout = QVBoxLayout(options_group)
 
         keep_encrypted_check = AnimatedCheckBox(
-            self.translate_text("Conserver les versions originales chiffrées après conversion")
+            self.translate_text("keep_original_encrypted_versions_after_conversion")
         )
         keep_encrypted_check.setChecked(True)
 
         remove_passwords_check = AnimatedCheckBox(
-            self.translate_text("Supprimer la protection par mot de passe des PDF convertis (recommandé)")
+            self.translate_text("remove_password_protection_from_converted_pdfs_recommended")
         )
         remove_passwords_check.setChecked(True)
 
@@ -213,8 +213,8 @@ class PdfToWordMixin:
             else:
                 QMessageBox.warning(
                     self,
-                    self.translate_text("Avertissement"),
-                    self.translate_text("Aucun mot de passe fourni. La conversion sera annulée."),
+                    self.translate_text("warning"),
+                    self.translate_text("no_password_provided_the_conversion_will_be_cancelled"),
                 )
                 return False
         else:
@@ -229,7 +229,7 @@ class PdfToWordMixin:
         keep_originals = passwords_info.get("keep_originals", True)
         remove_passwords = passwords_info.get("remove_passwords", True)
 
-        self.show_progress(True, self.translate_text("Déchiffrement des PDF..."))
+        self.show_progress(True, self.translate_text("decrypting_pdfs"))
 
         for i, pdf_file in enumerate(pdf_files):
             try:
@@ -244,7 +244,7 @@ class PdfToWordMixin:
                                 pdf_reader.decrypt("")
                             except Exception:
                                 failed_files.append(
-                                    f"{Path(pdf_file).name} - {self.translate_text('Mot de passe requis')}"
+                                    f"{Path(pdf_file).name} - {self.translate_text('password_required')}"
                                 )
                                 continue
                         else:
@@ -261,7 +261,7 @@ class PdfToWordMixin:
 
                                 if not success:
                                     failed_files.append(
-                                        f"{Path(pdf_file).name} - {self.translate_text('Mot de passe incorrect')}"
+                                        f"{Path(pdf_file).name} - {self.translate_text('incorrect_password')}"
                                     )
                                     continue
 
@@ -317,7 +317,7 @@ class PdfToWordMixin:
             if len(failed_files) > 3:
                 error_message += f"\n... et {len(failed_files) - 3} autres"
 
-            QMessageBox.warning(self, self.translate_text("Résultat déchiffrement"), error_message)
+            QMessageBox.warning(self, self.translate_text("decryption_result"), error_message)
 
         return temp_files
 
@@ -379,7 +379,7 @@ class PdfToWordMixin:
                 )
                 QMessageBox.critical(
                     self,
-                    self.translate_text("Erreur"),
+                    self.translate_text("error"),
                     self.translate_text(f"Erreur avec {Path(file_path).name}: {str(e)}"),
                 )
 
@@ -399,7 +399,7 @@ class PdfToWordMixin:
         message = self.translate_text("pdf_to_word_success_sum").format(success_count, len(pdf_files), formatted_time)
         if self.config.get("enable_system_notifications", True):
             self.system_notifier.send("pdf_to_word")
-        QMessageBox.information(self, self.translate_text("Succès"), self.translate_text(message))
+        QMessageBox.information(self, self.translate_text("success"), self.translate_text(message))
 
     def _get_chart_regions(self, page):
         MIN_PATHS = 8
@@ -969,11 +969,11 @@ class PdfToWordMixin:
         pdf_files = [f for f in files_to_process if f.lower().endswith(".pdf")]
         if not pdf_files:
             msg = (
-                self.translate_text("Veuillez sélectionner au moins un fichier PDF")
+                self.translate_text("please_select_at_least_one_pdf_file")
                 if selected_items
-                else self.translate_text("La liste doit contenir au moins un fichier PDF")
+                else self.translate_text("the_list_must_contain_at_least_one_pdf_file")
             )
-            QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
+            QMessageBox.warning(self, self.translate_text("warning"), msg)
             return
 
         encrypted_pdfs = []
@@ -1064,7 +1064,7 @@ class PdfToWordMixin:
                 self.system_notifier.send("pdf_to_word")
             QMessageBox.information(
                 self,
-                self.translate_text("Succès"),
+                self.translate_text("success"),
                 self.translate_text("pdf_to_word_success_sum").format(
                     s["success_count"], s["total"], f"{s['total_time']:.1f}"
                 ),
@@ -1075,7 +1075,7 @@ class PdfToWordMixin:
             lambda e: (
                 self.show_progress(False),
                 self._set_ui_enabled(True),
-                QMessageBox.critical(self, self.translate_text("Erreur"), str(e)),
+                QMessageBox.critical(self, self.translate_text("error"), str(e)),
             )
         )
         self._pdf_to_word_worker.start()

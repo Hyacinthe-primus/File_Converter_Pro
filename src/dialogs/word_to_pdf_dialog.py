@@ -59,7 +59,7 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         self._tm = make_tm(language)
         self.is_dark_mode: bool = getattr(parent, "dark_mode", False) if parent else False
 
-        self.setWindowTitle(self.translate_text("Options de conversion Word vers PDF"))
+        self.setWindowTitle(self.translate_text("word_to_pdf_conversion_options"))
         self.setModal(True)
         self._setup_ui()
 
@@ -78,25 +78,25 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
 
     def _build_mode_group(self) -> QGroupBox:
         """Create the conversion-mode section (radio buttons + advanced sub-group)."""
-        group = QGroupBox(self.translate_text("Mode de conversion"))
+        group = QGroupBox(self.translate_text("conversion_mode"))
         layout = QVBoxLayout(group)
         layout.setSpacing(6)
 
         self.mode_group = QButtonGroup(self)
 
         self.preserve_all_radio = AnimatedCheckBox(
-            self.translate_text("Conserver toute la mise en forme (recommandé)")
+            self.translate_text("preserve_all_formatting_recommended")
         )
         self.preserve_all_radio.setChecked(True)
 
-        self.text_only_radio = AnimatedCheckBox(self.translate_text("Texte seulement (plus rapide)"))
+        self.text_only_radio = AnimatedCheckBox(self.translate_text("text_only_faster_2"))
 
         self.mode_group.addButton(self.preserve_all_radio, 1)
         self.mode_group.addButton(self.text_only_radio, 2)
 
-        info_text = self.translate_text("Sélectionnez le mode de conversion :")
+        info_text = self.translate_text("select_conversion_mode")
         if self.has_content:
-            info_text += "\n" + self.translate_text("ℹ️ Ce document contient du contenu formaté, images, tableaux, etc.")
+            info_text += "\n" + self.translate_text("i_this_document_contains_formatted_content_images_tables_etc")
 
         info_label = QLabel(info_text)
         info_label.setWordWrap(True)
@@ -114,7 +114,7 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
 
     def _build_advanced_group(self) -> QGroupBox:
         """Create the collapsible advanced-options QGroupBox (quality, compression, metadata)."""
-        group = QGroupBox(self.translate_text("Options avancées"))
+        group = QGroupBox(self.translate_text("advanced_options"))
         group.setCheckable(True)
         group.setChecked(False)
 
@@ -125,19 +125,19 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         self.quality_combo = QComboBox()
         self.quality_combo.addItems(
             [
-                self.translate_text("Haute qualité (300 DPI)"),
-                self.translate_text("Qualité standard (150 DPI)"),
-                self.translate_text("Optimisé (96 DPI)"),
+                self.translate_text("high_quality_300_dpi"),
+                self.translate_text("standard_quality_150_dpi"),
+                self.translate_text("optimized_96_dpi"),
             ]
         )
 
-        self.compress_checkbox = AnimatedCheckBox(self.translate_text("Compresser les images"))
+        self.compress_checkbox = AnimatedCheckBox(self.translate_text("compress_images"))
         self.compress_checkbox.setChecked(True)
 
-        self.include_metadata_checkbox = AnimatedCheckBox(self.translate_text("Inclure les métadonnées"))
+        self.include_metadata_checkbox = AnimatedCheckBox(self.translate_text("include_metadata"))
         self.include_metadata_checkbox.setChecked(True)
 
-        form.addRow(self.translate_text("Qualité d'image:"), self.quality_combo)
+        form.addRow(self.translate_text("image_quality"), self.quality_combo)
         form.addWidget(self.compress_checkbox)
         form.addWidget(self.include_metadata_checkbox)
 
@@ -145,7 +145,7 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
 
     def _build_preview_group(self) -> QGroupBox:
         """Create the preview-differences section with a themed, elastic QTextEdit."""
-        group = QGroupBox(self.translate_text("Aperçu des différences"))
+        group = QGroupBox(self.translate_text("preview_differences"))
         group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         layout = QVBoxLayout(group)
@@ -192,18 +192,18 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         c = _DARK if self.is_dark_mode else _LIGHT
         is_preserve = self.preserve_all_radio.isChecked()
 
-        title_keep = self.translate_text("Mode 'Conserver tout'")
-        title_text = self.translate_text("Mode 'Texte seulement'")
+        title_keep = self.translate_text("keep_all_mode")
+        title_text = self.translate_text("text_only_mode")
 
         keep_bullets = [
-            self.translate_text("• Garde toutes les images, tableaux, couleurs"),
-            self.translate_text("• Conserve la mise en page exacte"),
-            self.translate_text("• Maintient les en-têtes et pieds de page"),
+            self.translate_text("keeps_all_images_tables_and_colors"),
+            self.translate_text("preserves_exact_layout"),
+            self.translate_text("maintains_headers_and_footers"),
         ]
         text_bullets = [
-            self.translate_text("• Extrait uniquement le texte"),
-            self.translate_text("• Formatage minimal"),
-            self.translate_text("• Plus rapide pour les longs documents"),
+            self.translate_text("extracts_text_only"),
+            self.translate_text("minimal_formatting"),
+            self.translate_text("faster_for_long_documents"),
         ]
 
         if is_preserve:

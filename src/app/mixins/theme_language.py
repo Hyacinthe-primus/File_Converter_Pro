@@ -30,7 +30,7 @@ class ThemeLanguageMixin:
         self.current_theme = "dark" if self.dark_mode else "light"
         self.apply_theme(self.dark_mode)
         self.theme_action.setText(
-            "☀️ " + self.translate_text("Mode Clair") if self.dark_mode else "🌙 " + self.translate_text("Mode Sombre")
+            "☀️ " + self.translate_text("light_mode") if self.dark_mode else "🌙 " + self.translate_text("dark_mode")
         )
 
         self.config["dark_mode"] = self.dark_mode
@@ -82,7 +82,7 @@ class ThemeLanguageMixin:
         self.setWindowTitle("File Converter Pro - Professional File Converter")
         self.update_file_counter()
         self._refresh_all_tab_titles()
-        self.status_bar.showMessage(self.translate_text("Prêt - Sélectionnez des fichiers pour commencer"))
+        self.status_bar.showMessage(self.translate_text("ready_select_files_to_start"))
 
         for widget in self.findChildren(QGroupBox):
             key = widget.property("i18n_key")
@@ -112,11 +112,11 @@ class ThemeLanguageMixin:
                 widget.setToolTip(self.translate_text(tip_key))
 
         self.theme_action.setText(
-            ("☀️ " if self.dark_mode else "🌙 ") + self.translate_text("Mode Clair" if self.dark_mode else "Mode Sombre")
+            ("☀️ " if self.dark_mode else "🌙 ") + self.translate_text("light_mode" if self.dark_mode else "dark_mode")
         )
-        self.new_action.setText("🆕 " + self.translate_text("Nouveau Projet"))
-        self.open_action.setText("📂 " + self.translate_text("Ouvrir Projet"))
-        self.save_action.setText("💾 " + self.translate_text("Enregistrer Projet"))
+        self.new_action.setText("🆕 " + self.translate_text("new_project"))
+        self.open_action.setText("📂 " + self.translate_text("open_project"))
+        self.save_action.setText("💾 " + self.translate_text("save_project"))
         self.setup_tooltips_with_shortcuts()
 
     def apply_theme(self, dark: bool) -> None:

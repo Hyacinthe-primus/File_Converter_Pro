@@ -12,7 +12,7 @@ class PasswordDialog(TranslationMixin, QDialog):
         super().__init__(parent)
         self.language = language
         self._tm = make_tm(language)
-        self.setWindowTitle(self.translate_text("Protéger PDF avec mot de passe"))
+        self.setWindowTitle(self.translate_text("protect_pdf_with_password"))
         self.setup_ui()
 
     def setup_ui(self):
@@ -23,8 +23,8 @@ class PasswordDialog(TranslationMixin, QDialog):
         self.confirm_input = QLineEdit()
         self.confirm_input.setEchoMode(QLineEdit.Password)
 
-        layout.addRow(self.translate_text("Mot de passe:"), self.password_input)
-        layout.addRow(self.translate_text("Confirmer mot de passe:"), self.confirm_input)
+        layout.addRow(self.translate_text("password"), self.password_input)
+        layout.addRow(self.translate_text("confirm_password"), self.confirm_input)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         ok_button = buttons.button(QDialogButtonBox.Ok)

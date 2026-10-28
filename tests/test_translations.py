@@ -28,9 +28,32 @@ def test_translation_text():
     from translations import TranslationManager
 
     tm = TranslationManager()
-    result = tm.translate_text("Gestion des Fichiers")
+    tm.set_language("fr")
+    result = tm.translate_text("file_management")
     assert isinstance(result, str)
-    assert len(result) > 0
+    assert result == "Gestion des Fichiers"
+
+
+def test_legacy_key_alias():
+    """Old French keys should still resolve through the legacy alias map."""
+    from translations import TranslationManager
+
+    tm = TranslationManager()
+    tm.set_language("en")
+    assert tm.translate_text("Gestion des Fichiers") == "File Management"
+
+
+def test_legacy_aliases_target_existing_keys():
+    """Every legacy alias should point at a key present in the English source."""
+    import json
+    import os
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    lang_dir = os.path.join(root, "src", "languages")
+    aliases = json.load(open(os.path.join(lang_dir, "legacy_aliases.json"), encoding="utf-8"))
+    en = json.load(open(os.path.join(lang_dir, "en.json"), encoding="utf-8"))
+    missing = sorted({target for target in aliases.values() if target not in en})
+    assert not missing, f"legacy aliases point at missing keys: {missing[:10]}"
 
 
 def test_translation_fallback():

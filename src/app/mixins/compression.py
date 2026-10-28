@@ -47,10 +47,10 @@ class CompressionMixin(ArchiveEnginesMixin):
 
         if not files_to_process:
             if selected_items:
-                msg = self.translate_text("Aucun fichier sélectionné")
+                msg = self.translate_text("no_files_selected")
             else:
-                msg = self.translate_text("La liste de fichiers est vide")
-            QMessageBox.warning(self, self.translate_text("Avertissement"), msg)
+                msg = self.translate_text("the_file_list_is_empty")
+            QMessageBox.warning(self, self.translate_text("warning"), msg)
             return
 
         folders_to_compress = []
@@ -67,12 +67,12 @@ class CompressionMixin(ArchiveEnginesMixin):
 
         if folders_to_compress:
             dialog = QDialog(self)
-            dialog.setWindowTitle(self.translate_text("Mode de compression des dossiers"))
+            dialog.setWindowTitle(self.translate_text("folder_compression_mode"))
             dialog.setMinimumWidth(500)
 
             layout = QVBoxLayout(dialog)
 
-            folder_info = QLabel(self.translate_text("Dossiers sélectionnés pour compression:"))
+            folder_info = QLabel(self.translate_text("folders_selected_for_compression"))
             folder_info.setStyleSheet("font-weight: bold;")
             layout.addWidget(folder_info)
 
@@ -92,15 +92,17 @@ class CompressionMixin(ArchiveEnginesMixin):
             folder_list.setText(folder_text)
             layout.addWidget(folder_list)
 
-            options_group = QGroupBox(self.translate_text("Options de compression"))
+            options_group = QGroupBox(self.translate_text("compression_options"))
             options_layout = QVBoxLayout(options_group)
 
-            option1 = QRadioButton(self.translate_text("Compresser les dossiers avec leur structure (recommandé)"))
+            option1 = QRadioButton(
+                self.translate_text("compress_folders_with_their_structure_recommended")
+            )
             option1.setChecked(True)
-            option1.setToolTip(self.translate_text("Crée des archives avec la structure complète des dossiers"))
+            option1.setToolTip(self.translate_text("creates_archives_with_the_full_folder_structure"))
 
-            option2 = QRadioButton(self.translate_text("Traiter les dossiers comme des fichiers individuels"))
-            option2.setToolTip(self.translate_text("Ajoute tous les fichiers des dossiers sans conserver la structure"))
+            option2 = QRadioButton(self.translate_text("treat_folders_as_individual_files"))
+            option2.setToolTip(self.translate_text("adds_all_files_from_folders_without_preserving_the_structure"))
 
             options_layout.addWidget(option1)
             options_layout.addWidget(option2)
@@ -130,13 +132,13 @@ class CompressionMixin(ArchiveEnginesMixin):
                 "ZIP": self.translate_text("ZIP"),
                 "RAR": self.translate_text("7Z"),
                 "7Z": self.translate_text("7Z"),
-                "TAR.GZ": self.translate_text("TAR.GZ"),
+                "TAR.GZ": self.translate_text("tar_gz"),
                 "TAR": self.translate_text("TAR"),
             }
             _lvl_map = {
                 "Normal": self.translate_text("Normal"),
-                "Haute compression": self.translate_text("Haute compression"),
-                "Compression maximale": self.translate_text("Compression maximale"),
+                "Haute compression": self.translate_text("high_compression"),
+                "Compression maximale": self.translate_text("maximum_compression"),
             }
             _fmt = tpl.get("format", "ZIP")
             _lvl = tpl.get("compression_level", "Normal")
@@ -197,7 +199,7 @@ class CompressionMixin(ArchiveEnginesMixin):
 
             if not archive_name:
                 QMessageBox.warning(
-                    self, self.translate_text("Erreur"), self.translate_text("Veuillez entrer un nom pour l'archive")
+                    self, self.translate_text("error"), self.translate_text("please_enter_a_name_for_the_archive")
                 )
                 return
 
@@ -215,7 +217,7 @@ class CompressionMixin(ArchiveEnginesMixin):
 
         if not archive_name:
             QMessageBox.warning(
-                self, self.translate_text("Erreur"), self.translate_text("Veuillez entrer un nom pour l'archive")
+                self, self.translate_text("error"), self.translate_text("please_enter_a_name_for_the_archive")
             )
             return
 
@@ -231,15 +233,15 @@ class CompressionMixin(ArchiveEnginesMixin):
                 if not password:
                     QMessageBox.warning(
                         self,
-                        self.translate_text("Avertissement"),
-                        self.translate_text("Veuillez entrer un mot de passe"),
+                        self.translate_text("warning"),
+                        self.translate_text("please_enter_a_password"),
                     )
                     return
                 if pwd_dialog.password_input.text() != pwd_dialog.confirm_input.text():
                     QMessageBox.warning(
                         self,
-                        self.translate_text("Erreur"),
-                        self.translate_text("Les mots de passe ne correspondent pas"),
+                        self.translate_text("error"),
+                        self.translate_text("passwords_do_not_match"),
                     )
                     return
             else:
@@ -341,13 +343,13 @@ class CompressionMixin(ArchiveEnginesMixin):
                     self.format_size(compressed_size),
                 )
 
-                QMessageBox.information(self, self.translate_text("Succès"), self.translate_text(message))
+                QMessageBox.information(self, self.translate_text("success"), self.translate_text(message))
 
             self.show_progress(False)
 
         else:
             self.show_progress(False)
-            QMessageBox.critical(self, self.translate_text("Erreur"), self.translate_text("Compression failed"))
+            QMessageBox.critical(self, self.translate_text("error"), self.translate_text("compression_failed_2"))
 
     def compress_folders_with_structure(
         self,
@@ -440,7 +442,7 @@ class CompressionMixin(ArchiveEnginesMixin):
                     archive_format, Path(archive_path).name, self.format_size(compressed_size)
                 )
 
-                QMessageBox.information(self, self.translate_text("Succès"), self.translate_text(message))
+                QMessageBox.information(self, self.translate_text("success"), self.translate_text(message))
 
                 total_size = 0
                 for folder in folders:
@@ -473,7 +475,7 @@ class CompressionMixin(ArchiveEnginesMixin):
 
                 return archive_path
             else:
-                QMessageBox.critical(self, self.translate_text("Erreur"), self.translate_text("Compression failed"))
+                QMessageBox.critical(self, self.translate_text("error"), self.translate_text("compression_failed_2"))
                 return False
 
         except Exception as e:
@@ -483,6 +485,6 @@ class CompressionMixin(ArchiveEnginesMixin):
 
             traceback.print_exc()
             QMessageBox.critical(
-                self, self.translate_text("Erreur"), self.translate_text(f"Error during compression: {str(e)}")
+                self, self.translate_text("error"), self.translate_text(f"Error during compression: {str(e)}")
             )
             return False

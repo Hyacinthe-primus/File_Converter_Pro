@@ -197,9 +197,9 @@ class AppLogicMixin(
         else:
             QMessageBox.information(
                 self,
-                self.translate_text("Conditions requises"),
+                self.translate_text("required_conditions"),
                 self.translate_text(
-                    "Vous devez accepter les conditions d'utilisation et la politique de confidentialité pour utiliser cette application."  # noqa: E501
+                    "you_must_accept_the_terms_of_use_and_privacy_policy_to_use_this"  # noqa: E501
                 ),
             )
             sys.exit(0)
