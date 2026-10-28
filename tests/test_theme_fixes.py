@@ -305,7 +305,87 @@ class TestQuickConvertCardTheme:
 
 
 class TestDialogButtonsTheme:
-    """Dialog action buttons must be themeable through each theme's buttons.qss."""
+    """Dialog action buttons must follow each theme's actual button styling."""
+
+    def test_dialog_button_rules_come_from_theme_style(self):
+        from qss_helpers import _dialog_buttons_qss
+
+        dark = _dialog_buttons_qss("dark")
+        light = _dialog_buttons_qss("light")
+        assert "QPushButton#BtnOK" in dark
+        assert "QPushButton#BtnOK" in light
+        assert "QMainWindow" not in dark
+        assert dark != light
+        assert "background-color: #21262d" in dark
+        assert "background-color: #0969da" in light
+
+    def test_custom_theme_uses_style_qss_instead_of_stale_buttons_qss(self, tmp_path, monkeypatch):
+        from pathlib import Path
+
+        import qss_helpers
+
+        root = Path(__file__).resolve().parents[1]
+        stale_buttons = (root / "src" / "styles" / "themes" / "buttons.qss").read_text(encoding="utf-8")
+        theme_dir = tmp_path / "MyTheme"
+        theme_dir.mkdir()
+        (theme_dir / "style.qss").write_text(
+            "QPushButton#BtnOK { background: #123456; }", encoding="utf-8"
+        )
+        (theme_dir / "buttons.qss").write_text(stale_buttons, encoding="utf-8")
+        monkeypatch.setattr(qss_helpers, "_CUSTOM_THEMES_DIR", str(tmp_path))
+        qss = qss_helpers._dialog_buttons_qss("MyTheme")
+        assert "#123456" in qss
+        assert "rgba(40,167,69,0.20)" not in qss
+
+    def test_custom_theme_can_override_buttons_qss(self, tmp_path, monkeypatch):
+        import qss_helpers
+
+        theme_dir = tmp_path / "MyTheme"
+        theme_dir.mkdir()
+        (theme_dir / "style.qss").write_text(
+            "QPushButton#BtnOK { background: #123456; }", encoding="utf-8"
+        )
+        (theme_dir / "buttons.qss").write_text(
+            "QPushButton#BtnOK { background: #abcdef; }", encoding="utf-8"
+        )
+        monkeypatch.setattr(qss_helpers, "_CUSTOM_THEMES_DIR", str(tmp_path))
+        qss = qss_helpers._dialog_buttons_qss("MyTheme")
+        assert "#abcdef" in qss
+        assert "#123456" not in qss
+
+    def test_custom_theme_without_button_rules_falls_back_to_buttons_qss(self, tmp_path, monkeypatch):
+        from pathlib import Path
+
+        import qss_helpers
+
+        root = Path(__file__).resolve().parents[1]
+        stale_buttons = (root / "src" / "styles" / "themes" / "buttons.qss").read_text(encoding="utf-8")
+        theme_dir = tmp_path / "MyTheme"
+        theme_dir.mkdir()
+        (theme_dir / "style.qss").write_text("QLabel { color: red; }", encoding="utf-8")
+        (theme_dir / "buttons.qss").write_text(stale_buttons, encoding="utf-8")
+        monkeypatch.setattr(qss_helpers, "_CUSTOM_THEMES_DIR", str(tmp_path))
+        qss = qss_helpers._dialog_buttons_qss("MyTheme")
+        assert "rgba(40,167,69,0.20)" in qss
+
+    def test_apply_dialog_btn_refreshes_with_theme(self, qapp):
+        from PySide6.QtWidgets import QPushButton
+
+        from qss_helpers import _apply_dialog_btn, set_theme
+
+        btn = QPushButton()
+        try:
+            set_theme("dark")
+            _apply_dialog_btn(btn, "BtnOK")
+            dark_qss = btn.styleSheet()
+            set_theme("light")
+            _apply_dialog_btn(btn, "BtnOK")
+            light_qss = btn.styleSheet()
+        finally:
+            set_theme(None)
+        assert "background-color: #21262d" in dark_qss
+        assert "background-color: #0969da" in light_qss
+        assert dark_qss != light_qss
 
     def test_builtin_themes_style_dialog_buttons(self):
         from pathlib import Path

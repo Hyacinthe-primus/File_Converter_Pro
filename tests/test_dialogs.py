@@ -136,6 +136,37 @@ class TestWordToPdfDialog:
         assert issubclass(WordToPdfOptionsDialog, TranslationMixin)
 
 
+class TestWordToPdfDialogSizing:
+    """Regression: the dialog must open at its layout size, not Windows' clamped minimum."""
+
+    @pytest.fixture(autouse=True)
+    def _qapp(self, qapp):
+        self._app = qapp
+        yield
+        qapp.processEvents()
+
+    @pytest.mark.parametrize("language", ["fr", "en"])
+    def test_initial_size_meets_layout_size_hint(self, language):
+        from dialogs import WordToPdfOptionsDialog
+
+        dlg = WordToPdfOptionsDialog(None, language, True)
+        hint = dlg.layout().sizeHint()
+        assert dlg.width() >= hint.width()
+        assert dlg.height() >= hint.height()
+        dlg.close()
+
+    def test_shown_size_does_not_shrink_below_layout_size_hint(self):
+        from dialogs import WordToPdfOptionsDialog
+
+        dlg = WordToPdfOptionsDialog(None, "fr", True)
+        hint = dlg.layout().sizeHint()
+        dlg.show()
+        self._app.processEvents()
+        assert dlg.width() >= hint.width()
+        assert dlg.height() >= hint.height()
+        dlg.close()
+
+
 class TestTermsDialog:
     def test_import(self):
         from dialogs.terms_dialog import TermsAndPrivacyDialog

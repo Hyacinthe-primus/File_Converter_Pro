@@ -62,6 +62,7 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         self.setWindowTitle(self.translate_text("word_to_pdf_conversion_options"))
         self.setModal(True)
         self._setup_ui()
+        self.resize(self.layout().sizeHint().expandedTo(self.layout().minimumSize()))
 
     def _setup_ui(self) -> None:
         """Build and wire all top-level widgets into the dialog layout."""

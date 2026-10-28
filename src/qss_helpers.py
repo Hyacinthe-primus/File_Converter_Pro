@@ -13,12 +13,13 @@ Expected structure:
 """
 
 import os
+import re
 
 from utils import SRC_DIR, resource_path
 
 _ROOT_DIR = str(SRC_DIR)
 
-__all__ = ["_load_qss", "_apply_dialog_btn", "_ROOT_DIR"]
+__all__ = ["_load_qss", "_apply_dialog_btn", "_dialog_buttons_qss", "_ROOT_DIR"]
 
 _THEMES_DIR = resource_path(os.path.join("styles", "themes"))
 _CUSTOM_THEMES_DIR = resource_path(os.path.join("styles", "custom_themes"))
@@ -83,6 +84,35 @@ def _load_qss(filename: str, theme: str | None = None) -> str:
         return ""
 
 
+_QSS_BLOCK_RE = re.compile(r"([^{}]+)\{([^{}]*)\}", re.DOTALL)
+
+
+def _extract_qss_blocks(qss: str, selector_token: str) -> str:
+    """Return top-level QSS blocks whose selector contains selector_token."""
+    blocks = []
+    for match in _QSS_BLOCK_RE.finditer(qss):
+        if selector_token in match.group(1):
+            blocks.append(match.group(0).strip())
+    return "\n\n".join(blocks)
+
+
+def _dialog_buttons_qss(theme: str | None) -> str:
+    """Return dialog-button rules for the active theme.
+
+    A theme-specific buttons.qss wins when it differs from the stock fallback.
+    Otherwise the theme's style.qss is the source of truth, which prevents
+    custom themes that ship a stale copy of buttons.qss from losing their look.
+    """
+    buttons_qss = _load_qss("buttons.qss", theme)
+    default_buttons_qss = _load_qss("buttons.qss", None)
+    if buttons_qss and buttons_qss != default_buttons_qss:
+        return buttons_qss
+    button_rules = _extract_qss_blocks(_load_qss("style.qss", theme), "QPushButton")
+    if button_rules:
+        return button_rules
+    return buttons_qss or default_buttons_qss
+
+
 _BUTTONS_QSS: str | None = None
 _CURRENT_THEME: str | None = None
 
@@ -91,7 +121,7 @@ def set_theme(theme: str | None) -> None:
     """Set the active theme ("dark", "light", or custom name).
 
     Resets the button stylesheet cache so that the next call to
-    _apply_dialog_btn reloads buttons.qss from the new theme folder.
+    _apply_dialog_btn reloads button rules from the new theme's style.qss.
     """
     global _CURRENT_THEME, _BUTTONS_QSS
     _CURRENT_THEME = theme
@@ -106,13 +136,13 @@ def get_current_theme(dark: bool) -> str:
 
 
 def _apply_dialog_btn(btn, object_name: str) -> None:
-    """Assign object_name and apply buttons.qss directly on btn.
+    """Assign object_name and apply the active theme's button rules to btn.
 
-    QDialog instances are top-level windows: the main-window stylesheet does
-    not cascade into them, so objectName alone is not sufficient, the
-    stylesheet must be set explicitly on each button.
+    Dialog buttons are styled explicitly so they keep the active theme even
+    when their parent does not propagate its stylesheet. The rules come from
+    the theme's style.qss; buttons.qss is only a legacy fallback.
 
-    Supported object names (defined in styles/themes/[theme/]buttons.qss):
+    Supported object names (defined in styles/themes/[theme/]style.qss):
         BtnOK        - green confirm button
         BtnCancel    - neutral cancel button
         BtnCancelRed - red/destructive cancel button
@@ -122,6 +152,6 @@ def _apply_dialog_btn(btn, object_name: str) -> None:
         return
     btn.setObjectName(object_name)
     if _BUTTONS_QSS is None:
-        _BUTTONS_QSS = _load_qss("buttons.qss", _CURRENT_THEME)
+        _BUTTONS_QSS = _dialog_buttons_qss(_CURRENT_THEME)
     if _BUTTONS_QSS:
         btn.setStyleSheet(_BUTTONS_QSS)
