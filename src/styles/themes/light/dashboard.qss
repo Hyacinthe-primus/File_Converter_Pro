@@ -27,7 +27,7 @@ QTabBar::tab:selected {
     background: #ffffff;
     color: #1a202c;
     font-weight: 700;
-    border-bottom: 2px solid #4dabf7;
+    border-bottom: 2px solid #2b6cb0;
 }
 QTabBar::tab:hover:!selected {
     background: #edf2ff;
@@ -74,10 +74,10 @@ QTableWidget::item {
     padding: 6px 8px;
     border: none;
 }
-QTableWidget::item:hover { background-color: #1a1726; }
+QTableWidget::item:hover { background-color: #f7faff; }
 QTableWidget::item:selected {
-    background-color: rgba(124,58,237,0.18);
-    color: #c4b5fd;
+    background-color: #dbeafe;
+    color: #1e40af;
 }
 QHeaderView::section {
     background: #eef2fa;
@@ -100,8 +100,8 @@ QComboBox {
     font-size: 12px;
     min-width: 140px;
 }
-QComboBox:hover { border-color: #4dabf7; }
-QComboBox:focus { border-color: #a78bfa; }
+QComboBox:hover { border-color: #2b6cb0; }
+QComboBox:focus { border-color: #2b6cb0; }
 QComboBox::drop-down { border: none; width: 24px; }
 QComboBox QAbstractItemView {
     background: #ffffff;
@@ -109,7 +109,7 @@ QComboBox QAbstractItemView {
     border: 1px solid #dde3ec;
     border-radius: 8px;
     selection-background-color: #dbeafe;
-    selection-color: #c4b5fd;
+    selection-color: #1e40af;
 }
 
 /* inputs */
@@ -121,8 +121,8 @@ QLineEdit {
     padding: 6px 12px;
     font-size: 12px;
 }
-QLineEdit:focus { border-color: #4dabf7; }
-QLineEdit:hover { border-color: rgba(160,140,255,0.22); }
+QLineEdit:focus { border-color: #2b6cb0; }
+QLineEdit:hover { border-color: #93c5fd; }
 
 /* date edit */
 QDateEdit {
@@ -133,8 +133,8 @@ QDateEdit {
     padding: 6px 22px 6px 10px;
     font-size: 12px;
 }
-QDateEdit:hover { border-color: #4dabf7; }
-QDateEdit:focus { border-color: #a78bfa; }
+QDateEdit:hover { border-color: #2b6cb0; }
+QDateEdit:focus { border-color: #2b6cb0; }
 QDateEdit::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: center right;

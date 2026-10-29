@@ -48,6 +48,13 @@ from PySide6.QtWidgets import (
 )
 
 from converter import AdvancedDatabaseManager
+from dashboard_theme import (
+    DashboardPalette,
+    accent_variants,
+    contrast_text,
+    get_dashboard_palette,
+    shade_color,
+)
 from qss_helpers import _load_qss
 from utils.translation_mixin import TranslationMixin
 
@@ -116,10 +123,10 @@ class _AdvDbProxy:
 class _FillBar(QWidget):
     """A thin bar that fills left-to-right with a shimmer sweep on hover."""
 
-    def __init__(self, color: str, dark_mode: bool, parent=None):
+    def __init__(self, color: str, track_color: str = "#2d3748", parent=None):
         super().__init__(parent)
         self.accent_color = color
-        self.dark_mode = dark_mode
+        self.track_color = track_color
         self._fill = 0.0
         self._shimmer = 0.0
         self.setFixedHeight(4)
@@ -133,6 +140,11 @@ class _FillBar(QWidget):
         self._shimmer_timer = QTimer(self)
         self._shimmer_timer.setInterval(14)
         self._shimmer_timer.timeout.connect(self._shimmer_tick)
+
+    def set_palette(self, palette: DashboardPalette):
+        self.accent_color = palette.accent
+        self.track_color = palette.surface_alt
+        self.update()
 
     def animate_in(self):
         self._fill_target = 1.0
@@ -169,19 +181,19 @@ class _FillBar(QWidget):
         w, h = self.width(), self.height()
         r = h // 2
 
-        track_color = QColor("#2d3748" if self.dark_mode else "#e2e8f0")
+        track_color = QColor(self.track_color)
+        if not track_color.isValid():
+            track_color = QColor("#2d3748")
         p.setPen(Qt.NoPen)
         p.setBrush(QBrush(track_color))
         p.drawRoundedRect(0, 0, w, h, r, r)
 
         fill_w = int(w * self._fill)
         if fill_w > 0:
-            try:
-                ar = int(self.accent_color[1:3], 16)
-                ag = int(self.accent_color[3:5], 16)
-                ab = int(self.accent_color[5:7], 16)
-            except Exception:
-                ar, ag, ab = 77, 171, 247
+            accent = QColor(self.accent_color)
+            if not accent.isValid():
+                accent = QColor("#4dabf7")
+            ar, ag, ab = accent.red(), accent.green(), accent.blue()
 
             grad = QLinearGradient(0, 0, fill_w, 0)
             grad.setColorAt(0.0, QColor(ar, ag, ab, 180))
@@ -207,12 +219,21 @@ class _FillBar(QWidget):
 class AnimatedStatCard(QFrame):
     """Stat card with count-up, smooth hover glow, and fill-bar animation."""
 
-    def __init__(self, icon: str, title: str, color: str, dark_mode: bool = False, parent=None):
+    def __init__(
+        self,
+        icon: str,
+        title: str,
+        color: str | None = None,
+        dark_mode: bool = False,
+        parent=None,
+        palette: DashboardPalette | None = None,
+    ):
         super().__init__(parent)
         self.icon = icon
         self.title = title
-        self.accent_color = color
-        self.dark_mode = dark_mode
+        self.palette = palette or DashboardPalette.fallback(dark_mode, color)
+        self.accent_color = self.palette.accent
+        self.dark_mode = self.palette.dark
 
         self._start_value = 0.0
         self._target_value = 0.0
@@ -249,7 +270,7 @@ class AnimatedStatCard(QFrame):
         self._title_lbl = QLabel(self.title)
         self._title_lbl.setStyleSheet(
             f"font-size: 11px; font-weight: 600; letter-spacing: 0.5px; "
-            f"color: {'#8b9ab0' if not self.dark_mode else '#7c8fa3'}; background: transparent;"
+            f"color: {self.palette.muted}; background: transparent;"
         )
         self._title_lbl.setWordWrap(True)
         header.addWidget(self._icon_lbl)
@@ -258,12 +279,12 @@ class AnimatedStatCard(QFrame):
 
         self._value_lbl = QLabel("—")
         self._value_lbl.setStyleSheet(
-            f"font-size: 32px; font-weight: 800; color: {self.accent_color}; "
+            f"font-size: 32px; font-weight: 800; color: {self.palette.accent_text}; "
             f"letter-spacing: -1px; background: transparent;"
         )
         layout.addWidget(self._value_lbl)
 
-        self._fill_bar = _FillBar(self.accent_color, self.dark_mode, self)
+        self._fill_bar = _FillBar(self.palette.accent, self.palette.surface_alt, self)
         layout.addStretch()
         layout.addWidget(self._fill_bar)
 
@@ -273,15 +294,8 @@ class AnimatedStatCard(QFrame):
         return f"#{int(r1 + (r2 - r1) * t):02x}{int(g1 + (g2 - g1) * t):02x}{int(b1 + (b2 - b1) * t):02x}"
 
     def _apply_card_style(self, t: float):
-        if self.dark_mode:
-            bg0, bg1 = "#1e2535", "#252f42"
-            border0 = "#2d3748"
-        else:
-            bg0, bg1 = "#ffffff", "#f0f5ff"
-            border0 = "#e8ecf0"
-
-        bg = self._lerp_color(bg0, bg1, t)
-        border = self._lerp_color(border0, self.accent_color, t)
+        bg = self._lerp_color(self.palette.surface, self.palette.surface_alt, t)
+        border = self._lerp_color(self.palette.border, self.palette.accent, t)
 
         self.setStyleSheet(f"""
             AnimatedStatCard {{
@@ -292,13 +306,10 @@ class AnimatedStatCard(QFrame):
         """)
 
         effect = QGraphicsDropShadowEffect(self)
-        try:
-            r = int(self.accent_color[1:3], 16)
-            g = int(self.accent_color[3:5], 16)
-            b = int(self.accent_color[5:7], 16)
-            effect.setColor(QColor(r, g, b, int(20 + 110 * t)))
-        except Exception:
-            effect.setColor(QColor(0, 0, 0, int(20 + 60 * t)))
+        accent = QColor(self.palette.accent)
+        if not accent.isValid():
+            accent = QColor("#4dabf7")
+        effect.setColor(QColor(accent.red(), accent.green(), accent.blue(), int(20 + 110 * t)))
         effect.setBlurRadius(int(10 + 32 * t))
         effect.setOffset(0, int(2 + 6 * t))
         self.setGraphicsEffect(effect)
@@ -352,14 +363,29 @@ class AnimatedStatCard(QFrame):
             self._count_timer.stop()
             self._value_lbl.setText(self._full_display)
 
-    def set_dark_mode(self, dark: bool):
-        self.dark_mode = dark
-        self._fill_bar.dark_mode = dark
+    def set_palette(self, palette: DashboardPalette):
+        self.palette = palette
+        self.accent_color = palette.accent
+        self.dark_mode = palette.dark
         self._title_lbl.setStyleSheet(
             f"font-size: 11px; font-weight: 600; letter-spacing: 0.5px; "
-            f"color: {'#8b9ab0' if not dark else '#7c8fa3'}; background: transparent;"
+            f"color: {palette.muted}; background: transparent;"
         )
+        self._value_lbl.setStyleSheet(
+            f"font-size: 32px; font-weight: 800; color: {palette.accent_text}; "
+            f"letter-spacing: -1px; background: transparent;"
+        )
+        self._fill_bar.set_palette(palette)
         self._apply_card_style(t=0.0)
+
+    def set_dark_mode(self, dark: bool):
+        self.set_palette(
+            DashboardPalette.fallback(
+                dark,
+                self.palette.accent,
+                self.palette.accent_text,
+            )
+        )
 
 
 class StatisticsDashboard(TranslationMixin, QDialog):
@@ -382,6 +408,9 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         self.setMinimumSize(1100, 700)
         self.setWindowFlag(Qt.FramelessWindowHint, False)
         self._dark = self._get_dark_mode()
+        self._palette = get_dashboard_palette(self._resolve_theme_name(), self._dark)
+        self._section_widgets = []
+        self._db_mode = "main"
         # DB selector state
         self._main_db = db_manager
         self._adv_db = None
@@ -394,18 +423,48 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             parent.theme_changed.connect(self._apply_global_style)
 
     def _get_dark_mode(self):
-        return hasattr(self.parent(), "dark_mode") and self.parent().dark_mode
+        parent = self.parent()
+        return bool(getattr(parent, "dark_mode", False)) if parent else False
 
-    def _apply_global_style(self):
-        arrow_svg = _get_asset_path("Assets/down-arrow.svg")
+    def _resolve_theme_name(self) -> str:
         parent = self.parent()
         custom_theme = getattr(parent, "current_theme", None) if parent else None
         if custom_theme and custom_theme not in ("dark", "light"):
-            theme = custom_theme
-        else:
-            theme = "dark" if self._dark else "light"
+            return custom_theme
+        return "dark" if self._dark else "light"
+
+    def _apply_global_style(self, *args):
+        self._dark = self._get_dark_mode()
+        theme = self._resolve_theme_name()
+        self._palette = get_dashboard_palette(theme, self._dark)
+        arrow_svg = _get_asset_path("Assets/down-arrow.svg")
         qss = _load_qss("dashboard.qss", theme)
         self.setStyleSheet(qss.replace("{arrow_svg}", arrow_svg))
+        self._refresh_theme_widgets()
+
+    def _refresh_theme_widgets(self):
+        for card in (
+            getattr(self, "card_conversions", None),
+            getattr(self, "card_size", None),
+            getattr(self, "card_time_saved", None),
+            getattr(self, "card_avg_time", None),
+        ):
+            if card is not None:
+                card.set_palette(self._palette)
+        for frame, header in self._section_widgets:
+            self._style_section(frame, header)
+        if hasattr(self, "_chart_frame"):
+            self._style_chart_frame()
+        if hasattr(self, "_filters_frame"):
+            self._style_filters_frame()
+        if hasattr(self, "_db_bar"):
+            self._style_db_bar()
+        self._style_action_buttons()
+        self._style_calendars()
+        if hasattr(self, "_divider"):
+            self._style_divider()
+        if hasattr(self, "chart_canvas") and self.chart_canvas.figure.axes:
+            self.update_charts()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -422,7 +481,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
         self.refresh_btn = QPushButton("🔄  " + self.translate_text("refresh_statistics"))
         self.refresh_btn.clicked.connect(self._animate_refresh)
-        self.refresh_btn.setStyleSheet(self._btn_style("#28a745", "#218838", "#1a6e2e"))
+        self.refresh_btn.setStyleSheet(self._accent_btn_style())
         self.refresh_btn.setCursor(Qt.PointingHandCursor)
         self.refresh_btn.setFixedHeight(36)
 
@@ -430,10 +489,10 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         top_bar.addSpacing(8)
         layout.addLayout(top_bar)
 
-        divider = QFrame()
-        divider.setFrameShape(QFrame.HLine)
-        divider.setStyleSheet("color: #2d3748; background: #2d3748; max-height: 1px;")
-        layout.addWidget(divider)
+        self._divider = QFrame()
+        self._divider.setFrameShape(QFrame.HLine)
+        self._style_divider()
+        layout.addWidget(self._divider)
 
         self.tab_widget = QTabWidget()
         self.tab_widget.setDocumentMode(True)
@@ -450,11 +509,12 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
         layout.addWidget(self.tab_widget, 1)
 
-    def _btn_style(self, bg, hover, pressed):
+    def _btn_style(self, bg, hover, pressed, color=None):
+        color = color or self._palette.on_accent
         return f"""
             QPushButton {{
                 background-color: {bg};
-                color: white;
+                color: {color};
                 border: none;
                 padding: 0 18px;
                 border-radius: 9px;
@@ -470,8 +530,73 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             }}
         """
 
+    def _accent_btn_style(self, accent=None):
+        accent = accent or self._palette.accent
+        return self._btn_style(accent, shade_color(accent, -0.14), shade_color(accent, -0.28))
+
+    def _style_divider(self):
+        self._divider.setStyleSheet(
+            f"color: {self._palette.border}; background: {self._palette.border}; max-height: 1px;"
+        )
+
+    def _style_section(self, frame, header):
+        palette = self._palette
+        frame.setStyleSheet(f"""
+            QFrame {{
+                background: {palette.surface};
+                border: 1px solid {palette.border};
+                border-radius: 12px;
+            }}
+        """)
+        header.setStyleSheet(f"""
+            QLabel {{
+                background: {palette.surface_alt};
+                color: {palette.accent_text};
+                font-size: 13px;
+                font-weight: 700;
+                padding: 10px 14px;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
+                border-bottom: 1px solid {palette.border};
+            }}
+        """)
+
+    def _style_chart_frame(self):
+        palette = self._palette
+        self._chart_frame.setStyleSheet(f"""
+            QFrame {{
+                background: {palette.surface};
+                border: 1px solid {palette.border};
+                border-radius: 14px;
+            }}
+        """)
+
+    def _style_filters_frame(self):
+        palette = self._palette
+        self._filters_frame.setStyleSheet(f"""
+            QFrame {{
+                background: {palette.surface};
+                border: 1px solid {palette.border};
+                border-radius: 10px;
+                padding: 4px;
+            }}
+        """)
+
+    def _style_action_buttons(self):
+        for name in ("refresh_btn", "apply_filters_btn", "_export_csv_btn", "_export_json_btn"):
+            button = getattr(self, name, None)
+            if button is not None:
+                button.setStyleSheet(self._accent_btn_style())
+
+    def _style_calendars(self):
+        qss = _load_qss("history_calendar.qss", self._resolve_theme_name())
+        for name in ("start_date_edit", "end_date_edit"):
+            editor = getattr(self, name, None)
+            if editor is not None:
+                editor.calendarWidget().setStyleSheet(qss)
+
     def create_overview_tab(self):
-        dm = self._dark
+        palette = self._palette
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(16, 16, 16, 16)
@@ -480,10 +605,10 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         cards_layout = QHBoxLayout()
         cards_layout.setSpacing(14)
 
-        self.card_conversions = AnimatedStatCard("🔄", self.translate_text("total_conversions"), "#4dabf7", dm)
-        self.card_size = AnimatedStatCard("💾", self.translate_text("total_size_processed"), "#28a745", dm)
-        self.card_time_saved = AnimatedStatCard("⏱️", self.translate_text("time_saved"), "#ff6b6b", dm)
-        self.card_avg_time = AnimatedStatCard("⚡", self.translate_text("average_conversion_time"), "#ffd166", dm)
+        self.card_conversions = AnimatedStatCard("🔄", self.translate_text("total_conversions"), palette=palette)
+        self.card_size = AnimatedStatCard("💾", self.translate_text("total_size_processed"), palette=palette)
+        self.card_time_saved = AnimatedStatCard("⏱️", self.translate_text("time_saved"), palette=palette)
+        self.card_avg_time = AnimatedStatCard("⚡", self.translate_text("average_conversion_time"), palette=palette)
 
         for card in [self.card_conversions, self.card_size, self.card_time_saved, self.card_avg_time]:
             card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -496,36 +621,19 @@ class StatisticsDashboard(TranslationMixin, QDialog):
 
         def make_section(title, table_attr, headers):
             container = QFrame()
-            container.setStyleSheet(f"""
-                QFrame {{
-                    background: {"#161b27" if dm else "#ffffff"};
-                    border: 1px solid {"#2d3748" if dm else "#dde3ec"};
-                    border-radius: 12px;
-                }}
-            """)
             vbox = QVBoxLayout(container)
             vbox.setContentsMargins(0, 0, 0, 0)
             vbox.setSpacing(0)
 
             header_lbl = QLabel(title)
-            header_lbl.setStyleSheet(f"""
-                QLabel {{
-                    background: {"#1a2236" if dm else "#eef2fa"};
-                    color: {"#90caf9" if dm else "#2b6cb0"};
-                    font-size: 13px;
-                    font-weight: 700;
-                    padding: 10px 14px;
-                    border-top-left-radius: 12px;
-                    border-top-right-radius: 12px;
-                    border-bottom: 1px solid {"#2d3748" if dm else "#dde3ec"};
-                }}
-            """)
             vbox.addWidget(header_lbl)
 
             tbl = self._make_table(headers, max_h=220)
             tbl.setStyleSheet("border: none; border-radius: 0;")
             vbox.addWidget(tbl)
             setattr(self, table_attr, tbl)
+            self._section_widgets.append((container, header_lbl))
+            self._style_section(container, header_lbl)
             return container
 
         formats_section = make_section(
@@ -604,22 +712,16 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         controls_layout.addStretch()
         layout.addLayout(controls_layout)
 
-        canvas_frame = QFrame()
-        canvas_frame.setStyleSheet(f"""
-            QFrame {{
-                background: {"#161b27" if self._dark else "#ffffff"};
-                border: 1px solid {"#2d3748" if self._dark else "#dde3ec"};
-                border-radius: 14px;
-            }}
-        """)
-        canvas_layout = QVBoxLayout(canvas_frame)
+        self._chart_frame = QFrame()
+        self._style_chart_frame()
+        canvas_layout = QVBoxLayout(self._chart_frame)
         canvas_layout.setContentsMargins(8, 8, 8, 8)
 
         self.chart_canvas = FigureCanvas(Figure(figsize=(10, 6)))
         self.chart_canvas.setStyleSheet("background: transparent; border: none;")
         canvas_layout.addWidget(self.chart_canvas)
 
-        layout.addWidget(canvas_frame, 1)
+        layout.addWidget(self._chart_frame, 1)
         return widget
 
     def create_details_tab(self):
@@ -628,16 +730,9 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         layout.setContentsMargins(16, 14, 16, 14)
         layout.setSpacing(12)
 
-        filters_frame = QFrame()
-        filters_frame.setStyleSheet(f"""
-            QFrame {{
-                background: {"#161b27" if self._dark else "#f8faff"};
-                border: 1px solid {"#2d3748" if self._dark else "#dde3ec"};
-                border-radius: 10px;
-                padding: 4px;
-            }}
-        """)
-        filters_layout = QHBoxLayout(filters_frame)
+        self._filters_frame = QFrame()
+        self._style_filters_frame()
+        filters_layout = QHBoxLayout(self._filters_frame)
         filters_layout.setContentsMargins(12, 8, 12, 8)
         filters_layout.setSpacing(10)
 
@@ -664,13 +759,12 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         self.end_date_edit.setMinimumWidth(160)
         self.end_date_edit.setDisplayFormat("dd/MM/yyyy")
 
-        self.start_date_edit.calendarWidget().setStyleSheet(_load_qss("history_calendar.qss"))
-        self.end_date_edit.calendarWidget().setStyleSheet(_load_qss("history_calendar.qss"))
+        self._style_calendars()
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText(self.translate_text("search_in_history"))
 
         self.apply_filters_btn = QPushButton("🔍  " + self.translate_text("apply_filters"))
-        self.apply_filters_btn.setStyleSheet(self._btn_style("#4361ee", "#3451d1", "#2a3fbf"))
+        self.apply_filters_btn.setStyleSheet(self._accent_btn_style())
         self.apply_filters_btn.setCursor(Qt.PointingHandCursor)
         self.apply_filters_btn.setFixedHeight(34)
         self.apply_filters_btn.clicked.connect(self.load_statistics)
@@ -681,7 +775,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         filters_layout.addWidget(self.end_date_edit)
         filters_layout.addWidget(self.search_input, 1)
         filters_layout.addWidget(self.apply_filters_btn)
-        layout.addWidget(filters_frame)
+        layout.addWidget(self._filters_frame)
 
         self.detailed_table = self._make_table(
             [
@@ -709,20 +803,20 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         export_layout = QHBoxLayout()
         export_layout.setSpacing(10)
 
-        export_csv_btn = QPushButton("📊  " + self.translate_text("export_to_csv"))
-        export_csv_btn.setStyleSheet(self._btn_style("#4361ee", "#3451d1", "#2a3fbf"))
-        export_csv_btn.setCursor(Qt.PointingHandCursor)
-        export_csv_btn.setFixedHeight(34)
-        export_csv_btn.clicked.connect(lambda: self.export_history("csv"))
+        self._export_csv_btn = QPushButton("📊  " + self.translate_text("export_to_csv"))
+        self._export_csv_btn.setStyleSheet(self._accent_btn_style())
+        self._export_csv_btn.setCursor(Qt.PointingHandCursor)
+        self._export_csv_btn.setFixedHeight(34)
+        self._export_csv_btn.clicked.connect(lambda: self.export_history("csv"))
 
-        export_json_btn = QPushButton("📋  " + self.translate_text("export_to_json"))
-        export_json_btn.setStyleSheet(self._btn_style("#7c3aed", "#6d28d9", "#5b21b6"))
-        export_json_btn.setCursor(Qt.PointingHandCursor)
-        export_json_btn.setFixedHeight(34)
-        export_json_btn.clicked.connect(lambda: self.export_history("json"))
+        self._export_json_btn = QPushButton("📋  " + self.translate_text("export_to_json"))
+        self._export_json_btn.setStyleSheet(self._accent_btn_style())
+        self._export_json_btn.setCursor(Qt.PointingHandCursor)
+        self._export_json_btn.setFixedHeight(34)
+        self._export_json_btn.clicked.connect(lambda: self.export_history("json"))
 
-        export_layout.addWidget(export_csv_btn)
-        export_layout.addWidget(export_json_btn)
+        export_layout.addWidget(self._export_csv_btn)
+        export_layout.addWidget(self._export_json_btn)
         export_layout.addStretch()
         layout.addLayout(export_layout)
 
@@ -850,14 +944,15 @@ class StatisticsDashboard(TranslationMixin, QDialog):
         self._fade_chart(fade_in=False, callback=self._redraw_and_fadein)
 
     def update_charts(self):
-        dm = self._get_dark_mode()
+        palette = self._palette
 
-        bg_color = "#0d1117" if dm else "#ffffff"
-        plot_bg_color = "#161b27" if dm else "#f8f9fa"
-        grid_color = "#2d3748" if dm else "#e2e8f0"
-        axis_color = "#8899aa" if dm else "#64748b"
-        text_color = "#e2e8f0" if dm else "#1a202c"
-        label_color = "#cbd5e0" if dm else "#374151"
+        bg_color = palette.surface
+        plot_bg_color = palette.surface_alt
+        grid_color = palette.border
+        axis_color = palette.muted
+        text_color = palette.text
+        label_color = palette.text
+        accent = palette.accent
 
         days_map = {
             self.translate_text("last_7_days"): 7,
@@ -886,8 +981,8 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             conversions = [r[1] for r in stats["daily_stats"]]
             x_pos = range(len(dates))
 
-            bar_color = "#640986" if dm else "#1e3a8a"
-            edge_color = "#1e2535" if dm else "#ffffff"
+            bar_color = accent
+            edge_color = palette.surface
             ax.bar(
                 x_pos,
                 conversions,
@@ -931,7 +1026,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             dates = [datetime.strptime(r[0], "%Y-%m-%d") for r in stats["daily_stats"]]
             sizes_mb = [r[2] / (1024 * 1024) for r in stats["daily_stats"]]
 
-            line_color = "#0891B2" if dm else "#28a745"
+            line_color = accent
             ax.plot(
                 dates,
                 sizes_mb,
@@ -987,33 +1082,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             total = sum(counts)
             percentages = [c / float(total) * 100 for c in counts]
 
-            color_map = {
-                "PDF vers Word": "#1e3a8a",
-                "PDF to Word": "#1e3a8a",
-                "Word vers PDF": "#3b82f6",
-                "Word to PDF": "#3b82f6",
-                "Images vers PDF": "#10b981",
-                "Images to PDF": "#10b981",
-                "Images vers PDF séparés": "#059669",
-                "Images to Separate PDFs": "#059669",
-                "Fusion PDF": "#8b5cf6",
-                "Merge PDF": "#8b5cf6",
-                "Fusion Word": "#2a0a74",
-                "Merge Word": "#2a0a74",
-                "Division PDF": "#f59e0b",
-                "Split PDF": "#f59e0b",
-                "Protection PDF": "#ef4444",
-                "Protect PDF": "#ef4444",
-                "Compression de fichiers": "#6366f1",
-                "File Compression": "#6366f1",
-                "Optimisation bureautique": "#06b6d4",
-                "Office Optimization": "#06b6d4",
-                "Conversion par Lot": "#ec4899",
-                "Batch Conversion": "#ec4899",
-                "Renommage par Lot": "#8b5cf6",
-                "Batch Rename": "#8b5cf6",
-            }
-            colors = [color_map.get(op, plt.cm.Set3(i / max(len(operations), 1))) for i, op in enumerate(operations)]
+            colors = accent_variants(accent, len(operations))
 
             def custom_autopct(pct):
                 return f"{pct:.1f}%" if pct >= 10 else ""
@@ -1027,9 +1096,9 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                 wedgeprops=dict(width=0.42, edgecolor=bg_color, linewidth=1.5),
                 pctdistance=0.82,
             )
-            for at in autotexts:
+            for at, color in zip(autotexts, colors):
                 if at.get_text():
-                    at.set_color("white")
+                    at.set_color(contrast_text(color))
                     at.set_fontweight("bold")
                     at.set_fontsize(9)
 
@@ -1073,7 +1142,7 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                     ha="center",
                     va="center",
                     fontsize=8,
-                    color="#6b7280" if not dm else "#8b94a1",
+                    color=palette.muted,
                     style="italic",
                 )
 
@@ -1085,8 +1154,8 @@ class StatisticsDashboard(TranslationMixin, QDialog):
             ax.barh(
                 formats,
                 counts,
-                color=[plt.cm.Pastel1(i / max(n, 1)) for i in range(n)],
-                edgecolor=grid_color,
+                color=accent_variants(accent, n),
+                edgecolor=palette.border,
                 linewidth=0.8,
                 height=0.65,
             )
@@ -1135,78 +1204,79 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                     self, self.translate_text("error"), self.translate_text(f"Erreur lors de l'export: {str(e)}")
                 )
 
+    def _style_db_bar(self):
+        palette = self._palette
+        self._db_bar.setStyleSheet(f"background:{palette.surface_alt};border-radius:9px;")
+        self._db_label.setStyleSheet(
+            f"color:{palette.muted}; font-size:11px; font-weight:600; background: transparent;"
+        )
+        self._db_path_lbl.setStyleSheet(
+            f"color:{palette.accent_text}; font-size:10px; font-style:italic; background: transparent;"
+        )
+        self._apply_db_button_styles()
+
+    def _apply_db_button_styles(self):
+        palette = self._palette
+        btn_base = "border-radius:7px; font-size:11px; font-weight:700; padding:5px 14px; border: none;"
+        btn_active = f"background:{palette.accent}; color:{palette.on_accent}; {btn_base}"
+        btn_normal = f"background:{palette.surface}; color:{palette.muted}; {btn_base}"
+        for name, mode in (
+            ("_btn_main_db", "main"),
+            ("_btn_adv_db", "advanced"),
+            ("_btn_custom", "custom"),
+        ):
+            button = getattr(self, name, None)
+            if button is not None:
+                button.setStyleSheet(btn_active if self._db_mode == mode else btn_normal)
+
     def _build_db_selector_bar(self) -> QWidget:
-        dm = self._dark
-        bar = QWidget()
-        row = QHBoxLayout(bar)
+        self._db_bar = QWidget()
+        row = QHBoxLayout(self._db_bar)
         row.setContentsMargins(8, 6, 8, 6)
         row.setSpacing(8)
 
-        btn_base = "border-radius:7px; font-size:11px; font-weight:700; padding:5px 14px; border: none;"
-        btn_active = f"background:#4dabf7; color:#fff; {btn_base}"
-        btn_normal = (
-            f"background:#1e2535; color:#8b9ab0; {btn_base}" if dm else f"background:#e2e8f0; color:#4a5568; {btn_base}"
-        )
-
-        lbl = QLabel(self.translate_text("database"))
-        lbl.setStyleSheet(
-            f"color:{'#8b9ab0' if dm else '#6b7280'}; font-size:11px; font-weight:600; background: transparent;"
-        )
-        row.addWidget(lbl)
+        self._db_label = QLabel(self.translate_text("database"))
+        row.addWidget(self._db_label)
 
         self._btn_main_db = QPushButton(self.translate_text("main_database"))
-        self._btn_main_db.setStyleSheet(btn_active)
         self._btn_main_db.setCursor(Qt.PointingHandCursor)
         self._btn_main_db.setFixedHeight(28)
         self._btn_main_db.clicked.connect(lambda: self._switch_db("main"))
         row.addWidget(self._btn_main_db)
 
         self._btn_adv_db = QPushButton(self.translate_text("advanced_conversions"))
-        self._btn_adv_db.setStyleSheet(btn_normal)
         self._btn_adv_db.setCursor(Qt.PointingHandCursor)
         self._btn_adv_db.setFixedHeight(28)
         self._btn_adv_db.clicked.connect(lambda: self._switch_db("advanced"))
         row.addWidget(self._btn_adv_db)
 
-        btn_custom = QPushButton(self.translate_text("load_a_db"))
-        btn_custom.setStyleSheet(btn_normal)
-        btn_custom.setCursor(Qt.PointingHandCursor)
-        btn_custom.setFixedHeight(28)
-        btn_custom.clicked.connect(lambda: self._switch_db("custom"))
-        row.addWidget(btn_custom)
+        self._btn_custom = QPushButton(self.translate_text("load_a_db"))
+        self._btn_custom.setCursor(Qt.PointingHandCursor)
+        self._btn_custom.setFixedHeight(28)
+        self._btn_custom.clicked.connect(lambda: self._switch_db("custom"))
+        row.addWidget(self._btn_custom)
 
         row.addStretch()
 
         self._db_path_lbl = QLabel("")
-        self._db_path_lbl.setStyleSheet("color:#6366f1; font-size:10px; font-style:italic; background: transparent;")
         row.addWidget(self._db_path_lbl)
 
-        bar.setStyleSheet(f"background:{'#161b27' if dm else '#eef2fa'};border-radius:9px;")
-        bar.setFixedHeight(44)
-        return bar
+        self._style_db_bar()
+        self._db_bar.setFixedHeight(44)
+        return self._db_bar
 
     def _switch_db(self, mode: str) -> None:
-        dm = self._dark
-        btn_base = "border-radius:7px; font-size:11px; font-weight:700; padding:5px 14px; border: none;"
-        btn_active = f"background:#4dabf7; color:#fff; {btn_base}"
-        btn_normal = (
-            f"background:#1e2535; color:#8b9ab0; {btn_base}" if dm else f"background:#e2e8f0; color:#4a5568; {btn_base}"
-        )
-
-        self._btn_main_db.setStyleSheet(btn_normal)
-        self._btn_adv_db.setStyleSheet(btn_normal)
-
         if mode == "main":
             self.db_manager = self._main_db
+            self._db_mode = "main"
             self._db_path_lbl.setText("")
-            self._btn_main_db.setStyleSheet(btn_active)
 
         elif mode == "advanced":
             if self._adv_db is None:
                 self._adv_db = AdvancedDatabaseManager()
             self.db_manager = _AdvDbProxy(self._adv_db)
+            self._db_mode = "advanced"
             self._db_path_lbl.setText(f"({self._adv_db.db_path})")
-            self._btn_adv_db.setStyleSheet(btn_active)
 
         elif mode == "custom":
             path, _ = QFileDialog.getOpenFileName(
@@ -1244,7 +1314,9 @@ class StatisticsDashboard(TranslationMixin, QDialog):
                         self.translate_text(f"Impossible d'ouvrir la base : {exc2}"),
                     )
                     return
+            self._db_mode = "custom"
 
+        self._apply_db_button_styles()
         self.load_statistics()
 
     def format_size(self, size_bytes):

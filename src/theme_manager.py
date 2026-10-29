@@ -2,7 +2,7 @@
 
 import configparser
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from utils import SRC_DIR
@@ -54,6 +54,7 @@ class ThemeMetadata:
     preview: str
     folder_name: str
     kind: str = "light"
+    dashboard: dict[str, str] = field(default_factory=dict)
 
 
 def _ensure_custom_dir():
@@ -87,6 +88,13 @@ def get_custom_theme_kind(folder_name: str) -> str:
     meta = _read_metadata(theme_dir)
     return meta.kind if meta else "light"
 
+
+def get_dashboard_overrides(folder_name: str) -> dict[str, str]:
+    theme_dir = CUSTOM_THEMES_DIR / folder_name
+    if not theme_dir.is_dir():
+        return {}
+    meta = _read_metadata(theme_dir)
+    return dict(meta.dashboard) if meta else {}
 
 
 def import_theme(zip_path: str) -> tuple[bool, str]:
@@ -229,6 +237,9 @@ def _parse_metadata_content(content: str, folder_name: str = "") -> ThemeMetadat
     kind = cp.get("theme", "kind", fallback="light").lower()
     if kind not in ("light", "dark"):
         kind = "light"
+    dashboard = {}
+    if cp.has_section("dashboard"):
+        dashboard = {key.strip().lower(): value.strip() for key, value in cp.items("dashboard")}
     return ThemeMetadata(
         name=cp.get("theme", "name", fallback="Unknown Theme"),
         author=cp.get("theme", "author", fallback=""),
@@ -237,6 +248,7 @@ def _parse_metadata_content(content: str, folder_name: str = "") -> ThemeMetadat
         preview=cp.get("theme", "preview", fallback=""),
         folder_name=folder_name,
         kind=kind,
+        dashboard=dashboard,
     )
 
 
