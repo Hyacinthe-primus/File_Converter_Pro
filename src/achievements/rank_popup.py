@@ -10,7 +10,7 @@ import os
 import sys
 
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer, QUrl
-from PySide6.QtGui import QColor, QFont, QPixmap
+from PySide6.QtGui import QColor, QPixmap
 from PySide6.QtWidgets import QDialog, QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QVBoxLayout
 
 from utils import SRC_DIR
@@ -22,6 +22,8 @@ if _ROOT_DIR not in sys.path:
 from translations import TranslationManager
 from utils.translation_mixin import TranslationMixin
 
+from .theme import get_achievements_palette, load_achievements_qss, resolve_theme_name
+
 
 class RankPopup(TranslationMixin, QDialog):
     def __init__(self, rank_data, achievement_system, parent=None, language="fr"):
@@ -32,82 +34,44 @@ class RankPopup(TranslationMixin, QDialog):
         self._tm = TranslationManager()
         self._tm.set_language(language)
         self.dark_mode = getattr(parent, "dark_mode", True)
+        self._theme = resolve_theme_name(parent, self.dark_mode)
+        self._palette = get_achievements_palette(self._theme, self.dark_mode)
 
     def setup_ui(self):
+        self.setObjectName("RankPopup")
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedWidth(400)
 
         layout = QVBoxLayout(self)
         container = QFrame()
-        container.setObjectName("container")
+        container.setObjectName("RankPopupContainer")
         container_layout = QHBoxLayout(container)
         container_layout.setContentsMargins(15, 15, 15, 15)
         container_layout.setSpacing(15)
-        rank_color = self.rank_data.get("color", "#FFD700")
-
-        if self.dark_mode:
-            container.setStyleSheet(f"""
-            #container {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                            stop:0 #1a1d23, stop:0.3 #2d333b, stop:1 #1a1d23);
-                border: 3px solid {rank_color};
-                border-radius: 15px;
-            }}
-            QLabel {{
-                color: #e9ecef;
-            }}
-            """)
-        else:
-            base_color = QColor(rank_color)
-            if base_color.lightness() > 180:  # If too light
-                darker_color = base_color.darker(130).name()
-            else:
-                darker_color = rank_color
-            container.setStyleSheet(f"""
-            #container {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                            stop:0 #f8f9fa, stop:0.3 #e9ecef, stop:1 #f8f9fa);
-                border: 3px solid {darker_color};
-                border-radius: 15px;
-            }}
-            QLabel {{
-                color: #212529;
-            }}
-            """)
 
         icon_path = self.achievement_system.get_achievement_icon_path(self.rank_data["icon"])
         icon_label = QLabel()
+        icon_label.setObjectName("RankPopupIcon")
         icon_label.setAttribute(Qt.WA_TranslucentBackground)
-        icon_label.setStyleSheet("background: transparent;")
         if os.path.exists(icon_path):
             pixmap = QPixmap(icon_path).scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             icon_label.setPixmap(pixmap)
         else:
             icon_label.setText("🎖️")
-            icon_label.setStyleSheet("font-size: 48px;")
         container_layout.addWidget(icon_label)
 
         content_layout = QVBoxLayout()
 
         rank_up_text = self.translate_text("rank_up")
         self.rank_up_label = QLabel(rank_up_text.upper())
+        self.rank_up_label.setObjectName("RankPopupRankUp")
         self.rank_up_label.setAttribute(Qt.WA_TranslucentBackground)
-        self.rank_up_label.setStyleSheet("""
-            font-size: 14px;
-            font-weight: bold;
-            color: #FFD700;
-            background-color: rgba(255, 215, 0, 0.06);
-            padding: 4px 12px;
-            border-radius: 12px;
-            letter-spacing: 1.5px;
-        """)
         content_layout.addWidget(self.rank_up_label, alignment=Qt.AlignCenter)
 
         title_label = QLabel(self.translate_text("advanced_to_a_new_tier"))
+        title_label.setObjectName("RankPopupTitle")
         title_label.setAttribute(Qt.WA_TranslucentBackground)
-        text_color = self.rank_data.get("color", "#FFFFFF")
-        title_label.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {text_color};")
         content_layout.addWidget(title_label)
 
         _raw_name = self.rank_data["name"]
@@ -116,21 +80,14 @@ class RankPopup(TranslationMixin, QDialog):
         else:
             name = _raw_name.get(self.language, _raw_name.get("fr", ""))
         name_label = QLabel(name)
+        name_label.setObjectName("RankPopupName")
         name_label.setAttribute(Qt.WA_TranslucentBackground)
-        name_label.setStyleSheet(f"font-size: 16px; font-weight: bold; color: {text_color};")
         content_layout.addWidget(name_label)
 
         reward_layout = QHBoxLayout()
         reward_layout.addStretch()
         xp_label = QLabel(f"+{self.achievement_system.get_total_xp()} XP")
-        xp_label.setStyleSheet("""
-            font-size: 14px;
-            font-weight: bold;
-            color: #FFD700;
-            background-color: rgba(255, 215, 0, 0.2);
-            padding: 2px 8px;
-            border-radius: 10px;
-        """)
+        xp_label.setObjectName("RankPopupXP")
         reward_layout.addWidget(xp_label)
         content_layout.addLayout(reward_layout)
 
@@ -142,19 +99,24 @@ class RankPopup(TranslationMixin, QDialog):
         screen = self.screen().availableGeometry()
         self.move(screen.width() - self.width() - 20, 50)
 
-        font_path = os.path.join(_ROOT_DIR, "fonts", "SF-Pro-Display-Medium.ttf")
-        if os.path.exists(font_path):
-            from PySide6.QtGui import QFontDatabase
+        self.apply_theme_style()
 
-            font_id = QFontDatabase.addApplicationFont(font_path)
-            if font_id != -1:
-                families = QFontDatabase.applicationFontFamilies(font_id)
-                if families:
-                    inter_font = QFont(families[0], 12)
-                    for label in [self.rank_up_label, title_label, name_label]:
-                        label.setFont(inter_font)
-                    rank_up_font = QFont(families[0], 16, QFont.Bold)
-                    self.rank_up_label.setFont(rank_up_font)
+    def apply_theme_style(self):
+        qss = load_achievements_qss(self._theme)
+        rank_id = self.rank_data.get("id", "")
+        rank_color = (
+            self._palette.ranks.get(rank_id)
+            or self.rank_data.get("color", self._palette.gold)
+        )
+        if not self._palette.dark:
+            base_color = QColor(rank_color)
+            if base_color.lightness() > 180:
+                rank_color = base_color.darker(130).name()
+        qss += (
+            f"\n#RankPopupContainer {{ border: 3px solid {rank_color}; }}\n"
+            f"#RankPopupTitle, #RankPopupName {{ color: {rank_color}; }}\n"
+        )
+        self.setStyleSheet(qss)
 
     def set_translator(self, tm) -> None:
         """Share the app-wide TranslationManager, then build the UI."""

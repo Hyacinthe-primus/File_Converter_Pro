@@ -61,103 +61,7 @@ if _ROOT_DIR not in sys.path:
 from translations import TranslationManager
 from utils.translation_mixin import TranslationMixin
 
-
-class _DSBase:
-    TIERS = {
-        "starter": ("#A8DADC", "#4A8A8C"),
-        "bronze": ("#CD7F32", "#80500A"),
-        "steel": ("#71797E", "#3A4044"),
-        "silver": ("#C0C0C0", "#707070"),
-        "platinum_tier": ("#C18D30", "#7A5A10"),
-        "gold": ("#FFD700", "#7A6520"),
-        "rare": ("#4169E1", "#1A3A90"),
-        "epic": ("#9370DB", "#4A2080"),
-        "legendary": ("#FF8C00", "#804400"),
-        "diamond": ("#B9F2FF", "#3090C0"),
-        "platinum": ("#E5E4E2", "#808080"),
-        "advanced": ("#22d3ee", "#0A7A90"),
-    }
-
-    TIER_HOVER = {
-        "starter": "#C8ECEE",
-        "bronze": "#E8943A",
-        "steel": "#9AAAB0",
-        "silver": "#E0E0E0",
-        "platinum_tier": "#E0A840",
-        "gold": "#FFD700",
-        "rare": "#6B8FFF",
-        "epic": "#B090F0",
-        "legendary": "#FFA830",
-        "diamond": "#D8F8FF",
-        "platinum": "#F5F4F2",
-        "advanced": "#50E8FF",
-    }
-
-    RADIUS = 12
-    RADIUS_S = 7
-    PAD = 16
-    PAD_S = 10
-
-    GOLD = "#D4AF37"
-    GOLD_BRIGHT = "#FFD700"
-    GOLD_DIM = "#7A6520"
-
-    GREEN = "#3FB950"
-    RED = "#F85149"
-    RED_DIM = "#3D1C1A"
-    BLUE = "#58A6FF"
-    PURPLE = "#BC8CFF"
-
-
-class _DSDark(_DSBase):
-    BG_BASE = "#0D1117"
-    BG_SURFACE = "#161B22"
-    BG_RAISED = "#1C2333"
-    BG_INPUT = "#21262D"
-
-    BORDER = "#30363D"
-    BORDER_LIGHT = "#3D444D"
-
-    TEXT_PRIMARY = "#E6EDF3"
-    TEXT_SECONDARY = "#8B949E"
-    TEXT_MUTED = "#484F58"
-
-
-class _DSLight(_DSBase):
-    BG_BASE = "#F5F3EE"
-    BG_SURFACE = "#FFFFFF"
-    BG_RAISED = "#EDE9E0"
-    BG_INPUT = "#F9F7F2"
-
-    BORDER = "#D6CFC0"
-    BORDER_LIGHT = "#C4BBa8"
-
-    TEXT_PRIMARY = "#1C1A16"
-    TEXT_SECONDARY = "#6B6355"
-    TEXT_MUTED = "#A89F8F"
-
-    RED_DIM = "#FADBD8"
-
-
-class _DSProxy:
-    def __init__(self):
-        self._theme: _DSBase = _DSDark()
-
-    def use_dark(self):
-        self._theme = _DSDark()
-
-    def use_light(self):
-        self._theme = _DSLight()
-
-    @property
-    def is_dark(self) -> bool:
-        return isinstance(self._theme, _DSDark)
-
-    def __getattr__(self, name: str):
-        return getattr(self._theme, name)
-
-
-DS = _DSProxy()
+from .theme import DS, get_achievements_palette, load_achievements_qss, resolve_theme_name
 
 
 class XPRingWidget(QWidget):
@@ -210,7 +114,7 @@ class XPRingWidget(QWidget):
 
         rect_outer = QRectF(cx - r_outer, cy - r_outer, r_outer * 2, r_outer * 2)
 
-        p.setPen(QPen(QColor(DS.BORDER), 18, Qt.SolidLine, Qt.RoundCap))
+        p.setPen(QPen(QColor(DS.RING_TRACK), 18, Qt.SolidLine, Qt.RoundCap))
         p.setBrush(Qt.NoBrush)
         p.drawEllipse(rect_outer)
 
@@ -219,9 +123,15 @@ class XPRingWidget(QWidget):
 
             if self._complete:
                 seg_sweep = 360 * 16 // 12
+                base_color = QColor(DS.RING_COMPLETE)
+                base_hue = base_color.hsvHueF()
+                if base_hue < 0:
+                    base_hue = self._rainbow_hue / 360.0
+                saturation = base_color.hsvSaturationF() or 0.85
+                value = base_color.valueF() or 1.0
                 for i in range(12):
-                    hue = (self._rainbow_hue + i * 30) % 360
-                    c = QColor.fromHsvF(hue / 360.0, 0.85, 1.0)
+                    hue = (base_hue + i / 12.0) % 1.0
+                    c = QColor.fromHsvF(hue, saturation, value)
                     gc = QColor(c)
                     gc.setAlpha(55)
                     p.setPen(QPen(gc, 28, Qt.SolidLine, Qt.RoundCap))
@@ -229,16 +139,20 @@ class XPRingWidget(QWidget):
                     p.setPen(QPen(c, 18, Qt.SolidLine, Qt.RoundCap))
                     p.drawArc(rect_outer, (90 - i * 30) * 16 + int(self._shimmer * 50), -seg_sweep)
             else:
-                p.setPen(QPen(QColor(212, 175, 55, 55), 28, Qt.SolidLine, Qt.RoundCap))
+                glow = QColor(DS.RING_GLOW)
+                glow.setAlpha(55)
+                p.setPen(QPen(glow, 28, Qt.SolidLine, Qt.RoundCap))
                 p.drawArc(rect_outer, 90 * 16, -sweep)
-                p.setPen(QPen(QColor(DS.GOLD), 18, Qt.SolidLine, Qt.RoundCap))
+                p.setPen(QPen(QColor(DS.RING_PROGRESS), 18, Qt.SolidLine, Qt.RoundCap))
                 p.drawArc(rect_outer, 90 * 16, -sweep)
                 tip_angle = math.radians(90 - 360 * self.progress)
                 tip_x = cx + r_outer * math.cos(tip_angle)
                 tip_y = cy - r_outer * math.sin(tip_angle)
                 alpha = int(170 + 85 * math.sin(self._shimmer))
+                tip = QColor(DS.RING_TIP)
+                tip.setAlpha(alpha)
                 p.setPen(Qt.NoPen)
-                p.setBrush(QColor(255, 230, 80, alpha))
+                p.setBrush(tip)
                 p.drawEllipse(QPointF(tip_x, tip_y), 8, 8)
 
         p.setPen(Qt.NoPen)
@@ -246,8 +160,8 @@ class XPRingWidget(QWidget):
         p.drawEllipse(QRectF(cx - r_inner, cy - r_inner, r_inner * 2, r_inner * 2))
 
         if self._complete:
-            p.setPen(QColor(DS.GOLD_BRIGHT))
-            p.setFont(QFont("Segoe UI", 13, QFont.Bold))
+            p.setPen(QColor(DS.RING_COMPLETE))
+            p.setFont(QFont(DS.FONT_FAMILY, 13, QFont.Bold))
             p.drawText(
                 QRectF(cx - r_inner, cy - r_inner * 0.55, r_inner * 2, r_inner * 0.55),
                 Qt.AlignHCenter | Qt.AlignVCenter,
@@ -256,7 +170,7 @@ class XPRingWidget(QWidget):
 
             rainbow_c = QColor.fromHsvF(self._rainbow_hue / 360.0, 0.9, 1.0)
             p.setPen(rainbow_c)
-            p.setFont(QFont("Segoe UI", 11, QFont.Bold))
+            p.setFont(QFont(DS.FONT_FAMILY, 11, QFont.Bold))
             p.drawText(
                 QRectF(cx - r_inner, cy - r_inner * 0.05, r_inner * 2, r_inner * 0.6),
                 Qt.AlignHCenter | Qt.AlignTop,
@@ -264,7 +178,7 @@ class XPRingWidget(QWidget):
             )
 
             p.setPen(QColor(DS.TEXT_MUTED))
-            p.setFont(QFont("Segoe UI", 7))
+            p.setFont(QFont(DS.FONT_FAMILY, 7))
             p.drawText(
                 QRectF(cx - r_inner, cy + r_inner * 0.45, r_inner * 2, r_inner * 0.4),
                 Qt.AlignHCenter | Qt.AlignTop,
@@ -272,7 +186,7 @@ class XPRingWidget(QWidget):
             )
         else:
             p.setPen(QColor(DS.GOLD_BRIGHT))
-            p.setFont(QFont("Segoe UI", 20, QFont.Bold))
+            p.setFont(QFont(DS.FONT_FAMILY, 20, QFont.Bold))
             p.drawText(
                 QRectF(cx - r_inner, cy - r_inner * 0.72, r_inner * 2, r_inner * 1.0),
                 Qt.AlignHCenter | Qt.AlignVCenter,
@@ -280,7 +194,7 @@ class XPRingWidget(QWidget):
             )
 
             p.setPen(QColor(DS.TEXT_SECONDARY))
-            p.setFont(QFont("Segoe UI", 8))
+            p.setFont(QFont(DS.FONT_FAMILY, 8))
             p.drawText(
                 QRectF(cx - r_inner, cy + r_inner * 0.12, r_inner * 2, r_inner * 0.45),
                 Qt.AlignHCenter | Qt.AlignTop,
@@ -288,7 +202,7 @@ class XPRingWidget(QWidget):
             )
 
             p.setPen(QColor(DS.TEXT_MUTED))
-            p.setFont(QFont("Segoe UI", 7))
+            p.setFont(QFont(DS.FONT_FAMILY, 7))
             p.drawText(
                 QRectF(cx - r_inner, cy + r_inner * 0.48, r_inner * 2, r_inner * 0.35),
                 Qt.AlignHCenter | Qt.AlignTop,
@@ -299,12 +213,21 @@ class XPRingWidget(QWidget):
 
 
 class StatBarWidget(QWidget):
-    def __init__(self, label: str, value: str, fraction: float = 1.0, color: str = DS.BLUE, parent=None):
+    def __init__(
+        self,
+        label: str,
+        value: str,
+        fraction: float = 1.0,
+        color: Optional[str] = None,
+        color_key: Optional[str] = None,
+        parent=None,
+    ):
         super().__init__(parent)
         self.label = label
         self.value = value
         self.fraction = max(0.0, min(1.0, fraction))
-        self.color = QColor(color)
+        self.color_key = color_key
+        self.color = QColor(color or DS.BLUE)
         self.setFixedHeight(44)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
@@ -314,7 +237,7 @@ class StatBarWidget(QWidget):
         w, h = self.width(), self.height()
 
         p.setPen(Qt.NoPen)
-        p.setBrush(QColor(DS.BG_RAISED))
+        p.setBrush(QColor(DS.STAT_TRACK))
         p.drawRoundedRect(QRectF(0, h * 0.6, w, h * 0.28), 4, 4)
 
         fill_w = max(8.0, w * self.fraction)
@@ -327,11 +250,11 @@ class StatBarWidget(QWidget):
         p.drawRoundedRect(QRectF(0, h * 0.6, fill_w, h * 0.28), 4, 4)
 
         p.setPen(QColor(DS.TEXT_SECONDARY))
-        p.setFont(QFont("Segoe UI", 9))
+        p.setFont(QFont(DS.FONT_FAMILY, 9))
         p.drawText(QRectF(0, 0, w * 0.7, h * 0.58), Qt.AlignVCenter | Qt.AlignLeft, self.label)
 
         p.setPen(self.color)
-        p.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        p.setFont(QFont(DS.FONT_FAMILY, 9, QFont.Bold))
         p.drawText(QRectF(0, 0, w, h * 0.58), Qt.AlignVCenter | Qt.AlignRight, self.value)
 
         p.end()
@@ -383,7 +306,7 @@ class GlobalProgressBar(QWidget):
 
         # Track
         p.setPen(QPen(QColor(DS.BORDER), 1))
-        p.setBrush(QColor(DS.BG_RAISED))
+        p.setBrush(QColor(DS.PROGRESS_TRACK))
         p.drawRoundedRect(QRectF(0, 0, w, h), r, r)
 
         # Fill
@@ -396,16 +319,16 @@ class GlobalProgressBar(QWidget):
             fill_path = full_pill.intersected(fill_rect)
 
             grad = QLinearGradient(0, 0, w, 0)
-            grad.setColorAt(0.0, QColor(DS.GOLD_DIM))
-            grad.setColorAt(1.0, QColor(DS.GOLD))
+            grad.setColorAt(0.0, QColor(DS.PROGRESS_FILL))
+            grad.setColorAt(1.0, QColor(DS.PROGRESS_FILL_END))
             p.setPen(Qt.NoPen)
             p.setBrush(QBrush(grad))
             p.drawPath(fill_path)
 
         pct_str = f"{frac * 100:.1f}%"
-        txt_c = QColor("#FFFFFF" if DS.is_dark else "#1C1A16")
+        txt_c = QColor(DS.PROGRESS_TEXT)
         p.setPen(txt_c)
-        p.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        p.setFont(QFont(DS.FONT_FAMILY, 10, QFont.Bold))
         p.drawText(QRectF(0, 0, w, h), Qt.AlignCenter, pct_str)
         p.end()
 
@@ -418,7 +341,6 @@ class AchievementCard(QFrame):
         category_data: dict,
         icon_path: str,
         language: str = "fr",
-        dark_mode: bool = True,
         parent=None,
     ):
         super().__init__(parent)
@@ -427,7 +349,6 @@ class AchievementCard(QFrame):
         self.category_data = category_data or {}
         self.icon_path = icon_path
         self.language = language
-        self.dark_mode = dark_mode
         from translations import TranslationManager as _TM
 
         self._tm = _TM()
@@ -444,7 +365,7 @@ class AchievementCard(QFrame):
         self._shadow = QGraphicsDropShadowEffect(self)
         self._shadow.setBlurRadius(0)
         self._shadow.setOffset(0, 0)
-        self._shadow.setColor(QColor(0, 0, 0, 0))
+        self._shadow.setColor(self._shadow_color(0))
         self.setGraphicsEffect(self._shadow)
 
         tier_id = achievement.get("tier", "bronze").lower()
@@ -452,7 +373,8 @@ class AchievementCard(QFrame):
         self._tier_color = QColor(tdata[0])
         self._tier_glow = QColor(tdata[1])
 
-        cat_color_str = self.category_data.get("color", "#58A6FF")
+        category_id = achievement.get("category", "")
+        cat_color_str = DS.CATEGORIES.get(category_id) or self.category_data.get("color", DS.BLUE)
         self._cat_color = QColor(cat_color_str)
 
         hover_hex = DS.TIER_HOVER.get(tier_id, DS.TIER_HOVER["bronze"])
@@ -462,7 +384,7 @@ class AchievementCard(QFrame):
             achievement.get("secret", False) and not achievement.get("unlocked", False)
         ) or achievement.get("_hide_secret", False)
         if self._is_secret:
-            self._cat_color = QColor("#8B0000")
+            self._cat_color = QColor(DS.SECRET_TEXT)
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
@@ -492,13 +414,25 @@ class AchievementCard(QFrame):
         alpha = 120 if DS.is_dark else 60
         self._shadow.setBlurRadius(blur)
         self._shadow.setOffset(0, offset)
-        self._shadow.setColor(QColor(0, 0, 0, alpha))
+        self._shadow.setColor(self._shadow_color(alpha))
 
     def leaveEvent(self, _e):
         self._hover = False
         self._shadow.setBlurRadius(0)
         self._shadow.setOffset(0, 0)
-        self._shadow.setColor(QColor(0, 0, 0, 0))
+        self._shadow.setColor(self._shadow_color(0))
+
+    @staticmethod
+    def _shadow_color(alpha: int = 0) -> QColor:
+        color = QColor(DS.CARD_SHADOW)
+        color.setAlpha(alpha)
+        return color
+
+    @staticmethod
+    def _sheen_color(alpha: int = 0) -> QColor:
+        color = QColor(DS.CARD_SHEEN)
+        color.setAlpha(alpha)
+        return color
 
     @staticmethod
     def _hex_path(cx: float, cy: float, r: float) -> QPainterPath:
@@ -528,7 +462,7 @@ class AchievementCard(QFrame):
         p.setClipPath(clip)
 
         if secret:
-            base_c = QColor("#0A0608") if DS.is_dark else QColor("#FAE8E8")
+            base_c = QColor(DS.SECRET_BG)
             p.fillPath(clip, QBrush(base_c))
         elif unlocked:
             diag = QLinearGradient(0, 0, w, h)
@@ -543,8 +477,8 @@ class AchievementCard(QFrame):
             p.fillPath(clip, QBrush(diag))
 
             sheen = QLinearGradient(0, 0, 0, h * 0.45)
-            sheen_top = QColor(255, 255, 255, 18 if DS.is_dark else 35)
-            sheen_bot = QColor(255, 255, 255, 0)
+            sheen_top = self._sheen_color(18 if DS.is_dark else 35)
+            sheen_bot = self._sheen_color(0)
             sheen.setColorAt(0, sheen_top)
             sheen.setColorAt(1, sheen_bot)
             p.fillPath(clip, QBrush(sheen))
@@ -586,10 +520,10 @@ class AchievementCard(QFrame):
                     sweep_pos = (math.sin(self._caustic * 0.7) + 1.0) / 2.0
                     cx_pos = -w * 0.2 + w * 1.4 * sweep_pos
                     cg = QLinearGradient(cx_pos - w * 0.3, 0, cx_pos + w * 0.3, h)
-                    cg.setColorAt(0.0, QColor(255, 255, 255, 0))
-                    cg.setColorAt(0.45, QColor(255, 255, 255, caustic_alpha))
-                    cg.setColorAt(0.55, QColor(255, 255, 255, caustic_alpha))
-                    cg.setColorAt(1.0, QColor(255, 255, 255, 0))
+                    cg.setColorAt(0.0, self._sheen_color(0))
+                    cg.setColorAt(0.45, self._sheen_color(caustic_alpha))
+                    cg.setColorAt(0.55, self._sheen_color(caustic_alpha))
+                    cg.setColorAt(1.0, self._sheen_color(0))
                     p.fillPath(clip, QBrush(cg))
             else:
                 flood_h = h * t
@@ -616,10 +550,10 @@ class AchievementCard(QFrame):
                     sweep_pos = (math.sin(self._caustic) + 1.0) / 2.0
                     cx_pos = -w * 0.3 + w * 1.6 * sweep_pos
                     caustic_g = QLinearGradient(cx_pos - w * 0.35, 0, cx_pos + w * 0.35, h)
-                    caustic_g.setColorAt(0.0, QColor(255, 255, 255, 0))
-                    caustic_g.setColorAt(0.4, QColor(255, 255, 255, caustic_alpha))
-                    caustic_g.setColorAt(0.6, QColor(255, 255, 255, caustic_alpha))
-                    caustic_g.setColorAt(1.0, QColor(255, 255, 255, 0))
+                    caustic_g.setColorAt(0.0, self._sheen_color(0))
+                    caustic_g.setColorAt(0.4, self._sheen_color(caustic_alpha))
+                    caustic_g.setColorAt(0.6, self._sheen_color(caustic_alpha))
+                    caustic_g.setColorAt(1.0, self._sheen_color(0))
                     p.fillPath(clip, QBrush(caustic_g))
 
                 if t < 0.95:
@@ -723,7 +657,7 @@ class AchievementCard(QFrame):
 
         if secret:
             p.setOpacity(0.55 + 0.35 * t)
-            p.setFont(QFont("Segoe UI Emoji", 20))
+            p.setFont(QFont(DS.FONT_FAMILY, 20))
             p.setPen(QColor(DS.RED))
             p.drawText(QRectF(ix, iy, ICON_SIZE, ICON_SIZE), Qt.AlignCenter, "🔒")
             p.setOpacity(1.0)
@@ -733,7 +667,7 @@ class AchievementCard(QFrame):
             p.setOpacity(1.0)
         else:
             p.setOpacity(1.0 if unlocked else (0.3 + 0.35 * t))
-            p.setFont(QFont("Segoe UI Emoji", 20))
+            p.setFont(QFont(DS.FONT_FAMILY, 20))
             p.setPen(QColor(DS.TEXT_PRIMARY))
             p.drawText(QRectF(ix, iy, ICON_SIZE, ICON_SIZE), Qt.AlignCenter, "🏆" if unlocked else "❓")
             p.setOpacity(1.0)
@@ -768,7 +702,7 @@ class AchievementCard(QFrame):
             )
 
         p.setPen(name_c)
-        p.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        p.setFont(QFont(DS.FONT_FAMILY, 10, QFont.Bold))
         p.drawText(QRectF(tx, 10, tw - 80, 22), Qt.AlignVCenter | Qt.AlignLeft, name_text)
 
         xp = ach.get("reward_xp", 0)
@@ -776,7 +710,7 @@ class AchievementCard(QFrame):
         xp_c = QColor(DS.RED if secret else (DS.GOLD if unlocked else DS.TEXT_MUTED))
         xp_c.setAlpha(int(130 + 125 * max(t, 0.3 if unlocked else 0)))
         p.setPen(xp_c)
-        p.setFont(QFont("Segoe UI", 8, QFont.Bold))
+        p.setFont(QFont(DS.FONT_FAMILY, 8, QFont.Bold))
         p.drawText(QRectF(w - 80, 12, 68, 20), Qt.AlignVCenter | Qt.AlignRight, xp_text)
 
         if not secret and self.tier_data and self.category_data:
@@ -803,13 +737,13 @@ class AchievementCard(QFrame):
                     int(170 + 85 * t),
                 )
             p.setPen(pc)
-            p.setFont(QFont("Segoe UI", 8))
+            p.setFont(QFont(DS.FONT_FAMILY, 8))
             p.drawText(QRectF(tx, 34, tw, 16), Qt.AlignVCenter | Qt.AlignLeft, pill_text)
         elif secret:
             sc3 = QColor(DS.TEXT_MUTED)
             sc3.setAlpha(int(100 + 80 * t))
             p.setPen(sc3)
-            p.setFont(QFont("Segoe UI", 8))
+            p.setFont(QFont(DS.FONT_FAMILY, 8))
             p.drawText(QRectF(tx, 34, tw, 16), Qt.AlignVCenter | Qt.AlignLeft, "??? · ???")
 
         _raw_desc = ach.get("description", "")
@@ -833,7 +767,7 @@ class AchievementCard(QFrame):
                 int(dc.blue() * (1 - t * 0.25) + hov_c.blue() * t * 0.25),
             )
         p.setPen(dc)
-        p.setFont(QFont("Segoe UI", 9))
+        p.setFont(QFont(DS.FONT_FAMILY, 9))
         p.drawText(QRectF(tx, 53, tw, 32), Qt.AlignTop | Qt.AlignLeft | Qt.TextWordWrap, desc)
 
         if not unlocked and not secret:
@@ -842,7 +776,7 @@ class AchievementCard(QFrame):
             frac = min(cur / max(req, 1), 1.0)
             bar_y, bar_w = h - 22, tw
 
-            track_c = QColor(DS.BG_RAISED)
+            track_c = QColor(DS.STAT_TRACK)
             if t > 0:
                 track_c = QColor(
                     int(track_c.red() * (1 - t * 0.4) + cat_c.red() * t * 0.4),
@@ -854,9 +788,7 @@ class AchievementCard(QFrame):
             p.drawRoundedRect(QRectF(tx, bar_y, bar_w, 5), 2.5, 2.5)
 
             if frac > 0:
-                bar_color = (
-                    QColor("#F85149") if frac < 0.33 else QColor("#F0A030") if frac < 0.66 else QColor("#3FB950")
-                )
+                bar_color = QColor(DS.RED) if frac < 0.33 else QColor(DS.GOLD) if frac < 0.66 else QColor(DS.GREEN)
                 if t > 0:
                     bar_color = QColor(
                         int(bar_color.red() * (1 - t * 0.5) + cat_c.red() * t * 0.5),
@@ -868,10 +800,10 @@ class AchievementCard(QFrame):
 
             prog_c = QColor(DS.TEXT_MUTED if t < 0.4 else DS.TEXT_SECONDARY)
             p.setPen(prog_c)
-            p.setFont(QFont("Segoe UI", 7))
+            p.setFont(QFont(DS.FONT_FAMILY, 7))
             p.drawText(QRectF(tx, bar_y - 13, bar_w, 12), Qt.AlignVCenter | Qt.AlignRight, f"{cur:.0f} / {req:.0f}")
 
-        p.setFont(QFont("Segoe UI", 8, QFont.Bold))
+        p.setFont(QFont(DS.FONT_FAMILY, 8, QFont.Bold))
         if unlocked:
             badge_text = "✓ Unlocked"
             if ach.get("unlock_date"):
@@ -896,49 +828,14 @@ class AchievementCard(QFrame):
 class NavPill(QPushButton):
     def __init__(self, text: str, parent=None):
         super().__init__(text, parent)
+        self.setObjectName("AchievementsNavPill")
         self.setCheckable(True)
         self.setFixedHeight(34)
         self.setMinimumWidth(120)
-        self._update_style()
-
-    def _update_style(self):
-        if self.isChecked():
-            self.setStyleSheet(f"""
-                QPushButton {{
-                    background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
-                        stop:0 {DS.GOLD_DIM}, stop:1 #5A4A10);
-                    color: {DS.GOLD_BRIGHT};
-                    border: 1px solid {DS.GOLD};
-                    border-radius: 17px;
-                    font-weight: bold;
-                    font-size: 11px;
-                    padding: 0 18px;
-                }}
-            """)
-        else:
-            self.setStyleSheet(f"""
-                QPushButton {{
-                    background: {DS.BG_RAISED};
-                    color: {DS.TEXT_SECONDARY};
-                    border: 1px solid {DS.BORDER};
-                    border-radius: 17px;
-                    font-size: 11px;
-                    padding: 0 18px;
-                }}
-                QPushButton:hover {{
-                    background: {DS.BG_INPUT};
-                    color: {DS.TEXT_PRIMARY};
-                    border-color: {DS.BORDER_LIGHT};
-                }}
-            """)
 
     def nextCheckState(self):
         if not self.isChecked():
             self.setChecked(True)
-
-    def setChecked(self, checked: bool):
-        super().setChecked(checked)
-        self._update_style()
 
 
 #  RANK BADGE WIDGET - tier-aware evolving animation
@@ -1025,7 +922,7 @@ class RankBadgeWidget(QWidget):
         self.update()
 
     def _calc_width(self):
-        fm = QFontMetrics(QFont("Segoe UI", 11, QFont.Bold))
+        fm = QFontMetrics(QFont(DS.FONT_FAMILY, 11, QFont.Bold))
         extra = 20 if self._anim_level >= 3 else 0
         self.setFixedWidth(fm.horizontalAdvance(self.rank_name) + 60 + extra)
 
@@ -1135,7 +1032,7 @@ class RankBadgeWidget(QWidget):
             text_x = 26
 
         p.setPen(rc)
-        p.setFont(QFont("Segoe UI", 11, QFont.Bold))
+        p.setFont(QFont(DS.FONT_FAMILY, 11, QFont.Bold))
         p.drawText(QRectF(text_x, 0, w - text_x - 8, h), Qt.AlignVCenter | Qt.AlignLeft, self.rank_name)
         p.end()
 
@@ -1151,226 +1048,63 @@ class AchievementsUI(TranslationMixin, QDialog):
         self._tm.set_language(language)
 
         dark = getattr(parent, "dark_mode", True) if parent else True
-        if dark:
-            DS.use_dark()
-        else:
-            DS.use_light()
+        self._theme = resolve_theme_name(parent, dark)
+        self._palette = get_achievements_palette(self._theme, dark)
+        DS.use_palette(self._palette)
 
+        self.setObjectName("AchievementsDialog")
         self.setWindowTitle(self.T("achievements_trophies"))
         self.setMinimumSize(920, 720)
         self.resize(980, 760)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        self._apply_global_style()
+        self._apply_theme()
         self.setup_ui()
+
+        parent = self.parent()
+        if parent is not None and hasattr(parent, "theme_changed"):
+            parent.theme_changed.connect(self._on_theme_changed)
 
         self.show()
         QApplication.processEvents()
         self.load_achievements()
 
-    def apply_theme(self, dark_mode: bool):
-        if dark_mode:
-            DS.use_dark()
-        else:
-            DS.use_light()
+    def _on_theme_changed(self, theme_name=None):
+        self.apply_theme(theme=theme_name)
 
-        self._apply_global_style()
-        self._refresh_header()
+    def apply_theme(self, dark_mode=None, theme=None):
+        parent = self.parent()
+        if dark_mode is None:
+            dark_mode = bool(getattr(parent, "dark_mode", self._palette.dark)) if parent else self._palette.dark
+        if theme is None:
+            theme = resolve_theme_name(parent, dark_mode)
+        self._theme = theme
+        self._palette = get_achievements_palette(theme, dark_mode)
+        DS.use_palette(self._palette)
+        self._apply_theme()
 
-        for pill in self._nav_pills:
-            pill._update_style()
-
-        self._refresh_footer()
-
+        if hasattr(self, "_category_tree"):
+            self.load_overview()
         if hasattr(self, "_xp_ring"):
             self._xp_ring.update()
         if hasattr(self, "_rank_badge"):
             self._rank_badge.update()
-
         if hasattr(self, "_cards_layout"):
             self.load_achievements_list()
-
         if hasattr(self, "_global_bar"):
             self._global_bar.update()
-
         if hasattr(self, "_stat_bars"):
             for bar in self._stat_bars:
+                if bar.color_key:
+                    bar.color = QColor(self._stat_color(bar.color_key))
                 bar.update()
-
-        self._update_secrets_btn_style()
         self.update()
 
     # Translations
     def T(self, key: str) -> str:
         return self._tm.translate_text(key)
 
-    def _apply_global_style(self):
-        self.setStyleSheet(f"""
-            QDialog, QWidget {{
-                background-color: {DS.BG_BASE};
-                color: {DS.TEXT_PRIMARY};
-            }}
-            QScrollArea {{
-                background: transparent;
-                border: none;
-            }}
-            QScrollBar:vertical {{
-                background: {DS.BG_SURFACE};
-                width: 6px;
-                border-radius: 3px;
-                margin: 0;
-            }}
-            QScrollBar::handle:vertical {{
-                background: {DS.BORDER_LIGHT};
-                border-radius: 3px;
-                min-height: 30px;
-            }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
-            QScrollBar:horizontal {{
-                background: {DS.BG_SURFACE};
-                height: 6px;
-                border-radius: 3px;
-            }}
-            QScrollBar::handle:horizontal {{
-                background: {DS.BORDER_LIGHT};
-                border-radius: 3px;
-            }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0; }}
-            QLineEdit {{
-                background: {DS.BG_INPUT};
-                color: {DS.TEXT_PRIMARY};
-                border: 1px solid {DS.BORDER};
-                border-radius: 7px;
-                padding: 6px 10px;
-                font-size: 11px;
-            }}
-            QLineEdit:focus {{
-                border-color: {DS.GOLD_DIM};
-            }}
-            QComboBox {{
-                background: {DS.BG_INPUT};
-                color: {DS.TEXT_PRIMARY};
-                border: 1px solid {DS.BORDER};
-                border-radius: 7px;
-                padding: 5px 10px;
-                font-size: 11px;
-                min-width: 110px;
-            }}
-            QComboBox::drop-down {{
-                border: none;
-                width: 20px;
-            }}
-            QComboBox QAbstractItemView {{
-                background: {DS.BG_RAISED};
-                color: {DS.TEXT_PRIMARY};
-                selection-background-color: {DS.GOLD_DIM};
-                border: 1px solid {DS.BORDER};
-            }}
-            QTreeWidget {{
-                background: {DS.BG_SURFACE};
-                color: {DS.TEXT_PRIMARY};
-                border: 1px solid {DS.BORDER};
-                border-radius: 8px;
-                alternate-background-color: {DS.BG_RAISED};
-                outline: none;
-                font-size: 11px;
-            }}
-            QTreeWidget::item {{ padding: 5px 4px; }}
-            QTreeWidget::item:hover {{
-                background: {"#2A2410" if DS.is_dark else "#F0E8D0"};
-                color: {DS.GOLD_BRIGHT if DS.is_dark else "#5A4A10"};
-            }}
-            QTreeWidget::item:selected {{
-                background: {"#3A3010" if DS.is_dark else "#E8D888"};
-                color: {DS.GOLD_BRIGHT if DS.is_dark else "#3A2A00"};
-            }}
-            QHeaderView::section {{
-                background: {DS.BG_RAISED};
-                color: {DS.TEXT_SECONDARY};
-                border: none;
-                border-bottom: 1px solid {DS.BORDER};
-                padding: 6px 8px;
-                font-size: 10px;
-                font-weight: bold;
-            }}
-            QLabel {{ color: {DS.TEXT_PRIMARY}; background: transparent; }}
-            QGroupBox {{
-                color: {DS.TEXT_SECONDARY};
-                border: 1px solid {DS.BORDER};
-                border-radius: {DS.RADIUS}px;
-                margin-top: 10px;
-                padding-top: 10px;
-                font-size: 10px;
-            }}
-            QGroupBox::title {{
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                left: 12px;
-                top: -2px;
-                padding: 0 6px;
-                background: {DS.BG_BASE};
-                color: {DS.TEXT_SECONDARY};
-                font-size: 10px;
-                letter-spacing: 1px;
-            }}
-            QFrame {{
-                background-color: transparent;
-            }}
-        """)
-
-    def _progress_lbl_html(self, unlocked: int, total: int) -> str:
-        return (
-            f"<span style='font-size:22px; font-weight:bold; color:{DS.TEXT_PRIMARY}'>"
-            f"{unlocked}</span>"
-            f"<span style='font-size:14px; color:{DS.TEXT_SECONDARY}'>"
-            f" / {total}  {self.T('achievements_unlocked')}</span>"
-        )
-
-    def _refresh_header(self):
-        if not hasattr(self, "_header_frame"):
-            return
-        self._header_frame.setStyleSheet(f"""
-            QFrame {{
-                background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
-                    stop:0 {DS.BG_SURFACE},
-                    stop:0.5 {"#1A2035" if DS.is_dark else "#F0EBE0"},
-                    stop:1 {DS.BG_SURFACE});
-                border: 1px solid {DS.BORDER};
-                border-radius: {DS.RADIUS}px;
-            }}
-        """)
-        if hasattr(self, "_header_title"):
-            self._header_title.setStyleSheet(
-                f"font-size:20px; font-weight:bold; color:{DS.GOLD}; background:transparent;"
-            )
-        if hasattr(self, "_header_chips"):
-            colors = [DS.GREEN, DS.GOLD]
-            for chip, color in zip(self._header_chips, colors):
-                chip.setStyleSheet(f"""
-                    background: transparent;
-                    color: {color};
-                    font-size: 11px;
-                    font-weight: bold;
-                    padding: 4px 12px;
-                    border: 1px solid {color};
-                    border-radius: 12px;
-                """)
-
-    def _refresh_footer(self):
-        if hasattr(self, "_close_btn"):
-            self._close_btn.setStyleSheet(f"""
-                QPushButton {{
-                    background: {DS.RED_DIM};
-                    color: {DS.RED};
-                    border: 1px solid {DS.RED};
-                    border-radius: {DS.RADIUS_S}px;
-                    font-weight: bold;
-                    font-size: 11px;
-                }}
-                QPushButton:hover {{
-                    background: {DS.RED};
-                    color: {"white" if DS.is_dark else "#1C1A16"};
-                }}
-            """)
+    def _apply_theme(self):
+        self.setStyleSheet(load_achievements_qss(self._theme))
 
     def setup_ui(self):
         root = QVBoxLayout(self)
@@ -1400,6 +1134,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         root.addLayout(nav_row)
 
         self.stack = QStackedWidget()
+        self.stack.setObjectName("AchievementsStack")
 
         self.overview_tab = self._build_overview_tab()
         self.list_tab = self._build_list_tab()
@@ -1414,26 +1149,13 @@ class AchievementsUI(TranslationMixin, QDialog):
 
     def _build_header(self) -> QWidget:
         w = QFrame()
+        w.setObjectName("AchievementsHeader")
         self._header_frame = w
-        w.setStyleSheet(f"""
-            QFrame {{
-                background: qlineargradient(x1:0,y1:0,x2:1,y2:0,
-                    stop:0 {DS.BG_SURFACE},
-                    stop:0.5 {"#1A2035" if DS.is_dark else "#F0EBE0"},
-                    stop:1 {DS.BG_SURFACE});
-                border: 1px solid {DS.BORDER};
-                border-radius: {DS.RADIUS}px;
-            }}
-        """)
         lay = QHBoxLayout(w)
         lay.setContentsMargins(DS.PAD, DS.PAD_S, DS.PAD, DS.PAD_S)
 
         title = QLabel(self.T("achievements_trophies"))
-        title.setStyleSheet(f"""
-            font-size: 20px; font-weight: bold;
-            color: {DS.GOLD};
-            background: transparent;
-        """)
+        title.setObjectName("AchievementsHeaderTitle")
         self._header_title = title
         lay.addWidget(title)
         lay.addStretch()
@@ -1444,20 +1166,13 @@ class AchievementsUI(TranslationMixin, QDialog):
         xp = ach_sys.get_total_xp()
 
         self._header_chips = []
-        for chip_text, chip_color in [
-            (f"{unlocked}/{total}  {self.T('achievements_unlocked')}", DS.GREEN),
-            (f"{xp}  {self.T('XP')}", DS.GOLD),
+        for chip_text, chip_type in [
+            (f"{unlocked}/{total}  {self.T('achievements_unlocked')}", "progress"),
+            (f"{xp}  {self.T('XP')}", "xp"),
         ]:
             chip = QLabel(chip_text)
-            chip.setStyleSheet(f"""
-                background: transparent;
-                color: {chip_color};
-                font-size: 11px;
-                font-weight: bold;
-                padding: 4px 12px;
-                border: 1px solid {chip_color};
-                border-radius: 12px;
-            """)
+            chip.setObjectName("AchievementsHeaderChip")
+            chip.setProperty("chipType", chip_type)
             lay.addWidget(chip)
             lay.addSpacing(6)
             self._header_chips.append(chip)
@@ -1470,22 +1185,9 @@ class AchievementsUI(TranslationMixin, QDialog):
         lay.addStretch()
 
         btn = QPushButton(self.T("close"))
+        btn.setObjectName("AchievementsCloseButton")
         btn.setFixedSize(110, 36)
         btn.setCursor(Qt.PointingHandCursor)
-        btn.setStyleSheet(f"""
-            QPushButton {{
-                background: {DS.RED_DIM};
-                color: {DS.RED};
-                border: 1px solid {DS.RED};
-                border-radius: {DS.RADIUS_S}px;
-                font-weight: bold;
-                font-size: 11px;
-            }}
-            QPushButton:hover {{
-                background: {DS.RED};
-                color: {"white" if DS.is_dark else "#1C1A16"};
-            }}
-        """)
         btn.clicked.connect(self.close)
         self._close_btn = btn
         lay.addWidget(btn)
@@ -1522,22 +1224,34 @@ class AchievementsUI(TranslationMixin, QDialog):
         total = len(self.achievement_system.get_all_achievements())
         pct = self.achievement_system.get_progress_percentage()
 
-        self._progress_lbl = QLabel()
-        self._progress_lbl.setTextFormat(Qt.RichText)
-        self._progress_lbl.setText(self._progress_lbl_html(unlocked, total))
-        info_col.addWidget(self._progress_lbl)
+        progress_row = QHBoxLayout()
+        progress_row.setSpacing(6)
+        self._progress_count = QLabel(str(unlocked))
+        self._progress_count.setObjectName("AchievementsUnlockedCount")
+        self._progress_total = QLabel(f"/ {total}  {self.T('achievements_unlocked')}")
+        self._progress_total.setObjectName("AchievementsUnlockedCaption")
+        progress_row.addWidget(self._progress_count)
+        progress_row.addWidget(self._progress_total)
+        progress_row.addStretch()
+        info_col.addLayout(progress_row)
 
         self._global_bar = GlobalProgressBar(int(pct), 100)
+        self._global_bar.setObjectName("AchievementsGlobalBar")
         info_col.addWidget(self._global_bar)
 
         rank_idx, rank_fr, rank_color = self.achievement_system.get_current_rank()
         rank_name = self.T(rank_fr)
         rank_key = self.achievement_system.ranks[rank_idx][0].lower().replace(" ", "_")
+        rank_color = (
+            self._palette.ranks.get(rank_key)
+            or self._palette.ranks.get(str(rank_idx))
+            or rank_color
+        )
         icon_path = self.achievement_system.get_achievement_icon_path(f"{rank_key}.png")
 
         rank_row = QHBoxLayout()
         rank_lbl = QLabel(f"{self.T('rank')}:")
-        rank_lbl.setStyleSheet(f"color:{DS.TEXT_SECONDARY}; font-size:11px; background:transparent;")
+        rank_lbl.setObjectName("AchievementsRankLabel")
         rank_row.addWidget(rank_lbl)
 
         self._rank_badge = RankBadgeWidget(rank_name, rank_color, icon_path)
@@ -1551,10 +1265,12 @@ class AchievementsUI(TranslationMixin, QDialog):
 
         # Category tree
         cat_group = QGroupBox(self.T("categories").upper())
+        cat_group.setObjectName("AchievementsGroup")
         cat_lay = QVBoxLayout(cat_group)
         cat_lay.setContentsMargins(DS.PAD_S, DS.PAD_S, DS.PAD_S, DS.PAD_S)
 
         self._category_tree = QTreeWidget()
+        self._category_tree.setObjectName("AchievementsCategoryTree")
         self._category_tree.setHeaderLabels([self.T("category"), self.T("progress")])
         self._category_tree.setColumnWidth(0, 200)
         self._category_tree.setAlternatingRowColors(True)
@@ -1573,17 +1289,19 @@ class AchievementsUI(TranslationMixin, QDialog):
         lay.addWidget(self._build_filter_bar())
 
         scroll = QScrollArea()
+        scroll.setObjectName("AchievementsScroll")
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self._cards_container = QWidget()
+        self._cards_container.setObjectName("AchievementsCardsContainer")
         self._cards_layout = QGridLayout(self._cards_container)
         self._cards_layout.setSpacing(10)
         self._cards_layout.setContentsMargins(2, 2, 2, 2)
 
         self._skeleton_lbl = QLabel(f"⏳  {self.T('loading_achievements')}")
+        self._skeleton_lbl.setObjectName("AchievementsSkeleton")
         self._skeleton_lbl.setAlignment(Qt.AlignCenter)
-        self._skeleton_lbl.setStyleSheet(f"color: {DS.TEXT_MUTED}; font-size: 14px; padding: 40px;")
         self._cards_layout.addWidget(self._skeleton_lbl, 0, 0, 1, 2)
 
         scroll.setWidget(self._cards_container)
@@ -1592,41 +1310,39 @@ class AchievementsUI(TranslationMixin, QDialog):
 
     def _build_filter_bar(self) -> QWidget:
         bar = QFrame()
+        bar.setObjectName("AchievementsFilterBar")
         bar.setFixedHeight(46)
-        bar.setStyleSheet(f"""
-            QFrame {{
-                background: {DS.BG_SURFACE};
-                border: 1px solid {DS.BORDER};
-                border-radius: {DS.RADIUS_S}px;
-            }}
-        """)
         lay = QHBoxLayout(bar)
         lay.setContentsMargins(10, 0, 10, 0)
         lay.setSpacing(8)
 
         self.category_filter = QComboBox()
+        self.category_filter.setObjectName("AchievementsFilter")
         self.category_filter.addItem(self.T("all"))
         self.category_filter.currentIndexChanged.connect(self.filter_achievements)
 
         self.tier_filter = QComboBox()
+        self.tier_filter.setObjectName("AchievementsFilter")
         self.tier_filter.addItem(self.T("all_2"))
         self.tier_filter.currentIndexChanged.connect(self.filter_achievements)
 
         self.status_filter = QComboBox()
+        self.status_filter.setObjectName("AchievementsFilter")
         self.status_filter.addItem(self.T("all_3"), "all")
         self.status_filter.addItem(self.T("unlocked_2"), "unlocked")
         self.status_filter.addItem(self.T("locked_2"), "locked")
         self.status_filter.currentIndexChanged.connect(self.filter_achievements)
 
         self.search_input = QLineEdit()
+        self.search_input.setObjectName("AchievementsSearch")
         self.search_input.setPlaceholderText(self.T("search_2"))
         self.search_input.setFixedWidth(180)
         self.search_input.textChanged.connect(self.filter_achievements)
 
         self.show_secrets_check = QPushButton(self.T("secrets"))
+        self.show_secrets_check.setObjectName("AchievementsSecretsButton")
         self.show_secrets_check.setCheckable(True)
         self.show_secrets_check.setFixedHeight(28)
-        self._update_secrets_btn_style()
         self.show_secrets_check.clicked.connect(self.filter_achievements)
 
         lay.addWidget(self.category_filter)
@@ -1637,29 +1353,6 @@ class AchievementsUI(TranslationMixin, QDialog):
         lay.addWidget(self.show_secrets_check)
         return bar
 
-    def _update_secrets_btn_style(self):
-        if not hasattr(self, "show_secrets_check"):
-            return
-        self.show_secrets_check.setStyleSheet(f"""
-            QPushButton {{
-                background: {DS.BG_INPUT};
-                color: {DS.TEXT_SECONDARY};
-                border: 1px solid {DS.BORDER};
-                border-radius: 14px;
-                font-size: 10px;
-                padding: 0 12px;
-            }}
-            QPushButton:checked {{
-                background: {DS.RED_DIM};
-                color: {DS.RED};
-                border-color: {DS.RED};
-            }}
-            QPushButton:hover:!checked {{
-                border-color: {DS.BORDER_LIGHT};
-                color: {DS.TEXT_PRIMARY};
-            }}
-        """)
-
     def _build_stats_tab(self) -> QWidget:
         page = QWidget()
         lay = QVBoxLayout(page)
@@ -1667,6 +1360,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         lay.setSpacing(0)
 
         scroll = QScrollArea()
+        scroll.setObjectName("AchievementsScroll")
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -1676,6 +1370,7 @@ class AchievementsUI(TranslationMixin, QDialog):
         inn_lay.setSpacing(4)
 
         group = QGroupBox(self.T("detailed_statistics").upper())
+        group.setObjectName("AchievementsGroup")
         g_lay = QVBoxLayout(group)
         g_lay.setSpacing(2)
         g_lay.setContentsMargins(DS.PAD, DS.PAD, DS.PAD, DS.PAD)
@@ -1683,17 +1378,17 @@ class AchievementsUI(TranslationMixin, QDialog):
         stats = self.achievement_system.stats
 
         self._stat_defs = [
-            (self.T("total_conversions_2"), "total_conversions", DS.BLUE),
-            (self.T("images_to_pdf_2"), "images_to_pdf", DS.PURPLE),
-            (self.T("word_pdf"), "word_pdf_conversions", DS.GOLD),
-            (self.T("protected_pdfs"), "pdf_protected", DS.GREEN),
-            (self.T("archives_created"), "archives_created", "#FF9F43"),
-            (self.T("previews_used"), "previews_used", DS.BLUE),
-            (self.T("dark_mode_2"), "dark_mode_minutes", "#6C8EBF"),
-            (self.T("ocr_pages"), "ocr_pages", DS.PURPLE),
-            (self.T("compressed_data"), "compressed_gb", DS.GREEN),
-            (self.T("consecutive"), "consecutive_success", DS.GOLD),
-            (self.T("unique_days"), "unique_days", DS.BLUE),
+            (self.T("total_conversions_2"), "total_conversions", "blue"),
+            (self.T("images_to_pdf_2"), "images_to_pdf", "purple"),
+            (self.T("word_pdf"), "word_pdf_conversions", "gold"),
+            (self.T("protected_pdfs"), "pdf_protected", "green"),
+            (self.T("archives_created"), "archives_created", "security"),
+            (self.T("previews_used"), "previews_used", "blue"),
+            (self.T("dark_mode_2"), "dark_mode_minutes", "usage"),
+            (self.T("ocr_pages"), "ocr_pages", "purple"),
+            (self.T("compressed_data"), "compressed_gb", "green"),
+            (self.T("consecutive"), "consecutive_success", "gold"),
+            (self.T("unique_days"), "unique_days", "blue"),
         ]
 
         raw_vals = []
@@ -1730,7 +1425,7 @@ class AchievementsUI(TranslationMixin, QDialog):
             except Exception:
                 frac = 0.0
 
-            bar = StatBarWidget(label, display, frac, color)
+            bar = StatBarWidget(label, display, frac, self._stat_color(color), color_key=color)
             g_lay.addWidget(bar)
             self._stat_bars.append(bar)
 
@@ -1739,6 +1434,11 @@ class AchievementsUI(TranslationMixin, QDialog):
         scroll.setWidget(inner)
         lay.addWidget(scroll)
         return page
+
+    def _stat_color(self, key: str) -> str:
+        if key in self._palette.categories:
+            return self._palette.categories[key]
+        return getattr(self._palette, key, self._palette.blue)
 
     # Data loading
     def refresh_stats_tab(self):
@@ -1801,7 +1501,8 @@ class AchievementsUI(TranslationMixin, QDialog):
 
         self._xp_ring.set_values(total_xp, self._max_xp)
 
-        self._progress_lbl.setText(self._progress_lbl_html(unlocked, total))
+        self._progress_count.setText(str(unlocked))
+        self._progress_total.setText(f"/ {total}  {self.T('achievements_unlocked')}")
         self._global_bar.setValue(int(pct))
 
         # Category tree
@@ -1814,12 +1515,18 @@ class AchievementsUI(TranslationMixin, QDialog):
                 item = QTreeWidgetItem(self._category_tree)
                 item.setText(0, name)
                 item.setText(1, f"{cstats['unlocked']}/{cstats['total']}  ({cstats['percentage']:.0f}%)")
-                if "color" in cat_data:
-                    item.setForeground(0, QColor(cat_data["color"]))
+                color = self._palette.categories.get(cat_id) or cat_data.get("color")
+                if color:
+                    item.setForeground(0, QColor(color))
 
         rank_idx, rank_fr, rank_color = ach_sys.get_current_rank()
         rank_name = self.T(rank_fr)
         rank_key = ach_sys.ranks[rank_idx][0].lower().replace(" ", "_")
+        rank_color = (
+            self._palette.ranks.get(rank_key)
+            or self._palette.ranks.get(str(rank_idx))
+            or rank_color
+        )
         icon_path = ach_sys.get_achievement_icon_path(f"{rank_key}.png")
         self._rank_badge.update_rank(rank_name, rank_color, icon_path)
 
@@ -1835,7 +1542,6 @@ class AchievementsUI(TranslationMixin, QDialog):
         filtered = self._filter_achievements_list(achievements)
 
         row, col, max_cols = 0, 0, 2
-        dark_mode = getattr(self.parent(), "dark_mode", True) if self.parent() else True
 
         for ach_id, ach in filtered.items():
             tier_data = self.achievement_system.get_tier(ach["tier"])
@@ -1848,7 +1554,6 @@ class AchievementsUI(TranslationMixin, QDialog):
                 category_data=category_data,
                 icon_path=icon_path,
                 language=self.current_language,
-                dark_mode=dark_mode,
             )
             self._cards_layout.addWidget(card, row, col)
             col += 1

@@ -18,6 +18,8 @@ if _ROOT_DIR not in sys.path:
 from translations import TranslationManager
 from utils.translation_mixin import TranslationMixin
 
+from .theme import get_achievements_palette, load_achievements_qss, resolve_theme_name
+
 
 class AchievementPopup(TranslationMixin, QDialog):
     """Achievement acquisition popup"""
@@ -37,6 +39,8 @@ class AchievementPopup(TranslationMixin, QDialog):
             self.dark_mode = parent.dark_mode
         elif hasattr(parent, "config") and "dark_mode" in parent.config:
             self.dark_mode = parent.config.get("dark_mode", True)
+        self._theme = resolve_theme_name(parent, self.dark_mode)
+        self._palette = get_achievements_palette(self._theme, self.dark_mode)
 
     def set_translator(self, tm) -> None:
         """Share the app-wide TranslationManager, then build the UI."""
@@ -49,6 +53,7 @@ class AchievementPopup(TranslationMixin, QDialog):
 
     def setup_ui(self):
         """Configure the interface"""
+        self.setObjectName("AchievementPopup")
         self.setFixedWidth(400)
         self.setSizeGripEnabled(False)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
@@ -58,18 +63,7 @@ class AchievementPopup(TranslationMixin, QDialog):
         layout.setContentsMargins(0, 0, 0, 0)
 
         container = QFrame()
-        container.setObjectName("container")
-        font_family = self.custom_font.family() if hasattr(self, "custom_font") else "Segoe UI"
-        container.setStyleSheet(f"""
-            #container {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #1a1d23, stop:0.3 #2d333b, stop:1 #1a1d23);
-                border-radius: 15px;
-                border: 3px solid #FFD700;
-                font-family: '{font_family}';
-            }}
-        """)
-
+        container.setObjectName("AchievementPopupContainer")
         container_layout = QHBoxLayout(container)
         container_layout.setContentsMargins(15, 15, 15, 15)
         container_layout.setSpacing(15)
@@ -77,8 +71,8 @@ class AchievementPopup(TranslationMixin, QDialog):
         # Icon
         icon_path = self.achievement_system.get_achievement_icon_path(self.achievement["icon"])
         icon_label = QLabel()
+        icon_label.setObjectName("AchievementPopupIcon")
         icon_label.setAttribute(Qt.WA_TranslucentBackground)
-        icon_label.setStyleSheet("background: transparent;")
 
         if os.path.exists(icon_path):
             pixmap = QPixmap(icon_path)
@@ -91,7 +85,6 @@ class AchievementPopup(TranslationMixin, QDialog):
                 icon_label.setPixmap(scaled)
         else:
             icon_label.setText("🏆")
-            icon_label.setStyleSheet("font-size: 48px;")
 
         container_layout.addWidget(icon_label)
 
@@ -100,12 +93,7 @@ class AchievementPopup(TranslationMixin, QDialog):
 
         title_text = self.translate_text("achievement_unlocked")
         title_label = QLabel(f"🏆 {title_text} 🏆")
-        title_label.setStyleSheet("""
-            font-size: 14px;
-            font-weight: bold;
-            color: #FFD700;
-            background: transparent;
-        """)
+        title_label.setObjectName("AchievementPopupTitle")
         content_layout.addWidget(title_label)
 
         _raw_name = self.achievement["name"]
@@ -113,9 +101,8 @@ class AchievementPopup(TranslationMixin, QDialog):
             name = self._tm.translate_text(_raw_name)
         else:
             name = _raw_name.get(self.language, _raw_name.get("fr", ""))
-        name_color = "#1e293b" if not self.dark_mode else "#e9ecef"
         name_label = QLabel(name)
-        name_label.setStyleSheet(f"font-size: 16px; font-weight: bold;color: {name_color}; background: transparent;")
+        name_label.setObjectName("AchievementPopupName")
         name_label.setWordWrap(True)
         content_layout.addWidget(name_label)
 
@@ -125,11 +112,7 @@ class AchievementPopup(TranslationMixin, QDialog):
         else:
             description = _raw_desc.get(self.language, _raw_desc.get("fr", ""))
         desc_label = QLabel(description)
-        desc_label.setStyleSheet("""
-            font-size: 12px;
-            color: #adb5bd;
-            background: transparent;
-        """)
+        desc_label.setObjectName("AchievementPopupDesc")
         desc_label.setWordWrap(True)
         content_layout.addWidget(desc_label)
 
@@ -137,14 +120,7 @@ class AchievementPopup(TranslationMixin, QDialog):
         reward_layout.addStretch()
 
         xp_label = QLabel(f"+{self.achievement['reward_xp']} XP")
-        xp_label.setStyleSheet("""
-            font-size: 14px;
-            font-weight: bold;
-            color: #FFD700;
-            background-color: rgba(255, 215, 0, 0.2);
-            padding: 2px 8px;
-            border-radius: 10px;
-        """)
+        xp_label.setObjectName("AchievementPopupXP")
         reward_layout.addWidget(xp_label)
 
         content_layout.addLayout(reward_layout)
@@ -161,75 +137,8 @@ class AchievementPopup(TranslationMixin, QDialog):
         self.move(screen_geometry.width() - self.width() - 20, 50)
 
     def apply_theme_style(self):
-        """Apply style adapted to light or dark theme"""
-        container = self.findChild(QFrame, "container")
-        if not container:
-            return
-
-        if self.dark_mode:
-            container.setStyleSheet("""
-                #container {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                        stop:0 #1a1d23, stop:0.3 #2d333b, stop:1 #1a1d23);
-                    border: 3px solid #FFD700;
-                    border-radius: 15px;
-                }
-                QLabel {
-                    color: #e9ecef;
-                }
-            """)
-        else:
-            container.setStyleSheet("""
-                #container {
-                    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                        stop:0 #f8f9fa, stop:0.3 #e9ecef, stop:1 #f8f9fa);
-                    border: 3px solid #FFC107;
-                    border-radius: 15px;
-                }
-                QLabel {
-                    color: #212529;
-                }
-                QLabel[style="title"] {
-                    color: #d97706;
-                }
-                QLabel[style="name"] {
-                    color: #1e293b;
-                    font-weight: bold;
-                }
-                QLabel[style="desc"] {
-                    color: #4b5563;
-                }
-                QLabel[style="xp"] {
-                    color: #d97706;
-                    background-color: rgba(217, 119, 6, 0.1);
-                    border: 1px solid rgba(217, 119, 6, 0.3);
-                }
-            """)
-
-            for child in self.findChildren(QLabel):
-                text = child.text()
-                if "SUCCÈS DÉBLOQUÉ" in text or "ACHIEVEMENT UNLOCKED" in text:
-                    child.setProperty("style", "title")
-                    child.setStyleSheet("font-size: 14px; font-weight: bold; color: #d97706;")
-                _n = self.achievement["name"]
-                _ach_name = _n if isinstance(_n, str) else _n.get("fr", "")
-                if child.font().bold() and text == _ach_name:
-                    child.setProperty("style", "name")
-                    child.setStyleSheet("font-size: 16px; font-weight: bold; color: #1e293b;")
-                elif child.font().pointSize() == 12:
-                    child.setProperty("style", "desc")
-                    child.setStyleSheet("font-size: 12px; color: #4b5563;")
-                elif "+" in text and "XP" in text:
-                    child.setProperty("style", "xp")
-                    child.setStyleSheet("""
-                        font-size: 14px;
-                        font-weight: bold;
-                        color: #d97706;
-                        background-color: rgba(217, 119, 6, 0.1);
-                        padding: 2px 8px;
-                        border-radius: 10px;
-                        border: 1px solid rgba(217, 119, 6, 0.3);
-                    """)
+        """Apply the theme's achievements stylesheet."""
+        self.setStyleSheet(load_achievements_qss(self._theme))
 
     def setup_animations(self):
         """Configure animations"""
