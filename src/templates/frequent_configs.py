@@ -1,12 +1,11 @@
-"""
-Frequent configurations -> auto-created templates.
+"""Frequent configurations -> auto-created templates.
 
 Logic (see FrequentConfigTracker.record):
 
 1. Every successful operation reports the configuration it really used.
-2. The config is reduced to a *canonical* form: only the fields that matter,
-   with language-independent values (French / English / internal keys all map
-   to the same thing). Two configs that behave the same therefore compare equal.
+2. The config is reduced to a semantic, language-independent form.  Legacy
+   French/English labels and internal values are normalized by
+   ``templates.semantic_keys``.
 3. If a template of that type (auto-created *or* made by the user) already has
    the same canonical config, no template is created; that template is just
    marked as used.
@@ -26,168 +25,63 @@ import json
 import re
 from typing import NamedTuple
 
+from . import semantic_keys as sk
+
 AUTO_PREFIX = "[Auto] "
 DEFAULT_THRESHOLD = 3
 DEFAULT_MAX_AUTO_PER_TYPE = 3
 
-# --------------------------------------------------------------------------
-# Canonical values (French label is the canonical form, as stored in templates)
-# --------------------------------------------------------------------------
-
-_PDF_TO_WORD_MODES = {
-    "with_images": "Conserver les images et la mise en page",
-    "text_only": "Texte brut uniquement",
-}
-_PDF_TO_WORD_ALIASES = {
-    "Keep images and layout": "with_images",
-    "Plain text only": "text_only",
-}
-
-_WORD_TO_PDF_MODES = {
-    "preserve_all": "Conserver toute la mise en page",
-    "text_only": "Texte uniquement",
-}
-_WORD_TO_PDF_ALIASES = {
-    "Preserve all layout": "preserve_all",
-    "Text only": "text_only",
-}
-_WORD_TO_PDF_QUALITY = {
-    "Haute (300 DPI)": "Haute (300 DPI)",
-    "Standard (150 DPI)": "Standard (150 DPI)",
-    "Basse (72 DPI)": "Basse (72 DPI)",
-    # labels shown by the conversion dialog
-    "Haute qualité (300 DPI)": "Haute (300 DPI)",
-    "Qualité standard (150 DPI)": "Standard (150 DPI)",
-    "Optimisé (96 DPI)": "Basse (72 DPI)",
-}
-
-_MERGE_ORDERS = {
-    "alpha_az": "Alphabétique (A→Z)",
-    "alpha_za": "Alphabétique (Z→A)",
-    "num_asc": "Numérique (1→9)",
-    "num_desc": "Numérique (9→1)",
-    "date_asc": "Date (ancien→nouveau)",
-    "date_desc": "Date (nouveau→ancien)",
-    "manual": "Manuel (glisser-déposer)",
-    "current": "Ordre actuel (liste principale)",
-}
-_MERGE_ORDER_ALIASES = {
-    "Alphabetical (A→Z)": "alpha_az",
-    "Alphabetical (Z→A)": "alpha_za",
-    "Numeric (1→9)": "num_asc",
-    "Numeric (9→1)": "num_desc",
-    "Date (oldest→newest)": "date_asc",
-    "Date (newest→oldest)": "date_desc",
-    "Manual (drag and drop)": "manual",
-    "Current order (main list)": "current",
-}
-
-_SPLIT_METHODS = {
-    "Par pages": "Par pages",
-    "Toutes les pages": "Toutes les pages",
-    "Plage de pages": "Plage de pages",
-    "By pages": "Par pages",
-    "All pages": "Toutes les pages",
-    "Page range": "Plage de pages",
-}
-
-_COMPRESSION_LEVELS = {
-    "Normal": "Normal",
-    "Haute compression": "Haute compression",
-    "Compression maximale": "Compression maximale",
-    "High compression": "Haute compression",
-    "Maximum compression": "Compression maximale",
-}
-
-_OPTIMIZATION_TYPES = {
-    "Compression  –  réduit la taille du fichier": 0,
-    "Nettoyage  –  supprime uniquement les métadonnées": 1,
-    "Compression + Nettoyage  –  recommandé": 2,
-    "Compression  —  reduces file size": 0,
-    "Cleaning  —  removes metadata only": 1,
-    "Compression + Cleaning  —  recommended": 2,
-    "compression": 0,
-    "nettoyage": 1,
-    "les deux": 2,
-}
-
-
-def _from_keyed(value, labels: dict, aliases: dict, default):
-    """Resolve internal key / French label / English alias to the French label."""
-    if value in labels:
-        return labels[value]
-    if value in labels.values():
-        return value
-    if value in aliases:
-        return labels[aliases[value]]
-    return labels[default] if value in (None, "") else value
-
-
-def _as_int(value, default: int = 0) -> int:
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
-
-
-def _optimization_type(value) -> int:
-    if isinstance(value, str) and value in _OPTIMIZATION_TYPES:
-        return _OPTIMIZATION_TYPES[value]
-    return _as_int(value, 2)
-
 
 def canonical_config(template_type: str, config: dict | None) -> dict | None:
-    """Return the canonical form of ``config`` for ``template_type``.
+    """Return the semantic canonical form of ``config`` for ``template_type``.
 
     Returns None when the type cannot be tracked (no real, reusable options).
     """
-    cfg = config or {}
+    key = sk.normalize_type(template_type)
+    cfg = sk.normalize_config(key, config)
 
-    if template_type == "Conversion PDF→Word":
-        return {"mode": _from_keyed(cfg.get("mode"), _PDF_TO_WORD_MODES, _PDF_TO_WORD_ALIASES, "with_images")}
+    if key == sk.PDF_TO_WORD:
+        return {"mode": cfg["mode"]}
 
-    if template_type == "Conversion Word→PDF":
+    if key == sk.WORD_TO_PDF:
         return {
-            "mode": _from_keyed(cfg.get("mode"), _WORD_TO_PDF_MODES, _WORD_TO_PDF_ALIASES, "preserve_all"),
-            "quality": _WORD_TO_PDF_QUALITY.get(cfg.get("quality"), "Standard (150 DPI)"),
-            "compress_images": bool(cfg.get("compress_images", cfg.get("compress", True))),
-            "include_metadata": bool(cfg.get("include_metadata", True)),
+            "mode": cfg["mode"],
+            "quality": cfg["quality"],
+            "compress_images": cfg["compress_images"],
+            "include_metadata": cfg["include_metadata"],
         }
 
-    if template_type == "Conversion Images→PDF":
-        return {"separate": bool(cfg.get("separate", False))}
+    if key == sk.IMAGES_TO_PDF:
+        return {"separate": cfg["separate"]}
 
-    if template_type in ("Fusion PDF", "Fusion Word"):
-        return {"merge_order": _from_keyed(cfg.get("merge_order"), _MERGE_ORDERS, _MERGE_ORDER_ALIASES, "current")}
+    if key in (sk.PDF_MERGE, sk.WORD_MERGE):
+        return {"merge_order": cfg["merge_order"]}
 
-    if template_type == "Division PDF":
-        method = _SPLIT_METHODS.get(cfg.get("split_method", "Par pages"), cfg.get("split_method"))
-        if method == "Plage de pages":
+    if key == sk.PDF_SPLIT:
+        if cfg["split_method"] == sk.SPLIT_PAGE_RANGE:
             return None  # a page range only makes sense for one specific document
         return {
-            "split_method": method,
-            "pages_per_file": max(1, _as_int(cfg.get("pages_per_file"), 1)) if method == "Par pages" else 1,
+            "split_method": cfg["split_method"],
+            "pages_per_file": cfg["pages_per_file"] if cfg["split_method"] == sk.SPLIT_BY_PAGES else 1,
         }
 
-    if template_type == "Compression":
-        split_size = max(0, _as_int(cfg.get("split_size"), 0))
-        split = bool(cfg.get("split_archive", split_size > 0)) and split_size > 0
+    if key == sk.COMPRESSION:
         return {
-            "format": str(cfg.get("format", "ZIP")).upper(),
-            "compression_level": _COMPRESSION_LEVELS.get(cfg.get("compression_level", "Normal"), "Normal"),
-            "encrypt": bool(cfg.get("encrypt", False)),
-            "delete_originals": bool(cfg.get("delete_originals", False)),
-            "split_archive": split,
-            "split_size": split_size if split else 0,
+            "format": cfg["format"],
+            "compression_level": cfg["compression_level"],
+            "encrypt": cfg["encrypt"],
+            "delete_originals": cfg["delete_originals"],
+            "split_archive": cfg["split_archive"],
+            "split_size": cfg["split_size"],
         }
 
-    if template_type == "Optimisation de fichiers":
+    if key == sk.FILE_OPTIMIZATION:
         return {
-            "optimization_type": _optimization_type(cfg.get("optimization_type", 2)),
-            "quality_level": _as_int(cfg.get("quality_level"), 1),
-            "remove_metadata": bool(cfg.get("remove_metadata", True)),
-            "compress_images": bool(cfg.get("compress_images", True)),
-            "keep_backup": bool(cfg.get("keep_backup", True)),
+            "optimization_type": cfg["optimization_type"],
+            "quality_level": cfg["quality_level"],
+            "remove_metadata": cfg["remove_metadata"],
+            "compress_images": cfg["compress_images"],
+            "keep_backup": cfg["keep_backup"],
         }
 
     return None

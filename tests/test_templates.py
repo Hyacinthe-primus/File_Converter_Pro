@@ -25,7 +25,7 @@ class TestTemplateManager:
         from templates.template_manager import TemplateManager
 
         assert TemplateManager.normalize_type("PDF to Word Conversion") == "Conversion PDF→Word"
-        assert TemplateManager.normalize_type("Quality Presets") == "Optimisation de fichiers"
+        assert TemplateManager.normalize_type("Quality Presets") == "Préréglages de qualité"
 
     def test_normalize_type_passthrough(self):
         from templates.template_manager import TemplateManager
@@ -88,3 +88,75 @@ class TestTemplateCRUD:
             tm.load_templates()
             templates_after = tm.get_templates_by_type("Compression")
             assert tid not in templates_after
+
+    def test_create_from_current_settings_uses_semantic_keys(self, tm):
+        from templates import semantic_keys as sk
+
+        class App:
+            config = {"pdf_to_word_mode": "text_only", "conversion_quality": "high"}
+            active_templates = {}
+
+            class config_manager:
+                @staticmethod
+                def save_config(_):
+                    pass
+
+        config = tm.create_template_from_current_settings("Semantic", sk.PDF_TO_WORD, App())
+        assert config["mode"] == sk.MODE_TEXT_ONLY
+        assert config["quality"] == sk.QUALITY_HIGH
+
+        templates = tm.get_templates_by_type(sk.PDF_TO_WORD)
+        assert len(templates) == 1
+        stored = next(iter(templates.values()))
+        assert stored["type"] == "Conversion PDF→Word"
+        assert stored["config"]["mode"] == sk.MODE_TEXT_ONLY
+
+    def test_apply_legacy_config_still_works(self, tm):
+        from templates import semantic_keys as sk
+
+        class App:
+            config = {}
+            active_templates = {}
+
+            class config_manager:
+                @staticmethod
+                def save_config(_):
+                    pass
+
+        tm.db_manager.save_template("Legacy", "Conversion PDF→Word", {"mode": "Texte brut uniquement"})
+        tm.load_templates()
+        template_id = next(iter(tm.current_templates))
+        app = App()
+        assert tm.apply_template(template_id, app) is True
+        assert app.active_templates["pdf_to_word"]["mode"] == sk.MODE_TEXT_ONLY
+
+    @pytest.mark.parametrize(
+        "template_type,config",
+        [
+            ("Conversion PDF→Word", {"mode": "text_only"}),
+            ("Conversion Word→PDF", {"mode": "preserve_all", "quality": "Standard (150 DPI)"}),
+            ("Conversion Images→PDF", {"separate": True}),
+            ("Fusion PDF", {"merge_order": "alpha_az"}),
+            ("Fusion Word", {"merge_order": "alpha_az"}),
+            ("Division PDF", {"split_method": "Par pages"}),
+            ("Protection PDF", {"protection_level": "Avancé (ouvrir + modifications)"}),
+            ("Compression", {"format": "ZIP", "compression_level": "Haute compression"}),
+            ("Optimisation de fichiers", {"optimization_type": 2}),
+        ],
+    )
+    def test_apply_semantic_configs(self, tm, template_type, config):
+        class App:
+            config = {}
+            active_templates = {}
+
+            class config_manager:
+                @staticmethod
+                def save_config(_):
+                    pass
+
+        tm.db_manager.save_template("Semantic", template_type, config)
+        tm.load_templates()
+        template_id = next(iter(tm.current_templates))
+        app = App()
+        assert tm.apply_template(template_id, app) is True
+        assert app.active_templates

@@ -52,6 +52,7 @@ except ImportError as _e:
 from achievements import AchievementPopup, AchievementsUI, RankPopup
 from dialogs import ConversionOptionsDialog, PreviewDialog, SettingsDialog
 from qss_helpers import _apply_dialog_btn
+from templates import semantic_keys as sk
 from widgets import AnimatedCheckBox
 
 
@@ -1194,15 +1195,16 @@ class AppUIMixin(
     def on_template_applied(self, template):
         """Called when a template is applied"""
 
+        template_type = sk.normalize_type(template["type"])
         message = f"{self.translate_text('template_applied')}: '{template['name']}'"
-        if template["type"] == self.translate_text("pdf_merge"):
+        if template_type == sk.PDF_MERGE:
             message += self.translate_text("add_pdf_files_and_launch_the_merge")
-        elif template["type"] == self.translate_text("pdf_to_word_conversion"):
+        elif template_type == sk.PDF_TO_WORD:
             message += self.translate_text("launch_a_pdf_to_word_conversion_to_use_these_settings")
 
         self.status_bar.showMessage(message)
 
-        if template["type"] == self.translate_text("file_optimization"):
+        if template_type == sk.FILE_OPTIMIZATION:
             message += " - " + self.translate_text(
                 "launch_optimize_files_to_use_these_settings"
             )

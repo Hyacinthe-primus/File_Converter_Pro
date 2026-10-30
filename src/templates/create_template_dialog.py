@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 
 from widgets import AnimatedCheckBox
 
+from . import semantic_keys as sk
 from .template_manager import TemplateManager
 
 
@@ -34,6 +35,11 @@ class CreateTemplateDialog(QDialog):
 
         self.setup_ui()
 
+    @staticmethod
+    def _add_choices(combo, choices):
+        for label, value in choices:
+            combo.addItem(label, value)
+
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
@@ -43,18 +49,19 @@ class CreateTemplateDialog(QDialog):
         self.name_input.setPlaceholderText(self.parent_dialog.translate_text("e_g_high_quality_conversion"))
 
         self.type_combo = QComboBox()
-        self.type_combo.addItems(
+        self._add_choices(
+            self.type_combo,
             [
-                self.parent_dialog.translate_text("pdf_to_word_conversion"),
-                self.parent_dialog.translate_text("word_to_pdf_conversion"),
-                self.parent_dialog.translate_text("images_to_pdf_conversion"),
-                self.parent_dialog.translate_text("pdf_merge"),
-                self.parent_dialog.translate_text("word_merge"),
-                self.parent_dialog.translate_text("pdf_split"),
-                self.parent_dialog.translate_text("pdf_protection"),
-                self.parent_dialog.translate_text("Compression"),
-                self.parent_dialog.translate_text("file_optimization"),
-            ]
+                (self.parent_dialog.translate_text("pdf_to_word_conversion"), sk.PDF_TO_WORD),
+                (self.parent_dialog.translate_text("word_to_pdf_conversion"), sk.WORD_TO_PDF),
+                (self.parent_dialog.translate_text("images_to_pdf_conversion"), sk.IMAGES_TO_PDF),
+                (self.parent_dialog.translate_text("pdf_merge"), sk.PDF_MERGE),
+                (self.parent_dialog.translate_text("word_merge"), sk.WORD_MERGE),
+                (self.parent_dialog.translate_text("pdf_split"), sk.PDF_SPLIT),
+                (self.parent_dialog.translate_text("pdf_protection"), sk.PDF_PROTECTION),
+                (self.parent_dialog.translate_text("Compression"), sk.COMPRESSION),
+                (self.parent_dialog.translate_text("file_optimization"), sk.FILE_OPTIMIZATION),
+            ],
         )
         self.type_combo.currentIndexChanged.connect(self.update_config_form)
 
@@ -120,21 +127,22 @@ class CreateTemplateDialog(QDialog):
     def create_word_merge_config(self):
         order_label = QLabel(self.parent_dialog.translate_text("merge_order_2"))
         self.word_merge_order_combo = QComboBox()
-        self.word_merge_order_combo.addItems(
+        self._add_choices(
+            self.word_merge_order_combo,
             [
-                self.parent_dialog.translate_text("current_order_main_list"),
-                self.parent_dialog.translate_text("alphabetical_a_to_z"),
-                self.parent_dialog.translate_text("alphabetical_z_to_a"),
-                self.parent_dialog.translate_text("numeric_1_to_9"),
-                self.parent_dialog.translate_text("numeric_9_to_1"),
-                self.parent_dialog.translate_text("date_oldest_to_newest"),
-                self.parent_dialog.translate_text("date_newest_to_oldest"),
-                self.parent_dialog.translate_text("manual_drag_and_drop"),
-            ]
+                (self.parent_dialog.translate_text("current_order_main_list"), sk.ORDER_CURRENT),
+                (self.parent_dialog.translate_text("alphabetical_a_to_z"), sk.ORDER_ALPHA_AZ),
+                (self.parent_dialog.translate_text("alphabetical_z_to_a"), sk.ORDER_ALPHA_ZA),
+                (self.parent_dialog.translate_text("numeric_1_to_9"), sk.ORDER_NUM_ASC),
+                (self.parent_dialog.translate_text("numeric_9_to_1"), sk.ORDER_NUM_DESC),
+                (self.parent_dialog.translate_text("date_oldest_to_newest"), sk.ORDER_DATE_ASC),
+                (self.parent_dialog.translate_text("date_newest_to_oldest"), sk.ORDER_DATE_DESC),
+                (self.parent_dialog.translate_text("manual_drag_and_drop"), sk.ORDER_MANUAL),
+            ],
         )
         name_label = QLabel(self.parent_dialog.translate_text("filename_template"))
         self.word_merge_name_input = QLineEdit()
-        self.word_merge_name_input.setText("fusion_word_{date}_{heure}")
+        self.word_merge_name_input.setText("fusion_word_{date}_{hour}")
         self.config_layout.addWidget(order_label)
         self.config_layout.addWidget(self.word_merge_order_combo)
         self.config_layout.addWidget(name_label)
@@ -147,25 +155,27 @@ class CreateTemplateDialog(QDialog):
         format_label = QLabel(self.parent_dialog.translate_text("archive_format"))
 
         self.compression_format_combo = QComboBox()
-        self.compression_format_combo.addItems(
+        self._add_choices(
+            self.compression_format_combo,
             [
-                self.parent_dialog.translate_text("ZIP"),
-                self.parent_dialog.translate_text("7Z"),
-                self.parent_dialog.translate_text("tar_gz"),
-                self.parent_dialog.translate_text("TAR"),
-            ]
+                (self.parent_dialog.translate_text("ZIP"), sk.FORMAT_ZIP),
+                (self.parent_dialog.translate_text("7Z"), sk.FORMAT_7Z),
+                (self.parent_dialog.translate_text("tar_gz"), sk.FORMAT_TAR_GZ),
+                (self.parent_dialog.translate_text("TAR"), sk.FORMAT_TAR),
+            ],
         )
         self.compression_format_combo.setMinimumHeight(30)
         self.compression_format_combo.setMaximumHeight(35)
 
         level_label = QLabel(self.parent_dialog.translate_text("compression_level"))
         self.compression_level_combo = QComboBox()
-        self.compression_level_combo.addItems(
+        self._add_choices(
+            self.compression_level_combo,
             [
-                self.parent_dialog.translate_text("Normal"),
-                self.parent_dialog.translate_text("high_compression"),
-                self.parent_dialog.translate_text("maximum_compression"),
-            ]
+                (self.parent_dialog.translate_text("Normal"), sk.LEVEL_NORMAL),
+                (self.parent_dialog.translate_text("high_compression"), sk.LEVEL_HIGH),
+                (self.parent_dialog.translate_text("maximum_compression"), sk.LEVEL_MAXIMUM),
+            ],
         )
         self.compression_level_combo.setMinimumHeight(28)
         self.compression_level_combo.setMaximumHeight(32)
@@ -214,36 +224,37 @@ class CreateTemplateDialog(QDialog):
             if item.widget():
                 item.widget().deleteLater()
 
-        template_type = self.type_combo.currentText()
+        template_type = self.type_combo.currentData() or sk.normalize_type(self.type_combo.currentText())
 
-        if template_type == self.parent_dialog.translate_text("pdf_to_word_conversion"):
+        if template_type == sk.PDF_TO_WORD:
             self.create_pdf_to_word_config()
-        elif template_type == self.parent_dialog.translate_text("word_to_pdf_conversion"):
+        elif template_type == sk.WORD_TO_PDF:
             self.create_word_to_pdf_config()
-        elif template_type == self.parent_dialog.translate_text("images_to_pdf_conversion"):
+        elif template_type == sk.IMAGES_TO_PDF:
             self.create_images_to_pdf_config()
-        elif template_type == self.parent_dialog.translate_text("pdf_merge"):
+        elif template_type == sk.PDF_MERGE:
             self.create_pdf_merge_config()
-        elif template_type == self.parent_dialog.translate_text("word_merge"):
+        elif template_type == sk.WORD_MERGE:
             self.create_word_merge_config()
-        elif template_type == self.parent_dialog.translate_text("pdf_split"):
+        elif template_type == sk.PDF_SPLIT:
             self.create_pdf_split_config()
-        elif template_type == self.parent_dialog.translate_text("pdf_protection"):
+        elif template_type == sk.PDF_PROTECTION:
             self.create_pdf_protection_config()
-        elif template_type == self.parent_dialog.translate_text("Compression"):
+        elif template_type == sk.COMPRESSION:
             self.create_compression_config()
-        elif template_type == self.parent_dialog.translate_text("file_optimization"):
+        elif template_type == sk.FILE_OPTIMIZATION:
             self.create_optimization_config()
 
     def create_pdf_split_config(self):
         method_label = QLabel(self.parent_dialog.translate_text("split_method"))
         self.split_method_combo = QComboBox()
-        self.split_method_combo.addItems(
+        self._add_choices(
+            self.split_method_combo,
             [
-                self.parent_dialog.translate_text("by_pages"),
-                self.parent_dialog.translate_text("all_pages"),
-                self.parent_dialog.translate_text("page_range"),
-            ]
+                (self.parent_dialog.translate_text("by_pages"), sk.SPLIT_BY_PAGES),
+                (self.parent_dialog.translate_text("all_pages"), sk.SPLIT_ALL_PAGES),
+                (self.parent_dialog.translate_text("page_range"), sk.SPLIT_PAGE_RANGE),
+            ],
         )
 
         pages_label = QLabel(self.parent_dialog.translate_text("pages_per_file"))
@@ -260,11 +271,12 @@ class CreateTemplateDialog(QDialog):
     def create_pdf_protection_config(self):
         level_label = QLabel(self.parent_dialog.translate_text("mode"))
         self.protection_level_combo = QComboBox()
-        self.protection_level_combo.addItems(
+        self._add_choices(
+            self.protection_level_combo,
             [
-                self.parent_dialog.translate_text("basic_only_restrictions"),
-                self.parent_dialog.translate_text("advanced_password_restrictions"),
-            ]
+                (self.parent_dialog.translate_text("basic_only_restrictions"), sk.PROTECTION_BASIC),
+                (self.parent_dialog.translate_text("advanced_password_restrictions"), sk.PROTECTION_ADVANCED),
+            ],
         )
 
         permissions_group = QGroupBox(self.parent_dialog.translate_text("Permissions"))
@@ -292,11 +304,12 @@ class CreateTemplateDialog(QDialog):
     def create_pdf_to_word_config(self):
         mode_label = QLabel(self.parent_dialog.translate_text("conversion_mode_2"))
         self.mode_combo = QComboBox()
-        self.mode_combo.addItems(
+        self._add_choices(
+            self.mode_combo,
             [
-                self.parent_dialog.translate_text("keep_images_and_layout"),
-                self.parent_dialog.translate_text("text_only_2"),
-            ]
+                (self.parent_dialog.translate_text("keep_images_and_layout"), sk.MODE_WITH_IMAGES),
+                (self.parent_dialog.translate_text("text_only_2"), sk.MODE_TEXT_ONLY),
+            ],
         )
         self.config_layout.addWidget(mode_label)
         self.config_layout.addWidget(self.mode_combo)
@@ -304,21 +317,23 @@ class CreateTemplateDialog(QDialog):
     def create_word_to_pdf_config(self):
         mode_label = QLabel(self.parent_dialog.translate_text("conversion_mode_2"))
         self.word_mode_combo = QComboBox()
-        self.word_mode_combo.addItems(
+        self._add_choices(
+            self.word_mode_combo,
             [
-                self.parent_dialog.translate_text("preserve_all_layout"),
-                self.parent_dialog.translate_text("text_only"),
-            ]
+                (self.parent_dialog.translate_text("preserve_all_layout"), sk.MODE_PRESERVE_ALL),
+                (self.parent_dialog.translate_text("text_only"), sk.MODE_TEXT_ONLY),
+            ],
         )
 
         quality_label = QLabel(self.parent_dialog.translate_text("image_quality"))
         self.image_quality_combo = QComboBox()
-        self.image_quality_combo.addItems(
+        self._add_choices(
+            self.image_quality_combo,
             [
-                self.parent_dialog.translate_text("high_300_dpi"),
-                self.parent_dialog.translate_text("standard_150_dpi"),
-                self.parent_dialog.translate_text("low_72_dpi"),
-            ]
+                (self.parent_dialog.translate_text("high_300_dpi"), sk.QUALITY_HIGH),
+                (self.parent_dialog.translate_text("standard_150_dpi"), sk.QUALITY_STANDARD),
+                (self.parent_dialog.translate_text("low_72_dpi"), sk.QUALITY_LOW),
+            ],
         )
 
         self.include_metadata_check = AnimatedCheckBox(self.parent_dialog.translate_text("include_metadata"))
@@ -337,21 +352,22 @@ class CreateTemplateDialog(QDialog):
     def create_pdf_merge_config(self):
         order_label = QLabel(self.parent_dialog.translate_text("merge_order_2"))
         self.merge_order_combo = QComboBox()
-        self.merge_order_combo.addItems(
+        self._add_choices(
+            self.merge_order_combo,
             [
-                self.parent_dialog.translate_text("current_order_main_list"),
-                self.parent_dialog.translate_text("alphabetical_a_to_z"),
-                self.parent_dialog.translate_text("alphabetical_z_to_a"),
-                self.parent_dialog.translate_text("numeric_1_to_9"),
-                self.parent_dialog.translate_text("numeric_9_to_1"),
-                self.parent_dialog.translate_text("date_oldest_to_newest"),
-                self.parent_dialog.translate_text("date_newest_to_oldest"),
-                self.parent_dialog.translate_text("manual_drag_and_drop"),
-            ]
+                (self.parent_dialog.translate_text("current_order_main_list"), sk.ORDER_CURRENT),
+                (self.parent_dialog.translate_text("alphabetical_a_to_z"), sk.ORDER_ALPHA_AZ),
+                (self.parent_dialog.translate_text("alphabetical_z_to_a"), sk.ORDER_ALPHA_ZA),
+                (self.parent_dialog.translate_text("numeric_1_to_9"), sk.ORDER_NUM_ASC),
+                (self.parent_dialog.translate_text("numeric_9_to_1"), sk.ORDER_NUM_DESC),
+                (self.parent_dialog.translate_text("date_oldest_to_newest"), sk.ORDER_DATE_ASC),
+                (self.parent_dialog.translate_text("date_newest_to_oldest"), sk.ORDER_DATE_DESC),
+                (self.parent_dialog.translate_text("manual_drag_and_drop"), sk.ORDER_MANUAL),
+            ],
         )
         name_label = QLabel(self.parent_dialog.translate_text("filename_template"))
         self.name_template_input = QLineEdit()
-        self.name_template_input.setText("fusion_{date}_{heure}")
+        self.name_template_input.setText("fusion_{date}_{hour}")
         self.config_layout.addWidget(order_label)
         self.config_layout.addWidget(self.merge_order_combo)
         self.config_layout.addWidget(name_label)
@@ -362,24 +378,26 @@ class CreateTemplateDialog(QDialog):
 
         self.config_layout.addWidget(QLabel(tr("optimization_mode")))
         self.optim_mode_combo = QComboBox()
-        self.optim_mode_combo.addItems(
+        self._add_choices(
+            self.optim_mode_combo,
             [
-                tr("compression_reduces_file_size"),
-                tr("cleaning_removes_metadata_only"),
-                tr("compression_cleaning_recommended"),
-            ]
+                (tr("compression_reduces_file_size"), sk.OPTIMIZATION_COMPRESSION),
+                (tr("cleaning_removes_metadata_only"), sk.OPTIMIZATION_CLEANING),
+                (tr("compression_cleaning_recommended"), sk.OPTIMIZATION_BOTH),
+            ],
         )
         self.optim_mode_combo.setCurrentIndex(2)
         self.config_layout.addWidget(self.optim_mode_combo)
 
         self.config_layout.addWidget(QLabel(tr("compression_level_2")))
         self.optim_quality_combo = QComboBox()
-        self.optim_quality_combo.addItems(
+        self._add_choices(
+            self.optim_quality_combo,
             [
-                "I  —  " + tr("high_quality_moderate_gain"),
-                "II  —  " + tr("balanced_recommended"),
-                "III  —  " + tr("maximum_reduced_quality"),
-            ]
+                ("I  -  " + tr("high_quality_moderate_gain"), 0),
+                ("II  -  " + tr("balanced_recommended"), 1),
+                ("III  -  " + tr("maximum_reduced_quality"), 2),
+            ],
         )
         self.optim_quality_combo.setCurrentIndex(1)
         self.config_layout.addWidget(self.optim_quality_combo)
@@ -407,63 +425,58 @@ class CreateTemplateDialog(QDialog):
             )
             return
 
-        template_type = self.type_combo.currentText()
+        template_type = self.type_combo.currentData() or sk.normalize_type(self.type_combo.currentText())
 
         config_data = {}
 
-        if template_type == self.parent_dialog.translate_text("pdf_to_word_conversion"):
-            config_data = {"mode": self.mode_combo.currentText()}
-        elif template_type == self.parent_dialog.translate_text("word_to_pdf_conversion"):
+        if template_type == sk.PDF_TO_WORD:
+            config_data = {"mode": self.mode_combo.currentData()}
+        elif template_type == sk.WORD_TO_PDF:
             config_data = {
-                "mode": self.word_mode_combo.currentText(),
-                "quality": self.image_quality_combo.currentText(),
+                "mode": self.word_mode_combo.currentData(),
+                "quality": self.image_quality_combo.currentData(),
                 "include_metadata": self.include_metadata_check.isChecked(),
                 "compress_images": self.compress_images_check.isChecked(),
             }
-        elif template_type == self.parent_dialog.translate_text("images_to_pdf_conversion"):
+        elif template_type == sk.IMAGES_TO_PDF:
             config_data = {
                 "separate": self.separate_images_check.isChecked(),
             }
-        elif template_type == self.parent_dialog.translate_text("pdf_merge"):
+        elif template_type == sk.PDF_MERGE:
             config_data = {
-                "merge_order": self.merge_order_combo.currentText(),
+                "merge_order": self.merge_order_combo.currentData(),
                 "name_template": self.name_template_input.text(),
             }
-        elif template_type == self.parent_dialog.translate_text("word_merge"):
+        elif template_type == sk.WORD_MERGE:
             config_data = {
-                "merge_order": self.word_merge_order_combo.currentText(),
+                "merge_order": self.word_merge_order_combo.currentData(),
                 "name_template": self.word_merge_name_input.text(),
             }
-        elif template_type == self.parent_dialog.translate_text("pdf_split"):
+        elif template_type == sk.PDF_SPLIT:
             config_data = {
-                "split_method": self.split_method_combo.currentText(),
+                "split_method": self.split_method_combo.currentData(),
                 "pages_per_file": self.pages_per_file_spin.value(),
             }
-        elif template_type == self.parent_dialog.translate_text("pdf_protection"):
+        elif template_type == sk.PDF_PROTECTION:
             config_data = {
-                "mode": self.protection_level_combo.currentText(),
+                "protection_level": self.protection_level_combo.currentData(),
                 "allow_printing": self.allow_printing_check.isChecked(),
                 "allow_copying": self.allow_copying_check.isChecked(),
                 "allow_modifications": self.allow_modifications_check.isChecked(),
             }
-        elif template_type == self.parent_dialog.translate_text("Compression"):
+        elif template_type == sk.COMPRESSION:
             config_data = {
-                "format": self.compression_format_combo.currentText(),
-                "compression_level": self.compression_level_combo.currentText(),
+                "format": self.compression_format_combo.currentData(),
+                "compression_level": self.compression_level_combo.currentData(),
                 "encrypt": self.encrypt_check.isChecked(),
                 "delete_originals": self.delete_originals_check.isChecked(),
                 "split_archive": self.split_check.isChecked(),
                 "split_size": self.split_size_spin.value() if self.split_check.isChecked() else 0,
             }
-        elif template_type == self.parent_dialog.translate_text("file_optimization"):
-            _mode_map = {
-                self.parent_dialog.translate_text("compression_reduces_file_size"): 0,
-                self.parent_dialog.translate_text("cleaning_removes_metadata_only"): 1,
-                self.parent_dialog.translate_text("compression_cleaning_recommended"): 2,
-            }
+        elif template_type == sk.FILE_OPTIMIZATION:
             config_data = {
-                "optimization_type": _mode_map.get(self.optim_mode_combo.currentText(), 2),
-                "quality_level": self.optim_quality_combo.currentIndex(),
+                "optimization_type": self.optim_mode_combo.currentData(),
+                "quality_level": self.optim_quality_combo.currentData(),
                 "remove_metadata": self.optim_metadata_check.isChecked(),
                 "compress_images": self.optim_images_check.isChecked(),
                 "keep_backup": self.optim_backup_check.isChecked(),
@@ -488,7 +501,11 @@ class CreateTemplateDialog(QDialog):
         if self.set_as_default_check.isChecked():
             config_data["is_default"] = True
 
-        self.template_manager.db_manager.save_template(name, template_type, config_data)
+        self.template_manager.db_manager.save_template(
+            name,
+            self.template_manager.normalize_type(template_type),
+            config_data,
+        )
         self.template_manager.load_templates()
 
         if self.set_as_default_check.isChecked():

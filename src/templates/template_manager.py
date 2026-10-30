@@ -13,6 +13,7 @@ Responsibilities:
 
 import json
 
+from . import semantic_keys as sk
 from .frequent_configs import FrequentConfigTracker
 
 
@@ -43,22 +44,15 @@ class TemplateManager:
         """Retrieve a template by its ID"""
         return self.current_templates.get(template_id)
 
-    _TYPE_NORMALIZE = {
-        "PDF to Word Conversion": "Conversion PDF→Word",
-        "Word to PDF Conversion": "Conversion Word→PDF",
-        "Images to PDF Conversion": "Conversion Images→PDF",
-        "PDF Merge": "Fusion PDF",
-        "Word Merge": "Fusion Word",
-        "PDF Split": "Division PDF",
-        "PDF Protection": "Protection PDF",
-        "Quality Presets": "Optimisation de fichiers",
-        "Office Optimization": "Optimisation de fichiers",
-    }
-
     @classmethod
     def normalize_type(cls, t):
-        """Normalize template type to French canonical form regardless of language."""
-        return cls._TYPE_NORMALIZE.get(t, t)
+        """Return the legacy storage type for any semantic/legacy type value."""
+        return sk.legacy_type(t)
+
+    @classmethod
+    def semantic_type(cls, t):
+        """Return the language-independent semantic type."""
+        return sk.normalize_type(t)
 
     def get_templates_by_type(self, template_type):
         """Retrieve all templates of a specific type"""
@@ -70,203 +64,78 @@ class TemplateManager:
         }
 
     def apply_template(self, template_id, parent_app):
-        """Apply a template — sets exactly the configuration fields that app.py reads."""
+        """Apply a template - sets exactly the configuration fields that app.py reads."""
         template = self.get_template_by_id(template_id)
         if not template:
             return False
 
         try:
             self.db_manager.update_template_usage(template_id)
-            cfg = template["config"]
-            t = template["type"]
-
-            _type_normalize = {
-                # EN
-                "PDF to Word Conversion": "Conversion PDF→Word",
-                "Word to PDF Conversion": "Conversion Word→PDF",
-                "Images to PDF Conversion": "Conversion Images→PDF",
-                "PDF Merge": "Fusion PDF",
-                "Word Merge": "Fusion Word",
-                "PDF Split": "Division PDF",
-                "PDF Protection": "Protection PDF",
-                "File optimization": "Préréglages de qualité",
-                # FR (pass-through)
-                "Conversion PDF→Word": "Conversion PDF→Word",
-                "Conversion Word→PDF": "Conversion Word→PDF",
-                "Conversion Images→PDF": "Conversion Images→PDF",
-                "Fusion PDF": "Fusion PDF",
-                "Fusion Word": "Fusion Word",
-                "Division PDF": "Division PDF",
-                "Protection PDF": "Protection PDF",
-                "Compression": "Compression",
-                "Optimisation de fichiers": "Optimisation de fichiers",
-            }
-            t = _type_normalize.get(t, t)
+            template_type = sk.normalize_type(template["type"])
+            cfg = sk.normalize_config(template_type, template["config"])
 
             if not hasattr(parent_app, "active_templates"):
                 parent_app.active_templates = {}
 
-            if t == "Conversion PDF→Word":
-                mode_map = {
-                    "Conserver les images et la mise en page": "with_images",
-                    "Texte brut uniquement": "text_only",
-                    "Keep images and layout": "with_images",
-                    "Plain text only": "text_only",
-                    "with_images": "with_images",
-                    "text_only": "text_only",
-                }
-                _mode = mode_map.get(cfg.get("mode", ""), "with_images")
-                parent_app.config["pdf_to_word_mode"] = _mode
-                parent_app.active_templates["pdf_to_word"] = {"mode": _mode}
+            if template_type == sk.PDF_TO_WORD:
+                parent_app.config["pdf_to_word_mode"] = cfg["mode"]
+                parent_app.active_templates["pdf_to_word"] = {"mode": cfg["mode"]}
                 parent_app.config_manager.save_config(parent_app.config)
 
-            elif t == "Conversion Word→PDF":
-                mode_map = {
-                    "Conserver toute la mise en page": "preserve_all",
-                    "Texte uniquement": "text_only",
-                    "Preserve all layout": "preserve_all",
-                    "Text only": "text_only",
-                    "preserve_all": "preserve_all",
-                    "text_only": "text_only",
-                }
-                _mode = mode_map.get(cfg.get("mode", ""), "preserve_all")
+            elif template_type == sk.WORD_TO_PDF:
                 parent_app.active_templates["word_to_pdf"] = {
-                    "mode": _mode,
-                    "quality": cfg.get("quality", "Standard (150 DPI)"),
-                    "compress_images": cfg.get("compress_images", True),
-                    "include_metadata": cfg.get("include_metadata", True),
+                    "mode": cfg["mode"],
+                    "quality": sk.quality_legacy_label(cfg["quality"]),
+                    "compress_images": cfg["compress_images"],
+                    "include_metadata": cfg["include_metadata"],
                 }
-                parent_app.config["word_to_pdf_mode"] = _mode
+                parent_app.config["word_to_pdf_mode"] = cfg["mode"]
                 parent_app.config_manager.save_config(parent_app.config)
 
-            elif t == "Conversion Images→PDF":
-                separate = cfg.get("separate", False)
-                parent_app.config["separate_image_pdfs"] = separate
+            elif template_type == sk.IMAGES_TO_PDF:
+                parent_app.config["separate_image_pdfs"] = cfg["separate"]
                 parent_app.config_manager.save_config(parent_app.config)
-                parent_app.active_templates["images_to_pdf"] = {"separate": separate}
+                parent_app.active_templates["images_to_pdf"] = {"separate": cfg["separate"]}
 
-            elif t == "Fusion PDF":
-                _order_map = {
-                    "Alphabétique (A→Z)": "alpha_az",
-                    "Alphabétique (Z→A)": "alpha_za",
-                    "Numérique (1→9)": "num_asc",
-                    "Numérique (9→1)": "num_desc",
-                    "Date (ancien→nouveau)": "date_asc",
-                    "Date (nouveau→ancien)": "date_desc",
-                    "Manuel (glisser-déposer)": "manual",
-                    "Ordre actuel (liste principale)": "current",
-                    "Alphabetical (A→Z)": "alpha_az",
-                    "Alphabetical (Z→A)": "alpha_za",
-                    "Numeric (1→9)": "num_asc",
-                    "Numeric (9→1)": "num_desc",
-                    "Date (oldest→newest)": "date_asc",
-                    "Date (newest→oldest)": "date_desc",
-                    "Manual (drag and drop)": "manual",
-                    "Current order (main list)": "current",
-                }
-                parent_app.active_templates["pdf_merge"] = {
-                    "merge_order_key": _order_map.get(cfg.get("merge_order", ""), "current"),
-                    "merge_order_label": cfg.get("merge_order", ""),
+            elif template_type in (sk.PDF_MERGE, sk.WORD_MERGE):
+                key = "pdf_merge" if template_type == sk.PDF_MERGE else "word_merge"
+                parent_app.active_templates[key] = {
+                    "merge_order_key": cfg["merge_order"],
+                    "merge_order_label": sk.merge_order_legacy_label(cfg["merge_order"]),
                 }
 
-            elif t == "Fusion Word":
-                _order_map = {
-                    "Alphabétique (A→Z)": "alpha_az",
-                    "Alphabétique (Z→A)": "alpha_za",
-                    "Numérique (1→9)": "num_asc",
-                    "Numérique (9→1)": "num_desc",
-                    "Date (ancien→nouveau)": "date_asc",
-                    "Date (nouveau→ancien)": "date_desc",
-                    "Manuel (glisser-déposer)": "manual",
-                    "Ordre actuel (liste principale)": "current",
-                    "Alphabetical (A→Z)": "alpha_az",
-                    "Alphabetical (Z→A)": "alpha_za",
-                    "Numeric (1→9)": "num_asc",
-                    "Numeric (9→1)": "num_desc",
-                    "Date (oldest→newest)": "date_asc",
-                    "Date (newest→oldest)": "date_desc",
-                    "Manual (drag and drop)": "manual",
-                    "Current order (main list)": "current",
-                }
-                parent_app.active_templates["word_merge"] = {
-                    "merge_order_key": _order_map.get(cfg.get("merge_order", ""), "current"),
-                    "merge_order_label": cfg.get("merge_order", ""),
-                }
-
-            elif t == "Division PDF":
-                _method_norm = {
-                    "Par pages": "Par pages",
-                    "Toutes les pages": "Toutes les pages",
-                    "Plage de pages": "Plage de pages",
-                    "By pages": "Par pages",
-                    "All pages": "Toutes les pages",
-                    "Page range": "Plage de pages",
-                }
-                _method = _method_norm.get(cfg.get("split_method", "Par pages"), cfg.get("split_method", "Par pages"))
+            elif template_type == sk.PDF_SPLIT:
                 parent_app.active_templates["pdf_split"] = {
-                    "split_method_label": _method,
-                    "pages_per_file": cfg.get("pages_per_file", 1),
+                    "split_method_key": cfg["split_method"],
+                    "split_method_label": sk.split_method_legacy_label(cfg["split_method"]),
+                    "pages_per_file": cfg["pages_per_file"],
                 }
 
-            elif t == "Protection PDF":
-                _mode_norm = {
-                    "Basique (restrictions uniquement)": "basic",
-                    "Avancé (mot de passe + restrictions)": "advanced",
-                    "Basique (ouvrir)": "basic",
-                    "Avancé (ouvrir + modifications)": "advanced",
-                    "Basic (restrictions only)": "basic",
-                    "Advanced (password + restrictions)": "advanced",
-                    "basic": "basic",
-                    "advanced": "advanced",
-                }
+            elif template_type == sk.PDF_PROTECTION:
                 parent_app.active_templates["pdf_protection"] = {
-                    "mode": _mode_norm.get(cfg.get("mode", cfg.get("protection_level", "basic")), "basic"),
-                    "allow_printing": cfg.get("allow_printing", True),
-                    "allow_copying": cfg.get("allow_copying", True),
-                    "allow_modifications": cfg.get("allow_modifications", False),
+                    "mode": cfg["protection_level"],
+                    "allow_printing": cfg["allow_printing"],
+                    "allow_copying": cfg["allow_copying"],
+                    "allow_modifications": cfg["allow_modifications"],
                 }
 
-            elif t == "Compression":
-                _fmt = {"ZIP": "ZIP", "RAR": "RAR", "TAR.GZ": "TAR.GZ", "TAR": "TAR"}
-                _lvl = {
-                    "Normal": "Normal",
-                    "Haute compression": "Haute compression",
-                    "Compression maximale": "Compression maximale",
-                    "High compression": "Haute compression",
-                    "Maximum compression": "Compression maximale",
-                }
+            elif template_type == sk.COMPRESSION:
                 parent_app.active_templates["compression"] = {
-                    "format": _fmt.get(cfg.get("format", "ZIP"), cfg.get("format", "ZIP")),
-                    "compression_level": _lvl.get(
-                        cfg.get("compression_level", "Normal"), cfg.get("compression_level", "Normal")
-                    ),
-                    "encrypt": cfg.get("encrypt", False),
-                    "delete_originals": cfg.get("delete_originals", False),
-                    "split_archive": cfg.get("split_archive", False),
-                    "split_size": cfg.get("split_size", 0),
+                    "format": sk.archive_format_legacy(cfg["format"]),
+                    "compression_level": sk.compression_level_legacy_label(cfg["compression_level"]),
+                    "encrypt": cfg["encrypt"],
+                    "delete_originals": cfg["delete_originals"],
+                    "split_archive": cfg["split_archive"],
+                    "split_size": cfg["split_size"],
                 }
 
-            elif t == "Optimisation de fichiers":
-                _mode_map = {
-                    "Compression  –  réduit la taille du fichier": 0,
-                    "Nettoyage  –  supprime uniquement les métadonnées": 1,
-                    "Compression + Nettoyage  –  recommandé": 2,
-                    "Compression  —  reduces file size": 0,
-                    "Cleaning  —  removes metadata only": 1,
-                    "Compression + Cleaning  —  recommended": 2,
-                    "compression": 0,
-                    "nettoyage": 1,
-                    "les deux": 2,
-                    0: 0,
-                    1: 1,
-                    2: 2,
-                }
+            elif template_type == sk.FILE_OPTIMIZATION:
                 parent_app.active_templates["office_optimization"] = {
-                    "optimization_type": _mode_map.get(cfg.get("optimization_type", 2), 2),
-                    "quality_level": cfg.get("quality_level", 1),
-                    "remove_metadata": cfg.get("remove_metadata", True),
-                    "compress_images": cfg.get("compress_images", True),
-                    "keep_backup": cfg.get("keep_backup", True),
+                    "optimization_type": sk.optimization_type_value(cfg["optimization_type"]),
+                    "quality_level": cfg["quality_level"],
+                    "remove_metadata": cfg["remove_metadata"],
+                    "compress_images": cfg["compress_images"],
+                    "keep_backup": cfg["keep_backup"],
                 }
 
             return True
@@ -276,99 +145,66 @@ class TemplateManager:
             return False
 
     def create_template_from_current_settings(self, name, template_type, parent_app):
-        """Create a template from the current settings"""
-        config = {}
+        """Create a semantic template from the current application settings."""
+        template_type = sk.normalize_type(template_type)
+        app_config = getattr(parent_app, "config", {})
 
-        if template_type == "Conversion PDF→Word":
-            mode_map = {
-                "with_images": "Conserver les images et la mise en page",
-                "text_only": "Texte brut uniquement",
-            }
-            quality_map = {
-                "high": "Haute qualité",
-                "standard": "Qualité standard",
-                "optimized": "Optimisé pour la taille",
-            }
+        if template_type == sk.PDF_TO_WORD:
+            config = sk.normalize_config(
+                template_type,
+                {
+                    "mode": app_config.get("pdf_to_word_mode", sk.MODE_WITH_IMAGES),
+                    "quality": app_config.get("conversion_quality", "standard"),
+                },
+            )
+        elif template_type == sk.WORD_TO_PDF:
+            config = sk.normalize_config(
+                template_type,
+                {
+                    "mode": app_config.get("word_to_pdf_mode", sk.MODE_PRESERVE_ALL),
+                    "quality": app_config.get("conversion_quality", "standard"),
+                },
+            )
+        elif template_type == sk.IMAGES_TO_PDF:
+            config = sk.normalize_config(
+                template_type,
+                {"separate": app_config.get("separate_image_pdfs", False)},
+            )
+        elif template_type == sk.PDF_MERGE:
+            config = sk.normalize_config(
+                template_type,
+                {"merge_order": sk.ORDER_CURRENT, "name_template": "fusion_{date}_{hour}"},
+            )
+        elif template_type == sk.WORD_MERGE:
+            config = sk.normalize_config(
+                template_type,
+                {"merge_order": sk.ORDER_CURRENT, "name_template": "fusion_word_{date}_{hour}"},
+            )
+        elif template_type == sk.PDF_SPLIT:
+            config = sk.normalize_config(
+                template_type,
+                {"split_method": sk.SPLIT_BY_PAGES, "name_template": "page_{page}"},
+            )
+        elif template_type == sk.PDF_PROTECTION:
+            config = sk.normalize_config(
+                template_type,
+                {"protection_level": sk.PROTECTION_BASIC},
+            )
+        elif template_type == sk.COMPRESSION:
+            config = sk.normalize_config(
+                template_type,
+                {"format": sk.FORMAT_ZIP, "compression_level": sk.LEVEL_NORMAL},
+            )
+        elif template_type == sk.FILE_OPTIMIZATION:
+            config = sk.normalize_config(
+                template_type,
+                {"optimization_type": sk.OPTIMIZATION_BOTH, "quality_level": 1},
+            )
+        else:
+            config = {}
 
-            config = {
-                "mode": mode_map.get(
-                    parent_app.config.get("pdf_to_word_mode", "with_images"), "Conserver les images et la mise en page"
-                ),
-                "quality": quality_map.get(parent_app.config.get("conversion_quality", "standard"), "Qualité standard"),
-                "keep_bookmarks": True,
-                "extract_images": False,
-            }
-
-        elif template_type == "Conversion Word→PDF":
-            config = {
-                "page_format": "A4",
-                "orientation": "Portrait",
-                "quality": "Standard (150 DPI)",
-                "include_metadata": True,
-                "compress": True,
-            }
-
-        elif template_type == "Conversion Images→PDF":
-            config = {
-                "orientation": "Portrait",
-                "quality": "Standard (150 DPI)",
-                "margin": 20,
-                "compress_images": True,
-                "keep_original_order": True,
-            }
-
-        elif template_type == "Fusion PDF":
-            config = {
-                "merge_order": "Alphabétique",
-                "merge_bookmarks": True,
-                "remove_duplicates": False,
-                "add_page_numbers": False,
-                "name_template": "fusion_{date}_{heure}",
-            }
-
-        elif template_type == "Fusion Word":
-            config = {
-                "merge_order": "Alphabétique",
-                "keep_formatting": True,
-                "add_page_breaks": True,
-                "name_template": "fusion_word_{date}_{heure}",
-            }
-
-        elif template_type == "Division PDF":
-            config = {
-                "split_method": "Par pages",
-                "pages_per_file": 1,
-                "keep_bookmarks": True,
-                "name_template": "page_{page}",
-            }
-
-        elif template_type == "Protection PDF":
-            config = {
-                "protection_level": "Basique (ouvrir)",
-                "allow_printing": True,
-                "allow_copying": True,
-                "allow_modifications": False,
-            }
-
-        elif template_type == "Préréglages de qualité":
-            quality_map = {"high": "Haute qualité", "standard": "Qualité standard", "compressed": "Compressé"}
-
-            compression_map = {"normal": "Normal", "high": "Haute compression", "maximum": "Compression maximale"}
-
-            config = {
-                "preset_type": "Qualité standard",
-                "compression": 50,
-                "target_format": "PDF",
-                "description": "Configuration par défaut",
-                "quality": quality_map.get(parent_app.config.get("conversion_quality", "standard"), "Qualité standard"),
-                "compression_level": compression_map.get(
-                    parent_app.config.get("compression_level", "normal"), "Normal"
-                ),
-            }
-
-        self.db_manager.save_template(name, template_type, config)
+        self.db_manager.save_template(name, self.normalize_type(template_type), config)
         self.load_templates()
-
         return config
 
     def get_default_template(self, template_type):
@@ -417,8 +253,8 @@ class TemplateManager:
                 {
                     "id": template_id,
                     "name": template["name"],
-                    "type": template["type"],
-                    "config": template["config"],
+                    "type": self.normalize_type(template["type"]),
+                    "config": sk.normalize_config(template["type"], template["config"]),
                     "created_at": template["created_at"],
                     "last_used": template["last_used"],
                 }
@@ -441,7 +277,9 @@ class TemplateManager:
                 name_exists = any(t[1] == template_data["name"] for t in existing_templates)
 
                 if not name_exists:
-                    self.db_manager.save_template(template_data["name"], template_data["type"], template_data["config"])
+                    template_type = self.normalize_type(template_data["type"])
+                    config = sk.normalize_config(template_type, template_data.get("config", {}))
+                    self.db_manager.save_template(template_data["name"], template_type, config)
                     imported_count += 1
 
             self.load_templates()

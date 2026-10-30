@@ -97,7 +97,7 @@ class TestThreshold:
         assert len(templates) == 1
         tpl = templates[result.template_id]
         assert tpl["name"].startswith(AUTO_PREFIX)
-        assert tpl["config"]["mode"] == "Texte brut uniquement"
+        assert tpl["config"]["mode"] == "text_only"
 
     def test_created_template_is_applicable(self, tm):
         class App:
@@ -172,16 +172,16 @@ class TestLimitPerType:
         assert DEFAULT_MAX_AUTO_PER_TYPE == 3
         self._make_frequent(tm, ["Normal", "Haute compression", "Compression maximale"])
         by_level = {t["config"]["compression_level"]: tid for tid, t in _templates(tm, COMPRESSION).items()}
-        _set_last_used(tm, by_level["Normal"], "2026-01-01 10:00:00")
-        _set_last_used(tm, by_level["Haute compression"], "2026-03-01 10:00:00")
-        _set_last_used(tm, by_level["Compression maximale"], "2026-02-01 10:00:00")
+        _set_last_used(tm, by_level["normal"], "2026-01-01 10:00:00")
+        _set_last_used(tm, by_level["high"], "2026-03-01 10:00:00")
+        _set_last_used(tm, by_level["maximum"], "2026-02-01 10:00:00")
 
         _use(tm, COMPRESSION, _comp("Normal", fmt="TAR"), DEFAULT_THRESHOLD)
 
         templates = _templates(tm, COMPRESSION)
         assert len(templates) == DEFAULT_MAX_AUTO_PER_TYPE
-        assert by_level["Normal"] not in templates  # the oldest one was dropped
-        assert by_level["Haute compression"] in templates
+        assert by_level["normal"] not in templates  # the oldest one was dropped
+        assert by_level["high"] in templates
 
     def test_user_templates_are_never_evicted_nor_counted(self, tm):
         tm.db_manager.save_template("Mine A", COMPRESSION, _comp("Haute compression", fmt="TAR"))
@@ -197,7 +197,7 @@ class TestLimitPerType:
     def test_evicted_config_must_become_frequent_again(self, tm):
         self._make_frequent(tm, ["Normal", "Haute compression", "Compression maximale"])
         by_level = {t["config"]["compression_level"]: tid for tid, t in _templates(tm, COMPRESSION).items()}
-        _set_last_used(tm, by_level["Normal"], "2026-01-01 10:00:00")
+        _set_last_used(tm, by_level["normal"], "2026-01-01 10:00:00")
         _use(tm, COMPRESSION, _comp("Normal", fmt="TAR"), DEFAULT_THRESHOLD)  # evicts "Normal"
 
         for _ in range(DEFAULT_THRESHOLD - 1):

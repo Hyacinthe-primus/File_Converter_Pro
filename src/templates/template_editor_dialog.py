@@ -2,6 +2,8 @@
 
 from PySide6.QtWidgets import QDialog, QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout
 
+from . import semantic_keys as sk
+
 
 class TemplateEditorDialog(QDialog):
     """Dialog for editing an existing template"""
@@ -25,7 +27,7 @@ class TemplateEditorDialog(QDialog):
         self.name_input = QLineEdit(self.template["name"])
         info_layout.addRow(self.parent_dialog.translate_text("name"), self.name_input)
 
-        type_label = QLabel(self.template["type"])
+        type_label = QLabel(self.parent_dialog.translate_text(sk.type_label_key(self.template["type"])))
         info_layout.addRow(self.parent_dialog.translate_text("type"), type_label)
 
         layout.addWidget(info_group)

@@ -48,6 +48,7 @@ from qss_helpers import _apply_dialog_btn, _load_qss
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
 
+from . import semantic_keys as sk
 from .create_template_dialog import CreateTemplateDialog
 from .template_editor_dialog import TemplateEditorDialog
 from .template_manager import TemplateManager
@@ -121,19 +122,18 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         layout.addWidget(QLabel(self.translate_text("select_the_type_of_template_to_create")))
 
         template_type_combo = QComboBox()
-        template_type_combo.addItems(
-            [
-                self.translate_text("pdf_to_word_conversion"),
-                self.translate_text("word_to_pdf_conversion"),
-                self.translate_text("images_to_pdf_conversion"),
-                self.translate_text("pdf_merge"),
-                self.translate_text("word_merge"),
-                self.translate_text("pdf_split"),
-                self.translate_text("pdf_protection"),
-                self.translate_text("Compression"),
-                self.translate_text("file_optimization"),
-            ]
-        )
+        for label, value in [
+            (self.translate_text("pdf_to_word_conversion"), sk.PDF_TO_WORD),
+            (self.translate_text("word_to_pdf_conversion"), sk.WORD_TO_PDF),
+            (self.translate_text("images_to_pdf_conversion"), sk.IMAGES_TO_PDF),
+            (self.translate_text("pdf_merge"), sk.PDF_MERGE),
+            (self.translate_text("word_merge"), sk.WORD_MERGE),
+            (self.translate_text("pdf_split"), sk.PDF_SPLIT),
+            (self.translate_text("pdf_protection"), sk.PDF_PROTECTION),
+            (self.translate_text("Compression"), sk.COMPRESSION),
+            (self.translate_text("file_optimization"), sk.FILE_OPTIMIZATION),
+        ]:
+            template_type_combo.addItem(label, value)
         layout.addWidget(template_type_combo)
 
         name_layout = QHBoxLayout()
@@ -155,7 +155,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
         if dialog.exec() == QDialog.Accepted:
             name = name_input.text().strip()
-            template_type = template_type_combo.currentText()
+            template_type = template_type_combo.currentData()
 
             if not name:
                 QMessageBox.warning(
@@ -214,20 +214,19 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self.search_input.textChanged.connect(self.filter_templates)
 
         self.type_filter_combo = QComboBox()
-        self.type_filter_combo.addItems(
-            [
-                self.translate_text("all_types"),
-                self.translate_text("pdf_to_word_conversion"),
-                self.translate_text("word_to_pdf_conversion"),
-                self.translate_text("images_to_pdf_conversion"),
-                self.translate_text("pdf_merge"),
-                self.translate_text("word_merge"),
-                self.translate_text("pdf_split"),
-                self.translate_text("pdf_protection"),
-                self.translate_text("Compression"),
-                self.translate_text("file_optimization"),
-            ]
-        )
+        for label, value in [
+            (self.translate_text("all_types"), None),
+            (self.translate_text("pdf_to_word_conversion"), sk.PDF_TO_WORD),
+            (self.translate_text("word_to_pdf_conversion"), sk.WORD_TO_PDF),
+            (self.translate_text("images_to_pdf_conversion"), sk.IMAGES_TO_PDF),
+            (self.translate_text("pdf_merge"), sk.PDF_MERGE),
+            (self.translate_text("word_merge"), sk.WORD_MERGE),
+            (self.translate_text("pdf_split"), sk.PDF_SPLIT),
+            (self.translate_text("pdf_protection"), sk.PDF_PROTECTION),
+            (self.translate_text("Compression"), sk.COMPRESSION),
+            (self.translate_text("file_optimization"), sk.FILE_OPTIMIZATION),
+        ]:
+            self.type_filter_combo.addItem(label, value)
         self.type_filter_combo.currentIndexChanged.connect(self.filter_templates)
 
         filter_layout.addWidget(QLabel(self.translate_text("search")))
@@ -343,10 +342,10 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         self.templates_list.clear()
         self.template_manager.load_templates()
 
-        filter_type = self.type_filter_combo.currentText()
+        filter_type = self.type_filter_combo.currentData()
 
         for template_id, template in self.template_manager.current_templates.items():
-            if filter_type != self.translate_text("all_types") and template["type"] != filter_type:
+            if filter_type is not None and sk.normalize_type(template["type"]) != filter_type:
                 continue
 
             is_default = template["config"].get("is_default", False)
@@ -355,9 +354,9 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             if icon:
                 item.setIcon(icon)
             item.setData(Qt.UserRole, template_id)
-            item.setData(Qt.UserRole, template_id)
 
-            tooltip = f"{template['type']}\n"
+            type_label = self.translate_text(sk.type_label_key(template["type"]))
+            tooltip = f"{type_label}\n"
             tooltip += f"{self.translate_text('created_on')} {template['created_at']}\n"
             if template["last_used"]:
                 tooltip += f"{self.translate_text('last_used')} {template['last_used']}"
@@ -376,7 +375,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
     def filter_templates(self):
         """Filter the template list with advanced search"""
         search_text = self.search_input.text().lower()
-        filter_type = self.type_filter_combo.currentText()
+        filter_type = self.type_filter_combo.currentData()
 
         for i in range(self.templates_list.count()):
             item = self.templates_list.item(i)
@@ -389,12 +388,13 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
             show_item = True
 
-            if filter_type != self.translate_text("all_types") and template["type"] != filter_type:
+            if filter_type is not None and sk.normalize_type(template["type"]) != filter_type:
                 show_item = False
 
             if search_text:
                 search_terms = search_text.split()
-                template_text = f"{template['name']} {template['type']} {json.dumps(template['config'])}".lower()
+                type_label = self.translate_text(sk.type_label_key(template["type"]))
+                template_text = f"{template['name']} {type_label} {json.dumps(template['config'])}".lower()
 
                 all_terms_found = all(term in template_text for term in search_terms)
 
@@ -470,7 +470,10 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         info_group = QGroupBox(self.translate_text("general_information"))
         info_layout = QFormLayout(info_group)
 
-        info_layout.addRow(self.translate_text("type"), QLabel(template["type"]))
+        info_layout.addRow(
+            self.translate_text("type"),
+            QLabel(self.translate_text(sk.type_label_key(template["type"]))),
+        )
         info_layout.addRow(self.translate_text("created_on"), QLabel(template["created_at"]))
 
         last_used = template["last_used"] if template["last_used"] else self.translate_text("never")
@@ -519,103 +522,100 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 "border: 1px solid #d0d7de; border-radius: 6px;"
             )
 
-        t = TemplateManager.normalize_type(template_type)
+        t = sk.normalize_type(template_type)
+        cfg = sk.normalize_config(t, config)
 
         oui = self.translate_text("yes")
         non = self.translate_text("no")
         ns = self.translate_text("not_specified")
 
-        def tv(val, fallback=None):
-            if val is None:
+        def dv(field, fallback=None):
+            if field not in cfg or cfg[field] is None:
                 return fallback if fallback is not None else ns
-            translated = self.translate_text(str(val))
-            return translated if translated else str(val)
+            value = sk.display_value(field, cfg[field], self.translate_text, t)
+            return value or (fallback if fallback is not None else ns)
 
         def translate_name_template(tpl):
             if not tpl:
                 return tpl
-            return tpl.replace("{heure}", self.translate_text("text_2"))
+            return tpl.replace("{heure}", self.translate_text("text_2")).replace(
+                "{hour}", self.translate_text("text_2")
+            )
 
-        if t == "Conversion PDF→Word":
+        if t == sk.PDF_TO_WORD:
             return f"""
             <div style="{style}">
-            📋 <b>{self.translate_text("conversion_mode_2")}</b> {tv(config.get("mode"))}
+            ?? <b>{self.translate_text("conversion_mode_2")}</b> {dv("mode")}
             </div>
             """
-        elif t == "Conversion Word→PDF":
+        if t == sk.WORD_TO_PDF:
             return f"""
             <div style="{style}">
-            🔄 <b>{self.translate_text("conversion_mode_2")}</b> {tv(config.get("mode"))}<br>
-            🎨 <b>{self.translate_text("image_quality")}</b> {tv(config.get("quality"))}<br>
-            📝 <b>{self.translate_text("include_metadata_2")}</b> {oui if config.get("include_metadata", False) else non}<br>
-            🗜️ <b>{self.translate_text("compress_pdf_2")}</b> {oui if config.get("compress_images", False) else non}
+            ?? <b>{self.translate_text("conversion_mode_2")}</b> {dv("mode")}<br>
+            ?? <b>{self.translate_text("image_quality")}</b> {dv("quality")}<br>
+            ?? <b>{self.translate_text("include_metadata_2")}</b> {oui if cfg["include_metadata"] else non}<br>
+            ??? <b>{self.translate_text("compress_pdf_2")}</b> {oui if cfg["compress_images"] else non}
             </div>
             """
-        elif t == "Conversion Images→PDF":
-            separate = config.get("separate", False)
+        if t == sk.IMAGES_TO_PDF:
+            separate = cfg["separate"]
             return f"""
             <div style="{style}">
-            📄 <b>{self.translate_text("mode")}</b> {self.translate_text("one_pdf_per_image") if separate else self.translate_text("merge_into_a_single_pdf")}
+            ?? <b>{self.translate_text("mode")}</b> {self.translate_text("one_pdf_per_image") if separate else self.translate_text("merge_into_a_single_pdf")}
             </div>
             """
-        elif t == "Fusion PDF":
+        if t in (sk.PDF_MERGE, sk.WORD_MERGE):
             return f"""
             <div style="{style}">
-            🔢 <b>{self.translate_text("merge_order_2")}</b> {tv(config.get("merge_order"))}<br>
-            📄 <b>{self.translate_text("filename_template_2")}</b> {translate_name_template(config.get("name_template", ns))}
+            ?? <b>{self.translate_text("merge_order_2")}</b> {dv("merge_order")}<br>
+            ?? <b>{self.translate_text("filename_template_2")}</b> {translate_name_template(cfg.get("name_template", ns))}
             </div>
             """
-        elif t == "Fusion Word":
+        if t == sk.PDF_SPLIT:
             return f"""
             <div style="{style}">
-            🔢 <b>{self.translate_text("merge_order_2")}</b> {tv(config.get("merge_order"))}<br>
-            📄 <b>{self.translate_text("filename_template_2")}</b> {translate_name_template(config.get("name_template", ns))}
+            ?? <b>{self.translate_text("split_method")}</b> {dv("split_method")}<br>
+            ?? <b>{self.translate_text("pages_per_file")}</b> {cfg["pages_per_file"]}
             </div>
             """
-        elif t == "Division PDF":
+        if t == sk.PDF_PROTECTION:
             return f"""
             <div style="{style}">
-            ✂️ <b>{self.translate_text("split_method")}</b> {tv(config.get("split_method"))}<br>
-            📄 <b>{self.translate_text("pages_per_file")}</b> {config.get("pages_per_file", 1)}
+            ?? <b>{self.translate_text("mode")}</b> {dv("protection_level")}<br>
+            ??? <b>{self.translate_text("allow_printing_2")}</b> {oui if cfg["allow_printing"] else non}<br>
+            ?? <b>{self.translate_text("allow_text_copying")}</b> {oui if cfg["allow_copying"] else non}<br>
+            ?? <b>{self.translate_text("allow_modifications_2")}</b> {oui if cfg["allow_modifications"] else non}
             </div>
             """
-        elif t == "Protection PDF":
+        if t == sk.COMPRESSION:
+            split_size = cfg["split_size"]
             return f"""
             <div style="{style}">
-            🔒 <b>{self.translate_text("mode")}</b> {tv(config.get("mode"))}<br>
-            🖨️ <b>{self.translate_text("allow_printing_2")}</b> {oui if config.get("allow_printing", True) else non}<br>
-            📋 <b>{self.translate_text("allow_text_copying")}</b> {oui if config.get("allow_copying", True) else non}<br>
-            ✏️ <b>{self.translate_text("allow_modifications_2")}</b> {oui if config.get("allow_modifications", False) else non}
+            ?? <b>{self.translate_text("archive_format")}</b> {dv("format")}<br>
+            ??? <b>{self.translate_text("compression_level")}</b> {dv("compression_level")}<br>
+            ?? <b>{self.translate_text("protect_with_password")}</b> {oui if cfg["encrypt"] else non}<br>
+            ??? <b>{self.translate_text("delete_original_files_after_compression")}</b> {oui if cfg["delete_originals"] else non}<br>
+            ?? <b>{self.translate_text("splitting")}</b> {oui if split_size > 0 else non}<br>
+            ?? <b>{self.translate_text("part_size")}</b> {split_size} Mo
             </div>
             """
-        elif t == "Compression":
-            encrypt = config.get("encrypt", False)
-            delete_orig = config.get("delete_originals", False)
-            split_size = config.get("split_size", 0)
+        if t == sk.FILE_OPTIMIZATION:
+            quality_keys = {
+                0: "high_quality_moderate_gain",
+                1: "balanced_recommended",
+                2: "maximum_reduced_quality",
+            }
+            quality_label = self.translate_text(quality_keys.get(cfg["quality_level"], "balanced_recommended"))
             return f"""
             <div style="{style}">
-            📦 <b>{self.translate_text("archive_format")}</b> {tv(config.get("format"))}<br>
-            🗜️ <b>{self.translate_text("compression_level")}</b> {tv(config.get("compression_level"))}<br>
-            🔒 <b>{self.translate_text("protect_with_password")}</b> {oui if encrypt else non}<br>
-            🗑️ <b>{self.translate_text("delete_original_files_after_compression")}</b> {oui if delete_orig else non}<br>
-            📂 <b>{self.translate_text("splitting")}</b> {oui if split_size > 0 else non}<br>
-            📏 <b>{self.translate_text("part_size")}</b> {split_size} Mo
+            ??? <b>{self.translate_text("optimization_mode")}</b> {dv("optimization_type")}<br>
+            ?? <b>{self.translate_text("compression_level")}</b> {quality_label}<br>
+            ??? <b>{self.translate_text("remove_personal_metadata")}</b> {oui if cfg["remove_metadata"] else non}<br>
+            ??? <b>{self.translate_text("recompress_embedded_images")}</b> {oui if cfg["compress_images"] else non}<br>
+            ?? <b>{self.translate_text("keep_a_copy_of_the_originals")}</b> {oui if cfg["keep_backup"] else non}
             </div>
             """
-        elif t == "Optimisation de fichiers":
-            _mode_labels = {0: "Compression", 1: "Nettoyage", 2: "Compression + Nettoyage"}
-            _ql_labels = {0: "I — Haute qualité", 1: "II — Équilibré", 2: "III — Maximum"}
-            return f"""
-            <div style="{style}">
-            🗜️ <b>{self.translate_text("optimization_mode")}</b> {_mode_labels.get(config.get("optimization_type", 2), "—")}<br>
-            📊 <b>{self.translate_text("compression_level")}</b> {_ql_labels.get(config.get("quality_level", 1), "—")}<br>
-            🗑️ <b>{self.translate_text("remove_personal_metadata")}</b> {"✓" if config.get("remove_metadata", True) else "✗"}<br>
-            🖼️ <b>{self.translate_text("recompress_embedded_images")}</b> {"✓" if config.get("compress_images", True) else "✗"}<br>
-            💾 <b>{self.translate_text("keep_a_copy_of_the_originals")}</b> {"✓" if config.get("keep_backup", True) else "✗"}
-            </div>
-            """
-        else:
-            return json.dumps(config, indent=2, ensure_ascii=False)
+        return json.dumps(cfg, indent=2, ensure_ascii=False)
 
     def show_template_context_menu(self, position):
         """Display the context menu for a template"""
@@ -783,20 +783,19 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         dialog.exec()
 
     def _launch_operation(self, template_type):
-        """Launch the operation matching the template type."""
+        """Launch the operation matching the semantic template type."""
         pw = self.parent_window
-        tr = self.translate_text
         ops = {
-            tr("pdf_to_word_conversion"): pw.convert_pdf_to_word,
-            tr("word_to_pdf_conversion"): pw.convert_word_to_pdf,
-            tr("images_to_pdf_conversion"): pw.convert_images_to_pdf,
-            tr("pdf_merge"): pw.merge_pdfs,
-            tr("word_merge"): pw.merge_word_docs,
-            tr("pdf_split"): pw.split_pdf,
-            tr("pdf_protection"): pw.protect_pdf,
-            tr("Compression"): pw.compress_files,
+            sk.PDF_TO_WORD: pw.convert_pdf_to_word,
+            sk.WORD_TO_PDF: pw.convert_word_to_pdf,
+            sk.IMAGES_TO_PDF: pw.convert_images_to_pdf,
+            sk.PDF_MERGE: pw.merge_pdfs,
+            sk.WORD_MERGE: pw.merge_word_docs,
+            sk.PDF_SPLIT: pw.split_pdf,
+            sk.PDF_PROTECTION: pw.protect_pdf,
+            sk.COMPRESSION: pw.compress_files,
         }
-        op = ops.get(template_type)
+        op = ops.get(sk.normalize_type(template_type))
         if op:
             op()
 
@@ -806,9 +805,9 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             return []
 
         file_extensions = {
-            self.translate_text("pdf_to_word_conversion"): [".pdf"],
-            self.translate_text("word_to_pdf_conversion"): [".docx", ".doc", ".odt"],
-            self.translate_text("images_to_pdf_conversion"): [
+            sk.PDF_TO_WORD: [".pdf"],
+            sk.WORD_TO_PDF: [".docx", ".doc", ".odt"],
+            sk.IMAGES_TO_PDF: [
                 ".png",
                 ".jpeg",
                 ".jpg",
@@ -835,18 +834,18 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 ".raf",
                 ".jfif",
             ],
-            self.translate_text("pdf_merge"): [".pdf"],
-            self.translate_text("word_merge"): [".docx", ".doc", ".odt"],
-            self.translate_text("pdf_split"): [".pdf"],
-            self.translate_text("pdf_protection"): [".pdf"],
-            self.translate_text("Compression"): [".*"],
+            sk.PDF_MERGE: [".pdf"],
+            sk.WORD_MERGE: [".docx", ".doc", ".odt"],
+            sk.PDF_SPLIT: [".pdf"],
+            sk.PDF_PROTECTION: [".pdf"],
+            sk.COMPRESSION: [".*"],
         }
 
-        extensions = file_extensions.get(template_type, [])
+        extensions = file_extensions.get(sk.normalize_type(template_type), [])
         compatible_files = []
 
         for file_path in self.parent_window.files_list:
-            if template_type == self.translate_text("Compression"):
+            if sk.normalize_type(template_type) == sk.COMPRESSION:
                 compatible_files.append(file_path)
             else:
                 file_ext = Path(file_path).suffix.lower()
@@ -857,21 +856,21 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
 
     def get_file_extensions_for_template(self, template_type):
         """Return file extensions for a given template type"""
-        if template_type == self.translate_text("pdf_to_word_conversion"):
+        if sk.normalize_type(template_type) == sk.PDF_TO_WORD:
             return "Fichiers PDF (*.pdf)"
-        elif template_type == self.translate_text("word_to_pdf_conversion"):
+        elif sk.normalize_type(template_type) == sk.WORD_TO_PDF:
             return "Fichiers Word (*.docx *.doc)"
-        elif template_type == self.translate_text("images_to_pdf_conversion"):
+        elif sk.normalize_type(template_type) == sk.IMAGES_TO_PDF:
             return "Images (*.jpg *.jpeg *.png *.bmp *.tiff *.tif *.webp *.heic *.heif *.avif *.psd *.svg *.dng)"
-        elif template_type == self.translate_text("pdf_merge"):
+        elif sk.normalize_type(template_type) == sk.PDF_MERGE:
             return "Fichiers PDF (*.pdf)"
-        elif template_type == self.translate_text("word_merge"):
+        elif sk.normalize_type(template_type) == sk.WORD_MERGE:
             return "Fichiers Word (*.docx *.doc)"
-        elif template_type == self.translate_text("pdf_split"):
+        elif sk.normalize_type(template_type) == sk.PDF_SPLIT:
             return "Fichiers PDF (*.pdf)"
-        elif template_type == self.translate_text("pdf_protection"):
+        elif sk.normalize_type(template_type) == sk.PDF_PROTECTION:
             return "Fichiers PDF (*.pdf)"
-        elif template_type == self.translate_text("Compression"):
+        elif sk.normalize_type(template_type) == sk.COMPRESSION:
             return "Tous les fichiers (*.*)"
         else:
             return "Tous les fichiers (*.*)"
@@ -903,8 +902,8 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         if filepath:
             template_data = {
                 "name": template["name"],
-                "type": template["type"],
-                "config": template["config"],
+                "type": TemplateManager.normalize_type(template["type"]),
+                "config": sk.normalize_config(template["type"], template["config"]),
                 "export_date": datetime.now().isoformat(),
             }
 
