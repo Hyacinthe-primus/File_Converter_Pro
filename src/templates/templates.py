@@ -545,58 +545,58 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         if t == sk.PDF_TO_WORD:
             return f"""
             <div style="{style}">
-            ?? <b>{self.translate_text("conversion_mode_2")}</b> {dv("mode")}
+            • <b>{self.translate_text("conversion_mode_2")}</b> {dv("mode")}
             </div>
             """
         if t == sk.WORD_TO_PDF:
             return f"""
             <div style="{style}">
-            ?? <b>{self.translate_text("conversion_mode_2")}</b> {dv("mode")}<br>
-            ?? <b>{self.translate_text("image_quality")}</b> {dv("quality")}<br>
-            ?? <b>{self.translate_text("include_metadata_2")}</b> {oui if cfg["include_metadata"] else non}<br>
-            ??? <b>{self.translate_text("compress_pdf_2")}</b> {oui if cfg["compress_images"] else non}
+            • <b>{self.translate_text("conversion_mode_2")}</b> {dv("mode")}<br>
+            • <b>{self.translate_text("image_quality")}</b> {dv("quality")}<br>
+            • <b>{self.translate_text("include_metadata_2")}</b> {oui if cfg["include_metadata"] else non}<br>
+            • <b>{self.translate_text("compress_pdf_2")}</b> {oui if cfg["compress_images"] else non}
             </div>
             """
         if t == sk.IMAGES_TO_PDF:
             separate = cfg["separate"]
             return f"""
             <div style="{style}">
-            ?? <b>{self.translate_text("mode")}</b> {self.translate_text("one_pdf_per_image") if separate else self.translate_text("merge_into_a_single_pdf")}
+            • <b>{self.translate_text("mode")}</b> {self.translate_text("one_pdf_per_image") if separate else self.translate_text("merge_into_a_single_pdf")}
             </div>
             """
         if t in (sk.PDF_MERGE, sk.WORD_MERGE):
             return f"""
             <div style="{style}">
-            ?? <b>{self.translate_text("merge_order_2")}</b> {dv("merge_order")}<br>
-            ?? <b>{self.translate_text("filename_template_2")}</b> {translate_name_template(cfg.get("name_template", ns))}
+            • <b>{self.translate_text("merge_order_2")}</b> {dv("merge_order")}<br>
+            • <b>{self.translate_text("filename_template_2")}</b> {translate_name_template(cfg.get("name_template", ns))}
             </div>
             """
         if t == sk.PDF_SPLIT:
             return f"""
             <div style="{style}">
-            ?? <b>{self.translate_text("split_method")}</b> {dv("split_method")}<br>
-            ?? <b>{self.translate_text("pages_per_file")}</b> {cfg["pages_per_file"]}
+            • <b>{self.translate_text("split_method")}</b> {dv("split_method")}<br>
+            • <b>{self.translate_text("pages_per_file")}</b> {cfg["pages_per_file"]}
             </div>
             """
         if t == sk.PDF_PROTECTION:
             return f"""
             <div style="{style}">
-            ?? <b>{self.translate_text("mode")}</b> {dv("protection_level")}<br>
-            ??? <b>{self.translate_text("allow_printing_2")}</b> {oui if cfg["allow_printing"] else non}<br>
-            ?? <b>{self.translate_text("allow_text_copying")}</b> {oui if cfg["allow_copying"] else non}<br>
-            ?? <b>{self.translate_text("allow_modifications_2")}</b> {oui if cfg["allow_modifications"] else non}
+            • <b>{self.translate_text("mode")}</b> {dv("protection_level")}<br>
+            • <b>{self.translate_text("allow_printing_2")}</b> {oui if cfg["allow_printing"] else non}<br>
+            • <b>{self.translate_text("allow_text_copying")}</b> {oui if cfg["allow_copying"] else non}<br>
+            • <b>{self.translate_text("allow_modifications_2")}</b> {oui if cfg["allow_modifications"] else non}
             </div>
             """
         if t == sk.COMPRESSION:
             split_size = cfg["split_size"]
             return f"""
             <div style="{style}">
-            ?? <b>{self.translate_text("archive_format")}</b> {dv("format")}<br>
-            ??? <b>{self.translate_text("compression_level")}</b> {dv("compression_level")}<br>
-            ?? <b>{self.translate_text("protect_with_password")}</b> {oui if cfg["encrypt"] else non}<br>
-            ??? <b>{self.translate_text("delete_original_files_after_compression")}</b> {oui if cfg["delete_originals"] else non}<br>
-            ?? <b>{self.translate_text("splitting")}</b> {oui if split_size > 0 else non}<br>
-            ?? <b>{self.translate_text("part_size")}</b> {split_size} Mo
+            • <b>{self.translate_text("archive_format")}</b> {dv("format")}<br>
+            • <b>{self.translate_text("compression_level")}</b> {dv("compression_level")}<br>
+            • <b>{self.translate_text("protect_with_password")}</b> {oui if cfg["encrypt"] else non}<br>
+            • <b>{self.translate_text("delete_original_files_after_compression")}</b> {oui if cfg["delete_originals"] else non}<br>
+            • <b>{self.translate_text("splitting")}</b> {oui if split_size > 0 else non}<br>
+            • <b>{self.translate_text("part_size")}</b> {split_size} Mo
             </div>
             """
         if t == sk.FILE_OPTIMIZATION:
@@ -608,11 +608,11 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
             quality_label = self.translate_text(quality_keys.get(cfg["quality_level"], "balanced_recommended"))
             return f"""
             <div style="{style}">
-            ??? <b>{self.translate_text("optimization_mode")}</b> {dv("optimization_type")}<br>
-            ?? <b>{self.translate_text("compression_level")}</b> {quality_label}<br>
-            ??? <b>{self.translate_text("remove_personal_metadata")}</b> {oui if cfg["remove_metadata"] else non}<br>
-            ??? <b>{self.translate_text("recompress_embedded_images")}</b> {oui if cfg["compress_images"] else non}<br>
-            ?? <b>{self.translate_text("keep_a_copy_of_the_originals")}</b> {oui if cfg["keep_backup"] else non}
+            • <b>{self.translate_text("optimization_mode")}</b> {dv("optimization_type")}<br>
+            • <b>{self.translate_text("compression_level")}</b> {quality_label}<br>
+            • <b>{self.translate_text("remove_personal_metadata")}</b> {oui if cfg["remove_metadata"] else non}<br>
+            • <b>{self.translate_text("recompress_embedded_images")}</b> {oui if cfg["compress_images"] else non}<br>
+            • <b>{self.translate_text("keep_a_copy_of_the_originals")}</b> {oui if cfg["keep_backup"] else non}
             </div>
             """
         return json.dumps(cfg, indent=2, ensure_ascii=False)
