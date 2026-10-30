@@ -1,5 +1,19 @@
 """Tests for template system - TemplateManager CRUD and template dialog imports."""
 
+import pytest
+
+
+@pytest.fixture
+def tm(tmp_path, monkeypatch):
+    """TemplateManager backed by a temporary database, never the app database."""
+    import database
+    from templates.template_manager import TemplateManager
+
+    monkeypatch.setattr(database, "SRC_DIR", tmp_path)
+    db = database.DatabaseManager()
+    yield TemplateManager(db)
+    db.close()
+
 
 class TestTemplateManager:
     def test_import(self):
@@ -19,21 +33,11 @@ class TestTemplateManager:
         assert TemplateManager.normalize_type("Compression") == "Compression"
         assert TemplateManager.normalize_type("Division PDF") == "Division PDF"
 
-    def test_manager_init(self):
-        from database import DatabaseManager
-        from templates.template_manager import TemplateManager
-
-        db = DatabaseManager()
-        tm = TemplateManager(db)
+    def test_manager_init(self, tm):
         assert tm is not None
         assert hasattr(tm, "current_templates")
 
-    def test_get_templates_empty(self):
-        from database import DatabaseManager
-        from templates.template_manager import TemplateManager
-
-        db = DatabaseManager()
-        tm = TemplateManager(db)
+    def test_get_templates_empty(self, tm):
         templates = tm.get_templates_by_type("pdf_to_word")
         assert isinstance(templates, dict)
 
@@ -66,26 +70,16 @@ class TestEnhancedTemplatesDialog:
 
 
 class TestTemplateCRUD:
-    def test_save_and_get_template(self):
-        from database import DatabaseManager
-        from templates.template_manager import TemplateManager
-
-        db = DatabaseManager()
-        tm = TemplateManager(db)
+    def test_save_and_get_template(self, tm):
         config = {"mode": "preserve_all", "quality": "Standard"}
-        db.save_template("Test Template", "Conversion Word→PDF", config)
+        tm.db_manager.save_template("Test Template", "Conversion Word→PDF", config)
         tm.load_templates()
         templates = tm.get_templates_by_type("Conversion Word→PDF")
-        assert len(templates) >= 1
+        assert len(templates) == 1
 
-    def test_delete_template(self):
-        from database import DatabaseManager
-        from templates.template_manager import TemplateManager
-
-        db = DatabaseManager()
-        tm = TemplateManager(db)
+    def test_delete_template(self, tm):
         config = {"mode": "text_only"}
-        db.save_template("To Delete", "Compression", config)
+        tm.db_manager.save_template("To Delete", "Compression", config)
         tm.load_templates()
         templates = tm.get_templates_by_type("Compression")
         tid = list(templates.keys())[0] if templates else None
