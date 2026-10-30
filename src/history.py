@@ -57,23 +57,36 @@ def _resource_path(relative_path):
     return resource_path(relative_path).replace("\\", "/")
 
 
+def matching_operation_types(operation_keys, query, translate) -> list[str]:
+    """Return operation keys whose localized label contains ``query``."""
+    needle = (query or "").strip().casefold()
+    if not needle:
+        return []
+    return [key for key in operation_keys if needle in str(translate(key)).casefold()]
+
+
 class HistoryLoader(QObject):
     """Worker that runs the DB query in a separate thread."""
 
     finished = Signal(list)
 
-    def __init__(self, db_manager, limit, search_query, start_date, end_date):
+    def __init__(self, db_manager, limit, search_query, start_date, end_date, operation_types=None):
         super().__init__()
         self.db_manager = db_manager
         self.limit = limit
         self.search_query = search_query
         self.start_date = start_date
         self.end_date = end_date
+        self.operation_types = operation_types or []
 
     def run(self):
         try:
             results = self.db_manager.get_conversion_history(
-                limit=self.limit, search_query=self.search_query, start_date=self.start_date, end_date=self.end_date
+                limit=self.limit,
+                search_query=self.search_query,
+                start_date=self.start_date,
+                end_date=self.end_date,
+                operation_types=self.operation_types,
             )
         except Exception:
             results = []
@@ -307,6 +320,17 @@ class HistoryDialog(TranslationMixin, QDialog):
         limit = int(self.limit_combo.currentText())
 
         active_db = self.adv_db_manager if self._use_adv_db else self.db_manager
+        operation_types = []
+        if search_query:
+            try:
+                operation_keys = active_db.get_distinct_operation_types()
+            except Exception:
+                operation_keys = []
+            operation_types = matching_operation_types(
+                operation_keys,
+                search_query,
+                self.translate_operation_type,
+            )
 
         if self._loader_thread is not None:
             try:
@@ -318,7 +342,7 @@ class HistoryDialog(TranslationMixin, QDialog):
             self._loader_thread = None
 
         self._loader_thread = QThread(self)
-        self._worker = HistoryLoader(active_db, limit, search_query, start_date, end_date)
+        self._worker = HistoryLoader(active_db, limit, search_query, start_date, end_date, operation_types)
         self._worker.moveToThread(self._loader_thread)
 
         self._loader_thread.started.connect(self._worker.run)

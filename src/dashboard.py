@@ -108,9 +108,15 @@ class _AdvDbProxy:
     def get_statistics(self, days=30):
         return self._db.get_statistics_compat(days)
 
-    def get_conversion_history(self, limit=200, search_query=None, start_date=None, end_date=None):
+    def get_conversion_history(
+        self, limit=200, search_query=None, start_date=None, end_date=None, operation_types=None
+    ):
         return self._db.get_conversion_history(
-            limit=limit, search_query=search_query, start_date=start_date, end_date=end_date
+            limit=limit,
+            search_query=search_query,
+            start_date=start_date,
+            end_date=end_date,
+            operation_types=operation_types,
         )
 
     def export_history(self, filepath, format_type):

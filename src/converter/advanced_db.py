@@ -152,6 +152,7 @@ class AdvancedDatabaseManager:
         start_date: str | None = None,
         end_date: str | None = None,
         category: str | None = None,
+        operation_types: list[str] | None = None,
     ) -> list[tuple]:
         """
         Return conversion history rows, most recent first.
@@ -171,9 +172,16 @@ class AdvancedDatabaseManager:
         params: list = []
 
         if search_query:
-            query += " AND (source_file LIKE ? OR target_file LIKE ? OR conversion_type LIKE ?)"
             p = f"%{search_query}%"
-            params.extend([p, p, p])
+            clauses = ["source_file LIKE ?", "target_file LIKE ?"]
+            params.extend([p, p])
+            if operation_types:
+                placeholders = ",".join("?" for _ in operation_types)
+                clauses.append(f"conversion_type IN ({placeholders})")
+                params.extend(operation_types)
+            clauses.append("conversion_type LIKE ?")
+            params.append(p)
+            query += " AND (" + " OR ".join(clauses) + ")"
 
         if start_date:
             query += " AND DATE(timestamp) >= ?"
@@ -194,6 +202,16 @@ class AdvancedDatabaseManager:
             cur = conn.cursor()
             cur.execute(query, params)
             return cur.fetchall()
+
+    def get_distinct_operation_types(self) -> list[str]:
+        """Return the conversion keys present in the advanced history table."""
+        with self._connect() as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT DISTINCT conversion_type FROM adv_conversion_history "
+                "WHERE conversion_type IS NOT NULL AND conversion_type != ''"
+            )
+            return [row[0] for row in cur.fetchall()]
 
     def get_statistics(self, days: int = 30) -> dict:
         """
@@ -310,6 +328,7 @@ class AdvancedDatabaseManager:
         search_query: str | None = None,
         start_date: str | None = None,
         end_date: str | None = None,
+        operation_types: list[str] | None = None,
     ) -> list[tuple]:
         """
         Compatibility wrapper so StatisticsDashboard can swap db_manager
@@ -323,6 +342,7 @@ class AdvancedDatabaseManager:
             search_query=search_query,
             start_date=start_date,
             end_date=end_date,
+            operation_types=operation_types,
         )
         return [(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[8], r[9], r[10], r[11]) for r in rows]
 

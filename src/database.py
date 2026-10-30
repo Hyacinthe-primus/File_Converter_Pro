@@ -170,7 +170,14 @@ class DatabaseManager:
 
         conn.commit()
 
-    def get_conversion_history(self, limit=100, search_query=None, start_date=None, end_date=None):
+    def get_conversion_history(
+        self,
+        limit=100,
+        search_query=None,
+        start_date=None,
+        end_date=None,
+        operation_types=None,
+    ):
         conn = self._conn
         cursor = conn.cursor()
 
@@ -183,9 +190,16 @@ class DatabaseManager:
         params = []
 
         if search_query:
-            query += " AND (source_file LIKE ? OR target_file LIKE ? OR operation_type LIKE ?)"
             search_param = f"%{search_query}%"
-            params.extend([search_param, search_param, search_param])
+            clauses = ["source_file LIKE ?", "target_file LIKE ?"]
+            params.extend([search_param, search_param])
+            if operation_types:
+                placeholders = ",".join("?" for _ in operation_types)
+                clauses.append(f"operation_type IN ({placeholders})")
+                params.extend(operation_types)
+            clauses.append("operation_type LIKE ?")
+            params.append(search_param)
+            query += " AND (" + " OR ".join(clauses) + ")"
 
         if start_date:
             query += " AND DATE(timestamp) >= ?"
@@ -200,6 +214,15 @@ class DatabaseManager:
 
         cursor.execute(query, params)
         return cursor.fetchall()
+
+    def get_distinct_operation_types(self):
+        """Return the operation keys present in the history table."""
+        cursor = self._conn.cursor()
+        cursor.execute(
+            "SELECT DISTINCT operation_type FROM conversion_history "
+            "WHERE operation_type IS NOT NULL AND operation_type != ''"
+        )
+        return [row[0] for row in cursor.fetchall()]
 
     def get_first_conversion_date(self):
         """Return the date of the first conversion, or None if no records exist."""
