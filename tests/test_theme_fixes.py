@@ -81,6 +81,28 @@ class TestLogoLabelThemeFix:
         parent.deleteLater()
 
 
+class TestThemeDisplayName:
+    def test_custom_theme_uses_metadata_name(self, tmp_path, monkeypatch):
+        import theme_manager
+
+        themes_dir = tmp_path / "custom_themes"
+        theme_dir = themes_dir / "kintsugi_folder"
+        theme_dir.mkdir(parents=True)
+        (theme_dir / "metadata.ini").write_text(
+            "[theme]\nname = Kintsugi Pro\nkind = dark\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(theme_manager, "CUSTOM_THEMES_DIR", themes_dir)
+
+        assert theme_manager.get_theme_display_name("kintsugi_folder") == "Kintsugi Pro"
+
+    def test_builtin_theme_display_name(self):
+        from theme_manager import get_theme_display_name
+
+        assert get_theme_display_name("dark") == "Dark"
+        assert get_theme_display_name("light") == "Light"
+
+
 class TestAdvancedConversionsCustomTheme:
     def test_resolve_theme_name_custom(self):
         from types import SimpleNamespace

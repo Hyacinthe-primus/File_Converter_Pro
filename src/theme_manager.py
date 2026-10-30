@@ -81,6 +81,18 @@ def get_custom_themes() -> list[ThemeMetadata]:
     return sorted(themes, key=lambda t: t.name.lower())
 
 
+def get_theme_display_name(theme_name: str | None) -> str:
+    """Return the metadata display name for a custom theme, or a built-in label."""
+    if not theme_name:
+        return ""
+    if theme_name in ("dark", "light"):
+        return theme_name.capitalize()
+    for meta in get_custom_themes():
+        if meta.folder_name == theme_name:
+            return meta.name
+    return theme_name
+
+
 def get_custom_theme_kind(folder_name: str) -> str:
     theme_dir = CUSTOM_THEMES_DIR / folder_name
     if not theme_dir.is_dir():

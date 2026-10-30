@@ -31,6 +31,7 @@ from theme_manager import (
     ThemeMessage,
     get_builtin_themes,
     get_custom_themes,
+    get_theme_display_name,
     import_theme,
     remove_theme,
 )
@@ -621,7 +622,7 @@ class SettingsDialog(TranslationMixin, QDialog):
 
         parent_app = self.parent()
         current_theme = getattr(parent_app, "current_theme", "light") if parent_app else "light"
-        self._theme_active_lbl.setText(current_theme)
+        self._theme_active_lbl.setText(get_theme_display_name(current_theme))
 
         builtin = get_builtin_themes()
         custom = get_custom_themes()
