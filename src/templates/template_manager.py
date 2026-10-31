@@ -49,11 +49,6 @@ class TemplateManager:
         """Return the legacy storage type for any semantic/legacy type value."""
         return sk.legacy_type(t)
 
-    @classmethod
-    def semantic_type(cls, t):
-        """Return the language-independent semantic type."""
-        return sk.normalize_type(t)
-
     def get_templates_by_type(self, template_type):
         """Retrieve all templates of a specific type"""
         template_type = self.normalize_type(template_type)
