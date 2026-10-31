@@ -92,3 +92,35 @@ def test_translate_markdown_to_html_operation():
     for language in ("fr", "en"):
         tm.set_language(language)
         assert tm.translate_operation_type("markdown_to_html") == "Markdown → HTML"
+
+
+def test_translate_operation_type_uses_other_language_files():
+    from translations import TranslationManager
+
+    tm = TranslationManager()
+    expected = {
+        "it": "PDF in Word",
+        "ru": "PDF в Word",
+        "tr": "PDF'den Word'e",
+        "zh": "PDF转Word",
+    }
+    for language, label in expected.items():
+        tm.set_language(language)
+        assert tm.translate_operation_type("pdf_to_word") == label
+
+
+def test_translate_operation_type_aliases_images_key():
+    from translations import TranslationManager
+
+    tm = TranslationManager()
+    tm.set_language("it")
+    assert tm.translate_operation_type("image_to_pdf") == "Immagini in PDF"
+    assert "Un PDF per immagine" in tm.translate_operation_type("image_to_pdf_s")
+
+
+def test_translate_operation_type_falls_back_to_format_arrow():
+    from translations import TranslationManager
+
+    tm = TranslationManager()
+    tm.set_language("it")
+    assert tm.translate_operation_type("txt_to_pdf") == "TXT → PDF"

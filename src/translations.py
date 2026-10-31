@@ -233,161 +233,43 @@ class TranslationManager:
         return text
 
     def translate_operation_type(self, operation_key):
-        translations = {
-            "fr": {
-                "pdf_to_word": "PDF vers Word",
-                "word_to_pdf": "Word vers PDF",
-                "image_to_pdf": "Images vers PDF",
-                "image_to_pdf_s": "Images vers PDF séparés",
-                "merge_pdf": "Fusion PDF",
-                "merge_word": "Fusion Word",
-                "split_pdf": "Division PDF",
-                "protect_pdf": "Protection PDF",
-                "office_optimization": "Optimisation bureautique",
-                "batch_conversion": "Conversion par Lot",
-                "batch_rename": "Renommage par Lot",
-                "file_compression": "Compression de fichiers",
-                "txt_to_pdf": "TXT → PDF",
-                "rtf_to_pdf": "RTF → PDF",
-                "txt_to_docx": "TXT → DOCX",
-                "rtf_to_docx": "RTF → DOCX",
-                "csv_to_json": "CSV → JSON",
-                "json_to_csv": "JSON → CSV",
-                "xlsx_to_pdf": "XLSX → PDF",
-                "xlsx_to_json": "XLSX → JSON",
-                "xlsx_to_csv": "XLSX → CSV",
-                "pptx_to_pdf": "PPTX → PDF",
-                "markdown_to_html": "Markdown → HTML",
-                "html_to_pdf": "HTML → PDF",
-                "pdf_to_html": "PDF → HTML",
-                "epub_to_pdf": "EPUB → PDF",
-                "jpeg_to_png": "JPEG → PNG",
-                "png_to_jpg": "PNG → JPG",
-                "jpg_to_png": "JPG → PNG",
-                "webp_to_png": "WEBP → PNG",
-                "bmp_to_png": "BMP → PNG",
-                "tiff_to_png": "TIFF → PNG",
-                "heic_to_png": "HEIC → PNG",
-                "heif_to_png": "HEIF → PNG",
-                "ico_to_png": "ICO → PNG",
-                "psd_to_png": "PSD → PNG",
-                "svg_to_png": "SVG → PNG",
-                "raw_to_png": "RAW → PNG",
-                "png_to_webp": "PNG → WEBP",
-                "png_to_avif": "PNG → AVIF",
-                "image_resize": "Redimensionnement d'image",
-                "image_to_ico": "Image → ICO",
-                "audio_convert": "Conversion audio",
-                "video_convert": "Conversion vidéo",
-                "csv_to_xlsx": "CSV → XLSX",
-                "json_to_xlsx": "JSON → XLSX",
-                "csv_to_pdf": "CSV → PDF",
-                "json_to_pdf": "JSON → PDF",
-                "image_to_png": "Image → PNG",
-                "image_to_jpeg": "Image → JPEG",
-                "image_to_jpg": "Image → JPG",
-                "image_to_bmp": "Image → BMP",
-                "image_to_heic": "Image → HEIC",
-                "image_to_webp": "Image → WEBP",
-                "image_to_tiff": "Image → TIFF",
-                "image_to_psd": "Image → PSD",
-                "image_to_svg": "Image → SVG",
-                "image_to_avif": "Image → AVIF",
-                "image_to_j2k": "Image → J2K",
-                "image_to_dng": "Image → DNG",
-                "video_to_mp4": "Vidéo → MP4",
-                "video_to_webm": "Vidéo → WEBM",
-                "video_to_mkv": "Vidéo → MKV",
-                "video_to_mov": "Vidéo → MOV",
-                "video_to_avi": "Vidéo → AVI",
-                "video_to_mp3": "Vidéo → MP3",
-                "video_to_wav": "Vidéo → WAV",
-                "video_to_aac": "Vidéo → AAC",
-                "video_to_flac": "Vidéo → FLAC",
-                "audio_to_mp3": "Audio → MP3",
-                "audio_to_wav": "Audio → WAV",
-                "audio_to_aac": "Audio → AAC",
-                "audio_to_ogg": "Audio → OGG",
-                "audio_to_flac": "Audio → FLAC",
-                "audio_to_m4a": "Audio → M4A",
-            },
-            "en": {
-                "pdf_to_word": "PDF to Word",
-                "word_to_pdf": "Word to PDF",
-                "image_to_pdf": "Images to PDF",
-                "image_to_pdf_s": "Separate Images to PDF",
-                "merge_pdf": "Merge PDF",
-                "merge_word": "Merge Word",
-                "split_pdf": "Split PDF",
-                "protect_pdf": "PDF Protection",
-                "office_optimization": "Office Optimization",
-                "batch_conversion": "Batch Conversion",
-                "batch_rename": "Batch Rename",
-                "file_compression": "File Compression",
-                "txt_to_pdf": "TXT → PDF",
-                "rtf_to_pdf": "RTF → PDF",
-                "txt_to_docx": "TXT → DOCX",
-                "rtf_to_docx": "RTF → DOCX",
-                "csv_to_json": "CSV → JSON",
-                "json_to_csv": "JSON → CSV",
-                "xlsx_to_pdf": "XLSX → PDF",
-                "xlsx_to_json": "XLSX → JSON",
-                "xlsx_to_csv": "XLSX → CSV",
-                "pptx_to_pdf": "PPTX → PDF",
-                "markdown_to_html": "Markdown → HTML",
-                "html_to_pdf": "HTML → PDF",
-                "pdf_to_html": "PDF → HTML",
-                "epub_to_pdf": "EPUB → PDF",
-                "jpeg_to_png": "JPEG → PNG",
-                "png_to_jpg": "PNG → JPG",
-                "jpg_to_png": "JPG → PNG",
-                "webp_to_png": "WEBP → PNG",
-                "bmp_to_png": "BMP → PNG",
-                "tiff_to_png": "TIFF → PNG",
-                "heic_to_png": "HEIC → PNG",
-                "heif_to_png": "HEIF → PNG",
-                "ico_to_png": "ICO → PNG",
-                "psd_to_png": "PSD → PNG",
-                "svg_to_png": "SVG → PNG",
-                "raw_to_png": "RAW → PNG",
-                "png_to_webp": "PNG → WEBP",
-                "png_to_avif": "PNG → AVIF",
-                "image_resize": "Image Resize",
-                "image_to_ico": "Image → ICO",
-                "audio_convert": "Audio Conversion",
-                "video_convert": "Video Conversion",
-                "csv_to_xlsx": "CSV → XLSX",
-                "json_to_xlsx": "JSON → XLSX",
-                "csv_to_pdf": "CSV → PDF",
-                "json_to_pdf": "JSON → PDF",
-                "image_to_png": "Image → PNG",
-                "image_to_jpeg": "Image → JPEG",
-                "image_to_jpg": "Image → JPG",
-                "image_to_bmp": "Image → BMP",
-                "image_to_heic": "Image → HEIC",
-                "image_to_webp": "Image → WEBP",
-                "image_to_tiff": "Image → TIFF",
-                "image_to_psd": "Image → PSD",
-                "image_to_svg": "Image → SVG",
-                "image_to_avif": "Image → AVIF",
-                "image_to_j2k": "Image → J2K",
-                "image_to_dng": "Image → DNG",
-                "video_to_mp4": "Video → MP4",
-                "video_to_webm": "Video → WEBM",
-                "video_to_mkv": "Video → MKV",
-                "video_to_mov": "Video → MOV",
-                "video_to_avi": "Video → AVI",
-                "video_to_mp3": "Video → MP3",
-                "video_to_wav": "Video → WAV",
-                "video_to_aac": "Video → AAC",
-                "video_to_flac": "Video → FLAC",
-                "audio_to_mp3": "Audio → MP3",
-                "audio_to_wav": "Audio → WAV",
-                "audio_to_aac": "Audio → AAC",
-                "audio_to_ogg": "Audio → OGG",
-                "audio_to_flac": "Audio → FLAC",
-                "audio_to_m4a": "Audio → M4A",
-            },
+        """Return a human-readable, localized operation label.
+
+        Language files are the source of truth. Keys without a translation
+        fall back to a generated SOURCE → TARGET label so format-only
+        operations still render clearly in every language.
+        """
+        if not isinstance(operation_key, str):
+            return operation_key
+
+        aliases = {
+            "image_to_pdf": "images_to_pdf",
+            "image_to_pdf_s": "images_to_pdf",
         }
-        lang = translations.get(self.current_language, translations.get("fr", {}))
-        return lang.get(operation_key, operation_key)
+        key = aliases.get(operation_key, operation_key)
+        translated = self.translate_text(key)
+        if translated != key:
+            if operation_key == "image_to_pdf_s":
+                return f"{translated} ({self.translate_text('one_pdf_per_image')})"
+            return translated
+
+        if operation_key == "Compression (selection)":
+            return f"{self.translate_text('file_compression')} ({self.translate_text('selected_files')})"
+        if operation_key == "Compression (all)":
+            return f"{self.translate_text('file_compression')} ({self.translate_text('all_files')})"
+
+        if "_to_" in key:
+            source, target = key.split("_to_", 1)
+            labels = {
+                "txt": "TXT", "rtf": "RTF", "csv": "CSV", "json": "JSON",
+                "xlsx": "XLSX", "pptx": "PPTX", "markdown": "Markdown",
+                "html": "HTML", "pdf": "PDF", "epub": "EPUB",
+            }
+            return f"{labels.get(source.lower(), source.upper())} → {labels.get(target.lower(), target.upper())}"
+
+        special = {
+            "image_resize": "Image Resize",
+            "audio_convert": "Audio Conversion",
+            "video_convert": "Video Conversion",
+        }
+        return special.get(key, key)
