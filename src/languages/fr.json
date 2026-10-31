@@ -495,6 +495,7 @@
     "history_delete": "Voulez-vous vraiment supprimer {0} enregistrement(s) de l'historique ?",
     "main_conversions": "Conversions principales",
     "advanced_conversions_2": "Conversions avancées",
+    "advanced_conversions_module_not_loaded": "Module de conversions avancées non chargé",
     "create_new_template": "Créer un nouveau template",
     "template_name": "Nom du template:",
     "configuration": "Configuration:",

@@ -474,6 +474,7 @@
         "history_delete": "",
         "main_conversions": "",
         "advanced_conversions_2": "",
+        "advanced_conversions_module_not_loaded": "",
         "create_new_template": "",
         "template_name": "",
         "configuration": "",

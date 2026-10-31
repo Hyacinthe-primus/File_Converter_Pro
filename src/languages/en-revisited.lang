@@ -480,6 +480,7 @@
         "history_delete": "Do you really want to delete {0} history entries?",
         "main_conversions": "Main conversions",
         "advanced_conversions_2": "Advanced conversions",
+        "advanced_conversions_module_not_loaded": "Advanced conversions module not loaded",
         "create_new_template": "Create New Template",
         "template_name": "Template name:",
         "configuration": "Configuration:",

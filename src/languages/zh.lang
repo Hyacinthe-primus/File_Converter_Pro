@@ -475,6 +475,7 @@
         "history_delete": "您确定要删除 {0} 条历史记录吗？",
         "main_conversions": "主要转换",
         "advanced_conversions_2": "高级转换",
+        "advanced_conversions_module_not_loaded": "高级转换模块未加载",
         "create_new_template": "创建新模板",
         "template_name": "模板名称：",
         "configuration": "配置：",

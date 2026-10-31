@@ -168,7 +168,9 @@ class HistoryDialog(TranslationMixin, QDialog):
 
         if not self.adv_db_manager:
             self.btn_adv_db.setEnabled(False)
-            self.btn_adv_db.setToolTip("Module de conversions avancées non chargé")
+            self.btn_adv_db.setToolTip(
+                self.translate_text("advanced_conversions_module_not_loaded")
+            )
 
         source_layout.addWidget(self.btn_main_db)
         source_layout.addWidget(self.btn_adv_db)

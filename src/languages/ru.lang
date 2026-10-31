@@ -474,6 +474,7 @@
         "history_delete": "Вы действительно хотите удалить {0} записей истории?",
         "main_conversions": "Основные конвертации",
         "advanced_conversions_2": "Расширенные конвертации",
+        "advanced_conversions_module_not_loaded": "Модуль расширенных конвертаций не загружен",
         "create_new_template": "Создать новый шаблон",
         "template_name": "Имя шаблона:",
         "configuration": "Конфигурация:",

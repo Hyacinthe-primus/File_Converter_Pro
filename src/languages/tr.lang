@@ -509,6 +509,7 @@
         "history_delete": "{0} geçmiş kaydını gerçekten silmek istiyor musunuz?",
         "main_conversions": "Ana dönüştürmeler",
         "advanced_conversions_2": "Gelişmiş dönüştürmeler",
+        "advanced_conversions_module_not_loaded": "Gelişmiş dönüştürmeler modülü yüklenmedi",
         "create_new_template": "Yeni Şablon Oluştur",
         "template_name": "Şablon adı:",
         "configuration": "Yapılandırma:",

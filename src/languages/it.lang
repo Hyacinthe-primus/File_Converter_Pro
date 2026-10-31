@@ -474,6 +474,7 @@
         "history_delete": "Vuoi davvero eliminare {0} voci della cronologia?",
         "main_conversions": "Conversioni principali",
         "advanced_conversions_2": "Conversioni avanzate",
+        "advanced_conversions_module_not_loaded": "Modulo delle conversioni avanzate non caricato",
         "create_new_template": "Crea nuovo modello",
         "template_name": "Nome modello:",
         "configuration": "Configurazione:",
