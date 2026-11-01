@@ -4,22 +4,113 @@ system_notifier.py
 Cross-platform system notification manager for File Converter Pro.
 
 Handles native notifications with platform-specific backends:
-    - Windows: native toast notifications via winotify
+    - Windows: native toast notifications through a fixed PowerShell script
     - Linux / macOS: system tray notifications via QSystemTrayIcon
 
 Features:
-    - Native Windows toast notifications (winotify)
+    - Native Windows toast notifications with structured XML/data payloads
     - Cross-platform fallback via Qt system tray
     - FR/EN translations
 
 """
 
+import base64
+import json
 import os
 import platform
 import re
 import webbrowser
+import xml.etree.ElementTree as ET
+from importlib.util import find_spec
 
 IS_WINDOWS = platform.system() == "Windows"
+WINOTIFY_AVAILABLE = IS_WINDOWS and find_spec("winotify") is not None
+
+_TOAST_ENV_VAR = "FCP_TOAST_PAYLOAD"
+_NOTIF_PLACEHOLDER_RE = re.compile(r"\{(task|app)\}")
+_TOAST_PS_SCRIPT = r"""
+$ErrorActionPreference = 'Stop'
+$payloadText = $env:FCP_TOAST_PAYLOAD
+if ([string]::IsNullOrEmpty($payloadText)) { exit 1 }
+$data = $payloadText | ConvertFrom-Json
+[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
+[Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+$xml.LoadXml([string]$data.xml)
+$toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
+$toast.Tag = [string]$data.tag
+$toast.Group = [string]$data.group
+$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier([string]$data.app_id)
+$notifier.Show($toast)
+"""
+
+
+def _build_toast_xml(
+    title: str,
+    message: str,
+    action_label: str,
+    action_url: str,
+    icon: str,
+    duration: str,
+) -> str:
+    if duration not in ("short", "long"):
+        raise ValueError("Duration is not 'short' or 'long'")
+
+    toast = ET.Element("toast", {"duration": duration})
+    visual = ET.SubElement(toast, "visual")
+    binding = ET.SubElement(visual, "binding", {"template": "ToastImageAndText02"})
+    ET.SubElement(binding, "image", {"id": "1", "src": icon})
+    title_node = ET.SubElement(binding, "text", {"id": "1"})
+    title_node.text = title
+    message_node = ET.SubElement(binding, "text", {"id": "2"})
+    message_node.text = message
+    actions = ET.SubElement(toast, "actions")
+    ET.SubElement(
+        actions,
+        "action",
+        {
+            "activationType": "protocol",
+            "content": action_label,
+            "arguments": action_url,
+        },
+    )
+    ET.SubElement(toast, "audio", {"silent": "true"})
+    return ET.tostring(toast, encoding="unicode")
+
+
+def _build_toast_payload(
+    app_id: str,
+    title: str,
+    message: str,
+    action_label: str,
+    action_url: str,
+    icon: str,
+    duration: str,
+) -> dict:
+    return {
+        "xml": _build_toast_xml(title, message, action_label, action_url, icon, duration),
+        "app_id": app_id,
+        "tag": title,
+        "group": app_id,
+    }
+
+
+def _encode_ps_command(script: str) -> str:
+    return base64.b64encode(script.encode("utf-16-le")).decode("ascii")
+
+
+def _build_ps_invocation(payload: dict) -> tuple[list[str], dict]:
+    env = os.environ.copy()
+    env[_TOAST_ENV_VAR] = json.dumps(payload, ensure_ascii=True)
+    command = [
+        "powershell.exe",
+        "-NoProfile",
+        "-NonInteractive",
+        "-EncodedCommand",
+        _encode_ps_command(_TOAST_PS_SCRIPT),
+    ]
+    return command, env
 
 
 def _compare_versions(a: str, b: str) -> int:
@@ -35,56 +126,33 @@ def _compare_versions(a: str, b: str) -> int:
             return -1 if x < y else 1
     return (len(a_parts) > len(b_parts)) - (len(a_parts) < len(b_parts))
 
-if IS_WINDOWS:
-    try:
-        import subprocess as _winotify_subprocess
+if IS_WINDOWS and not WINOTIFY_AVAILABLE:
+    print("[NOTIFIER] winotify not installed — falling back to Qt tray")
 
-        import winotify as _winotify_module
-        from winotify import Notification as WinotifyNotification
 
-        def _run_ps_isolated(*, file: str = "", command: str = "") -> None:
-            """Replacement for winotify._run_ps.
+def _run_windows_toast(payload: dict) -> None:
+    import subprocess
 
-            The original spawns powershell.exe without CREATE_NO_WINDOW, so the
-            child attaches to the parent's console (ConPTY) and resets it
-            (clears the screen/scrollback and rewrites the title). Giving the
-            child its own hidden console keeps the app's terminal intact.
-            """
-            si = _winotify_subprocess.STARTUPINFO()
-            si.dwFlags |= _winotify_subprocess.STARTF_USESHOWWINDOW
+    command, env = _build_ps_invocation(payload)
+    startupinfo = None
+    if hasattr(subprocess, "STARTUPINFO"):
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
-            cmd = ["powershell.exe", "-ExecutionPolicy", "Bypass"]
-            if file and command:
-                raise ValueError
-            elif file:
-                cmd.extend(["-file", file])
-            elif command:
-                cmd.extend(["-Command", command])
-            else:
-                raise ValueError
+    subprocess.Popen(
+        command,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        startupinfo=startupinfo,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        env=env,
+    )
 
-            _winotify_subprocess.Popen(
-                cmd,
-                stdin=_winotify_subprocess.DEVNULL,
-                stdout=_winotify_subprocess.DEVNULL,
-                stderr=_winotify_subprocess.DEVNULL,
-                startupinfo=si,
-                creationflags=_winotify_subprocess.CREATE_NO_WINDOW,
-            )
-
-        _winotify_module._run_ps = _run_ps_isolated
-        WINOTIFY_AVAILABLE = True
-    except ImportError:
-        WINOTIFY_AVAILABLE = False
-        print("[NOTIFIER] winotify not installed — falling back to Qt tray")
-else:
-    WINOTIFY_AVAILABLE = False
 
 from PySide6.QtCore import QObject, Signal  # noqa: E402
 from PySide6.QtGui import QAction, QIcon  # noqa: E402
 from PySide6.QtWidgets import QMenu, QSystemTrayIcon  # noqa: E402
-
-from app import __version__  # noqa: E402
 
 
 def open_url(url: str) -> None:
@@ -148,7 +216,8 @@ class SystemNotifier:
     - The operation is not excluded (PDF Protection, Optimization)
 
     Backend selection (automatic):
-    - Windows + winotify installed  → native Windows toast (rich, with actions)
+    - Windows + winotify installed  → native Windows toast through a fixed
+      PowerShell script with notification values supplied as structured data
     - Otherwise                     → Qt system tray notification
     """
 
@@ -170,6 +239,7 @@ class SystemNotifier:
         self.app_instance = app_instance
         self.language = language
         self._tm = None
+        self._fallback_tm = None
         self.app_name = "File Converter Pro"
         self.app_id = "FileConverterPro.SystemNotifier"
 
@@ -182,7 +252,7 @@ class SystemNotifier:
         self._bridge.notify_request.connect(self._show_notification)
         self._bridge.update_available.connect(self._show_update_notification)
 
-        backend = "winotify (Windows)" if (IS_WINDOWS and WINOTIFY_AVAILABLE) else "Qt tray"
+        backend = "Windows toast (PowerShell)" if (IS_WINDOWS and WINOTIFY_AVAILABLE) else "Qt tray"
         print(
             f"[NOTIFIER] Initialized — backend: {backend} | "
             f"Icon: {os.path.exists(self.toast_icon_path) if self.toast_icon_path else 'None'}"
@@ -198,6 +268,21 @@ class SystemNotifier:
         self.language = language
         if self._tm is not None:
             self._tm.set_language(language)
+        fallback = getattr(self, "_fallback_tm", None)
+        if fallback is not None:
+            fallback.set_language(language)
+
+    def _translation_manager(self):
+        if self._tm is not None:
+            return self._tm
+        fallback = getattr(self, "_fallback_tm", None)
+        if fallback is None:
+            from translations import TranslationManager
+
+            fallback = TranslationManager()
+            fallback.set_language(self.language)
+            self._fallback_tm = fallback
+        return fallback
 
     def _get_resource_path(self, relative_path: str) -> str:
         """Return absolute path to a resource, compatible with dev and PyInstaller."""
@@ -208,21 +293,22 @@ class SystemNotifier:
     def _translate_message(self, task_name: str) -> str:
         """Translate the notification body via the shared TranslationManager."""
         fallback = "Task « {task} » in {app} completed successfully"
-        if self._tm is not None:
-            template = self._tm.translate_text("notif_task_done_fr")
-            if "{task}" not in template:
-                template = fallback
-        else:
-            template = fallback
-        return template.format(task=task_name, app=self.app_name)
+        template = fallback
+        candidate = self._translation_manager().translate_text("notif_task_done_fr")
+        if isinstance(candidate, str) and "{task}" in candidate:
+            template = candidate
+
+        def replace(match):
+            return task_name if match.group(1) == "task" else self.app_name
+
+        return _NOTIF_PLACEHOLDER_RE.sub(replace, template)
 
     def _repo_button_label(self) -> str:
         """Return the GitHub button label via TranslationManager."""
-        if self._tm is not None:
-            label = self._tm.translate_text("open_github_repository")
-            if label != "📂 Ouvrir le dépôt GitHub":
-                return label
-        return "📂 Open GitHub Repository" if self.language != "fr" else "📂 Ouvrir le dépôt GitHub"
+        label = self._translation_manager().translate_text("open_github_repository")
+        if isinstance(label, str) and label.strip() and label != "open_github_repository":
+            return label
+        return "📂 Open GitHub Repository"
 
     def _get_task_display_name(self, operation_key: str) -> str:
         """Convert an operation key into a human-readable name for the notification."""
@@ -270,28 +356,26 @@ class SystemNotifier:
             "image_to_j2k": "Image → J2K",
             "image_to_dng": "Image → DNG",
             "image_to_ico": "Image → ICO",
-            "video_to_mp4": "Vidéo → MP4",
-            "video_to_webm": "Vidéo → WEBM",
-            "video_to_mkv": "Vidéo → MKV",
-            "video_to_mov": "Vidéo → MOV",
-            "video_to_avi": "Vidéo → AVI",
-            "video_to_mp3": "Vidéo → MP3",
-            "video_to_wav": "Vidéo → WAV",
-            "video_to_aac": "Vidéo → AAC",
-            "video_to_flac": "Vidéo → FLAC",
-            "audio_to_mp3": "Audio → MP3",
-            "audio_to_wav": "Audio → WAV",
-            "audio_to_aac": "Audio → AAC",
-            "audio_to_ogg": "Audio → OGG",
-            "audio_to_flac": "Audio → FLAC",
-            "audio_to_m4a": "Audio → M4A",
         }
-        fr_key = task_names.get(operation_key, operation_key)
-        if self._tm is not None:
-            translated = self._tm.translate_text(fr_key)
-            if translated != fr_key:
-                return translated
-        return fr_key
+        tm = self._translation_manager()
+        key = task_names.get(operation_key, operation_key)
+        translated = tm.translate_text(key)
+        if isinstance(translated, str) and translated != key:
+            return translated
+        if operation_key in task_names:
+            return key
+
+        if operation_key.startswith(("video_to_", "audio_to_")):
+            source, target = operation_key.split("_to_", 1)
+            source_label = tm.translate_text(source)
+            if not isinstance(source_label, str) or source_label == source:
+                source_label = source.upper()
+            return f"{source_label} → {target.upper()}"
+
+        translated = tm.translate_operation_type(operation_key)
+        if isinstance(translated, str) and translated:
+            return translated
+        return operation_key
 
     def _play_sound(self) -> None:
         """Play the notification sound if available."""
@@ -363,6 +447,8 @@ class SystemNotifier:
                 timeout=5,
             )
             latest = resp.json()["tag_name"].lstrip("v")
+            from app import __version__
+
             current = __version__.lstrip("v")
 
             if _compare_versions(current, latest) >= 0:
@@ -391,15 +477,16 @@ class SystemNotifier:
             if icon and not os.path.exists(icon):
                 icon = ""
             if IS_WINDOWS and WINOTIFY_AVAILABLE:
-                toast = WinotifyNotification(
-                    app_id=self.app_id,
-                    title=title,
-                    msg=message,
-                    duration=duration,
-                    icon=icon,
+                payload = _build_toast_payload(
+                    self.app_id,
+                    title,
+                    message,
+                    action_label,
+                    action_url,
+                    icon,
+                    duration,
                 )
-                toast.add_actions(label=action_label, launch=action_url)
-                toast.show()
+                _run_windows_toast(payload)
             else:
                 self._qt_notifier.notify_with_actions(
                     title=title,
