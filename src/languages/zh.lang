@@ -431,6 +431,8 @@
         "keep_history_days": "保留历史记录（天）：",
         "automatically_clean_temporary_files": "自动清理临时文件",
         "create_backup_before_conversion": "转换前创建备份",
+        "allow_local_resources_in_html_to_pdf": "允许在 HTML 转 PDF 转换中使用本地资源",
+        "allow_local_resources_in_html_to_pdf_tooltip": "禁用时，HTML 或 CSS 引用的本地图片、样式表、字体和其他文件将被阻止。仅对可信的 HTML 文件启用。本地资源必须位于 HTML 文件所在文件夹内。",
         "automatically_save_frequent_configurations": "自动保存常用配置",
         "general": "常规",
         "privacy": "隐私",

@@ -463,6 +463,9 @@ class ConversionThread(QThread):
 
                             _cfg = ConfigManager().load_config()
                             engine.backup_enabled = _cfg.get("backup_before_conversion", False)
+                            engine.allow_local_html_resources = _cfg.get(
+                                "allow_local_resources_in_html_to_pdf", False
+                            )
                         except Exception:
                             pass
                         result = engine.convert(self.conversion_type, f, f_dst_dir)

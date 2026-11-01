@@ -464,6 +464,8 @@
         "keep_history_days": "Geçmişi sakla (gün):",
         "automatically_clean_temporary_files": "Geçici dosyaları otomatik temizle",
         "create_backup_before_conversion": "Dönüştürmeden önce yedek oluştur",
+        "allow_local_resources_in_html_to_pdf": "HTML'den PDF'e dönüşümlerde yerel kaynaklara izin ver",
+        "allow_local_resources_in_html_to_pdf_tooltip": "Devre dışı bırakıldığında HTML veya CSS tarafından başvurulan yerel görseller, stil sayfaları, yazı tipleri ve diğer dosyalar engellenir. Yalnızca güvenilen HTML dosyaları için etkinleştirin. Yerel kaynaklar HTML dosyasının klasöründe kalmalıdır.",
         "automatically_save_frequent_configurations": "Sık kullanılan yapılandırmaları otomatik kaydet",
         "general": "Genel",
         "privacy": "Gizlilik",

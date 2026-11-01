@@ -38,6 +38,7 @@ DEFAULT_CONFIG: dict = {
     "enable_system_notifications": True,
     "show_file_previews": True,
     "backup_before_conversion": False,
+    "allow_local_resources_in_html_to_pdf": False,
     "pdf_to_word_mode": "with_images",
     "show_dashboard_on_startup": False,
     "keep_history_days": 365,

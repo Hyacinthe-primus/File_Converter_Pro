@@ -80,7 +80,11 @@ class _ConversionWorker(QObject):
         self.achievement_system = achievement_system
         self._tm = tm
         self._config = config or {}
-        self.engine.backup_enabled = self._config.get("backup_before_conversion", False)
+        if config is not None:
+            self.engine.backup_enabled = self._config.get("backup_before_conversion", False)
+            self.engine.allow_local_html_resources = self._config.get(
+                "allow_local_resources_in_html_to_pdf", False
+            )
 
     def cancel(self) -> None:
         self._cancelled = True
@@ -201,6 +205,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self.engine = AdvancedConverterEngine()
         _cfg = getattr(parent, "config", {}) if parent else {}
         self.engine.backup_enabled = _cfg.get("backup_before_conversion", False)
+        self.engine.allow_local_html_resources = _cfg.get("allow_local_resources_in_html_to_pdf", False)
 
         self._last_dst_dir: str | None = None
 
@@ -319,6 +324,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
             dst_dir,
             achievement_system=_ach_sys,
             tm=self._tm,
+            config=getattr(self.parent_window, "config", None),
         )
         thread = QThread(self)
         worker.moveToThread(thread)

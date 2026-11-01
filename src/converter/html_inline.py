@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import base64
-import os
 import re
 import tempfile
 
@@ -168,6 +167,17 @@ def build_table_flowable(
     return t
 
 
+_EPS_MIME_TYPES = {
+    "application/eps",
+    "application/postscript",
+    "image/eps",
+    "image/postscript",
+    "image/x-eps",
+}
+_EPS_MAGIC_PREFIXES = (b"%!PS",)
+_IMAGE_EXTENSIONS = {"bmp", "gif", "jpeg", "jpg", "png", "svg", "tif", "tiff", "webp"}
+
+
 def add_image_flowable(
     story: list,
     src_val: str,
@@ -177,31 +187,36 @@ def add_image_flowable(
     caption: str | None = None,
     caption_style=None,
 ) -> bool:
-    """Add an image from a data URI or raw bytes to the story.
+    """Add an image from a data URI to the story.
 
     Args:
         story: Reportlab story list to append to.
-        src_val: Data URI (data:image/png;base64,...) or file path.
+        src_val: Data URI (data:image/png;base64,...).
         max_width: Maximum width in points.
         tmp_imgs_list: List to track temp files for cleanup.
         caption: Optional caption text.
         caption_style: ParagraphStyle for caption.
     """
     try:
-        if src_val.startswith("data:"):
-            b64 = src_val.split(",", 1)[1]
-            raw = base64.b64decode(b64)
-            ext = src_val[5 : src_val.index(";")].split("/")[-1] or "png"
-            tf = tempfile.NamedTemporaryFile(suffix="." + ext, delete=False)
-            tf.write(raw)
-            tf.close()
-            tmp_imgs_list.append(tf.name)
-            rl = RLImage(tf.name)
-        elif os.path.isfile(src_val):
-            rl = RLImage(src_val)
-            tmp_imgs_list.append(src_val)
-        else:
+        if not src_val.startswith("data:"):
             return False
+        header, separator, payload = src_val[5:].partition(",")
+        if not separator:
+            return False
+        mime = header.split(";", 1)[0].strip().lower()
+        if mime in _EPS_MIME_TYPES:
+            return False
+        raw = base64.b64decode(payload)
+        if raw.lstrip().startswith(_EPS_MAGIC_PREFIXES):
+            return False
+        ext = mime.split("/")[-1].split("+", 1)[0].lower()
+        if ext not in _IMAGE_EXTENSIONS:
+            ext = "png"
+        tf = tempfile.NamedTemporaryFile(suffix="." + ext, delete=False)
+        tf.write(raw)
+        tf.close()
+        tmp_imgs_list.append(tf.name)
+        rl = RLImage(tf.name)
 
         if rl.imageWidth > max_width:
             s = max_width / rl.imageWidth

@@ -430,6 +430,8 @@
         "keep_history_days": "Хранить историю (дней):",
         "automatically_clean_temporary_files": "Автоматически очищать временные файлы",
         "create_backup_before_conversion": "Создавать резервную копию перед конвертацией",
+        "allow_local_resources_in_html_to_pdf": "Разрешить локальные ресурсы при преобразовании HTML в PDF",
+        "allow_local_resources_in_html_to_pdf_tooltip": "Если параметр отключён, локальные изображения, таблицы стилей, шрифты и другие файлы, на которые ссылается HTML или CSS, блокируются. Включайте только для доверенных HTML-файлов. Локальные ресурсы должны находиться в папке HTML-файла.",
         "automatically_save_frequent_configurations": "Автоматически сохранять частые конфигурации",
         "general": "Общие",
         "privacy": "Конфиденциальность",

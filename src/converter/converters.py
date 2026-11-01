@@ -55,8 +55,9 @@ class AdvancedConverterEngine(
 
     _SIG_WITH_TYPE = ("_image_convert", "_ffmpeg_convert", "_heic_convert", "_raw_convert")
 
-    def __init__(self):
+    def __init__(self, allow_local_html_resources=False):
         self.backup_enabled = False
+        self.allow_local_html_resources = bool(allow_local_html_resources)
 
     def convert(self, conversion_type, src, dst_dir):
         if conversion_type not in self._DISPATCH:

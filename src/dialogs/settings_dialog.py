@@ -189,6 +189,16 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.backup_checkbox = AnimatedCheckBox(self.translate_text("create_backup_before_conversion"))
         self.backup_checkbox.setChecked(self.config.get("backup_before_conversion", False))
 
+        self.allow_local_resources_checkbox = AnimatedCheckBox(
+            self.translate_text("allow_local_resources_in_html_to_pdf")
+        )
+        self.allow_local_resources_checkbox.setChecked(
+            self.config.get("allow_local_resources_in_html_to_pdf", False)
+        )
+        self.allow_local_resources_checkbox.setToolTip(
+            self.translate_text("allow_local_resources_in_html_to_pdf_tooltip")
+        )
+
         self.keep_history_days_spin = QSpinBox()
         self.keep_history_days_spin.setRange(1, 3650)
         self.keep_history_days_spin.setValue(self.config.get("keep_history_days", 365))
@@ -217,6 +227,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         conversion_layout.addRow(self.translate_text("ocr_orientation"), self.ocr_orientation_combo)
         conversion_layout.addRow(self.auto_clean_checkbox)
         conversion_layout.addRow(self.backup_checkbox)
+        conversion_layout.addRow(self.allow_local_resources_checkbox)
         conversion_layout.addRow(self.auto_save_configs_check)
 
         conversion_group.setMaximumHeight(600)
@@ -900,6 +911,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.keep_history_days_spin.setValue(365)
         self.auto_clean_checkbox.setChecked(True)
         self.backup_checkbox.setChecked(False)
+        self.allow_local_resources_checkbox.setChecked(False)
         self.auto_save_configs_check.setChecked(True)
         self.separate_image_pdfs_checkbox.setChecked(False)
         self.use_system_theme_checkbox.setChecked(True)
@@ -1121,6 +1133,7 @@ class SettingsDialog(TranslationMixin, QDialog):
             "keep_history_days": self.keep_history_days_spin.value(),
             "auto_clean_temp_files": self.auto_clean_checkbox.isChecked(),
             "backup_before_conversion": self.backup_checkbox.isChecked(),
+            "allow_local_resources_in_html_to_pdf": self.allow_local_resources_checkbox.isChecked(),
             "auto_save_configs": self.auto_save_configs_check.isChecked(),
             "separate_image_pdfs": self.separate_image_pdfs_checkbox.isChecked(),
             "use_system_theme": self.use_system_theme_checkbox.isChecked(),

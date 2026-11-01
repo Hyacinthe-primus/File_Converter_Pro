@@ -182,6 +182,9 @@ class BatchMixin:
 
             engine = AdvancedConverterEngine()
             engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
+            engine.allow_local_html_resources = getattr(self, "config", {}).get(
+                "allow_local_resources_in_html_to_pdf", False
+            )
             return engine.convert(conv, fp, str(Path(out).parent)).success
         return False
 
@@ -199,6 +202,9 @@ class BatchMixin:
 
             engine = AdvancedConverterEngine()
             engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
+            engine.allow_local_html_resources = getattr(self, "config", {}).get(
+                "allow_local_resources_in_html_to_pdf", False
+            )
             return engine.convert(conv, fp, str(Path(out).parent)).success
         return False
 
@@ -245,6 +251,9 @@ class BatchMixin:
 
                 engine = AdvancedConverterEngine()
                 engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
+                engine.allow_local_html_resources = getattr(self, "config", {}).get(
+                    "allow_local_resources_in_html_to_pdf", False
+                )
                 if not engine.convert(conv, fp, tmp_dir).success:
                     return False
                 tmp_pdf = os.path.join(tmp_dir, f"{Path(fp).stem}.pdf")

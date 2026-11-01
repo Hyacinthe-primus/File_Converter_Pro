@@ -450,6 +450,8 @@
     "keep_history_days": "Conserver l'historique (jours):",
     "automatically_clean_temporary_files": "Nettoyer automatiquement les fichiers temporaires",
     "create_backup_before_conversion": "Créer une sauvegarde avant conversion",
+    "allow_local_resources_in_html_to_pdf": "Autoriser les ressources locales dans les conversions HTML vers PDF",
+    "allow_local_resources_in_html_to_pdf_tooltip": "Lorsque cette option est désactivée, les images, feuilles de style, polices et autres fichiers locaux référencés par le HTML ou le CSS sont bloqués. Activez-la uniquement pour des fichiers HTML de confiance. Les ressources locales doivent rester dans le dossier du fichier HTML.",
     "automatically_save_frequent_configurations": "Sauvegarder automatiquement les configurations fréquentes",
     "general": "Général",
     "privacy": "Confidentialité",

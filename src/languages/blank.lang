@@ -430,6 +430,8 @@
         "keep_history_days": "",
         "automatically_clean_temporary_files": "",
         "create_backup_before_conversion": "",
+        "allow_local_resources_in_html_to_pdf": "",
+        "allow_local_resources_in_html_to_pdf_tooltip": "",
         "automatically_save_frequent_configurations": "",
         "general": "",
         "privacy": "",
