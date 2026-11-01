@@ -6,6 +6,9 @@ Checksum/
 src/styles/custom_themes
 Wiki/
 
+# Private security records (never commit)
+Private_Security_Records/
+
 # Cache files
 __pycache__/
 .pytest_cache/

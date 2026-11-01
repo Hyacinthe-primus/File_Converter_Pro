@@ -9,6 +9,55 @@ Only the latest release of File Converter Pro is supported with security updates
 | 1.0.7+  | Yes       |
 | < 1.0.7 | No        |
 
+At the time of writing, **v1.0.7 is the latest tagged release**. The security
+fixes described below are present in the **1.0.8 development line** on `main`
+and are expected in the next release; they are not included in the tagged
+v1.0.7 build.
+
+## Recent Security Fixes
+
+### HTML-to-PDF local resource handling
+
+- **Affected component:** HTML-to-PDF conversion, including local images,
+  stylesheets, CSS resources, and fallback renderers.
+- **Affected versions:** Releases predating the 1.0.8 development line,
+  including the latest tagged v1.0.7.
+- **Root cause:** Local resource references were not sufficiently contained, and
+  renderers were allowed to access local files and active content.
+- **Remediation:** Local resources are now disabled by default and require an
+  explicit opt-in. Approved resources must remain inside the HTML file's folder.
+  Local-file access and JavaScript are disabled in the pdfkit path; WeasyPrint
+  uses a restricted URL policy; the ReportLab fallback accepts only `data:`
+  images. Resource reads use an open-once containment check.
+- **Verification:** Focused regression tests, the full automated suite, and
+  real wkhtmltopdf checks. The full suite reported 541 passing tests at the time
+  of the fix.
+- **Limitations:** Local resources remain opt-in. Filesystem-level alias and
+  race conditions remain documented limitations. Remote HTTP(S) resources are
+  still allowed by the renderers. Newer WeasyPrint versions may hit a
+  compatibility limitation in the custom fetcher and fall back to the safer
+  ReportLab path; approved local resources may not render through that path.
+
+### Notification PowerShell handling
+
+- **Affected components:** Windows notifications and imported translation packs.
+- **Affected versions:** Releases predating the 1.0.8 development line,
+  including the latest tagged v1.0.7.
+- **Root cause:** Notification text from translation packs was interpolated into
+  generated PowerShell source.
+- **Remediation:** Notifications no longer use the unsafe winotify template.
+  A fixed PowerShell script receives notification values as structured XML and
+  JSON data; no untrusted value is interpolated into PowerShell source or the
+  command line. Imported translation values are treated as untrusted data.
+- **Verification:** Focused regression tests, PowerShell parser validation,
+  mocked process checks, and the full automated suite (541 passing tests at the
+  time of the fix). A benign real Windows toast invocation completed
+  successfully; visual rendering was not programmatically inspected.
+- **Limitations:** Imported language packs can still change displayed UI and
+  notification text; this is an integrity boundary, not code execution.
+  Notification process hardening, including executable resolution and
+  environment handling, remains tracked separately.
+
 ## Reporting a Vulnerability
 
 **Do not open a public GitHub issue for security reports.**
