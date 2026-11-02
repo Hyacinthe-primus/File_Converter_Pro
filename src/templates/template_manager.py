@@ -125,7 +125,7 @@ class TemplateManager:
                 }
 
             elif template_type == sk.FILE_OPTIMIZATION:
-                parent_app.active_templates["office_optimization"] = {
+                parent_app.active_templates[sk.FILE_OPTIMIZATION] = {
                     "optimization_type": sk.optimization_type_value(cfg["optimization_type"]),
                     "quality_level": cfg["quality_level"],
                     "remove_metadata": cfg["remove_metadata"],

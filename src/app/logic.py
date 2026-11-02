@@ -247,7 +247,10 @@ class AppLogicMixin(
         if tm is None:
             return
         try:
-            tm.record_config_usage(template_type, config, self.translate_text(template_type))
+            from templates import semantic_keys as sk
+
+            label_key = sk.type_label_key(template_type)
+            tm.record_config_usage(template_type, config, self.translate_text(label_key))
         except Exception as e:
             print(f"[AUTO-SAVE] Could not record configuration usage: {e}")
 

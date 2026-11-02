@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 
 from app.mixins.archive_engines import ArchiveEnginesMixin
 from dialogs import CompressionDialog, PasswordDialog
+from templates import semantic_keys as sk
 
 _NO_WINDOW = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0
 
@@ -28,7 +29,7 @@ class CompressionMixin(ArchiveEnginesMixin):
 
     def compress_files(self):
         if not (hasattr(self, "active_templates") and "compression" in self.active_templates):
-            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template("Compression")
+            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template(sk.COMPRESSION)
             if _def_id:
                 (self._ensure_template_manager() or object()).apply_template(_def_id, self)
 
@@ -284,7 +285,7 @@ class CompressionMixin(ArchiveEnginesMixin):
 
         if success:
             self.record_config_usage(
-                "Compression",
+                sk.COMPRESSION,
                 {
                     "format": self._ui_label_to_key(archive_format, ["ZIP", "7Z", "TAR.GZ", "TAR"]),
                     "compression_level": self._ui_label_to_key(

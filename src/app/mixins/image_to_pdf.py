@@ -7,6 +7,8 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox
 
+from templates import semantic_keys as sk
+
 IMAGE_EXTENSIONS = (
     ".png",
     ".jpeg",
@@ -41,12 +43,12 @@ class ImageToPdfMixin:
 
     def convert_images_to_pdf(self) -> None:
         """Route to separate or merged PDF based on config."""
-        if not (hasattr(self, "active_templates") and "images_to_pdf" in self.active_templates):
-            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template("Conversion Images→PDF")
+        if not (hasattr(self, "active_templates") and sk.IMAGES_TO_PDF in self.active_templates):
+            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template(sk.IMAGES_TO_PDF)
             if _def_id:
                 (self._ensure_template_manager() or object()).apply_template(_def_id, self)
-        if hasattr(self, "active_templates") and "images_to_pdf" in self.active_templates:
-            self.config["separate_image_pdfs"] = self.active_templates["images_to_pdf"].get("separate", False)
+        if hasattr(self, "active_templates") and sk.IMAGES_TO_PDF in self.active_templates:
+            self.config["separate_image_pdfs"] = self.active_templates[sk.IMAGES_TO_PDF].get("separate", False)
 
         selected_items = self.files_list_widget.selectedItems()
         files_to_process = []
@@ -236,7 +238,7 @@ class ImageToPdfMixin:
         self.achievement_system.record_ocr_usage(ocr_pages)
         self.show_progress(False)
         if success_count > 0:
-            self.record_config_usage("Conversion Images→PDF", {"separate": True})
+            self.record_config_usage(sk.IMAGES_TO_PDF, {"separate": True})
         if self.config.get("enable_system_notifications", True):
             self.system_notifier.send("image_to_pdf_s")
         QMessageBox.information(
@@ -281,7 +283,7 @@ class ImageToPdfMixin:
                     success=True,
                 )
                 self.achievement_system.record_conversion("image_to_pdf", total_size, True)
-                self.record_config_usage("Conversion Images→PDF", {"separate": False})
+                self.record_config_usage(sk.IMAGES_TO_PDF, {"separate": False})
                 self.show_progress(False)
                 if self.config.get("enable_system_notifications", True):
                     self.system_notifier.send("image_to_pdf")
@@ -469,7 +471,7 @@ class ImageToPdfMixin:
 
         self.show_progress(False)
         if success_count > 0:
-            self.record_config_usage("Conversion Images→PDF", {"separate": True})
+            self.record_config_usage(sk.IMAGES_TO_PDF, {"separate": True})
         if self.config.get("enable_system_notifications", True):
             self.system_notifier.send("image_to_pdf_s")
         QMessageBox.information(
@@ -530,7 +532,7 @@ class ImageToPdfMixin:
                     success=True,
                 )
                 self.achievement_system.record_conversion("image_to_pdf", total_size, True)
-                self.record_config_usage("Conversion Images→PDF", {"separate": False})
+                self.record_config_usage(sk.IMAGES_TO_PDF, {"separate": False})
                 self.show_progress(False)
                 if self.config.get("enable_system_notifications", True):
                     self.system_notifier.send("image_to_pdf")

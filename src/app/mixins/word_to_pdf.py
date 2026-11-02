@@ -9,6 +9,8 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QMessageBox
 
+from templates import semantic_keys as sk
+
 try:
     from docx import Document
 except ImportError as _e:
@@ -40,8 +42,8 @@ class WordToPdfMixin:
     """Mixin: Word/DOCX → PDF conversion for FileConverterApp."""
 
     def convert_word_to_pdf(self):
-        if not (hasattr(self, "active_templates") and "word_to_pdf" in self.active_templates):
-            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template("Conversion Word→PDF")
+        if not (hasattr(self, "active_templates") and sk.WORD_TO_PDF in self.active_templates):
+            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template(sk.WORD_TO_PDF)
             if _def_id:
                 (self._ensure_template_manager() or object()).apply_template(_def_id, self)
 
@@ -84,8 +86,8 @@ class WordToPdfMixin:
             except Exception:
                 pass
 
-        if hasattr(self, "active_templates") and "word_to_pdf" in self.active_templates:
-            _tpl = self.active_templates["word_to_pdf"]
+        if hasattr(self, "active_templates") and sk.WORD_TO_PDF in self.active_templates:
+            _tpl = self.active_templates[sk.WORD_TO_PDF]
             _quality_map = {
                 "Haute (300 DPI)": "Haute qualité (300 DPI)",
                 "Standard (150 DPI)": "Qualité standard (150 DPI)",
@@ -186,7 +188,7 @@ class WordToPdfMixin:
             self.achievement_system.check_achievement("night_owl")
             if sc > 0:
                 self.record_config_usage(
-                    "Conversion Word→PDF",
+                    sk.WORD_TO_PDF,
                     {
                         **_options,
                         "quality": self._ui_label_to_key(

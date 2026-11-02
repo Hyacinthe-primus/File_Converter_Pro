@@ -300,15 +300,15 @@ class AppUIMixin(
             return
 
         _def_id, _ = (
-            self.template_manager.get_default_template("Optimisation de fichiers")
+            self.template_manager.get_default_template(sk.FILE_OPTIMIZATION)
             if self.template_manager is not None
             else (None, None)
         )
         if _def_id:
             (self._ensure_template_manager() or object()).apply_template(_def_id, self)
 
-        if hasattr(self, "active_templates") and "office_optimization" in self.active_templates:
-            _t = self.active_templates["office_optimization"]
+        if hasattr(self, "active_templates") and sk.FILE_OPTIMIZATION in self.active_templates:
+            _t = self.active_templates[sk.FILE_OPTIMIZATION]
             self.optimize_office_files(
                 office_files,
                 _t.get("optimization_type", 2),
@@ -360,9 +360,9 @@ class AppUIMixin(
         mode_layout = QVBoxLayout(mode_group)
         mode_layout.setSpacing(6)
 
-        radio_compress = QRadioButton("🗜  " + self.translate_text("compression_reduces_file_size"))
-        radio_clean = QRadioButton("🧹  " + self.translate_text("cleaning_removes_metadata_only"))
-        radio_both = QRadioButton("⚡  " + self.translate_text("compression_cleaning_recommended"))
+        radio_compress = QRadioButton(self.translate_text("compression_reduces_file_size"))
+        radio_clean = QRadioButton(self.translate_text("cleaning_removes_metadata_only"))
+        radio_both = QRadioButton(self.translate_text("compression_cleaning_recommended"))
         radio_both.setChecked(True)
 
         for r in (radio_compress, radio_clean, radio_both):

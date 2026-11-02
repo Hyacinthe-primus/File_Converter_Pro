@@ -20,6 +20,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from templates import semantic_keys as sk
+
 try:
     from pdf2docx import Converter as _Converter
 
@@ -943,18 +945,10 @@ class PdfToWordMixin:
             self._solid_fitz_fallback(pdf_path, docx_path)
 
     def convert_pdf_to_word(self):
-        if not (hasattr(self, "active_templates") and "pdf_to_word" in self.active_templates):
-            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template("Conversion PDF→Word")
+        if not (hasattr(self, "active_templates") and sk.PDF_TO_WORD in self.active_templates):
+            _def_id, _ = (self._ensure_template_manager() or object()).get_default_template(sk.PDF_TO_WORD)
             if _def_id:
                 (self._ensure_template_manager() or object()).apply_template(_def_id, self)
-
-        if hasattr(self, "active_templates") and "word_to_pdf" in self.active_templates:
-            template = self.active_templates["word_to_pdf"]
-            template.get("page_format_value", "a4")
-            template.get("orientation_value", "portrait")
-            template.get("quality_value", 150)
-            template.get("include_metadata", True)
-            template.get("compress", True)
 
         selected_items = self.files_list_widget.selectedItems()
         files_to_process = []
@@ -1007,8 +1001,8 @@ class PdfToWordMixin:
             self.convert_pdfs_without_images(pdf_files)
             return
 
-        if hasattr(self, "active_templates") and "pdf_to_word" in self.active_templates:
-            conversion_mode = self.active_templates["pdf_to_word"].get("mode", "with_images")
+        if hasattr(self, "active_templates") and sk.PDF_TO_WORD in self.active_templates:
+            conversion_mode = self.active_templates[sk.PDF_TO_WORD].get("mode", "with_images")
         else:
             current_mode = self.config.get("pdf_to_word_mode", "with_images")
             dialog = PdfToWordDialog(self, self.current_language, current_mode)
@@ -1059,7 +1053,7 @@ class PdfToWordMixin:
             self.show_progress(False)
             self._set_ui_enabled(True)
             if s["success_count"] > 0:
-                self.record_config_usage("Conversion PDF→Word", {"mode": _mode})
+                self.record_config_usage(sk.PDF_TO_WORD, {"mode": _mode})
             if s["success_count"] > 0 and self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("pdf_to_word")
             QMessageBox.information(

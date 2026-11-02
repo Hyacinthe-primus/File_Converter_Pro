@@ -22,6 +22,7 @@ from app.mixins.media_optimizer import MediaOptimizerMixin
 from app.mixins.office_optimizer import OfficeDocOptimizerMixin
 from app.mixins.pdf_optimizer import PdfOptimizerMixin
 from app.mixins.web_optimizer import WebOptimizerMixin
+from templates import semantic_keys as sk
 
 
 class OptimizationMixin(
@@ -37,8 +38,8 @@ class OptimizationMixin(
     def optimize_office_files(
         self, office_files, optimization_type, quality_level, remove_metadata, compress_images, keep_backup
     ):
-        if hasattr(self, "active_templates") and "office_optimization" in self.active_templates:
-            del self.active_templates["office_optimization"]
+        if hasattr(self, "active_templates") and sk.FILE_OPTIMIZATION in self.active_templates:
+            del self.active_templates[sk.FILE_OPTIMIZATION]
         """Optimize office and image files"""
         output_dir = self.get_output_directory()
         if not output_dir:
@@ -141,7 +142,7 @@ class OptimizationMixin(
 
         if success_count > 0:
             self.record_config_usage(
-                "Optimisation de fichiers",
+                sk.FILE_OPTIMIZATION,
                 {
                     "optimization_type": optimization_type,
                     "quality_level": quality_level,

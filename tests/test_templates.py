@@ -160,3 +160,52 @@ class TestTemplateCRUD:
         app = App()
         assert tm.apply_template(template_id, app) is True
         assert app.active_templates
+
+    def test_default_template_accepts_canonical_and_legacy_types(self, tm):
+        from templates import semantic_keys as sk
+
+        tm.db_manager.save_template(
+            "Optimization default",
+            sk.FILE_OPTIMIZATION,
+            {"optimization_type": sk.OPTIMIZATION_BOTH, "is_default": True},
+        )
+        tm.load_templates()
+
+        canonical = tm.get_default_template(sk.FILE_OPTIMIZATION)
+        legacy = tm.get_default_template("Optimisation de fichiers")
+        assert canonical[0] is not None
+        assert canonical[0] == legacy[0]
+
+    def test_apply_optimization_template_uses_canonical_active_key(self, tm):
+        from templates import semantic_keys as sk
+
+        class App:
+            config = {}
+            active_templates = {}
+
+            class config_manager:
+                @staticmethod
+                def save_config(_):
+                    pass
+
+        tm.db_manager.save_template(
+            "Optimization",
+            sk.FILE_OPTIMIZATION,
+            {"optimization_type": sk.OPTIMIZATION_BOTH, "is_default": True},
+        )
+        tm.load_templates()
+        template_id = next(iter(tm.current_templates))
+        app = App()
+        assert tm.apply_template(template_id, app) is True
+        assert sk.FILE_OPTIMIZATION in app.active_templates
+        assert "office_optimization" not in app.active_templates
+
+    def test_achievement_category_stat_keys_preserve_legacy_storage_keys(self):
+        from achievements.achievements_system import AchievementSystem
+        from templates import semantic_keys as sk
+
+        assert AchievementSystem._tpl_category_stat_key(sk.PDF_TO_WORD) == "tpl_cat_Conversion_PDF_Word"
+        assert (
+            AchievementSystem._tpl_category_stat_key(sk.FILE_OPTIMIZATION)
+            == "tpl_cat_Prereglages_de_qualite"
+        )

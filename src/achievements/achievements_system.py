@@ -23,6 +23,7 @@ _ROOT_DIR = str(SRC_DIR)
 if _ROOT_DIR not in sys.path:
     sys.path.insert(0, _ROOT_DIR)
 
+from templates import semantic_keys as sk
 from translations import TranslationManager
 
 
@@ -1978,15 +1979,15 @@ class AchievementSystem(QObject):
     ]
 
     _TPL_CATEGORIES = {
-        "Conversion PDF→Word",
-        "Conversion Word→PDF",
-        "Conversion Images→PDF",
-        "Fusion PDF",
-        "Fusion Word",
-        "Division PDF",
-        "Protection PDF",
-        "Compression",
-        "Préréglages de qualité",
+        sk.PDF_TO_WORD,
+        sk.WORD_TO_PDF,
+        sk.IMAGES_TO_PDF,
+        sk.PDF_MERGE,
+        sk.WORD_MERGE,
+        sk.PDF_SPLIT,
+        sk.PDF_PROTECTION,
+        sk.COMPRESSION,
+        sk.FILE_OPTIMIZATION,
     }
 
     def record_template_created(self, template_type: str = ""):
@@ -2010,10 +2011,14 @@ class AchievementSystem(QObject):
             self.update_stat("tpl_single_max_applied", this_count)
         self.check_achievement("tpl_le_rituel")
 
-        session_key = f"tpl_session_{template_type}"
+        normalized = sk.normalize_type(template_type)
+        legacy_type = sk.legacy_type(normalized)
+        session_key = f"tpl_session_{legacy_type}"
         if self.stats.get(session_key, 0) == 0:
             self.update_stat(session_key, 1)
-            used = sum(1 for cat in self._TPL_CATEGORIES if self.stats.get(f"tpl_session_{cat}", 0) > 0)
+            used = sum(
+                1 for cat in self._TPL_CATEGORIES if self.stats.get(f"tpl_session_{sk.legacy_type(cat)}", 0) > 0
+            )
             self.update_stat("tpl_types_session", used)
         self.check_achievement("tpl_polyvalent")
 
@@ -2048,6 +2053,19 @@ class AchievementSystem(QObject):
         except Exception as e:
             print(f"[TPL ACH] record_template_default_set error: {e}")
 
+    @staticmethod
+    def _tpl_category_stat_key(category: str) -> str:
+        legacy = sk.legacy_type(category)
+        return (
+            "tpl_cat_"
+            + legacy.replace(" ", "_")
+            .replace("→", "_")
+            .replace("é", "e")
+            .replace("è", "e")
+            .replace("ê", "e")
+            .replace("â", "a")
+        )
+
     def _recompute_tpl_categories(self, new_type: str = ""):
         """
         Recompute how many template categories are covered.
@@ -2055,22 +2073,14 @@ class AchievementSystem(QObject):
         never need to query the templates table in a different DB file.
         """
         try:
-            from templates import TemplateManager
-
             if new_type:
-                normalized = TemplateManager.normalize_type(new_type)
+                normalized = sk.normalize_type(new_type)
                 if normalized in self._TPL_CATEGORIES:
-                    stat_key = "tpl_cat_" + normalized.replace(" ", "_").replace("→", "_").replace("é", "e").replace(
-                        "è", "e"
-                    ).replace("ê", "e").replace("â", "a")
-                    self.update_stat(stat_key, 1)
+                    self.update_stat(self._tpl_category_stat_key(normalized), 1)
 
             covered = 0
             for cat in self._TPL_CATEGORIES:
-                stat_key = "tpl_cat_" + cat.replace(" ", "_").replace("→", "_").replace("é", "e").replace(
-                    "è", "e"
-                ).replace("ê", "e").replace("â", "a")
-                if self.stats.get(stat_key, 0) >= 1:
+                if self.stats.get(self._tpl_category_stat_key(cat), 0) >= 1:
                     covered += 1
 
             ach = self.achievements_data["achievements"].get("tpl_collectionneur_workflows")
@@ -2249,11 +2259,11 @@ class AchievementSystem(QObject):
 
             if all_ok:
                 print(
-                    f"✅ SUCCESS: All formats validated ({len(required_formats)}/{len(required_formats)}). Unlocking Universal Traveller!"  # noqa: E501
+                    f"SUCCESS: All formats validated ({len(required_formats)}/{len(required_formats)}). Unlocking Universal Traveller!"  # noqa: E501
                 )
                 self.check_achievement("universal_traveler")
             else:
-                print(f"⏳ Waiting... Missing formats: {missing}")
+                print(f"Waiting... Missing formats: {missing}")
 
         except Exception as e:
             print(f"Critical error check_all_formats_used: {e}")
