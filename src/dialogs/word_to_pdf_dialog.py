@@ -74,6 +74,15 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         layout.addWidget(self._build_preview_group(), stretch=1)
         layout.addWidget(self._build_buttons())
 
+        for checkbox in (
+            self.preserve_all_radio,
+            self.text_only_radio,
+            self.advanced_check,
+            self.compress_checkbox,
+            self.include_metadata_checkbox,
+        ):
+            checkbox.set_dark_mode(self.is_dark_mode)
+
         self.preserve_all_radio.toggled.connect(self._on_mode_changed)
         self.text_only_radio.toggled.connect(self._on_mode_changed)
 
@@ -103,23 +112,33 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         info_label.setWordWrap(True)
         info_label.setStyleSheet("color: #007acc; font-size: 12.5px; margin: 4px 0;")
 
+        self.advanced_check = AnimatedCheckBox(self.translate_text("advanced_options"))
+        self.advanced_check.setChecked(False)
         self.advanced_group = self._build_advanced_group()
+        self.advanced_check.toggled.connect(self.advanced_group.setChecked)
+        self.advanced_group.toggled.connect(self.advanced_check.setChecked)
 
         layout.addWidget(info_label)
         layout.addWidget(self.preserve_all_radio)
         layout.addWidget(self.text_only_radio)
         layout.addSpacing(6)
+        layout.addWidget(self.advanced_check)
         layout.addWidget(self.advanced_group)
 
         return group
 
     def _build_advanced_group(self) -> QGroupBox:
         """Create the collapsible advanced-options QGroupBox (quality, compression, metadata)."""
-        group = QGroupBox(self.translate_text("advanced_options"))
+        group = QGroupBox()
         group.setCheckable(True)
         group.setChecked(False)
 
-        group.setStyleSheet(_load_qss("advanced_group.qss", "dark" if self.is_dark_mode else "light"))
+        group.setStyleSheet(
+            _load_qss("advanced_group.qss", "dark" if self.is_dark_mode else "light")
+            + "\nQGroupBox { margin-top: 0; }\n"
+            "QGroupBox::indicator { width: 0; height: 0; margin: 0;"
+            " border: none; background: transparent; }\n"
+        )
 
         form = QFormLayout(group)
 
@@ -182,6 +201,7 @@ class WordToPdfOptionsDialog(TranslationMixin, QDialog):
         """Show/hide advanced options and refresh the preview whenever the mode switches."""
         is_preserve = self.preserve_all_radio.isChecked()
 
+        self.advanced_check.setVisible(is_preserve)
         self.advanced_group.setVisible(is_preserve)
 
         self.preview_text.setMinimumHeight(90 if is_preserve else 110)
