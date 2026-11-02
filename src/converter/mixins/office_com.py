@@ -73,52 +73,53 @@ class OfficeComConverters:
             elif "PowerPoint" in app_name:
                 import shutil
 
-                tmp_dst = str(Path(tempfile.gettempdir()) / "pptx_com_out.pdf")
-                _ps_env = os.environ.copy()
-                _ps_env["FCP_SRC"] = src_abs
-                _ps_env["FCP_DST"] = tmp_dst
+                with tempfile.TemporaryDirectory(prefix="fcp_pptx_com_") as tmp_dir:
+                    tmp_dst = str(Path(tmp_dir) / "pptx_com_out.pdf")
+                    _ps_env = os.environ.copy()
+                    _ps_env["FCP_SRC"] = src_abs
+                    _ps_env["FCP_DST"] = tmp_dst
 
-                ps_a = """
-                $app = New-Object -ComObject PowerPoint.Application
-                $app.Visible = -1
-                try {
-                    $prs = $app.Presentations.Open($env:FCP_SRC, 0, 0, -1)
-                    $prs.SaveAs($env:FCP_DST, 32)
-                    $prs.Close()
-                } finally { $app.Quit() }
-                """
-                subprocess.run(
-                    ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", ps_a],
-                    capture_output=True,
-                    timeout=120,
-                    creationflags=_NO_WINDOW,
-                    env=_ps_env,
-                )
-                if Path(tmp_dst).exists():
-                    shutil.move(tmp_dst, dst_abs)
-                    return Path(dst_abs).exists()
+                    ps_a = """
+                    $app = New-Object -ComObject PowerPoint.Application
+                    $app.Visible = -1
+                    try {
+                        $prs = $app.Presentations.Open($env:FCP_SRC, 0, 0, -1)
+                        $prs.SaveAs($env:FCP_DST, 32)
+                        $prs.Close()
+                    } finally { $app.Quit() }
+                    """
+                    subprocess.run(
+                        ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", ps_a],
+                        capture_output=True,
+                        timeout=120,
+                        creationflags=_NO_WINDOW,
+                        env=_ps_env,
+                    )
+                    if Path(tmp_dst).exists():
+                        shutil.move(tmp_dst, dst_abs)
+                        return Path(dst_abs).exists()
 
-                ps_b = """
-                $app = New-Object -ComObject PowerPoint.Application
-                $app.Visible = -1
-                try {
-                    $prs = $app.Presentations.Open($env:FCP_SRC, 0, 0, -1)
-                    $prs.PrintOut(1, $prs.Slides.Count, $env:FCP_DST, 0, 2)
-                    $prs.Close()
-                } finally { $app.Quit() }
-                """
-                r2 = subprocess.run(
-                    ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", ps_b],
-                    capture_output=True,
-                    timeout=120,
-                    creationflags=_NO_WINDOW,
-                    env=_ps_env,
-                )
-                if Path(tmp_dst).exists():
-                    shutil.move(tmp_dst, dst_abs)
-                    return Path(dst_abs).exists()
+                    ps_b = """
+                    $app = New-Object -ComObject PowerPoint.Application
+                    $app.Visible = -1
+                    try {
+                        $prs = $app.Presentations.Open($env:FCP_SRC, 0, 0, -1)
+                        $prs.PrintOut(1, $prs.Slides.Count, $env:FCP_DST, 0, 2)
+                        $prs.Close()
+                    } finally { $app.Quit() }
+                    """
+                    r2 = subprocess.run(
+                        ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", ps_b],
+                        capture_output=True,
+                        timeout=120,
+                        creationflags=_NO_WINDOW,
+                        env=_ps_env,
+                    )
+                    if Path(tmp_dst).exists():
+                        shutil.move(tmp_dst, dst_abs)
+                        return Path(dst_abs).exists()
 
-                print(f"[COM-PS] stderr: {r2.stderr.decode('utf-8', 'replace')[:400]}")
+                    print(f"[COM-PS] stderr: {r2.stderr.decode('utf-8', 'replace')[:400]}")
 
             elif "Word" in app_name:
                 app = comtypes.client.CreateObject(app_name)
