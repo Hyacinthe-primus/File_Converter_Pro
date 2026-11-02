@@ -1446,7 +1446,7 @@ class AchievementsManager(QDialog):
             self._global_media_player.playbackStateChanged.connect(on_playback_state_changed)
             self._global_media_player.mediaStatusChanged.connect(on_media_status_changed)
             self._global_media_player.play()
-            print(f"[DEBUG] ✅ Playback started: {sound_path}")
+            print(f"[DEBUG] Playback started: {sound_path}")
 
             def cleanup_on_end():
                 try:
@@ -1866,7 +1866,7 @@ class QuickAchievementsReset(QDialog):
 
             count = len(achievements)
             pct = int(count / total_all * 100) if total_all else 0
-            lines = [f"✅  {count} / {total_all} succès débloqués ({pct}%)\n"]
+            lines = [f"{count} / {total_all} succès débloqués ({pct}%)\n"]
 
             for ach_id, name_json, category, tier, progress, max_progress, unlock_date in achievements:
                 name = _parse_ach_name(name_json, ach_id, "fr")
@@ -2269,9 +2269,9 @@ def reset_specific_achievement_cli(achievement_id):
         )
         conn.commit()
         conn.close()
-        print(f"✅ Achievement '{achievement_id}' reset!")
+        print(f"Achievement '{achievement_id}' reset!")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 def unlock_specific_achievement_cli(achievement_id):
@@ -2293,9 +2293,9 @@ def unlock_specific_achievement_cli(achievement_id):
         )
         conn.commit()
         conn.close()
-        print(f"✅ Achievement '{achievement_id}' unlocked!")
+        print(f"Achievement '{achievement_id}' unlocked!")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 def reset_all_achievements_cli():
@@ -2311,9 +2311,9 @@ def reset_all_achievements_cli():
         """)
         conn.commit()
         conn.close()
-        print("✅ All achievements have been reset!")
+        print("All achievements have been reset!")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
 
 
 def show_achievements_status_cli():

@@ -616,7 +616,7 @@ class SettingsDialog(TranslationMixin, QDialog):
         get_themes_link.setOpenExternalLinks(True)
         layout.addWidget(get_themes_link)
 
-        hint = QLabel("ℹ️ " + self.translate_text("theme_import_hint"))
+        hint = QLabel(self.translate_text("theme_import_hint"))
         hint.setWordWrap(True)
         hint.setObjectName("SettingsHint")
         layout.addWidget(hint)

@@ -186,7 +186,7 @@ class BatchRenameDialog(QDialog):
         root.setStretchFactor(prev_box, 1)
 
         btn_row = QHBoxLayout()
-        self.rename_btn = QPushButton("✅ " + self.tr_("br_apply"))
+        self.rename_btn = QPushButton(self.tr_("br_apply"))
         self.rename_btn.setMinimumHeight(36)
         _apply_dialog_btn(self.rename_btn, "BtnOK")
         cancel_btn = QPushButton(self.tr_("cancel"))
