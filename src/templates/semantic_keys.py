@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any
 
-# Template types -----------------------------------------------------------
+# Template types
 PDF_TO_WORD = "pdf_to_word"
 WORD_TO_PDF = "word_to_pdf"
 IMAGES_TO_PDF = "images_to_pdf"
@@ -35,29 +35,29 @@ TYPE_LABEL_KEYS = {
 }
 
 TYPE_LEGACY_NAMES = {
-    PDF_TO_WORD: "Conversion PDF\u2192Word",
-    WORD_TO_PDF: "Conversion Word\u2192PDF",
-    IMAGES_TO_PDF: "Conversion Images\u2192PDF",
+    PDF_TO_WORD: "Conversion PDF→Word",
+    WORD_TO_PDF: "Conversion Word→PDF",
+    IMAGES_TO_PDF: "Conversion Images→PDF",
     PDF_MERGE: "Fusion PDF",
     WORD_MERGE: "Fusion Word",
     PDF_SPLIT: "Division PDF",
     PDF_PROTECTION: "Protection PDF",
     COMPRESSION: "Compression",
-    FILE_OPTIMIZATION: "Pr\u00e9r\u00e9glages de qualit\u00e9",
+    FILE_OPTIMIZATION: "Préréglages de qualité",
 }
 
 TYPE_ALIASES = {
     PDF_TO_WORD: PDF_TO_WORD,
     "PDF to Word Conversion": PDF_TO_WORD,
-    "Conversion PDF\u2192Word": PDF_TO_WORD,
+    "Conversion PDF→Word": PDF_TO_WORD,
     "pdf_to_word_conversion": PDF_TO_WORD,
     WORD_TO_PDF: WORD_TO_PDF,
     "Word to PDF Conversion": WORD_TO_PDF,
-    "Conversion Word\u2192PDF": WORD_TO_PDF,
+    "Conversion Word→PDF": WORD_TO_PDF,
     "word_to_pdf_conversion": WORD_TO_PDF,
     IMAGES_TO_PDF: IMAGES_TO_PDF,
     "Images to PDF Conversion": IMAGES_TO_PDF,
-    "Conversion Images\u2192PDF": IMAGES_TO_PDF,
+    "Conversion Images→PDF": IMAGES_TO_PDF,
     "images_to_pdf_conversion": IMAGES_TO_PDF,
     PDF_MERGE: PDF_MERGE,
     "PDF Merge": PDF_MERGE,
@@ -82,11 +82,11 @@ TYPE_ALIASES = {
     "Office Optimization": FILE_OPTIMIZATION,
     "File optimization": FILE_OPTIMIZATION,
     "Optimisation de fichiers": FILE_OPTIMIZATION,
-    "Pr\u00e9r\u00e9glages de qualit\u00e9": FILE_OPTIMIZATION,
+    "Préréglages de qualité": FILE_OPTIMIZATION,
     "file_optimization": FILE_OPTIMIZATION,
 }
 
-# Configuration values ----------------------------------------------------
+# Configuration values
 MODE_WITH_IMAGES = "with_images"
 MODE_TEXT_ONLY = "text_only"
 MODE_PRESERVE_ALL = "preserve_all"
@@ -149,14 +149,14 @@ _QUALITIES = {
     "low": QUALITY_LOW,
     "optimized": QUALITY_LOW,
     "Haute (300 DPI)": QUALITY_HIGH,
-    "Haute qualit\u00e9 (300 DPI)": QUALITY_HIGH,
+    "Haute qualité (300 DPI)": QUALITY_HIGH,
     "High (300 DPI)": QUALITY_HIGH,
     "High quality (300 DPI)": QUALITY_HIGH,
     "Standard (150 DPI)": QUALITY_STANDARD,
-    "Qualit\u00e9 standard (150 DPI)": QUALITY_STANDARD,
+    "Qualité standard (150 DPI)": QUALITY_STANDARD,
     "Standard quality (150 DPI)": QUALITY_STANDARD,
     "Basse (72 DPI)": QUALITY_LOW,
-    "Optimis\u00e9 (96 DPI)": QUALITY_LOW,
+    "Optimisé (96 DPI)": QUALITY_LOW,
     "Low (72 DPI)": QUALITY_LOW,
     "Optimized (96 DPI)": QUALITY_LOW,
 }
@@ -170,21 +170,21 @@ _MERGE_ORDERS = {
     ORDER_DATE_DESC: ORDER_DATE_DESC,
     ORDER_MANUAL: ORDER_MANUAL,
     "Ordre actuel (liste principale)": ORDER_CURRENT,
-    "Alphab\u00e9tique": ORDER_ALPHA_AZ,
-    "Alphab\u00e9tique (A\u2192Z)": ORDER_ALPHA_AZ,
-    "Alphab\u00e9tique (Z\u2192A)": ORDER_ALPHA_ZA,
-    "Num\u00e9rique (1\u21929)": ORDER_NUM_ASC,
-    "Num\u00e9rique (9\u21921)": ORDER_NUM_DESC,
-    "Date (ancien\u2192nouveau)": ORDER_DATE_ASC,
-    "Date (nouveau\u2192ancien)": ORDER_DATE_DESC,
-    "Manuel (glisser-d\u00e9poser)": ORDER_MANUAL,
+    "Alphabétique": ORDER_ALPHA_AZ,
+    "Alphabétique (A→Z)": ORDER_ALPHA_AZ,
+    "Alphabétique (Z→A)": ORDER_ALPHA_ZA,
+    "Numérique (1→9)": ORDER_NUM_ASC,
+    "Numérique (9→1)": ORDER_NUM_DESC,
+    "Date (ancien→nouveau)": ORDER_DATE_ASC,
+    "Date (nouveau→ancien)": ORDER_DATE_DESC,
+    "Manuel (glisser-déposer)": ORDER_MANUAL,
     "Current order (main list)": ORDER_CURRENT,
-    "Alphabetical (A\u2192Z)": ORDER_ALPHA_AZ,
-    "Alphabetical (Z\u2192A)": ORDER_ALPHA_ZA,
-    "Numeric (1\u21929)": ORDER_NUM_ASC,
-    "Numeric (9\u21921)": ORDER_NUM_DESC,
-    "Date (oldest\u2192newest)": ORDER_DATE_ASC,
-    "Date (newest\u2192oldest)": ORDER_DATE_DESC,
+    "Alphabetical (A→Z)": ORDER_ALPHA_AZ,
+    "Alphabetical (Z→A)": ORDER_ALPHA_ZA,
+    "Numeric (1→9)": ORDER_NUM_ASC,
+    "Numeric (9→1)": ORDER_NUM_DESC,
+    "Date (oldest→newest)": ORDER_DATE_ASC,
+    "Date (newest→oldest)": ORDER_DATE_DESC,
     "Manual (drag and drop)": ORDER_MANUAL,
 }
 _SPLIT_METHODS = {
@@ -205,8 +205,8 @@ _PROTECTION_LEVELS = {
     "Basique (restrictions uniquement)": PROTECTION_BASIC,
     "Basic (open)": PROTECTION_BASIC,
     "Basic (restrictions only)": PROTECTION_BASIC,
-    "Avanc\u00e9 (ouvrir + modifications)": PROTECTION_ADVANCED,
-    "Avanc\u00e9 (mot de passe + restrictions)": PROTECTION_ADVANCED,
+    "Avancé (ouvrir + modifications)": PROTECTION_ADVANCED,
+    "Avancé (mot de passe + restrictions)": PROTECTION_ADVANCED,
     "Advanced (open + modifications)": PROTECTION_ADVANCED,
     "Advanced (password + restrictions)": PROTECTION_ADVANCED,
 }
@@ -250,11 +250,11 @@ _OPTIMIZATION_TYPES = {
     "compression": OPTIMIZATION_COMPRESSION,
     "nettoyage": OPTIMIZATION_CLEANING,
     "les deux": OPTIMIZATION_BOTH,
-    "Compression  -  r\u00e9duit la taille du fichier": OPTIMIZATION_COMPRESSION,
+    "Compression  -  réduit la taille du fichier": OPTIMIZATION_COMPRESSION,
     "Compression  -  reduces file size": OPTIMIZATION_COMPRESSION,
-    "Nettoyage  -  supprime uniquement les m\u00e9tadonn\u00e9es": OPTIMIZATION_CLEANING,
+    "Nettoyage  -  supprime uniquement les métadonnées": OPTIMIZATION_CLEANING,
     "Cleaning  -  removes metadata only": OPTIMIZATION_CLEANING,
-    "Compression + Nettoyage  -  recommand\u00e9": OPTIMIZATION_BOTH,
+    "Compression + Nettoyage  -  recommandé": OPTIMIZATION_BOTH,
     "Compression + Cleaning  -  recommended": OPTIMIZATION_BOTH,
 }
 
@@ -323,13 +323,13 @@ _LEGACY_SPLIT_LABELS = {
 }
 _LEGACY_MERGE_LABELS = {
     ORDER_CURRENT: "Ordre actuel (liste principale)",
-    ORDER_ALPHA_AZ: "Alphab\u00e9tique (A\u2192Z)",
-    ORDER_ALPHA_ZA: "Alphab\u00e9tique (Z\u2192A)",
-    ORDER_NUM_ASC: "Num\u00e9rique (1\u21929)",
-    ORDER_NUM_DESC: "Num\u00e9rique (9\u21921)",
-    ORDER_DATE_ASC: "Date (ancien\u2192nouveau)",
-    ORDER_DATE_DESC: "Date (nouveau\u2192ancien)",
-    ORDER_MANUAL: "Manuel (glisser-d\u00e9poser)",
+    ORDER_ALPHA_AZ: "Alphabétique (A→Z)",
+    ORDER_ALPHA_ZA: "Alphabétique (Z→A)",
+    ORDER_NUM_ASC: "Numérique (1→9)",
+    ORDER_NUM_DESC: "Numérique (9→1)",
+    ORDER_DATE_ASC: "Date (ancien→nouveau)",
+    ORDER_DATE_DESC: "Date (nouveau→ancien)",
+    ORDER_MANUAL: "Manuel (glisser-déposer)",
 }
 
 
