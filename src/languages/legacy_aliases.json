@@ -82,7 +82,7 @@
   "Thème intégré File Converter": "file_converter_built_in_theme",
   "Intégré": "built_in",
   "Installer un thème (.fctheme)": "install_a_theme_fctheme",
-  "Les fichiers .fctheme sont des archives ZIP contenant les fichiers QSS/CSS du thème et un metadata.ini.": "fctheme_files_are_zip_archives_containing_the_theme_s_qss_css_fi",
+  "Les fichiers .fctheme sont des archives ZIP contenant les fichiers QSS/CSS du thème et un metadata.ini.": "theme_import_hint",
   "Langue": "language",
   "Conversion PDF→Word": "pdf_to_word_conversion",
   "Conversion Word→PDF": "word_to_pdf_conversion",

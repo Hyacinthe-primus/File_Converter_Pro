@@ -431,7 +431,7 @@
         "automatically_clean_temporary_files": "Pulisci automaticamente i file temporanei",
         "create_backup_before_conversion": "Crea backup prima della conversione",
         "allow_local_resources_in_html_to_pdf": "Consenti risorse locali nelle conversioni da HTML a PDF",
-        "allow_local_resources_in_html_to_pdf_tooltip": "Se disattivato, le immagini, i fogli di stile, i font e gli altri file locali a cui fa riferimento HTML o CSS vengono bloccati. Attivalo solo per file HTML affidabili. Le risorse locali devono rimanere nella cartella del file HTML.",
+        "allow_local_resources_in_html_to_pdf_tooltip": "Se disattivato, le immagini, i fogli di stile, i font e gli altri file locali a cui fa riferimento HTML o CSS vengono bloccati.\n Attivalo solo per file HTML affidabili. Le risorse locali devono rimanere nella cartella del file HTML.",
         "automatically_save_frequent_configurations": "Salva automaticamente configurazioni frequenti",
         "general": "Generale",
         "privacy": "Informativa sulla Privacy",
