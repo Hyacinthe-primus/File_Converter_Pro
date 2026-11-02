@@ -9,6 +9,7 @@ Launched via:
 import os
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -35,6 +36,15 @@ _COLLECT_STABLE_SEC = 0.5
 _COLLECT_MAX_SEC = 8.0
 _COLLECT_POLL_SEC = 0.05
 _COLLECT_EPOCH_SEC = 15.0
+
+
+class _ConversionCancelled(Exception):
+    """Raised when the user cancels a quick conversion."""
+
+
+def _raise_if_cancelled(cancel_event: threading.Event | None) -> None:
+    if cancel_event is not None and cancel_event.is_set():
+        raise _ConversionCancelled()
 
 
 def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
@@ -83,6 +93,7 @@ def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
 
 
 AUTO_CLOSE_DELAY_MS = 1800
+CANCEL_GRACE_MS = 5000
 
 
 def _sort_files(files: list, order: str) -> list:
@@ -127,38 +138,50 @@ def _convert_image_to_pdf(src: str, dst_dir: str) -> None:
     pdf.close()
 
 
-def _merge_images_to_pdf(files: list, dst_dir: str) -> None:
+def _merge_images_to_pdf(
+    files: list, dst_dir: str, cancel_event: threading.Event | None = None
+) -> None:
     import fitz
 
     pdf = fitz.open()
-    for src in files:
-        img = fitz.open(src)
-        rect = img[0].rect
-        page = pdf.new_page(width=rect.width, height=rect.height)
-        page.insert_image(rect, filename=src)
-        img.close()
-    import time as _time
+    try:
+        for src in files:
+            _raise_if_cancelled(cancel_event)
+            img = fitz.open(src)
+            rect = img[0].rect
+            page = pdf.new_page(width=rect.width, height=rect.height)
+            page.insert_image(rect, filename=src)
+            img.close()
+        import time as _time
 
-    out = os.path.join(dst_dir, f"merged_images_{_time.strftime('%Y%m%d_%H%M%S')}.pdf")
-    pdf.save(out)
-    pdf.close()
+        out = os.path.join(dst_dir, f"merged_images_{_time.strftime('%Y%m%d_%H%M%S')}.pdf")
+        pdf.save(out)
+    finally:
+        pdf.close()
 
 
-def _merge_pdfs(files: list, dst_dir: str, order: str) -> None:
+def _merge_pdfs(
+    files: list, dst_dir: str, order: str, cancel_event: threading.Event | None = None
+) -> None:
     import fitz
 
     merged = fitz.open()
-    import time as _time
+    try:
+        import time as _time
 
-    for f in _sort_files(files, order):
-        doc = fitz.open(f)
-        merged.insert_pdf(doc)
-        doc.close()
-    merged.save(os.path.join(dst_dir, f"merged_{_time.strftime('%Y%m%d_%H%M%S')}.pdf"))
-    merged.close()
+        for f in _sort_files(files, order):
+            _raise_if_cancelled(cancel_event)
+            doc = fitz.open(f)
+            merged.insert_pdf(doc)
+            doc.close()
+        merged.save(os.path.join(dst_dir, f"merged_{_time.strftime('%Y%m%d_%H%M%S')}.pdf"))
+    finally:
+        merged.close()
 
 
-def _merge_docx(files: list, dst_dir: str, order: str) -> None:
+def _merge_docx(
+    files: list, dst_dir: str, order: str, cancel_event: threading.Event | None = None
+) -> None:
     import time as _time
 
     from docx import Document
@@ -166,11 +189,13 @@ def _merge_docx(files: list, dst_dir: str, order: str) -> None:
     from docx.oxml.ns import qn
     from docxcompose.composer import Composer
 
+    _raise_if_cancelled(cancel_event)
     sorted_files = _sort_files(files, order)
     merged = Document(sorted_files[0])
     composer = Composer(merged)
 
     for f in sorted_files[1:]:
+        _raise_if_cancelled(cancel_event)
         doc = Document(f)
         p = OxmlElement("w:p")
         r = OxmlElement("w:r")
@@ -248,9 +273,12 @@ def _convert_docx_to_pdf(src: str, dst_dir: str) -> None:
     raise RuntimeError("All DOCX→PDF methods failed.")
 
 
-def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
+def _convert_pdf_to_docx(
+    src: str, dst_dir: str, cancel_event: threading.Event | None = None
+) -> None:
     import sys
-    import threading
+
+    _raise_if_cancelled(cancel_event)
 
     out = os.path.join(dst_dir, f"{Path(src).stem}.docx")
     src_abs = os.path.abspath(src)
@@ -258,6 +286,7 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
 
     # Tier 1: Word COM (best quality, Windows only)
     if sys.platform == "win32":
+        _raise_if_cancelled(cancel_event)
         try:
             import winreg
 
@@ -372,12 +401,14 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
             worker.start()
             worker.join(timeout=60)
             stop_event.set()
+            _raise_if_cancelled(cancel_event)
 
             if result["ok"]:
                 return
             print("[pdf→docx] COM timed out or failed — falling back")
 
     # Tier 2: pdf2docx
+    _raise_if_cancelled(cancel_event)
     try:
         from pdf2docx import Converter
 
@@ -389,6 +420,7 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
         print(f"[pdf→docx] pdf2docx failed: {e}")
 
     # Tier 3: fitz + python-docx (text only)
+    _raise_if_cancelled(cancel_event)
     try:
         import fitz
         from docx import Document as DocxDoc
@@ -413,14 +445,25 @@ def _convert_pdf_to_docx(src: str, dst_dir: str) -> None:
 
 class ConversionThread(QThread):
     done = Signal(bool, str, str)
+    cancelled = Signal()
 
     def __init__(self, files: list, conversion_type: str):
         super().__init__()
         self.files = files
         self.conversion_type = conversion_type
+        self._cancel_event = threading.Event()
+
+    def cancel(self) -> None:
+        """Request cooperative cancellation of the running conversion."""
+        self._cancel_event.set()
+        self.requestInterruption()
+
+    def _check_cancelled(self) -> None:
+        _raise_if_cancelled(self._cancel_event)
 
     def run(self):
         try:
+            self._check_cancelled()
             base = os.path.dirname(
                 sys.executable if getattr(sys, "frozen", False) else str(SRC_DIR)
             )
@@ -430,22 +473,25 @@ class ConversionThread(QThread):
             dst_dir = os.path.dirname(self.files[0])
 
             if self.conversion_type == "images_to_pdf_merged":
-                _merge_images_to_pdf(self.files, dst_dir)
+                _merge_images_to_pdf(self.files, dst_dir, self._cancel_event)
+                self._check_cancelled()
                 self.done.emit(True, "Images merged into PDF", dst_dir)
                 return
 
             if self.conversion_type in MERGE_DISPATCH:
                 kind, order = MERGE_DISPATCH[self.conversion_type]
                 if kind == "pdf":
-                    _merge_pdfs(self.files, dst_dir, order)
+                    _merge_pdfs(self.files, dst_dir, order, self._cancel_event)
                 else:
-                    _merge_docx(self.files, dst_dir, order)
+                    _merge_docx(self.files, dst_dir, order, self._cancel_event)
+                self._check_cancelled()
                 self.done.emit(True, "Files merged successfully", dst_dir)
                 return
 
             errors = []
             out_dir = ""
             for f in self.files:
+                self._check_cancelled()
                 f_dst_dir = os.path.dirname(f)
                 try:
                     if self.conversion_type == "image_to_pdf":
@@ -453,7 +499,7 @@ class ConversionThread(QThread):
                     elif self.conversion_type == "docx_to_pdf":
                         _convert_docx_to_pdf(f, f_dst_dir)
                     elif self.conversion_type == "pdf_to_docx":
-                        _convert_pdf_to_docx(f, f_dst_dir)
+                        _convert_pdf_to_docx(f, f_dst_dir, self._cancel_event)
                     else:
                         from converter.converters import AdvancedConverterEngine
 
@@ -471,18 +517,27 @@ class ConversionThread(QThread):
                         result = engine.convert(self.conversion_type, f, f_dst_dir)
                         if not result.success:
                             raise Exception(result.error)
+                    self._check_cancelled()
                     out_dir = f_dst_dir
+                except _ConversionCancelled:
+                    raise
                 except Exception as e:
                     errors.append(f"{os.path.basename(f)}: {e}")
 
+            self._check_cancelled()
             if errors:
                 self.done.emit(False, "\n".join(errors), "")
             else:
                 n = len(self.files)
                 self.done.emit(True, f"{n} file{'s' if n > 1 else ''} converted", out_dir)
 
+        except _ConversionCancelled:
+            self.cancelled.emit()
         except Exception as e:
-            self.done.emit(False, str(e), "")
+            if self._cancel_event.is_set():
+                self.cancelled.emit()
+            else:
+                self.done.emit(False, str(e), "")
 
 
 class QuickConvertWindow(QWidget):
@@ -605,7 +660,7 @@ class QuickConvertWindow(QWidget):
 
         self.cancel_btn = QPushButton("Cancel")
         self.cancel_btn.setObjectName("cancelBtn")
-        self.cancel_btn.clicked.connect(self.close)
+        self.cancel_btn.clicked.connect(self._cancel_conversion)
 
         self.convert_btn = QPushButton("Convert")
         self.convert_btn.setObjectName("convertBtn")
@@ -626,13 +681,50 @@ class QuickConvertWindow(QWidget):
     def _start_conversion(self):
         conversion_type = self.forced_conversion if self.forced_conversion else self.combo.currentData()
         self.convert_btn.setEnabled(False)
-        self.cancel_btn.setEnabled(False)
+        self.cancel_btn.setText("Cancel")
+        self.cancel_btn.setEnabled(True)
         self.progress.show()
         self.status_label.hide()
 
         self._worker_thread = ConversionThread(self.files, conversion_type)
         self._worker_thread.done.connect(self._on_done)
+        self._worker_thread.cancelled.connect(self._on_cancelled)
         self._worker_thread.start()
+
+    def _cancel_conversion(self):
+        thread = getattr(self, "_worker_thread", None)
+        if thread is None or not thread.isRunning():
+            self.close()
+            return
+
+        thread.cancel()
+        self.cancel_btn.setText("Cancelling...")
+        self.cancel_btn.setEnabled(False)
+        self.status_label.setObjectName("statusOk")
+        self.status_label.setText("Cancelling...")
+        self.status_label.show()
+        self.status_label.style().unpolish(self.status_label)
+        self.status_label.style().polish(self.status_label)
+        self.adjustSize()
+        self.setFixedHeight(self.sizeHint().height())
+        QTimer.singleShot(CANCEL_GRACE_MS, self._force_cancel_if_running)
+
+    def _force_cancel_if_running(self):
+        thread = getattr(self, "_worker_thread", None)
+        if thread is not None and thread.isRunning():
+            os._exit(0)
+
+    def _on_cancelled(self):
+        self.progress.hide()
+        self.cancel_btn.setEnabled(False)
+        self.status_label.setObjectName("statusOk")
+        self.status_label.setText("Conversion cancelled")
+        self.status_label.show()
+        self.status_label.style().unpolish(self.status_label)
+        self.status_label.style().polish(self.status_label)
+        self.adjustSize()
+        self.setFixedHeight(self.sizeHint().height())
+        QTimer.singleShot(300, QApplication.quit)
 
     def _on_done(self, success: bool, message: str, out_dir: str):
         self.progress.hide()
@@ -641,6 +733,7 @@ class QuickConvertWindow(QWidget):
         self.setFixedHeight(self.sizeHint().height())
 
         if success:
+            self.cancel_btn.setEnabled(False)
             self.status_label.setObjectName("statusOk")
             self.status_label.setText(f"✓ {message}")
             QTimer.singleShot(AUTO_CLOSE_DELAY_MS, QApplication.quit)
@@ -649,6 +742,7 @@ class QuickConvertWindow(QWidget):
             self.status_label.setText(f"✗ {message}")
             self.convert_btn.setText("Retry")
             self.convert_btn.setEnabled(True)
+            self.cancel_btn.setText("Cancel")
             self.cancel_btn.setEnabled(True)
             self.convert_btn.clicked.disconnect()
             self.convert_btn.clicked.connect(self._start_conversion)
@@ -665,13 +759,13 @@ class QuickConvertWindow(QWidget):
             self.move(e.globalPosition().toPoint() - self._drag_pos)
 
     def closeEvent(self, e):
+        thread = getattr(self, "_worker_thread", None)
+        if thread is not None and thread.isRunning():
+            thread.cancel()
+            if not thread.wait(3000):
+                os._exit(0)
         e.accept()
-        if hasattr(self, "_worker_thread") and self._worker_thread.isRunning():
-            self._worker_thread.quit()
-            self._worker_thread.wait(2000)
-            os._exit(0)
-        else:
-            QApplication.quit()
+        QApplication.quit()
 
 
 def run_context_menu(files: list, conversion_type: str | None = None) -> None:
