@@ -221,12 +221,14 @@ class SystemNotifier:
     - Otherwise                     → Qt system tray notification
     """
 
-    EXCLUDED_OPERATIONS = [
+    EXCLUDED_OPERATIONS = {
         "protect_pdf",
         "office_optimization",
-        "Protection PDF",
-        "Optimisation bureautique",
-    ]
+    }
+    LEGACY_EXCLUDED_OPERATIONS = {
+        "Protection PDF": "protect_pdf",
+        "Optimisation bureautique": "office_optimization",
+    }
 
     REPO_URL = "https://github.com/Hyacinthe-primus"
 
@@ -394,7 +396,8 @@ class SystemNotifier:
         """Return True if this operation should trigger a notification."""
         if not operation_type:
             return False
-        return operation_type not in self.EXCLUDED_OPERATIONS
+        operation = self.LEGACY_EXCLUDED_OPERATIONS.get(operation_type, operation_type)
+        return operation not in self.EXCLUDED_OPERATIONS
 
     def send(self, operation_type: str, config_enabled: bool = True) -> bool:
         """

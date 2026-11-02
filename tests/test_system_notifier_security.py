@@ -345,3 +345,12 @@ def test_fixed_script_parses_without_payload_execution():
     )
     assert result.returncode == 0, result.stderr
     assert "PARSE_ERRORS=0" in result.stdout
+
+
+def test_excluded_operations_use_canonical_ids_and_accept_legacy_labels():
+    notifier = notifier_module.SystemNotifier.__new__(notifier_module.SystemNotifier)
+    assert notifier.should_notify("protect_pdf") is False
+    assert notifier.should_notify("office_optimization") is False
+    assert notifier.should_notify("Protection PDF") is False
+    assert notifier.should_notify("Optimisation bureautique") is False
+    assert notifier.should_notify("pdf_to_word") is True
