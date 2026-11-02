@@ -3,30 +3,28 @@
 from PySide6.QtWidgets import QComboBox, QDialog, QDialogButtonBox, QFormLayout, QSpinBox
 
 from qss_helpers import _apply_dialog_btn
+from templates import semantic_keys as sk
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
 
 
 class SplitDialog(TranslationMixin, QDialog):
-    def __init__(self, total_pages, parent=None, language="fr"):
+    def __init__(self, total_pages, parent=None, language="fr", pre_select_key=None, pages_per_file=None):
         super().__init__(parent)
         self.total_pages = total_pages
         self.language = language
         self._tm = make_tm(language)
         self.setWindowTitle(self.translate_text("split_pdf"))
         self.setup_ui()
+        self._apply_template_values(pre_select_key, pages_per_file)
 
     def setup_ui(self):
         layout = QFormLayout(self)
 
         self.split_method = QComboBox()
-        self.split_method.addItems(
-            [
-                self.translate_text("by_pages"),
-                self.translate_text("all_pages"),
-                self.translate_text("page_range"),
-            ]
-        )
+        self.split_method.addItem(self.translate_text("by_pages"), sk.SPLIT_BY_PAGES)
+        self.split_method.addItem(self.translate_text("all_pages"), sk.SPLIT_ALL_PAGES)
+        self.split_method.addItem(self.translate_text("page_range"), sk.SPLIT_PAGE_RANGE)
 
         self.page_interval = QSpinBox()
         self.page_interval.setMinimum(1)
@@ -57,3 +55,17 @@ class SplitDialog(TranslationMixin, QDialog):
         buttons.rejected.connect(self.reject)
 
         layout.addRow(buttons)
+
+    def _apply_template_values(self, pre_select_key, pages_per_file):
+        if isinstance(pre_select_key, str):
+            index = self.split_method.findData(pre_select_key)
+            if index >= 0:
+                self.split_method.setCurrentIndex(index)
+
+        try:
+            pages = int(pages_per_file)
+        except (TypeError, ValueError):
+            pages = 1
+        if pages < 1 or pages > self.total_pages:
+            pages = 1
+        self.page_interval.setValue(pages)

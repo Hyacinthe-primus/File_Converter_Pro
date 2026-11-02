@@ -89,6 +89,11 @@ class AnimatedCheckBox(QCheckBox):
 
     rippleProgress = Property(float, _get_ripple, _set_ripple)
 
+    def set_dark_mode(self, dark: bool):
+        """Switch the hand-painted colors between the light and dark palettes."""
+        self._is_dark = bool(dark)
+        self.update()
+
     def setWordWrap(self, wrap: bool):
         """Wrap the label text onto multiple lines when it overflows its width."""
         self._word_wrap = wrap
@@ -277,13 +282,12 @@ class AnimatedCheckBox(QCheckBox):
         painter.restore()
 
     def sizeHint(self):
-        if not self._word_wrap:
-            fm = self.fontMetrics()
-            w = 2 + 20 + 10 + fm.horizontalAdvance(self.text()) + 4
-            return QSize(max(w, 120), 32)
         font = self.font()
         font.setPointSize(10)
         fm = QFontMetrics(font)
+        if not self._word_wrap:
+            w = 2 + 20 + 10 + fm.horizontalAdvance(self.text()) + 4
+            return QSize(max(w, 120), 32)
         full = fm.horizontalAdvance(self.text())
         text_w = int(min(full, 270))
         rect = QRect(0, 0, text_w, 10000)

@@ -1,11 +1,89 @@
 """PdfOperationsMixin - PDF merge, split, protect methods."""
 
 import os
+import secrets
+import tempfile
 from datetime import datetime
 from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QMessageBox
+
+from templates import semantic_keys as sk
+
+
+def _protection_permission_flags(allow_printing, allow_copying, allow_modifications):
+    """Build pypdf permissions.
+
+    allow_printing controls PRINT and PRINT_TO_REPRESENTATION.
+    allow_copying controls EXTRACT; EXTRACT_TEXT_AND_GRAPHICS stays enabled.
+    allow_modifications controls MODIFY, ADD_OR_MODIFY, FILL_FORM_FIELDS,
+    and ASSEMBLE_DOC.
+    """
+    from pypdf.constants import UserAccessPermissions
+
+    flags = UserAccessPermissions(0xFFFFFFFF)
+    if not allow_printing:
+        flags &= ~(
+            UserAccessPermissions.PRINT
+            | UserAccessPermissions.PRINT_TO_REPRESENTATION
+        )
+    if not allow_copying:
+        flags &= ~UserAccessPermissions.EXTRACT
+    if not allow_modifications:
+        flags &= ~(
+            UserAccessPermissions.MODIFY
+            | UserAccessPermissions.ADD_OR_MODIFY
+            | UserAccessPermissions.FILL_FORM_FIELDS
+            | UserAccessPermissions.ASSEMBLE_DOC
+        )
+    return flags
+
+
+def _protect_pdf_file(
+    source_file,
+    output_file,
+    user_password,
+    allow_printing,
+    allow_copying,
+    allow_modifications,
+):
+    """Write an AES-256 protected copy without leaving a partial output."""
+    from pypdf import PdfReader, PdfWriter
+
+    permissions = _protection_permission_flags(
+        allow_printing,
+        allow_copying,
+        allow_modifications,
+    )
+    owner_password = secrets.token_urlsafe(32)
+
+    fd, temp_path = tempfile.mkstemp(
+        prefix=".fcp_protect_",
+        suffix=".pdf",
+        dir=os.path.dirname(output_file) or ".",
+    )
+    os.close(fd)
+    try:
+        with open(source_file, "rb") as source_stream:
+            reader = PdfReader(source_stream)
+            writer = PdfWriter()
+            writer.append(reader)
+            writer.encrypt(
+                user_password=user_password,
+                owner_password=owner_password,
+                permissions_flag=permissions,
+                algorithm="AES-256",
+            )
+            with open(temp_path, "wb") as temp_file:
+                writer.write(temp_file)
+        os.replace(temp_path, output_file)
+    except Exception:
+        try:
+            os.remove(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class PdfOperationsMixin:
@@ -34,7 +112,19 @@ class PdfOperationsMixin:
             QMessageBox.warning(self, self.translate_text("warning"), msg)
             return
 
-        dialog = MergeOrderDialog(pdf_files, ".pdf", parent=self, language=self.current_language)
+        active_templates = getattr(self, "active_templates", None)
+        template = active_templates.get(sk.PDF_MERGE) if isinstance(active_templates, dict) else None
+        pre_select_key = template.get("merge_order_key") if isinstance(template, dict) else None
+        if not isinstance(pre_select_key, str):
+            pre_select_key = None
+
+        dialog = MergeOrderDialog(
+            pdf_files,
+            ".pdf",
+            parent=self,
+            language=self.current_language,
+            pre_select_key=pre_select_key,
+        )
         if dialog.exec() != QDialog.Accepted:
             return
         ordered_files = dialog.get_ordered_files()
@@ -72,7 +162,7 @@ class PdfOperationsMixin:
             merged_doc = fitz.open(output_file)
             self.achievement_system.record_pdf_merge(len(merged_doc))
             merged_doc.close()
-            self.record_config_usage("Fusion PDF", {"merge_order": dialog.get_order_key()})
+            self.record_config_usage(sk.PDF_MERGE, {"merge_order": dialog.get_order_key()})
             self.show_progress(False)
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("merge_pdf")
@@ -109,7 +199,19 @@ class PdfOperationsMixin:
                                 self.translate_text("please_select_at_least_2_word_files"))
             return
 
-        dialog = MergeOrderDialog(word_files, ".docx", parent=self, language=self.current_language)
+        active_templates = getattr(self, "active_templates", None)
+        template = active_templates.get(sk.WORD_MERGE) if isinstance(active_templates, dict) else None
+        pre_select_key = template.get("merge_order_key") if isinstance(template, dict) else None
+        if not isinstance(pre_select_key, str):
+            pre_select_key = None
+
+        dialog = MergeOrderDialog(
+            word_files,
+            ".docx",
+            parent=self,
+            language=self.current_language,
+            pre_select_key=pre_select_key,
+        )
         if dialog.exec() != QDialog.Accepted:
             return
         ordered_files = dialog.get_ordered_files()
@@ -125,8 +227,8 @@ class PdfOperationsMixin:
 
         try:
             from docx import Document
-            composer = Composer(Document(word_files[0]))
-            for wf in word_files[1:]:
+            composer = Composer(Document(ordered_files[0]))
+            for wf in ordered_files[1:]:
                 composer.doc.add_page_break()
                 composer.append(Document(wf))
             composer.save(output_file)
@@ -145,7 +247,7 @@ class PdfOperationsMixin:
                 success=True,
             )
             self.achievement_system.record_conversion("merge_word", total_size, True)
-            self.record_config_usage("Fusion Word", {"merge_order": dialog.get_order_key()})
+            self.record_config_usage(sk.WORD_MERGE, {"merge_order": dialog.get_order_key()})
             QMessageBox.information(
                 self,
                 self.translate_text("success"),
@@ -177,7 +279,8 @@ class PdfOperationsMixin:
             return
 
         for pdf_file in pdf_files:
-            self.split_pdf_file(pdf_file)
+            if self.split_pdf_file(pdf_file) is False:
+                break
 
     def split_pdf_file(self, pdf_path, output_dir=None, dialog=None, silent=False):
         import fitz
@@ -191,9 +294,23 @@ class PdfOperationsMixin:
 
         if dialog is None:
             from dialogs import SplitDialog
-            dialog = SplitDialog(total_pages, self, self.current_language)
+
+            active_templates = getattr(self, "active_templates", None)
+            template = active_templates.get(sk.PDF_SPLIT) if isinstance(active_templates, dict) else None
+            pre_select_key = template.get("split_method_key") if isinstance(template, dict) else None
+            if not isinstance(pre_select_key, str):
+                pre_select_key = None
+            pages_per_file = template.get("pages_per_file") if isinstance(template, dict) else None
+
+            dialog = SplitDialog(
+                total_pages,
+                self,
+                self.current_language,
+                pre_select_key=pre_select_key,
+                pages_per_file=pages_per_file,
+            )
             if dialog.exec() != QDialog.Accepted:
-                return
+                return False
 
         if not output_dir:
             output_dir = self.get_output_directory()
@@ -238,10 +355,11 @@ class PdfOperationsMixin:
             self.achievement_system.record_pdf_split(total_pages)
             if method == 0:
                 self.record_config_usage(
-                    "Division PDF", {"split_method": "Par pages", "pages_per_file": dialog.page_interval.value()}
+                    sk.PDF_SPLIT,
+                    {"split_method": sk.SPLIT_BY_PAGES, "pages_per_file": dialog.page_interval.value()},
                 )
             elif method == 1:
-                self.record_config_usage("Division PDF", {"split_method": "Toutes les pages"})
+                self.record_config_usage(sk.PDF_SPLIT, {"split_method": sk.SPLIT_ALL_PAGES})
             if not silent:
                 if self.config.get("enable_system_notifications", True):
                     self.system_notifier.send("split_pdf")
@@ -269,16 +387,49 @@ class PdfOperationsMixin:
                                 self.translate_text("please_select_at_least_one_pdf_file"))
             return
 
-        from dialogs import PasswordDialog
-        dialog = PasswordDialog(self, self.current_language)
+        active_templates = getattr(self, "active_templates", None)
+        template = (
+            active_templates.get(sk.PDF_PROTECTION)
+            if isinstance(active_templates, dict)
+            else None
+        )
+        if isinstance(template, dict):
+            pre_select_mode = template.get("protection_level")
+            allow_printing = template.get("allow_printing")
+            allow_copying = template.get("allow_copying")
+            allow_modifications = template.get("allow_modifications")
+            allow_printing = allow_printing if isinstance(allow_printing, bool) else None
+            allow_copying = allow_copying if isinstance(allow_copying, bool) else None
+            allow_modifications = (
+                allow_modifications if isinstance(allow_modifications, bool) else None
+            )
+        else:
+            pre_select_mode = sk.PROTECTION_ADVANCED
+            allow_printing = True
+            allow_copying = True
+            allow_modifications = True
+
+        from dialogs import PdfProtectionDialog
+
+        dialog = PdfProtectionDialog(
+            self,
+            self.current_language,
+            pre_select_mode=pre_select_mode,
+            allow_printing=allow_printing,
+            allow_copying=allow_copying,
+            allow_modifications=allow_modifications,
+        )
         if dialog.exec() != QDialog.Accepted:
             return
 
+        mode = dialog.get_mode()
         password = dialog.get_password()
-        if not password:
+        if mode == sk.PROTECTION_ADVANCED and not password:
             QMessageBox.warning(self, self.translate_text("warning"),
                                 self.translate_text("password_required"))
             return
+        user_password = password if mode == sk.PROTECTION_ADVANCED else ""
+        permissions = dialog.get_permissions()
 
         output_dir = self.get_output_directory()
         if not output_dir:
@@ -287,13 +438,17 @@ class PdfOperationsMixin:
         self.show_progress(True, self.translate_text("pdf_protection"))
         success_count = 0
 
-        import fitz
         for i, pdf_file in enumerate(pdf_files):
             try:
                 output_file = os.path.join(output_dir, f"protected_{Path(pdf_file).name}")
-                pdf_doc = fitz.open(pdf_file)
-                pdf_doc.save(output_file, encryption=fitz.PDF_ENCRYPT_AES_256, user_pw=password)
-                pdf_doc.close()
+                _protect_pdf_file(
+                    pdf_file,
+                    output_file,
+                    user_password,
+                    permissions["allow_printing"],
+                    permissions["allow_copying"],
+                    permissions["allow_modifications"],
+                )
                 success_count += 1
                 self.progress_bar.setValue(int((i + 1) / len(pdf_files) * 100))
             except Exception as e:
@@ -301,7 +456,9 @@ class PdfOperationsMixin:
 
         self.show_progress(False)
         if success_count > 0:
-            self.achievement_system.record_pdf_protection(success_count, len(password))
+            self.achievement_system.record_pdf_protection(
+                success_count, len(user_password)
+            )
         QMessageBox.information(
             self,
             self.translate_text("success"),

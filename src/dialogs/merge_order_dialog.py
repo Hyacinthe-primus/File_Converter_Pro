@@ -14,13 +14,13 @@ from PySide6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QPushButton,
-    QRadioButton,
     QVBoxLayout,
 )
 
 from qss_helpers import _apply_dialog_btn
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
+from widgets import AnimatedCheckBox
 
 
 class MergeOrderDialog(TranslationMixin, QDialog):
@@ -36,6 +36,7 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         self.setMinimumHeight(400)
         self._setup_ui()
         self.apply_theme_style()
+        self.resize(self.layout().sizeHint().expandedTo(self.layout().minimumSize()))
         if pre_select_key and pre_select_key in self._radio_map:
             self._radio_map[pre_select_key].setChecked(True)
 
@@ -47,6 +48,8 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         order_lay = QVBoxLayout(order_group)
 
         self.order_buttons = QButtonGroup(self)
+        self.order_buttons.setExclusive(True)
+        parent_dark = bool(getattr(self.parent(), "dark_mode", False))
         orders = [
             ("alpha_az", "🔤 " + self.translate_text("alphabetical_a_to_z")),
             ("alpha_za", "🔤 " + self.translate_text("alphabetical_z_to_a")),
@@ -59,10 +62,11 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         ]
         self._radio_map = {}
         for key, label in orders:
-            rb = QRadioButton(label)
-            self.order_buttons.addButton(rb)
-            order_lay.addWidget(rb)
-            self._radio_map[key] = rb
+            cb = AnimatedCheckBox(label)
+            cb.set_dark_mode(parent_dark)
+            self.order_buttons.addButton(cb)
+            order_lay.addWidget(cb)
+            self._radio_map[key] = cb
         self._radio_map["current"].setChecked(True)
 
         lay.addWidget(order_group)
@@ -86,13 +90,9 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         self._radio_map["manual"].toggled.connect(self._manual_group.setVisible)
 
         btn_row = QHBoxLayout()
-        merge_btn = QPushButton("🔗 " + self.translate_text("merge"))
+        merge_btn = QPushButton(self.translate_text("merge"))
         merge_btn.setMinimumHeight(36)
-        merge_btn.setStyleSheet("""
-            QPushButton { background:#28a745; color:white; border:none;
-                          border-radius:6px; font-weight:bold; padding:6px 16px; }
-            QPushButton:hover { background:#218838; }
-        """)
+        _apply_dialog_btn(merge_btn, "BtnOK")
         cancel_btn = QPushButton(self.translate_text("cancel"))
         cancel_btn.setMinimumHeight(36)
         _apply_dialog_btn(cancel_btn, "BtnCancelGlassy")
@@ -150,17 +150,6 @@ class MergeOrderDialog(TranslationMixin, QDialog):
                 """
                 QDialog { background-color: #1e2229; }
                 QLabel { color: #e9ecef; }
-                QRadioButton { color: #e9ecef; spacing: 8px; }
-                QRadioButton::indicator {
-                    width: 16px; height: 16px;
-                    border-radius: 8px;
-                    border: 2px solid #4a5568;
-                    background: #1e2229;
-                }
-                QRadioButton::indicator:checked {
-                    background-color: #4dabf7;
-                    border: 2px solid #4dabf7;
-                }
                 QGroupBox {
                     color: #adb5bd;
                     border: 1px solid #2c313a;
@@ -186,17 +175,6 @@ class MergeOrderDialog(TranslationMixin, QDialog):
                 """
                 QDialog { background-color: #f8f9fa; }
                 QLabel { color: #212529; }
-                QRadioButton { color: #212529; spacing: 8px; }
-                QRadioButton::indicator {
-                    width: 16px; height: 16px;
-                    border-radius: 8px;
-                    border: 2px solid #adb5bd;
-                    background: #ffffff;
-                }
-                QRadioButton::indicator:checked {
-                    background-color: #4dabf7;
-                    border: 2px solid #4dabf7;
-                }
                 QGroupBox {
                     color: #495057;
                     border: 1px solid #dee2e6;
