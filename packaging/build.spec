@@ -2,7 +2,7 @@
 # pyright: reportUndefinedVariable=false
 
 block_cipher = None
-import os, shutil, glob
+import os, sys, shutil, glob
 
 shutil.rmtree(os.path.join('dist', 'FCP'), ignore_errors=True)
 
@@ -91,6 +91,11 @@ try:
     _, _pdf2docx_bins, _pdf2docx_hidden = _ca("pdf2docx")
 except Exception:
     _pdf2docx_bins, _pdf2docx_hidden = [], []
+
+_ctypes_bins = [
+    (libffi, '.')
+    for libffi in glob.glob(os.path.join(sys.base_prefix, 'DLLs', 'libffi*.dll'))
+]
 
 try:
     _rich_hidden = _cs("rich")
@@ -270,6 +275,8 @@ UPX_EXCLUDE = [
     'api-ms-win*.dll', 'ucrtbase.dll',
     '_mupdf*.pyd', 'mupdf*.dll', '_fitz*.pyd',
     '_uuid.pyd',
+    '_ctypes.pyd',
+    'libffi*.dll',
     'libx265*.dll',
     'opencv_videoio_ffmpeg*.dll',
 ]
@@ -281,7 +288,7 @@ FOREIGN_BIN_DIRS = ('miktex', 'msys64', 'gtk3-runtime')
 a = Analysis(
     ['../src/main.py'],
     pathex=[],
-    binaries=[] + _pdf2docx_bins,
+    binaries=_ctypes_bins + _pdf2docx_bins,
     datas=collect_data_files(),
     hiddenimports=SHARED_HIDDEN,
     hookspath=[],
