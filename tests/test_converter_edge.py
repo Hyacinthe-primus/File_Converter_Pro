@@ -50,6 +50,18 @@ def test_markdown_dispatch_and_context_menu():
     assert LABELS["markdown_to_html"] == "Markdown → HTML"
 
 
+def test_html_to_pdf_rejects_non_html_source(tmp_path):
+    src = tmp_path / "xref-build.pdf"
+    original = b"%PDF-1.4\n%test\n"
+    src.write_bytes(original)
+
+    result = AdvancedConverterEngine().convert("html_to_pdf", str(src), str(tmp_path))
+
+    assert result.success is False
+    assert "HTML" in result.error
+    assert src.read_bytes() == original
+
+
 def test_dispatch_image_types():
     engine = AdvancedConverterEngine()
     assert "image_to_png" in engine._DISPATCH

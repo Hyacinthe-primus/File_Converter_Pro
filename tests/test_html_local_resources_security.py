@@ -165,14 +165,15 @@ class TestDisabledLocalResources:
         assert 'src=""' in output
 
     def test_weasyprint_fetcher_denies_file_urls(self):
+        fetcher = HtmlRenderers._safe_weasyprint_fetcher()
         with pytest.raises(ValueError):
-            HtmlRenderers._safe_weasyprint_fetcher("file:///C:/secret.txt")
+            fetcher.fetch("file:///C:/secret.txt")
         with pytest.raises(ValueError):
-            HtmlRenderers._safe_weasyprint_fetcher("relative.png")
+            fetcher.fetch("relative.png")
         with pytest.raises(ValueError):
-            HtmlRenderers._safe_weasyprint_fetcher("C:/secret.txt")
+            fetcher.fetch("C:/secret.txt")
         with pytest.raises(ValueError):
-            HtmlRenderers._safe_weasyprint_fetcher("\\\\server\\share\\secret.txt")
+            fetcher.fetch("\\\\server\\share\\secret.txt")
 
 
 class TestEnabledLocalResources:
@@ -537,3 +538,80 @@ class TestReportLabImageHardening:
         finally:
             for path in tmp_imgs:
                 Path(path).unlink(missing_ok=True)
+
+
+class TestWeasyPrintCompatibility:
+    @staticmethod
+    def _render_with_weasyprint(html, root, output):
+        weasyprint = pytest.importorskip("weasyprint")
+        renderer = _renderer(True)
+        sanitized = renderer._inline_all_resources(html, root)
+        weasyprint.HTML(
+            string=sanitized,
+            url_fetcher=HtmlRenderers._safe_weasyprint_fetcher(),
+        ).write_pdf(str(output))
+        return sanitized
+
+    @staticmethod
+    def _pdf_text(path):
+        fitz = pytest.importorskip("fitz")
+        with fitz.open(path) as doc:
+            return "\n".join(page.get_text() for page in doc)
+
+    def test_safe_fetcher_uses_weasyprint_70_api(self):
+        weasyprint = pytest.importorskip("weasyprint")
+        fetcher = HtmlRenderers._safe_weasyprint_fetcher()
+        assert isinstance(fetcher, weasyprint.urls.URLFetcher)
+        assert fetcher._allowed_protocols == ("http", "https", "data")
+        assert fetcher._fail_on_errors is False
+
+        with pytest.raises(ValueError):
+            fetcher.fetch("ftp://example.com/image.png")
+        with pytest.raises(ValueError):
+            fetcher.fetch("file:///C:/secret.txt")
+
+    def test_approved_local_resource_renders_with_weasyprint(self, tmp_path):
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="80">'
+            '<text x="10" y="50" font-size="22">LOCAL_SENTINEL</text>'
+            "</svg>"
+        )
+        (tmp_path / "inside.svg").write_text(svg, encoding="utf-8")
+        output = tmp_path / "approved.pdf"
+        sanitized = self._render_with_weasyprint(
+            '<html><body><p>SAFE</p><img src="inside.svg"></body></html>',
+            tmp_path,
+            output,
+        )
+        assert "data:image/svg+xml;base64," in sanitized
+        text = self._pdf_text(output)
+        assert "SAFE" in text
+        assert "LOCAL_SENTINEL" in text
+
+    @pytest.mark.parametrize("kind", ["outside", "traversal", "file_url"])
+    def test_unauthorized_local_resources_do_not_render_with_weasyprint(self, tmp_path, kind):
+        outside = tmp_path.parent / f"{tmp_path.name}-outside.svg"
+        outside.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="80">'
+            '<text x="10" y="50" font-size="22">OUTSIDE_SENTINEL</text>'
+            "</svg>",
+            encoding="utf-8",
+        )
+        if kind == "outside":
+            ref = outside.as_posix()
+        elif kind == "traversal":
+            ref = f"../{outside.name}"
+        else:
+            ref = outside.as_uri()
+
+        output = tmp_path / f"{kind}.pdf"
+        sanitized = self._render_with_weasyprint(
+            f'<html><body><p>SAFE</p><img src="{ref}"></body></html>',
+            tmp_path,
+            output,
+        )
+        assert "OUTSIDE_SENTINEL" not in sanitized
+        assert "data:image/svg+xml;base64," not in sanitized
+        text = self._pdf_text(output)
+        assert "SAFE" in text
+        assert "OUTSIDE_SENTINEL" not in text

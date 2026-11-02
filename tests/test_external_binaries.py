@@ -229,3 +229,53 @@ def test_resolve_unknown_tool_uses_config_only(monkeypatch, tmp_path):
         monkeypatch.undo()
         os.remove(conf)
         eb._reset_cache()
+
+
+def test_directory_config_overrides_defaults(monkeypatch, tmp_path):
+    """A non-empty [directories] value replaces the built-in candidates."""
+    first = tmp_path / "gtk-one"
+    second = tmp_path / "gtk-two"
+    first.mkdir()
+    second.mkdir()
+    conf = tmp_path / "external_binaries.conf"
+    conf.write_text(
+        f"[directories]\nweasyprint_dll = {first}; {second}; {tmp_path / 'missing'}\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("FCP_EXTERNAL_BINARIES_CONF", str(conf))
+    monkeypatch.delenv("WEASYPRINT_DLL_DIRECTORIES", raising=False)
+    eb._reset_cache()
+
+    assert [_norm(path) for path in eb.resolve_directories("weasyprint_dll")] == [
+        _norm(first),
+        _norm(second),
+    ]
+
+
+def test_directory_env_var_takes_priority(monkeypatch, tmp_path):
+    """WEASYPRINT_DLL_DIRECTORIES is prepended to configured directories."""
+    env_dir = tmp_path / "env-gtk"
+    conf_dir = tmp_path / "conf-gtk"
+    env_dir.mkdir()
+    conf_dir.mkdir()
+    conf = tmp_path / "external_binaries.conf"
+    conf.write_text(f"[directories]\nweasyprint_dll = {conf_dir}\n", encoding="utf-8")
+    monkeypatch.setenv("FCP_EXTERNAL_BINARIES_CONF", str(conf))
+    monkeypatch.setenv("WEASYPRINT_DLL_DIRECTORIES", str(env_dir))
+    eb._reset_cache()
+
+    assert [_norm(path) for path in eb.resolve_directories("weasyprint_dll")] == [
+        _norm(env_dir),
+        _norm(conf_dir),
+    ]
+
+
+def test_directory_defaults_used_when_config_empty(monkeypatch, tmp_path):
+    """Missing/empty [directories] entries fall back to DIRECTORY_DEFAULTS."""
+    default_dir = tmp_path / "default-gtk"
+    default_dir.mkdir()
+    monkeypatch.setattr(eb, "DIRECTORY_DEFAULTS", {"weasyprint_dll": (str(default_dir),)})
+    monkeypatch.delenv("WEASYPRINT_DLL_DIRECTORIES", raising=False)
+    eb._reset_cache()
+
+    assert [_norm(path) for path in eb.resolve_directories("weasyprint_dll")] == [_norm(default_dir)]

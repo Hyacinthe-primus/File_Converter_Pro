@@ -27,31 +27,18 @@ def _import_weasyprint():
     ships pango/harfbuzz/fontconfig), so if such a directory comes first on
     PATH, an incompatible mix of DLLs is loaded and the process crashes.
     Prioritize the real native DLL directories for the import only.
+
+    Directories come from WEASYPRINT_DLL_DIRECTORIES, the [directories]
+    weasyprint_dll INI entry, or external_binaries.DIRECTORY_DEFAULTS.
     """
     if os.name != "nt":
         import weasyprint
 
         return weasyprint
 
-    configured = os.environ.get("WEASYPRINT_DLL_DIRECTORIES", "")
-    candidates = [part for part in configured.split(";") if part]
-    candidates.extend(
-        (
-            r"C:\msys64\ucrt64\bin",
-            r"C:\msys64\mingw64\bin",
-            r"C:\Program Files\GTK3-Runtime Win64\bin",
-        )
-    )
+    from external_binaries import resolve_directories
 
-    dll_dirs = []
-    seen = set()
-    for path in candidates:
-        key = os.path.normcase(os.path.abspath(path))
-        if key in seen or not os.path.isdir(path):
-            continue
-        seen.add(key)
-        dll_dirs.append(path)
-
+    dll_dirs = resolve_directories("weasyprint_dll")
     for path in dll_dirs:
         try:
             _WEASYPRINT_DLL_COOKIES.append(os.add_dll_directory(path))
@@ -121,6 +108,11 @@ class HtmlRenderers:
            (fitz insert_htmlbox removed - duplicates content on some HTML inputs)
         """
         src_path = Path(src)
+        if src_path.suffix.lower() not in {".html", ".htm", ".xhtml"}:
+            raise ValueError(
+                "HTML to PDF requires an HTML source (.html, .htm, .xhtml), "
+                f"not {src_path.suffix or 'a file without an extension'}"
+            )
         base_dir = src_path.parent
         allow_local_resources = self._allow_local_resources(None)
 
@@ -175,7 +167,7 @@ class HtmlRenderers:
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                weasyprint.HTML(string=html, url_fetcher=self._safe_weasyprint_fetcher).write_pdf(dst)
+                weasyprint.HTML(string=html, url_fetcher=self._safe_weasyprint_fetcher()).write_pdf(dst)
             return
         except Exception:
             pass
@@ -221,14 +213,14 @@ class HtmlRenderers:
         return bool(allow_local_resources)
 
     @staticmethod
-    def _safe_weasyprint_fetcher(url, *args, **kwargs):
+    def _safe_weasyprint_fetcher():
         """Allow only remote/data fetches; applied local files are inlined."""
-        scheme = urlsplit(url).scheme.lower()
-        if scheme not in ("http", "https", "data"):
-            raise ValueError("Local file access is disabled")
-        from weasyprint.urls import default_url_fetcher
+        from weasyprint.urls import URLFetcher
 
-        return default_url_fetcher(url, *args, **kwargs)
+        return URLFetcher(
+            allowed_protocols=("http", "https", "data"),
+            allow_redirects=False,
+        )
 
     @staticmethod
     def _clean_resource_ref(raw):

@@ -14,8 +14,13 @@ or project root in dev. Override path with FCP_EXTERNAL_BINARIES_CONF.
     ffmpeg = C:\\ffmpeg\\bin\\ffmpeg.exe
     ghostscript =
 
+    [directories]
+    weasyprint_dll = C:\\msys64\\ucrt64\\bin; C:\\Program Files\\GTK3-Runtime Win64\\bin
+
 Values support %ENVVAR%/$ENVVAR expansion, "~", and relative paths (resolved
 against the config/ folder's parent). Empty/missing config = auto-detect only.
+A directory entry replaces the built-in fallbacks for that name; the matching
+environment variable (WEASYPRINT_DLL_DIRECTORIES) is applied first.
 
 TOOLS placeholders: {app_dir} (exe dir when frozen, else _MEIPASS/project root),
 {app_data} (LOCALAPPDATA or ~/.file_converter_app), {meipass} (PyInstaller temp dir).
@@ -37,6 +42,7 @@ CONFIG_FOLDER = "config"
 CONFIG_FILE = "external_binaries.conf"
 
 _cached_config = None  # None -> not parsed yet; {} -> parsed, no values
+_cached_directories = None
 _cached_path = None
 
 
@@ -222,6 +228,19 @@ TOOLS: dict[str, ToolSpec] = {
 }
 
 
+DIRECTORY_DEFAULTS: dict[str, tuple[str, ...]] = {
+    "weasyprint_dll": (
+        r"C:\msys64\ucrt64\bin",
+        r"C:\msys64\mingw64\bin",
+        r"C:\Program Files\GTK3-Runtime Win64\bin",
+    ),
+}
+
+DIRECTORY_ENV_VARS: dict[str, str] = {
+    "weasyprint_dll": "WEASYPRINT_DLL_DIRECTORIES",
+}
+
+
 # Env vars that are defined on Windows but may be absent in some shells;
 # used only to make %VAR% expansion deterministic.
 _FALLBACK_ENV = {
@@ -297,6 +316,31 @@ def load_config() -> dict:
     return _cached_config
 
 
+def load_directory_config() -> dict:
+    """Parse the optional [directories] section once and return its values."""
+    global _cached_directories
+    if _cached_directories is not None:
+        return _cached_directories
+
+    _cached_directories = {}
+    path = get_config_path()
+    if not path:
+        return _cached_directories
+
+    parser = configparser.ConfigParser(interpolation=None)
+    try:
+        parser.read(path, encoding="utf-8")
+        if parser.has_section("directories"):
+            for key, value in parser.items("directories"):
+                value = (value or "").strip()
+                if value:
+                    _cached_directories[key.strip().lower()] = value
+    except Exception as exc:
+        print(f"[external_binaries] Could not parse config file {path}: {exc}")
+        _cached_directories = {}
+    return _cached_directories
+
+
 def get_configured_binary(name: str) -> str | None:
     """Return the absolute path declared in the config file for *name*.
 
@@ -366,6 +410,51 @@ def _expand_template(template: str, app_data: str | None) -> str:
     return os.path.normpath(value)
 
 
+def _split_directory_list(value: str) -> list[str]:
+    """Split a semicolon/newline separated directory list."""
+    return [part.strip().strip('"').strip("'") for part in re.split(r"[;\r\n]+", value) if part.strip()]
+
+
+def _expand_configured_path(value: str) -> str:
+    """Expand templates/env vars and resolve relative paths against app root."""
+    expanded = _expand_template(value, app_data=None)
+    if not os.path.isabs(expanded):
+        folder = get_config_folder()
+        if folder:
+            expanded = os.path.normpath(os.path.join(os.path.dirname(folder), expanded))
+    return expanded
+
+
+def resolve_directories(name: str) -> list[str]:
+    """Return existing directories configured for *name*.
+
+    Priority: matching environment variable first, then the INI
+    ``[directories]`` entry, then :data:`DIRECTORY_DEFAULTS`. A non-empty INI
+    entry replaces the built-in defaults. Missing directories are ignored.
+    """
+    key = str(name).strip().lower()
+    configured = load_directory_config().get(key)
+    if configured:
+        candidates = _split_directory_list(configured)
+    else:
+        candidates = list(DIRECTORY_DEFAULTS.get(key, ()))
+
+    env_name = DIRECTORY_ENV_VARS.get(key)
+    if env_name:
+        candidates = _split_directory_list(os.environ.get(env_name, "")) + candidates
+
+    resolved = []
+    seen = set()
+    for candidate in candidates:
+        path = _expand_configured_path(candidate)
+        norm = os.path.normcase(os.path.abspath(path))
+        if norm in seen or not os.path.isdir(path):
+            continue
+        seen.add(norm)
+        resolved.append(path)
+    return resolved
+
+
 def locate_binary(name: str, app_data_dir: str | None = None) -> tuple[str | None, str | None]:
     """Resolve *name* and report both the path and where it was found.
 
@@ -413,22 +502,27 @@ def resolve_binary(name: str, app_data_dir: str | None = None) -> str | None:
 
 def _reset_cache() -> None:
     """Forget cached config/path.  Internal helper (used by tests)."""
-    global _cached_config, _cached_path
+    global _cached_config, _cached_directories, _cached_path
     _cached_config = None
+    _cached_directories = None
     _cached_path = None
 
 
 __all__ = [
     "CONFIG_FOLDER",
     "CONFIG_FILE",
+    "DIRECTORY_DEFAULTS",
+    "DIRECTORY_ENV_VARS",
     "TOOLS",
     "ToolSpec",
     "get_config_path",
     "get_config_folder",
     "load_config",
+    "load_directory_config",
     "get_configured_binary",
     "get_app_dir",
     "get_app_data_dir",
     "locate_binary",
     "resolve_binary",
+    "resolve_directories",
 ]
