@@ -423,6 +423,8 @@
         "pdf_to_word_mode": "Режим PDF→Word:",
         "image_to_ico_layers": "Изображение → ICO (слои):",
         "multi_layer": "Многослойная",
+        "image_to_ico_custom_size_hint": "Введите размер значка в формате WxH (1–256), например 256x128.",
+        "invalid_icon_size": "Размер значка должен быть в формате WxH, каждое значение от 1 до 256 (например, 256x128).",
         "keep_images_and_layout": "Сохранять изображения и макет",
         "text_only_2": "Только обычный текст",
         "default_output_folder": "Папка вывода по умолчанию:",

@@ -1,10 +1,11 @@
 """SettingsDialog — Application preferences and configuration (multi-tab)."""
 
+import re
 import sys
 from datetime import datetime
 
-from PySide6.QtCore import QCoreApplication, Qt, QTimer
-from PySide6.QtGui import QImage, QPixmap
+from PySide6.QtCore import QCoreApplication, QRegularExpression, Qt, QTimer
+from PySide6.QtGui import QImage, QPixmap, QRegularExpressionValidator
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -164,11 +165,25 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.icon_layer_combo.addItem("48x48", "48")
         self.icon_layer_combo.addItem("32x32", "32")
         self.icon_layer_combo.addItem("16x16", "16")
-        current_icon_layer = self.config.get("image_to_icon_layer", "multi")
-        for idx in range(self.icon_layer_combo.count()):
-            if self.icon_layer_combo.itemData(idx) == current_icon_layer:
-                self.icon_layer_combo.setCurrentIndex(idx)
-                break
+        self.icon_layer_combo.addItem(self.translate_text("custom") + "...", "custom")
+
+        self.icon_layer_custom_input = QLineEdit()
+        self.icon_layer_custom_input.setPlaceholderText("WxH")
+        self.icon_layer_custom_input.setMaxLength(7)
+        self.icon_layer_custom_input.setFixedWidth(95)
+        self.icon_layer_custom_input.setAlignment(Qt.AlignCenter)
+        self.icon_layer_custom_input.setValidator(
+            QRegularExpressionValidator(QRegularExpression(r"^\d{0,3}([xX]\d{1,3})?$"), self)
+        )
+        self.icon_layer_custom_input.setToolTip(
+            self.translate_text("image_to_ico_custom_size_hint")
+        )
+        self.icon_layer_custom_input.setVisible(False)
+
+        self.icon_layer_combo.currentIndexChanged.connect(
+            lambda _index: self._update_icon_layer_custom_visibility()
+        )
+        self._set_icon_layer_combo(self.config.get("image_to_icon_layer", "multi"))
 
         self.default_output_input = QLineEdit()
         self.default_output_input.setText(self.config.get("default_output_folder", ""))
@@ -221,7 +236,12 @@ class SettingsDialog(TranslationMixin, QDialog):
         conversion_layout.addRow(self.translate_text("default_quality"), self.quality_combo)
         conversion_layout.addRow(self.translate_text("compression_level_3"), self.compression_level_combo)
         conversion_layout.addRow(self.translate_text("pdf_to_word_mode"), self.pdf_to_word_mode_combo)
-        conversion_layout.addRow(self.translate_text("image_to_ico_layers"), self.icon_layer_combo)
+        icon_layer_layout = QHBoxLayout()
+        icon_layer_layout.setContentsMargins(0, 0, 0, 0)
+        icon_layer_layout.setSpacing(6)
+        icon_layer_layout.addWidget(self.icon_layer_combo, 1)
+        icon_layer_layout.addWidget(self.icon_layer_custom_input)
+        conversion_layout.addRow(self.translate_text("image_to_ico_layers"), icon_layer_layout)
         conversion_layout.addRow(self.translate_text("default_output_folder"), output_layout)
         conversion_layout.addRow(self.translate_text("keep_history_days"), self.keep_history_days_spin)
         conversion_layout.addRow(self.translate_text("ocr_orientation"), self.ocr_orientation_combo)
@@ -279,7 +299,8 @@ class SettingsDialog(TranslationMixin, QDialog):
         buttons.addButton(cancel_btn, QDialogButtonBox.RejectRole)
         buttons.addButton(restore_btn, QDialogButtonBox.ResetRole)
 
-        ok_btn.clicked.connect(self.accept)
+        ok_btn.setDefault(True)
+        ok_btn.clicked.connect(self._accept_settings)
         cancel_btn.clicked.connect(self.reject)
         restore_btn.clicked.connect(self.restore_defaults)
 
@@ -907,6 +928,8 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.compression_level_combo.setCurrentIndex(0)
         self.pdf_to_word_mode_combo.setCurrentIndex(0)
         self.icon_layer_combo.setCurrentIndex(0)
+        self.icon_layer_custom_input.clear()
+        self._update_icon_layer_custom_visibility()
         self.default_output_input.clear()
         self.keep_history_days_spin.setValue(365)
         self.auto_clean_checkbox.setChecked(True)
@@ -916,6 +939,61 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.separate_image_pdfs_checkbox.setChecked(False)
         self.use_system_theme_checkbox.setChecked(True)
         self._set_ocr_orientation_combo("auto")
+
+    def _accept_settings(self) -> None:
+        if self.icon_layer_combo.currentData() == "custom":
+            normalized = self._icon_layer_custom_size()
+            if normalized is None:
+                QMessageBox.warning(
+                    self,
+                    self.translate_text("warning_2"),
+                    self.translate_text("invalid_icon_size"),
+                )
+                self.icon_layer_custom_input.setFocus()
+                self.icon_layer_custom_input.selectAll()
+                return
+            self.icon_layer_custom_input.setText(normalized)
+        self.accept()
+
+    def _set_icon_layer_combo(self, value) -> None:
+        """Select a preset, or show a saved custom WxH value in the input."""
+        value = str(value or "multi")
+        custom_index = self.icon_layer_combo.findData("custom")
+        for idx in range(self.icon_layer_combo.count()):
+            if self.icon_layer_combo.itemData(idx) == value:
+                self.icon_layer_combo.setCurrentIndex(idx)
+                break
+        else:
+            size = self._parse_icon_size(value)
+            if size is not None and custom_index >= 0:
+                self.icon_layer_combo.setCurrentIndex(custom_index)
+                self.icon_layer_custom_input.setText(f"{size[0]}x{size[1]}")
+            else:
+                self.icon_layer_combo.setCurrentIndex(0)
+        self._update_icon_layer_custom_visibility()
+
+    def _update_icon_layer_custom_visibility(self) -> None:
+        self.icon_layer_custom_input.setVisible(self.icon_layer_combo.currentData() == "custom")
+
+    @staticmethod
+    def _parse_icon_size(value) -> tuple[int, int] | None:
+        text = str(value or "").strip()
+        match = re.fullmatch(r"(\d{1,3})[xX](\d{1,3})", text)
+        if match:
+            width, height = int(match.group(1)), int(match.group(2))
+        elif text.isdigit() and len(text) <= 3:
+            width = height = int(text)
+        else:
+            return None
+        if not (1 <= width <= 256 and 1 <= height <= 256):
+            return None
+        return width, height
+
+    def _icon_layer_custom_size(self) -> str | None:
+        size = self._parse_icon_size(self.icon_layer_custom_input.text())
+        if size is None:
+            return None
+        return f"{size[0]}x{size[1]}"
 
     def _set_ocr_orientation_combo(self, value: str) -> None:
         """Select the preset matching *value*, or show it as custom text."""
@@ -1115,6 +1193,11 @@ class SettingsDialog(TranslationMixin, QDialog):
         path.mkdir(exist_ok=True)
         subprocess.Popen(["explorer", str(path)])
 
+    def _icon_layer_record_value(self) -> str:
+        if self.icon_layer_combo.currentData() == "custom":
+            return self._icon_layer_custom_size() or "multi"
+        return str(self.icon_layer_combo.currentData() or "multi")
+
     def get_settings(self):
         quality_map = {0: "high", 1: "standard", 2: "compressed"}
         compression_map = {0: "normal", 1: "high", 2: "maximum"}
@@ -1128,7 +1211,7 @@ class SettingsDialog(TranslationMixin, QDialog):
             "conversion_quality": quality_map[self.quality_combo.currentIndex()],
             "compression_level": compression_map[self.compression_level_combo.currentIndex()],
             "pdf_to_word_mode": mode_map[self.pdf_to_word_mode_combo.currentIndex()],
-            "image_to_icon_layer": self.icon_layer_combo.currentData(),
+            "image_to_icon_layer": self._icon_layer_record_value(),
             "default_output_folder": self.default_output_input.text(),
             "keep_history_days": self.keep_history_days_spin.value(),
             "auto_clean_temp_files": self.auto_clean_checkbox.isChecked(),

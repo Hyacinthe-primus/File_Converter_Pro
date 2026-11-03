@@ -428,6 +428,8 @@
         "pdf_to_word_mode": "PDF→Word mode:",
         "image_to_ico_layers": "Image → ICO (layers):",
         "multi_layer": "Multi-layer",
+        "image_to_ico_custom_size_hint": "Enter the icon size as WxH (1-256), for example 256x128.",
+        "invalid_icon_size": "Icon size must be entered as WxH, with each value between 1 and 256 (for example 256x128).",
         "keep_images_and_layout": "Keep images and layout",
         "text_only_2": "Text only",
         "default_output_folder": "Default output folder:",

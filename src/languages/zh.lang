@@ -424,6 +424,8 @@
         "pdf_to_word_mode": "PDF→Word模式：",
         "image_to_ico_layers": "图片 → ICO（图层）：",
         "multi_layer": "多层",
+        "image_to_ico_custom_size_hint": "请输入图标尺寸，格式为 WxH（1-256），例如 256x128。",
+        "invalid_icon_size": "图标尺寸必须为 WxH 格式，且每个值在 1 到 256 之间（例如 256x128）。",
         "keep_images_and_layout": "保留图片和布局",
         "text_only_2": "仅纯文本",
         "default_output_folder": "默认输出文件夹：",

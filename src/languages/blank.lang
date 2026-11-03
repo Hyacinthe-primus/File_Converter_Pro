@@ -423,6 +423,8 @@
         "pdf_to_word_mode": "",
         "image_to_ico_layers": "",
         "multi_layer": "",
+        "image_to_ico_custom_size_hint": "",
+        "invalid_icon_size": "",
         "keep_images_and_layout": "",
         "text_only_2": "",
         "default_output_folder": "",

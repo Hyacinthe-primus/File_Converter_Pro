@@ -423,6 +423,8 @@
         "pdf_to_word_mode": "Modalità PDF→Word:",
         "image_to_ico_layers": "Immagine → ICO (livelli):",
         "multi_layer": "Multi-livello",
+        "image_to_ico_custom_size_hint": "Inserisci la dimensione dell'icona come LxH (1-256), ad esempio 256x128.",
+        "invalid_icon_size": "La dimensione dell'icona deve essere in formato LxH, con valori tra 1 e 256 (ad esempio 256x128).",
         "keep_images_and_layout": "Mantieni immagini e layout",
         "text_only_2": "Solo testo semplice",
         "default_output_folder": "Cartella di destinazione predefinita:",

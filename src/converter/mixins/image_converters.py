@@ -89,16 +89,35 @@ class ImageConverters:
             if layer == "multi":
                 sizes = [(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)]
             else:
-                try:
-                    n = int(layer)
-                except (TypeError, ValueError):
-                    n = 256
-                sizes = [(n, n)]
+                size = self._parse_icon_size(layer)
+                if size is None:
+                    size = (256, 256)
+                elif "x" in layer.lower():
+                    from PIL import Image
+
+                    if img.size != size:
+                        img = img.resize(size, Image.Resampling.LANCZOS)
+                sizes = [size]
             img.save(dst, format="ICO", sizes=sizes)
             return True
         except Exception as e:
             print(f"[image→ico] {e}")
             return False
+
+    @staticmethod
+    def _parse_icon_size(value) -> tuple[int, int] | None:
+        """Parse legacy 'N' or custom 'WxH' icon dimensions."""
+        text = str(value or "").strip()
+        try:
+            if "x" in text.lower():
+                width, height = (int(part) for part in text.lower().split("x", 1))
+            else:
+                width = height = int(text)
+        except (TypeError, ValueError):
+            return None
+        if 1 <= width <= 256 and 1 <= height <= 256:
+            return width, height
+        return None
 
     @staticmethod
     def _icon_layer_setting() -> str:

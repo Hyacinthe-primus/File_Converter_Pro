@@ -443,6 +443,8 @@
     "pdf_to_word_mode": "Mode PDF→Word:",
     "image_to_ico_layers": "Image → ICO (calques):",
     "multi_layer": "Multi-calque",
+    "image_to_ico_custom_size_hint": "Entrez la taille de l'icône au format LxH (1-256), par exemple 256x128.",
+    "invalid_icon_size": "La taille de l'icône doit être au format LxH, avec chaque valeur comprise entre 1 et 256 (par exemple 256x128).",
     "keep_images_and_layout": "Conserver les images et la mise en page",
     "text_only_2": "Texte brut uniquement",
     "default_output_folder": "Dossier de sortie par défaut:",

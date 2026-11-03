@@ -456,6 +456,8 @@
         "pdf_to_word_mode": "PDF→Word modu:",
         "image_to_ico_layers": "Görsel → ICO (katmanlar):",
         "multi_layer": "Çok katmanlı",
+        "image_to_ico_custom_size_hint": "Simge boyutunu GxY olarak girin (1-256), örneğin 256x128.",
+        "invalid_icon_size": "Simge boyutu GxY biçiminde olmalı ve her değer 1 ile 256 arasında olmalıdır (örneğin 256x128).",
         "keep_images_and_layout": "Görselleri ve sayfa düzenini koru",
         "text_only_2": "Yalnızca düz metin",
         "default_output_folder": "Varsayılan çıktı klasörü:",
