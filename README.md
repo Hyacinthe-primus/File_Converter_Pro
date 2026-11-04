@@ -4,7 +4,7 @@
 
 <p><em>A free, offline, all-in-one file converter for Windows built to feel premium.</em></p>
 
-[![Version](https://img.shields.io/badge/version-1.0.8-4dabf7?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/version-1.0.7-4dabf7?style=for-the-badge)](#)
 [![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=for-the-badge&logo=windows&logoColor=white)](#)
 [![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=for-the-badge&logo=qt&logoColor=white)](#)
 [![License](https://img.shields.io/badge/license-GPLv3-blue?style=for-the-badge)](#license)
@@ -52,8 +52,8 @@ Core philosophy: **ship nothing until it runs perfectly on a clean machine, with
 
 | | Link |
 |---|---|
-| **Installer** *(recommended)* | [Latest Release](../../releases/latest) → `FileConverterPro_Setup_v1.0.8.exe` |
-| **Portable** | [Latest Release](../../releases/latest) → `File_Converter_Pro_v1.0.8.zip` |
+| **Installer** *(recommended)* | [Latest Release](../../releases/latest) → `FileConverterPro_Setup_v1.0.7.exe` |
+| **Portable** | [Latest Release](../../releases/latest) → `File_Converter_Pro_v1.0.7.zip` |
 | **Official Website** | [file-converter-pro](https://file-converter-pro.org/) |
 | **Itch** | [hyacinthe-primus.itch.io/file-converter-pro](https://hyacinthe-primus.itch.io/file-converter-pro) |
 

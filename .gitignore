@@ -47,3 +47,6 @@ env/
 
 # Social preview files
 social-preview.png
+
+# Local session notes (never commit)
+HANDOFF.md
