@@ -177,7 +177,12 @@ class AppLogicMixin(
         return self.template_manager
 
     def show_terms_dialog(self):
-        dialog = TermsAndPrivacyDialog(self, self.current_language, dark_mode=self.dark_mode)
+        dialog = TermsAndPrivacyDialog(
+            self,
+            self.current_language,
+            dark_mode=self.dark_mode,
+            theme_name=self.current_theme,
+        )
         result = dialog.exec()
         if result == QDialog.Accepted:
             from datetime import datetime
@@ -195,13 +200,20 @@ class AppLogicMixin(
             self.config_manager.save_config(self.config)
             self.terms_accepted = True
         else:
-            QMessageBox.information(
-                self,
-                self.translate_text("required_conditions"),
-                self.translate_text(
-                    "you_must_accept_the_terms_of_use_and_privacy_policy_to_use_this"  # noqa: E501
-                ),
-            )
+            if not getattr(dialog, "decline_message_shown", False):
+                show_decline_message = getattr(
+                    dialog, "_show_required_conditions_message", None
+                )
+                if show_decline_message:
+                    show_decline_message()
+                else:
+                    QMessageBox.information(
+                        self,
+                        self.translate_text("required_conditions"),
+                        self.translate_text(
+                            "you_must_accept_the_terms_of_use_and_privacy_policy_to_use_this"  # noqa: E501
+                        ),
+                    )
             sys.exit(0)
 
     def closeEvent(self, event):

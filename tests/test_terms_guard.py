@@ -49,6 +49,37 @@ def test_enforce_records_acceptance(monkeypatch):
     assert saved["accepted_privacy"] is True
 
 
+def test_enforce_passes_custom_theme_to_dialog(monkeypatch):
+    from PySide6.QtWidgets import QDialog
+
+    import main
+
+    captured = {}
+
+    class FakeDialog:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+        def exec(self):
+            return QDialog.Accepted
+
+    class FakeConfigManager:
+        def save_config(self, config):
+            pass
+
+    config = {
+        "accepted_terms": False,
+        "accepted_privacy": False,
+        "custom_theme": "Kintsugi",
+        "dark_mode": True,
+    }
+    monkeypatch.setattr(main, "TermsAndPrivacyDialog", FakeDialog)
+
+    main.TermsGuard(config, FakeConfigManager()).enforce()
+
+    assert captured["theme_name"] == "Kintsugi"
+
+
 def test_enforce_records_reacceptance_timestamp(monkeypatch):
     from PySide6.QtWidgets import QDialog
 

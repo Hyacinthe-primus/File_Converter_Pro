@@ -851,7 +851,12 @@ class SettingsDialog(TranslationMixin, QDialog):
 
     def show_terms(self):
         dark_mode = self.config.get("dark_mode", False)
-        dialog = TermsAndPrivacyDialog(self, self.language, dark_mode=dark_mode)
+        dialog = TermsAndPrivacyDialog(
+            self,
+            self.language,
+            dark_mode=dark_mode,
+            theme_name=self.config.get("custom_theme"),
+        )
         dialog.tab_widget.setCurrentIndex(0)
         dialog.from_settings = True
         result = dialog.exec()
@@ -861,7 +866,12 @@ class SettingsDialog(TranslationMixin, QDialog):
 
     def show_privacy(self):
         dark_mode = self.config.get("dark_mode", False)
-        dialog = TermsAndPrivacyDialog(self, self.language, dark_mode=dark_mode)
+        dialog = TermsAndPrivacyDialog(
+            self,
+            self.language,
+            dark_mode=dark_mode,
+            theme_name=self.config.get("custom_theme"),
+        )
         dialog.tab_widget.setCurrentIndex(1)
         dialog.from_settings = True
         result = dialog.exec()

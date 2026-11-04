@@ -135,12 +135,15 @@ def get_current_theme(dark: bool) -> str:
     return "dark" if dark else "light"
 
 
-def _apply_dialog_btn(btn, object_name: str) -> None:
-    """Assign object_name and apply the active theme's button rules to btn.
+def _apply_dialog_btn(btn, object_name: str, theme: str | None = None) -> None:
+    """Assign object_name and apply dialog button rules to btn.
 
     Dialog buttons are styled explicitly so they keep the active theme even
     when their parent does not propagate its stylesheet. The rules come from
     the theme's style.qss; buttons.qss is only a legacy fallback.
+
+    Pass ``theme`` when the dialog's theme is known but the global theme has
+    not been applied yet, for example the first-run Terms dialog.
 
     Supported object names (defined in styles/themes/[theme/]style.qss):
         BtnOK        - green confirm button
@@ -151,7 +154,11 @@ def _apply_dialog_btn(btn, object_name: str) -> None:
     if btn is None:
         return
     btn.setObjectName(object_name)
-    if _BUTTONS_QSS is None:
-        _BUTTONS_QSS = _dialog_buttons_qss(_CURRENT_THEME)
-    if _BUTTONS_QSS:
-        btn.setStyleSheet(_BUTTONS_QSS)
+    if theme is not None:
+        qss = _dialog_buttons_qss(theme)
+    else:
+        if _BUTTONS_QSS is None:
+            _BUTTONS_QSS = _dialog_buttons_qss(_CURRENT_THEME)
+        qss = _BUTTONS_QSS
+    if qss:
+        btn.setStyleSheet(qss)

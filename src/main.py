@@ -568,7 +568,9 @@ class TermsGuard:
             return
 
         dialog = TermsAndPrivacyDialog(
-            language=self.config.get("language", "fr"), dark_mode=self.config.get("dark_mode", False)
+            language=self.config.get("language", "fr"),
+            dark_mode=self.config.get("dark_mode", False),
+            theme_name=self.config.get("custom_theme"),
         )
         if dialog.exec() != QDialog.Accepted:
             sys.exit(0)

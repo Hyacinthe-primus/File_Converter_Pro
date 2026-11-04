@@ -24,27 +24,49 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from qss_helpers import _apply_dialog_btn, _load_qss
+from qss_helpers import _apply_dialog_btn, _load_qss, get_current_theme
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
 from widgets import AnimatedCheckBox
 
 
 class TermsAndPrivacyDialog(TranslationMixin, QDialog):
-    def __init__(self, parent=None, language="fr", dark_mode=False):
+    def __init__(self, parent=None, language="fr", dark_mode=False, theme_name=None):
         super().__init__(parent)
         self.language = language
         self.dark_mode = dark_mode
+        self._theme_name = self._resolve_theme_name(parent, dark_mode, theme_name)
+        self._terms_qss = _load_qss("terms.qss", self._theme_name)
+        self._contact_links_css = _load_qss("contact_links.css", self._theme_name)
         self._tm = make_tm(language)
         self.setWindowTitle(self.translate_text("terms_of_use_and_privacy_policy"))
         self.setModal(True)
         self.setMinimumSize(800, 650)
         self.setWindowIcon(QIcon(self.get_icon_path()))
         self.closed_by_cross = False
+        self.decline_message_shown = False
 
-        self.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
+        self.setStyleSheet(self._terms_qss)
 
         self.setup_ui()
+
+    @staticmethod
+    def _resolve_theme_name(parent, dark_mode, theme_name=None):
+        """Resolve an explicit theme, the parent app's theme, or the active theme."""
+        if theme_name and theme_name not in ("dark", "light"):
+            return theme_name
+
+        parent_theme = getattr(parent, "current_theme", None) if parent else None
+        if parent_theme and parent_theme not in ("dark", "light"):
+            return parent_theme
+
+        if theme_name in ("dark", "light"):
+            return theme_name
+
+        active_theme = get_current_theme(dark_mode)
+        if active_theme and active_theme not in ("dark", "light"):
+            return active_theme
+        return "dark" if dark_mode else "light"
 
     def closeEvent(self, event):
         """Intercept closing via the X button to distinguish it from the Decline button"""
@@ -114,45 +136,40 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         self.tab_widget = QTabWidget()
 
         self.terms_tab = QWidget()
-        self.terms_tab.setStyleSheet(f"background-color: {'#2d2d2d' if self.dark_mode else '#ffffff'};")
         terms_layout = QVBoxLayout(self.terms_tab)
         terms_layout.setContentsMargins(15, 12, 15, 15)
 
-        title_color = "#ffffff" if self.dark_mode else "#212529"
         translated_msg = self.translate_text("terms_of_use")
-        terms_title = QLabel(f"<h2 style='color: {title_color}; margin: 0 0 8px 0;'>{translated_msg}</h2>")
-        terms_title.setStyleSheet(f"background-color: transparent; color: {title_color};")
+        terms_title = QLabel(f"<h2 style='margin: 0 0 8px 0;'>{translated_msg}</h2>")
         terms_layout.addWidget(terms_title)
 
         self.terms_text = QTextBrowser()
         self.terms_text.setReadOnly(True)
         self.terms_text.setOpenExternalLinks(False)
         self.terms_text.setOpenLinks(False)
-        self.terms_text.setHtml(self.get_terms_content())
         self.terms_text.setObjectName("TermsTextBrowser")
-        self.terms_text.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
+        self.terms_text.setStyleSheet(self._terms_qss)
         self.terms_text.document().setDefaultStyleSheet(self.get_html_theme_css())
+        self.terms_text.setHtml(self.get_terms_content())
         terms_layout.addWidget(self.terms_text)
 
         self.privacy_tab = QWidget()
-        self.privacy_tab.setStyleSheet(f"background-color: {'#2d2d2d' if self.dark_mode else '#ffffff'};")
         privacy_layout = QVBoxLayout(self.privacy_tab)
         privacy_layout.setContentsMargins(15, 12, 15, 15)
 
         privacy_title = QLabel(
-            f"<h2 style='color: {title_color}; margin: 0 0 8px 0;'>{self.translate_text('privacy_policy')}</h2>"
+            f"<h2 style='margin: 0 0 8px 0;'>{self.translate_text('privacy_policy')}</h2>"
         )
-        privacy_title.setStyleSheet(f"background-color: transparent; color: {title_color};")
         privacy_layout.addWidget(privacy_title)
 
         self.privacy_text = QTextBrowser()
         self.privacy_text.setReadOnly(True)
         self.privacy_text.setOpenExternalLinks(False)
         self.privacy_text.setOpenLinks(False)
-        self.privacy_text.setHtml(self.get_privacy_content())
         self.privacy_text.setObjectName("TermsTextBrowser")
-        self.privacy_text.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
+        self.privacy_text.setStyleSheet(self._terms_qss)
         self.privacy_text.document().setDefaultStyleSheet(self.get_html_theme_css())
+        self.privacy_text.setHtml(self.get_privacy_content())
         privacy_layout.addWidget(self.privacy_text)
 
         self.tab_widget.addTab(self.terms_tab, self.translate_text("terms_of_use"))
@@ -165,7 +182,7 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
 
         contact_group = QGroupBox(self.translate_text("Contact"))
         contact_group.setObjectName("ContactGroup")
-        contact_group.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
+        contact_group.setStyleSheet(self._terms_qss)
         contact_layout = QVBoxLayout(contact_group)
         contact_layout.setContentsMargins(12, 8, 12, 8)
         contact_layout.setSpacing(6)
@@ -174,13 +191,11 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         contact_links = QTextBrowser()
         contact_links.setReadOnly(True)
         contact_links.setOpenExternalLinks(True)
-        contact_links.setHtml(contact_links_html)
         contact_links.setMaximumHeight(70)
         contact_links.setObjectName("ContactLinks")
-        contact_links.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
-        contact_links.document().setDefaultStyleSheet(
-            _load_qss("contact_links.css", "dark" if self.dark_mode else "light")
-        )
+        contact_links.setStyleSheet(self._terms_qss)
+        contact_links.document().setDefaultStyleSheet(self._contact_links_css)
+        contact_links.setHtml(contact_links_html)
         contact_layout.addWidget(contact_links)
 
         layout.addWidget(contact_group)
@@ -190,11 +205,11 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
 
         self.terms_checkbox = AnimatedCheckBox(self.translate_text("i_accept_the_terms_of_use"))
         self.terms_checkbox.setObjectName("TermsCheckBox")
-        self.terms_checkbox.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
+        self.terms_checkbox.setStyleSheet(self._terms_qss)
 
         self.privacy_checkbox = AnimatedCheckBox(self.translate_text("i_accept_the_privacy_policy"))
         self.privacy_checkbox.setObjectName("TermsCheckBox")
-        self.privacy_checkbox.setStyleSheet(_load_qss("terms.qss", "dark" if self.dark_mode else "light"))
+        self.privacy_checkbox.setStyleSheet(self._terms_qss)
 
         checkbox_layout.addWidget(self.terms_checkbox)
         checkbox_layout.addWidget(self.privacy_checkbox)
@@ -207,29 +222,8 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         self.accept_button = QPushButton(self.translate_text("accept"))
         self.accept_button.setEnabled(False)
 
-        self.accept_button.setStyleSheet(f"""
-            QPushButton {{
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 6px;
-                font-weight: bold;
-                font-size: 12px;
-            }}
-            QPushButton:hover {{
-                background-color: #218838;
-            }}
-            QPushButton:pressed {{
-                background-color: #1e7e34;
-            }}
-            QPushButton:disabled {{
-                background-color: {"#4a4a4a" if self.dark_mode else "#d1d5db"};
-                color: {"#808080" if self.dark_mode else "#9ca3af"};
-            }}
-        """)
-
-        _apply_dialog_btn(self.decline_button, "BtnDecline")
+        _apply_dialog_btn(self.decline_button, "BtnDecline", theme=self._theme_name)
+        _apply_dialog_btn(self.accept_button, "BtnOK", theme=self._theme_name)
 
         button_layout.addStretch()
         button_layout.addWidget(self.decline_button)
@@ -261,8 +255,8 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
                 QDesktopServices.openUrl(url)
 
     def get_html_theme_css(self) -> str:
-        """Load HTML theme CSS from styles/themes/dark/ or light/."""
-        return _load_qss("terms_html.css", "dark" if self.dark_mode else "light")
+        """Load HTML theme CSS for the resolved active theme."""
+        return _load_qss("terms_html.css", self._theme_name)
 
     def get_compact_contact_links_html(self):
         """Generate ultra-compact HTML for contact links"""
@@ -270,16 +264,16 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
             return """
             <p style="margin:2px 0;font-size:9px;">
                 <strong>Développeur :</strong>
-                <a href="mailto:prime.enterprises.dev@gmail.com" style="font-weight:500;color:#3498db;">prime.enterprises.dev@gmail.com</a>
+                <a href="mailto:prime.enterprises.dev@gmail.com">prime.enterprises.dev@gmail.com</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
-                <a href="https://github.com/Hyacinthe-primus" style="margin-right:8px;color:#7c5cbf;">💻 GitHub</a>
-                <a href="https://www.instagram.com/___hyacinthe_" style="margin-right:8px;color:#7c5cbf;">📸 Instagram</a>
-                <a href="https://www.reddit.com/user/___Hyacinthe_/" style="color:#7c5cbf;">🔴 Reddit</a>
+                <a href="https://github.com/Hyacinthe-primus" style="margin-right:8px;">💻 GitHub</a>
+                <a href="https://www.instagram.com/___hyacinthe_" style="margin-right:8px;">📸 Instagram</a>
+                <a href="https://www.reddit.com/user/___Hyacinthe_/">🔴 Reddit</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
                 <a href="mailto:prime.enterprises.dev@gmail.com?subject=Report%20Bug%20from%20File%20Converter%20Pro"
-                   style="color:#e74c3c;font-weight:600;">
+                   class="warning">
                    🐛 Signaler un bug
                 </a>
             </p>
@@ -288,16 +282,16 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
             return """
             <p style="margin:2px 0;font-size:9px;">
                 <strong>Developer:</strong>
-                <a href="mailto:prime.enterprises.dev@gmail.com" style="font-weight:500;color:#3498db;">prime.enterprises.dev@gmail.com</a>
+                <a href="mailto:prime.enterprises.dev@gmail.com">prime.enterprises.dev@gmail.com</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
-                <a href="https://github.com/Hyacinthe-primus" style="margin-right:8px;color:#7c5cbf;">💻 GitHub</a>
-                <a href="https://www.instagram.com/___hyacinthe_" style="margin-right:8px;color:#7c5cbf;">📸 Instagram</a>
-                <a href="https://www.reddit.com/user/___Hyacinthe_/" style="color:#7c5cbf;">🔴 Reddit</a>
+                <a href="https://github.com/Hyacinthe-primus" style="margin-right:8px;">💻 GitHub</a>
+                <a href="https://www.instagram.com/___hyacinthe_" style="margin-right:8px;">📸 Instagram</a>
+                <a href="https://www.reddit.com/user/___Hyacinthe_/">🔴 Reddit</a>
             </p>
             <p style="margin:2px 0;font-size:9px;">
                 <a href="mailto:prime.enterprises.dev@gmail.com?subject=Bug%20Report%20from%20File%20Converter%20Pro"
-                style="color:#e74c3c;font-weight:600;">
+                class="warning">
                 🐛 Report a Bug
                 </a>
             </p>
@@ -389,16 +383,27 @@ class TermsAndPrivacyDialog(TranslationMixin, QDialog):
         if self.terms_checkbox.isChecked() and self.privacy_checkbox.isChecked():
             super().accept()
 
+    def _show_required_conditions_message(self):
+        """Show the decline warning with the dialog's active theme."""
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Information)
+        box.setWindowTitle(self.translate_text("required_conditions"))
+        box.setText(
+            self.translate_text(
+                "you_must_accept_the_terms_of_use_and_privacy_policy_to_use_this"
+            )
+        )
+        box.setStandardButtons(QMessageBox.Ok)
+        box.setStyleSheet(self._terms_qss)
+        _apply_dialog_btn(box.button(QMessageBox.Ok), "BtnOK", theme=self._theme_name)
+        self.decline_message_shown = True
+        box.exec()
+        return box
+
     def reject(self):
         """Handle click on Decline"""
         if hasattr(self, "from_settings") and self.from_settings:
             super().reject()
         else:
-            QMessageBox.information(
-                self,
-                self.translate_text("required_conditions"),
-                self.translate_text(
-                    "you_must_accept_the_terms_of_use_and_privacy_policy_to_use_this"
-                ),
-            )
+            self._show_required_conditions_message()
             super().reject()
