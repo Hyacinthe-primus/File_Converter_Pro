@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (
 )
 
 from context_menu.formats import CONVERSION_MAP, LABELS, MERGE_DISPATCH
+from pdf_text import convert_pdf_text_to_docx
 from qss_helpers import _load_qss
 from utils import SRC_DIR
 
@@ -37,6 +38,9 @@ _COLLECT_MAX_SEC = 8.0
 _COLLECT_POLL_SEC = 0.05
 _COLLECT_EPOCH_SEC = 15.0
 
+_PDF_TO_WORD_MODE_DEFAULT = "with_images"
+_PDF_TO_WORD_MODES = frozenset({"with_images", "text_only"})
+
 
 class _ConversionCancelled(Exception):
     """Raised when the user cancels a quick conversion."""
@@ -45,6 +49,61 @@ class _ConversionCancelled(Exception):
 def _raise_if_cancelled(cancel_event: threading.Event | None) -> None:
     if cancel_event is not None and cancel_event.is_set():
         raise _ConversionCancelled()
+
+
+def _normalise_pdf_to_word_mode(mode: object) -> str:
+    if isinstance(mode, str) and mode in _PDF_TO_WORD_MODES:
+        return mode
+    return _PDF_TO_WORD_MODE_DEFAULT
+
+
+def _load_quick_config() -> dict:
+    try:
+        from config import ConfigManager
+
+        config = ConfigManager().load_config()
+    except Exception:
+        return {}
+    return config if isinstance(config, dict) else {}
+
+
+def _load_pdf_to_word_mode(config: dict | None = None) -> str:
+    """Read and validate the persisted PDF→Word mode for Quick Convert."""
+    if config is None:
+        config = _load_quick_config()
+    if not isinstance(config, dict):
+        return _PDF_TO_WORD_MODE_DEFAULT
+    return _normalise_pdf_to_word_mode(config.get("pdf_to_word_mode"))
+
+
+def _create_source_backups(files: list[str]) -> None:
+    from converter.helpers import create_backup
+
+    seen = set()
+    for src in files:
+        key = os.path.normcase(os.path.realpath(src))
+        if key in seen:
+            continue
+        seen.add(key)
+        if create_backup(src, overwrite=False) is None:
+            name = os.path.basename(src) or src
+            raise RuntimeError(f"Backup failed for {name}; conversion not started.")
+
+
+def _solid_fitz_fallback(pdf_path: str, docx_path: str) -> None:
+    from app.mixins.pdf_to_word import PdfToWordMixin
+
+    PdfToWordMixin()._solid_fitz_fallback(pdf_path, docx_path)
+
+
+def _temporary_docx_path(dst_path: str) -> str:
+    fd, temp_path = tempfile.mkstemp(
+        prefix="~fcp_pdf_word_",
+        suffix=".docx",
+        dir=os.path.dirname(dst_path),
+    )
+    os.close(fd)
+    return temp_path
 
 
 def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
@@ -127,13 +186,16 @@ def _sort_files(files: list, order: str) -> list:
 def _convert_image_to_pdf(src: str, dst_dir: str) -> None:
     import fitz
 
+    from utils.image_formats import decodable_image_path
+
     out = os.path.join(dst_dir, f"{Path(src).stem}.pdf")
     pdf = fitz.open()
-    img = fitz.open(src)
-    rect = img[0].rect
-    page = pdf.new_page(width=rect.width, height=rect.height)
-    page.insert_image(rect, filename=src)
-    img.close()
+    with decodable_image_path(src) as readable:
+        img = fitz.open(readable)
+        rect = img[0].rect
+        page = pdf.new_page(width=rect.width, height=rect.height)
+        page.insert_image(rect, filename=readable)
+        img.close()
     pdf.save(out)
     pdf.close()
 
@@ -143,15 +205,18 @@ def _merge_images_to_pdf(
 ) -> None:
     import fitz
 
+    from utils.image_formats import decodable_image_path
+
     pdf = fitz.open()
     try:
         for src in files:
             _raise_if_cancelled(cancel_event)
-            img = fitz.open(src)
-            rect = img[0].rect
-            page = pdf.new_page(width=rect.width, height=rect.height)
-            page.insert_image(rect, filename=src)
-            img.close()
+            with decodable_image_path(src) as readable:
+                img = fitz.open(readable)
+                rect = img[0].rect
+                page = pdf.new_page(width=rect.width, height=rect.height)
+                page.insert_image(rect, filename=readable)
+                img.close()
         import time as _time
 
         out = os.path.join(dst_dir, f"merged_images_{_time.strftime('%Y%m%d_%H%M%S')}.pdf")
@@ -274,7 +339,10 @@ def _convert_docx_to_pdf(src: str, dst_dir: str) -> None:
 
 
 def _convert_pdf_to_docx(
-    src: str, dst_dir: str, cancel_event: threading.Event | None = None
+    src: str,
+    dst_dir: str,
+    cancel_event: threading.Event | None = None,
+    mode: str = _PDF_TO_WORD_MODE_DEFAULT,
 ) -> None:
     import sys
 
@@ -283,6 +351,30 @@ def _convert_pdf_to_docx(
     out = os.path.join(dst_dir, f"{Path(src).stem}.docx")
     src_abs = os.path.abspath(src)
     out_abs = os.path.abspath(out)
+
+    if _normalise_pdf_to_word_mode(mode) == "text_only":
+        temp_path = _temporary_docx_path(out_abs)
+        try:
+            try:
+                convert_pdf_text_to_docx(
+                    src_abs,
+                    temp_path,
+                    cancel_check=lambda: _raise_if_cancelled(cancel_event),
+                )
+            except _ConversionCancelled:
+                raise
+            except Exception:
+                _raise_if_cancelled(cancel_event)
+                _solid_fitz_fallback(src_abs, temp_path)
+            _raise_if_cancelled(cancel_event)
+            os.replace(temp_path, out_abs)
+        except Exception:
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+            raise
+        return
 
     # Tier 1: Word COM (best quality, Windows only)
     if sys.platform == "win32":
@@ -470,7 +562,13 @@ class ConversionThread(QThread):
             if base not in sys.path:
                 sys.path.insert(0, base)
 
+            runtime_config = _load_quick_config()
             dst_dir = os.path.dirname(self.files[0])
+            pdf_to_word_mode = _PDF_TO_WORD_MODE_DEFAULT
+            if self.conversion_type == "pdf_to_docx":
+                pdf_to_word_mode = _load_pdf_to_word_mode(runtime_config)
+            if bool(runtime_config.get("backup_before_conversion", False)):
+                _create_source_backups(self.files)
 
             if self.conversion_type == "images_to_pdf_merged":
                 _merge_images_to_pdf(self.files, dst_dir, self._cancel_event)
@@ -499,21 +597,20 @@ class ConversionThread(QThread):
                     elif self.conversion_type == "docx_to_pdf":
                         _convert_docx_to_pdf(f, f_dst_dir)
                     elif self.conversion_type == "pdf_to_docx":
-                        _convert_pdf_to_docx(f, f_dst_dir, self._cancel_event)
+                        _convert_pdf_to_docx(
+                            f,
+                            f_dst_dir,
+                            self._cancel_event,
+                            mode=pdf_to_word_mode,
+                        )
                     else:
                         from converter.converters import AdvancedConverterEngine
 
                         engine = AdvancedConverterEngine()
-                        try:
-                            from config import ConfigManager
-
-                            _cfg = ConfigManager().load_config()
-                            engine.backup_enabled = _cfg.get("backup_before_conversion", False)
-                            engine.allow_local_html_resources = _cfg.get(
-                                "allow_local_resources_in_html_to_pdf", False
-                            )
-                        except Exception:
-                            pass
+                        engine.backup_enabled = False
+                        engine.allow_local_html_resources = runtime_config.get(
+                            "allow_local_resources_in_html_to_pdf", False
+                        )
                         result = engine.convert(self.conversion_type, f, f_dst_dir)
                         if not result.success:
                             raise Exception(result.error)

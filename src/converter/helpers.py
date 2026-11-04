@@ -52,16 +52,57 @@ def _safe_html(text):
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def create_backup(src: str, suffix: str = ".bak") -> str | None:
+def _create_backup_exclusive(src: str, suffix: str) -> str | None:
+    import shutil
+
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0)
+    counter = 0
+    while True:
+        backup_path = f"{src}{suffix}" if counter == 0 else f"{src}{suffix}.{counter}"
+        try:
+            fd = os.open(backup_path, flags, 0o600)
+        except FileExistsError:
+            counter += 1
+            continue
+        except OSError as e:
+            print(f"[BACKUP] Could not create backup for {src}: {e}")
+            return None
+        break
+
+    try:
+        with open(src, "rb") as src_file:
+            with os.fdopen(fd, "wb") as dst_file:
+                fd = -1
+                shutil.copyfileobj(src_file, dst_file)
+        shutil.copystat(src, backup_path)
+        return backup_path
+    except Exception as e:
+        if fd >= 0:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        try:
+            os.unlink(backup_path)
+        except OSError:
+            pass
+        print(f"[BACKUP] Could not create backup for {src}: {e}")
+        return None
+
+
+def create_backup(src: str, suffix: str = ".bak", overwrite: bool = True) -> str | None:
     """
     Create a backup copy of *src* with the given suffix appended.
     Returns the backup path, or None if the source doesn't exist or copy fails.
-    Cross-platform: uses shutil.copy2 which preserves metadata on all OSes.
+    Cross-platform: uses shutil.copy2 for overwrite=True and an exclusive
+    create/copy/copystat path for overwrite=False.
     """
     import shutil
 
     if not os.path.isfile(src):
         return None
+    if not overwrite:
+        return _create_backup_exclusive(src, suffix)
     backup_path = f"{src}{suffix}"
     try:
         shutil.copy2(src, backup_path)

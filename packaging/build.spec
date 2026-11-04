@@ -237,7 +237,8 @@ SHARED_HIDDEN = [
     'apscheduler.triggers.cron', 'apscheduler.triggers.interval',
     'tomli',
     'daemon',
-    'qss_helpers'
+    'qss_helpers',
+    'pdf_text',
 ]
 
 SHARED_EXCLUDES = [

@@ -42,6 +42,9 @@ MERGE_ACTIONS = {MERGE_IMAGE_ACTION, MERGE_PDF_ACTION, MERGE_DOCX_ACTION}
 
 MERGE_DEBOUNCE_SECONDS = 2.0
 
+_PDF_TO_WORD_MODE_DEFAULT = "with_images"
+_PDF_TO_WORD_MODES = frozenset({"with_images", "text_only"})
+
 IMAGE_EXTENSIONS = {
     "jpg",
     "jpeg",
@@ -252,6 +255,21 @@ def _build_conversion_type(src_ext: str, dst_fmt: str) -> str | None:
     return None
 
 
+def _load_pdf_to_word_mode() -> str:
+    try:
+        from config import ConfigManager
+
+        config = ConfigManager().load_config()
+    except Exception:
+        return _PDF_TO_WORD_MODE_DEFAULT
+    if not isinstance(config, dict):
+        return _PDF_TO_WORD_MODE_DEFAULT
+    mode = config.get("pdf_to_word_mode")
+    if isinstance(mode, str) and mode in _PDF_TO_WORD_MODES:
+        return mode
+    return _PDF_TO_WORD_MODE_DEFAULT
+
+
 def _run_conversion(conversion_type: str, src: str, output_dir: str, ocr: bool = False) -> None:
     os.makedirs(output_dir, exist_ok=True)
     if conversion_type == "image_to_pdf":
@@ -273,7 +291,7 @@ def _run_conversion(conversion_type: str, src: str, output_dir: str, ocr: bool =
     elif conversion_type == "pdf_to_docx":
         from context_menu.window import _convert_pdf_to_docx
 
-        _convert_pdf_to_docx(src, output_dir)
+        _convert_pdf_to_docx(src, output_dir, mode=_load_pdf_to_word_mode())
     else:
         from converter.converters import AdvancedConverterEngine
 

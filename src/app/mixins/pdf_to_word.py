@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from pdf_text import convert_pdf_text_to_docx
 from templates import semantic_keys as sk
 
 try:
@@ -924,23 +925,7 @@ class PdfToWordMixin:
 
     def convert_pdf_to_docx_text_only(self, pdf_path, docx_path):
         try:
-            import fitz
-
-            doc = Document()
-            pdf_document = fitz.open(pdf_path)
-            for page_num in range(len(pdf_document)):
-                page = pdf_document.load_page(page_num)
-                text = page.get_text("text")
-                if text.strip():
-                    lines = text.split("\n")
-                    for line in lines:
-                        line = line.strip()
-                        if line:
-                            doc.add_paragraph(line)
-                if page_num < len(pdf_document) - 1:
-                    doc.add_page_break()
-            pdf_document.close()
-            doc.save(docx_path)
+            convert_pdf_text_to_docx(pdf_path, docx_path)
         except Exception:
             self._solid_fitz_fallback(pdf_path, docx_path)
 
