@@ -11,7 +11,6 @@ import sys
 import tempfile
 import threading
 import time
-from pathlib import Path
 
 from PySide6.QtCore import Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QIcon
@@ -27,6 +26,22 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from context_menu.conversion_helpers import (
+    _PDF_TO_WORD_MODE_DEFAULT,
+    _PDF_TO_WORD_MODES,  # noqa: F401
+    _ConversionCancelled,
+    _convert_docx_to_pdf,
+    _convert_image_to_pdf,
+    _convert_pdf_to_docx_impl,
+    _merge_docx,
+    _merge_images_to_pdf,
+    _merge_pdfs,
+    _normalise_pdf_to_word_mode,
+    _raise_if_cancelled,
+    _solid_fitz_fallback,
+    _sort_files,  # noqa: F401
+    _temporary_docx_path,  # noqa: F401
+)
 from context_menu.formats import CONVERSION_MAP, LABELS, MERGE_DISPATCH
 from pdf_text import convert_pdf_text_to_docx
 from qss_helpers import _load_qss
@@ -37,24 +52,6 @@ _COLLECT_STABLE_SEC = 0.5
 _COLLECT_MAX_SEC = 8.0
 _COLLECT_POLL_SEC = 0.05
 _COLLECT_EPOCH_SEC = 15.0
-
-_PDF_TO_WORD_MODE_DEFAULT = "with_images"
-_PDF_TO_WORD_MODES = frozenset({"with_images", "text_only"})
-
-
-class _ConversionCancelled(Exception):
-    """Raised when the user cancels a quick conversion."""
-
-
-def _raise_if_cancelled(cancel_event: threading.Event | None) -> None:
-    if cancel_event is not None and cancel_event.is_set():
-        raise _ConversionCancelled()
-
-
-def _normalise_pdf_to_word_mode(mode: object) -> str:
-    if isinstance(mode, str) and mode in _PDF_TO_WORD_MODES:
-        return mode
-    return _PDF_TO_WORD_MODE_DEFAULT
 
 
 def _load_quick_config() -> dict:
@@ -88,22 +85,6 @@ def _create_source_backups(files: list[str]) -> None:
         if create_backup(src, overwrite=False) is None:
             name = os.path.basename(src) or src
             raise RuntimeError(f"Backup failed for {name}; conversion not started.")
-
-
-def _solid_fitz_fallback(pdf_path: str, docx_path: str) -> None:
-    from app.mixins.pdf_to_word import PdfToWordMixin
-
-    PdfToWordMixin()._solid_fitz_fallback(pdf_path, docx_path)
-
-
-def _temporary_docx_path(dst_path: str) -> str:
-    fd, temp_path = tempfile.mkstemp(
-        prefix="~fcp_pdf_word_",
-        suffix=".docx",
-        dir=os.path.dirname(dst_path),
-    )
-    os.close(fd)
-    return temp_path
 
 
 def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
@@ -155,384 +136,20 @@ AUTO_CLOSE_DELAY_MS = 1800
 CANCEL_GRACE_MS = 5000
 
 
-def _sort_files(files: list, order: str) -> list:
-    if order == "none" or not order:
-        return files
-    if order == "alphabetical_asc":
-        return sorted(files, key=lambda f: Path(f).name.lower())
-    if order == "alphabetical_desc":
-        return sorted(files, key=lambda f: Path(f).name.lower(), reverse=True)
-    if order == "numerical_asc":
-        import re
-
-        return sorted(
-            files, key=lambda f: [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", Path(f).name)]
-        )
-    if order == "numerical_desc":
-        import re
-
-        return sorted(
-            files,
-            key=lambda f: [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", Path(f).name)],
-            reverse=True,
-        )
-    if order == "date_asc":
-        return sorted(files, key=lambda f: Path(f).stat().st_mtime)
-    if order == "date_desc":
-        return sorted(files, key=lambda f: Path(f).stat().st_mtime, reverse=True)
-    return files
-
-
-def _convert_image_to_pdf(src: str, dst_dir: str) -> None:
-    import fitz
-
-    from utils.image_formats import decodable_image_path
-
-    out = os.path.join(dst_dir, f"{Path(src).stem}.pdf")
-    pdf = fitz.open()
-    with decodable_image_path(src) as readable:
-        img = fitz.open(readable)
-        rect = img[0].rect
-        page = pdf.new_page(width=rect.width, height=rect.height)
-        page.insert_image(rect, filename=readable)
-        img.close()
-    pdf.save(out)
-    pdf.close()
-
-
-def _merge_images_to_pdf(
-    files: list, dst_dir: str, cancel_event: threading.Event | None = None
-) -> None:
-    import fitz
-
-    from utils.image_formats import decodable_image_path
-
-    pdf = fitz.open()
-    try:
-        for src in files:
-            _raise_if_cancelled(cancel_event)
-            with decodable_image_path(src) as readable:
-                img = fitz.open(readable)
-                rect = img[0].rect
-                page = pdf.new_page(width=rect.width, height=rect.height)
-                page.insert_image(rect, filename=readable)
-                img.close()
-        import time as _time
-
-        out = os.path.join(dst_dir, f"merged_images_{_time.strftime('%Y%m%d_%H%M%S')}.pdf")
-        pdf.save(out)
-    finally:
-        pdf.close()
-
-
-def _merge_pdfs(
-    files: list, dst_dir: str, order: str, cancel_event: threading.Event | None = None
-) -> None:
-    import fitz
-
-    merged = fitz.open()
-    try:
-        import time as _time
-
-        for f in _sort_files(files, order):
-            _raise_if_cancelled(cancel_event)
-            doc = fitz.open(f)
-            merged.insert_pdf(doc)
-            doc.close()
-        merged.save(os.path.join(dst_dir, f"merged_{_time.strftime('%Y%m%d_%H%M%S')}.pdf"))
-    finally:
-        merged.close()
-
-
-def _merge_docx(
-    files: list, dst_dir: str, order: str, cancel_event: threading.Event | None = None
-) -> None:
-    import time as _time
-
-    from docx import Document
-    from docx.oxml import OxmlElement
-    from docx.oxml.ns import qn
-    from docxcompose.composer import Composer
-
-    _raise_if_cancelled(cancel_event)
-    sorted_files = _sort_files(files, order)
-    merged = Document(sorted_files[0])
-    composer = Composer(merged)
-
-    for f in sorted_files[1:]:
-        _raise_if_cancelled(cancel_event)
-        doc = Document(f)
-        p = OxmlElement("w:p")
-        r = OxmlElement("w:r")
-        br = OxmlElement("w:br")
-        br.set(qn("w:type"), "page")
-        r.append(br)
-        p.append(r)
-        doc.element.body.insert(0, p)
-        composer.append(doc)
-
-    merged.save(os.path.join(dst_dir, f"merged_{_time.strftime('%Y%m%d_%H%M%S')}.docx"))
-
-
-def _convert_docx_to_pdf(src: str, dst_dir: str) -> None:
-    out = os.path.join(dst_dir, f"{Path(src).stem}.pdf")
-    src_abs = os.path.abspath(src)
-    out_abs = os.path.abspath(out)
-
-    try:
-        from docx2pdf import convert
-
-        convert(src_abs, out_abs)
-        return
-    except Exception as e:
-        print(f"[docx→pdf] docx2pdf failed: {e}")
-
-    try:
-        import comtypes.client
-
-        word = comtypes.client.CreateObject("Word.Application")
-        word.Visible = False
-        doc = word.Documents.Open(src_abs)
-        doc.SaveAs(out_abs, FileFormat=17)
-        doc.Close(False)
-        word.Quit()
-        return
-    except Exception as e:
-        print(f"[docx→pdf] COM failed: {e}")
-
-    try:
-        import subprocess
-
-        from external_binaries import resolve_binary
-
-        exe = resolve_binary("libreoffice")
-        if exe:
-            subprocess.run(
-                [exe, "--headless", "--convert-to", "pdf", "--outdir", dst_dir, src_abs],
-                check=True,
-                capture_output=True,
-                timeout=60,
-            )
-            return
-    except Exception as e:
-        print(f"[docx→pdf] LibreOffice failed: {e}")
-
-    try:
-        from docx import Document as DocxDoc
-        from reportlab.lib.pagesizes import A4
-        from reportlab.lib.styles import getSampleStyleSheet
-        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
-
-        doc = DocxDoc(src_abs)
-        styles = getSampleStyleSheet()
-        story = []
-        for para in doc.paragraphs:
-            if para.text.strip():
-                story.append(Paragraph(para.text, styles["Normal"]))
-                story.append(Spacer(1, 6))
-        SimpleDocTemplate(out_abs, pagesize=A4).build(story)
-        return
-    except Exception as e:
-        print(f"[docx→pdf] reportlab failed: {e}")
-
-    raise RuntimeError("All DOCX→PDF methods failed.")
-
-
 def _convert_pdf_to_docx(
     src: str,
     dst_dir: str,
     cancel_event: threading.Event | None = None,
     mode: str = _PDF_TO_WORD_MODE_DEFAULT,
 ) -> None:
-    import sys
-
-    _raise_if_cancelled(cancel_event)
-
-    out = os.path.join(dst_dir, f"{Path(src).stem}.docx")
-    src_abs = os.path.abspath(src)
-    out_abs = os.path.abspath(out)
-
-    if _normalise_pdf_to_word_mode(mode) == "text_only":
-        temp_path = _temporary_docx_path(out_abs)
-        try:
-            try:
-                convert_pdf_text_to_docx(
-                    src_abs,
-                    temp_path,
-                    cancel_check=lambda: _raise_if_cancelled(cancel_event),
-                )
-            except _ConversionCancelled:
-                raise
-            except Exception:
-                _raise_if_cancelled(cancel_event)
-                _solid_fitz_fallback(src_abs, temp_path)
-            _raise_if_cancelled(cancel_event)
-            os.replace(temp_path, out_abs)
-        except Exception:
-            try:
-                os.remove(temp_path)
-            except OSError:
-                pass
-            raise
-        return
-
-    # Tier 1: Word COM (best quality, Windows only)
-    if sys.platform == "win32":
-        _raise_if_cancelled(cancel_event)
-        try:
-            import winreg
-
-            winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, "Word.Application")
-            _word_available = True
-        except (OSError, ImportError):
-            _word_available = False
-            print("[pdf→docx] Word not found in registry — skipping COM tier")
-
-        if _word_available:
-            result = {"ok": False}
-            stop_event = threading.Event()
-
-            def _dialog_dismisser():
-                import ctypes
-                import ctypes.wintypes
-                import time as _t
-
-                user32 = ctypes.windll.user32
-                BM_CLICK = 0x00F5
-
-                DialogProc = ctypes.WINFUNCTYPE(
-                    ctypes.c_bool,
-                    ctypes.wintypes.HWND,
-                    ctypes.wintypes.LPARAM,
-                )
-
-                def _find_ok_button(hwnd_dialog):
-                    found = ctypes.wintypes.HWND(0)
-
-                    @DialogProc
-                    def _enum(hwnd_child, _lp):
-                        buf = ctypes.create_unicode_buffer(64)
-                        user32.GetWindowTextW(hwnd_child, buf, 64)
-                        if buf.value.strip().upper() in ("OK", "O&K"):
-                            found.value = hwnd_child
-                            return False
-                        if user32.GetDlgCtrlID(hwnd_child) == 1:
-                            found.value = hwnd_child
-                            return False
-                        return True
-
-                    user32.EnumChildWindows(hwnd_dialog, _enum, 0)
-                    return found.value or None
-
-                dialog_classes = ["#32770", "bosa_sdm_msword"]
-                target_title = "Microsoft Word"
-
-                while not stop_event.is_set():
-                    for cls in dialog_classes:
-                        hwnd = user32.FindWindowW(cls, None)
-                        if hwnd:
-                            ok_btn = _find_ok_button(hwnd)
-                            if ok_btn:
-                                user32.SendMessageW(ok_btn, BM_CLICK, 0, 0)
-                            else:
-                                user32.SendMessageW(hwnd, 0x0111, 1, 0)
-                    hwnd = user32.FindWindowW(None, target_title)
-                    if hwnd:
-                        ok_btn = _find_ok_button(hwnd)
-                        if ok_btn:
-                            user32.SendMessageW(ok_btn, BM_CLICK, 0, 0)
-                        else:
-                            user32.SendMessageW(hwnd, 0x0111, 1, 0)
-                    _t.sleep(0.3)
-
-            def _com_worker():
-                word = None
-                doc = None
-                try:
-                    import comtypes.client
-                    import pythoncom
-
-                    pythoncom.CoInitialize()
-                    word = comtypes.client.CreateObject("Word.Application")
-                    word.Visible = False
-                    word.DisplayAlerts = 0
-                    word.AutomationSecurity = 3
-                    doc = word.Documents.Open(
-                        src_abs,
-                        ConfirmConversions=False,
-                        ReadOnly=True,
-                        AddToRecentFiles=False,
-                        NoEncodingDialog=True,
-                    )
-                    doc.SaveAs2(out_abs, FileFormat=16)
-                    result["ok"] = True
-                    print(f"[pdf→docx] Word COM success: {Path(src_abs).name}")
-                except Exception as e:
-                    print(f"[pdf→docx] COM failed: {e}")
-                finally:
-                    if doc is not None:
-                        try:
-                            doc.Close(False)
-                        except Exception:
-                            pass
-                    if word is not None:
-                        try:
-                            word.Quit()
-                        except Exception:
-                            pass
-                    try:
-                        import pythoncom as _pc
-
-                        _pc.CoUninitialize()
-                    except Exception:
-                        pass
-
-            dismisser = threading.Thread(target=_dialog_dismisser, daemon=True)
-            dismisser.start()
-            worker = threading.Thread(target=_com_worker, daemon=True)
-            worker.start()
-            worker.join(timeout=60)
-            stop_event.set()
-            _raise_if_cancelled(cancel_event)
-
-            if result["ok"]:
-                return
-            print("[pdf→docx] COM timed out or failed — falling back")
-
-    # Tier 2: pdf2docx
-    _raise_if_cancelled(cancel_event)
-    try:
-        from pdf2docx import Converter
-
-        cv = Converter(src_abs)
-        cv.convert(out_abs, parse_drawing=True)
-        cv.close()
-        return
-    except Exception as e:
-        print(f"[pdf→docx] pdf2docx failed: {e}")
-
-    # Tier 3: fitz + python-docx (text only)
-    _raise_if_cancelled(cancel_event)
-    try:
-        import fitz
-        from docx import Document as DocxDoc
-
-        pdf_doc = fitz.open(src_abs)
-        word_doc = DocxDoc()
-        for page_num in range(len(pdf_doc)):
-            text = pdf_doc.load_page(page_num).get_text("text")
-            for line in text.split("\n"):
-                if line.strip():
-                    word_doc.add_paragraph(line.strip())
-            if page_num < len(pdf_doc) - 1:
-                word_doc.add_page_break()
-        pdf_doc.close()
-        word_doc.save(out_abs)
-        return
-    except Exception as e:
-        print(f"[pdf→docx] fitz failed: {e}")
-
-    raise RuntimeError("All PDF→DOCX methods failed.")
+    _convert_pdf_to_docx_impl(
+        src,
+        dst_dir,
+        cancel_event,
+        mode,
+        text_converter=convert_pdf_text_to_docx,
+        fallback=_solid_fitz_fallback,
+    )
 
 
 class ConversionThread(QThread):
@@ -595,7 +212,7 @@ class ConversionThread(QThread):
                     if self.conversion_type == "image_to_pdf":
                         _convert_image_to_pdf(f, f_dst_dir)
                     elif self.conversion_type == "docx_to_pdf":
-                        _convert_docx_to_pdf(f, f_dst_dir)
+                        _convert_docx_to_pdf(f, f_dst_dir, self._cancel_event)
                     elif self.conversion_type == "pdf_to_docx":
                         _convert_pdf_to_docx(
                             f,

@@ -9,6 +9,9 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
+from utils.conversion_pipeline import run_conversion_pipeline
+from utils.pdf_artifacts import validate_docx_artifact, validate_pdf_artifact
+
 _BATCH_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".tif", ".webp"}
 _OPENDOCUMENT_EXTS = {".odt", ".ods", ".odp"}
 _ENGINE_TO_PDF = {
@@ -76,9 +79,11 @@ class BatchMixin:
             t0 = _time.perf_counter()
             fp = task["input_path"]
             out = task["output_path"]
+            self._last_batch_error = ""
             ok = self._convert_batch_file(fp, out, target_format)
             if not ok:
-                return {"success": False, "input_path": fp, "error": "Unsupported conversion"}
+                error = self._last_batch_error or "Unsupported conversion"
+                return {"success": False, "input_path": fp, "error": error}
             fs = os.path.getsize(fp) if os.path.exists(fp) else 0
             return {
                 "success": True,
@@ -114,25 +119,51 @@ class BatchMixin:
                 )
                 nonlocal success_count
                 success_count += 1
+            else:
+                self.db_manager.add_conversion_record(
+                    source_file=result.get("input_path", "?"),
+                    source_format=Path(result.get("input_path", "?")).suffix.upper().replace(".", ""),
+                    target_file="",
+                    target_format=ext.upper(),
+                    operation_type="batch_conversion",
+                    file_size=0,
+                    conversion_time=0,
+                    success=False,
+                    notes=f"Error: {result.get('error', '')}",
+                )
 
         def _on_finished(summary):
             self.show_progress(False)
             total_time = (datetime.now() - start_time).total_seconds()
             self.achievement_system.record_batch_conversion(len(files))
             target_label = {"pdf": "PDF", "docx": "DOCX", "png": "png_images"}.get(target_format, target_format.upper())
-            if success_count:
-                QMessageBox.information(
-                    self,
-                    self.translate_text("batch_conversion_result"),
-                    f"{success_count}/{len(files)} {self.translate_text('files_converted_to')} "
-                    f"{self.translate_text(target_label)} ({total_time:.1f}s)",
-                )
-            else:
+            completed = summary.get("success_count", success_count)
+            failed = summary.get("failed", [])
+            result_text = (
+                f"{completed}/{len(files)} {self.translate_text('files_converted_to')} "
+                f"{self.translate_text(target_label)} ({total_time:.1f}s)"
+            )
+            if failed or completed < len(files):
+                failure_lines = [
+                    self.translate_text("error_with_file").format(
+                        filename=Path(item.get("name", "?")).name,
+                        error=item.get("error", ""),
+                    )
+                    for item in failed
+                ]
+                if failure_lines:
+                    result_text += "\n\n" + "\n".join(failure_lines)
                 QMessageBox.warning(
                     self,
                     self.translate_text("batch_conversion_result"),
-                    self.translate_text("no_files_converted_check_supported_formats"),
+                    result_text,
                 )
+                return
+            QMessageBox.information(
+                self,
+                self.translate_text("batch_conversion_result"),
+                result_text,
+            )
 
         from conversion_worker import ConversionWorker
 
@@ -159,18 +190,27 @@ class BatchMixin:
 
     def _batch_to_pdf(self, fp: str, out: str, ext: str) -> bool:
         """Route a single file to PDF."""
+        self._last_batch_error = ""
         if ext in (".docx", ".doc"):
-            try:
-                if self.convert_word_to_pdf_com(fp, out):
-                    return True
-            except Exception:
-                pass
-            try:
-                if self._convert_docx_to_pdf_libreoffice(fp, out):
-                    return True
-            except Exception:
-                pass
-            return bool(self.convert_docx_to_pdf_simple(fp, out))
+            engines = [
+                ("COM", lambda target: self.convert_word_to_pdf_com(fp, target)),
+                ("LibreOffice", lambda target: self._convert_docx_to_pdf_libreoffice(fp, target)),
+                ("ReportLab", lambda target: self.convert_docx_to_pdf_simple(fp, target)),
+            ]
+            result = run_conversion_pipeline(
+                out,
+                engines,
+                validate_pdf_artifact,
+                stage_mode="directory",
+                stage_dir_prefix="~fcp_pdf_stage_",
+                staged_prefix="~fcp_pdf_",
+                staged_suffix=".pdf",
+            )
+            if result.success:
+                return True
+            self._last_batch_error = "Word to PDF conversion failed: " + result.error
+            print(f"[BATCH] Word->PDF failed for {Path(fp).name}: {result.error}")
+            return False
         if ext == ".pdf":
             return self._batch_copy(fp, out)
         if ext in _BATCH_IMAGE_EXTS:
@@ -210,18 +250,24 @@ class BatchMixin:
 
     def _batch_pdf_to_docx(self, fp: str, out: str) -> bool:
         """Convert a PDF to DOCX using COM → LibreOffice → native fallback."""
-        try:
-            if self._try_word_com_pdf_to_docx(fp, out):
-                return True
-        except Exception:
-            pass
-        try:
-            if self._convert_pdf_to_docx_libreoffice(fp, out):
-                return True
-        except Exception:
-            pass
-        self._solid_fitz_fallback(fp, out)
-        return os.path.exists(out)
+        engines = [
+            ("COM", lambda target: self._try_word_com_pdf_to_docx(fp, target)),
+            ("LibreOffice", lambda target: self._convert_pdf_to_docx_libreoffice(fp, target)),
+            ("fitz fallback", lambda target: self._solid_fitz_fallback(fp, target)),
+        ]
+        result = run_conversion_pipeline(
+            out,
+            engines,
+            validate_docx_artifact,
+            stage_mode="directory",
+            stage_dir_prefix="~fcp_pdf_stage_",
+            staged_prefix="~fcp_pdf_word_",
+            staged_suffix=".docx",
+        )
+        if result.success:
+            return True
+        self._last_batch_error = "PDF to Word conversion failed: " + result.error
+        return False
 
     def _batch_to_png(self, fp: str, out: str, ext: str) -> bool:
         """Route a single file to PNG (one PNG per page for PDFs)."""

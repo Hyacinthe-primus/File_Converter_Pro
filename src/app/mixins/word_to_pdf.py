@@ -31,6 +31,8 @@ except ImportError as _e:
 
 from conversion_worker import ConversionWorker
 from dialogs import WordToPdfOptionsDialog
+from utils.conversion_pipeline import run_conversion_pipeline
+from utils.pdf_artifacts import validate_pdf_artifact
 
 
 def _sanitize_xml(t: str) -> str:
@@ -40,6 +42,28 @@ def _sanitize_xml(t: str) -> str:
 
 class WordToPdfMixin:
     """Mixin: Word/DOCX → PDF conversion for FileConverterApp."""
+
+    def _run_word_to_pdf_task(self, task, options):
+        import time as _time
+
+        t0 = _time.perf_counter()
+        fp = task["input_path"]
+        out = task["output_path"]
+        fs = os.path.getsize(fp) if os.path.exists(fp) else 0
+        self._last_word_to_pdf_error = ""
+
+        if options["mode"] == "preserve_all":
+            ok = self.convert_docx_to_pdf_preserve_all(fp, out, options)
+        else:
+            ok = self.convert_docx_to_pdf_text_only(fp, out)
+        detail = self._last_word_to_pdf_error if not ok else ""
+
+        return {
+            "success": ok,
+            "error": "" if ok else (detail or "Word to PDF conversion failed"),
+            "file_size": fs,
+            "operation_time": _time.perf_counter() - t0,
+        }
 
     def convert_word_to_pdf(self):
         if not (hasattr(self, "active_templates") and sk.WORD_TO_PDF in self.active_templates):
@@ -119,18 +143,7 @@ class WordToPdfMixin:
         _outdir = output_dir
 
         def _run_word_to_pdf(task):
-            import os
-            import time as _time
-
-            t0 = _time.perf_counter()
-            fp = task["input_path"]
-            out = task["output_path"]
-            fs = os.path.getsize(fp) if os.path.exists(fp) else 0
-            if _options["mode"] == "preserve_all":
-                self.convert_docx_to_pdf_preserve_all(fp, out, _options)
-            else:
-                self.convert_docx_to_pdf_text_only(fp, out)
-            return {"success": True, "error": "", "file_size": fs, "operation_time": _time.perf_counter() - t0}
+            return self._run_word_to_pdf_task(task, _options)
 
         tasks = [
             {
@@ -204,13 +217,27 @@ class WordToPdfMixin:
             )
             formatted_time = f"{total_time:.1f}"
             msg = self.translate_text("word_to_pdf_success_sum").format(sc, total, formatted_time, mode_name)
+            failed = summary.get("failed", [])
+            if failed or sc < total:
+                failure_lines = [
+                    self.translate_text("error_with_file").format(
+                        filename=Path(item.get("name", "?")).name,
+                        error=item.get("error", ""),
+                    )
+                    for item in failed
+                ]
+                if failure_lines:
+                    msg = f"{msg}\n\n" + "\n".join(failure_lines)
+                QMessageBox.warning(self, self.translate_text("warning"), msg)
+                return
+
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("word_to_pdf")
             if sc >= 50 and total_time <= 300:
                 self.achievement_system.update_stat("recent_batch_files", sc)
                 self.achievement_system.update_stat("recent_batch_time", total_time)
                 self.achievement_system.check_speed_conversion(sc, total_time)
-            QMessageBox.information(self, self.translate_text("success"), self.translate_text(msg))
+            QMessageBox.information(self, self.translate_text("success"), msg)
 
         self._worker = ConversionWorker(tasks, _run_word_to_pdf)
         self._worker.progress.connect(self.progress_bar.setValue)
@@ -283,40 +310,41 @@ class WordToPdfMixin:
                 pass
 
     def convert_docx_to_pdf_preserve_all(self, docx_path, pdf_path, options, progress_callback=None):
-        if progress_callback:
-            progress_callback(10)
-
-        ok = False
-
-        try:
-            if self.convert_word_to_pdf_com(docx_path, pdf_path, progress_callback):
-                ok = True
-        except Exception as e:
-            print(f"[Word→PDF] COM failed: {e}")
-
-        if not ok and progress_callback:
-            progress_callback(30)
-
-        if not ok:
-            try:
-                if self._convert_docx_to_pdf_libreoffice(docx_path, pdf_path, progress_callback):
-                    ok = True
-            except Exception as e:
-                print(f"[Word→PDF] LibreOffice failed: {e}")
-
-        if not ok and progress_callback:
-            progress_callback(50)
-
-        if not ok:
-            try:
-                ok = self._convert_docx_to_pdf_fallback_reportlab(docx_path, pdf_path, options, progress_callback)
-            except Exception as e:
-                print(f"[Word→PDF] ReportLab fallback failed: {e}")
-
-        if ok and os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 0:
-            self._postprocess_word_pdf(docx_path, pdf_path, options)
-
-        return ok
+        self._last_word_to_pdf_error = ""
+        engines = [
+            (
+                "COM",
+                lambda target: self.convert_word_to_pdf_com(docx_path, target, progress_callback),
+            ),
+            (
+                "LibreOffice",
+                lambda target: self._convert_docx_to_pdf_libreoffice(docx_path, target, progress_callback),
+            ),
+            (
+                "ReportLab",
+                lambda target: self._convert_docx_to_pdf_fallback_reportlab(
+                    docx_path,
+                    target,
+                    options,
+                    progress_callback,
+                ),
+            ),
+        ]
+        result = run_conversion_pipeline(
+            os.path.abspath(pdf_path),
+            engines,
+            validate_pdf_artifact,
+            stage_mode="directory",
+            stage_dir_prefix="~fcp_pdf_stage_",
+            staged_prefix="~fcp_pdf_",
+            staged_suffix=".pdf",
+            progress_callback=progress_callback,
+            attempt_progress=(10, 30, 50),
+            postprocess=lambda target: self._postprocess_word_pdf(docx_path, target, options),
+        )
+        if not result.success:
+            self._last_word_to_pdf_error = result.error
+        return result.success
 
     def _postprocess_word_pdf(self, docx_path: str, pdf_path: str, options: dict) -> None:
         """Apply the advanced options to a finished PDF regardless of the engine that produced it.
@@ -534,6 +562,7 @@ class WordToPdfMixin:
             c = canvas.Canvas(pdf_path, pagesize=A4)
             width, height = A4
             y = height - 72
+            page_used = False
 
             if progress_callback:
                 progress_callback(60)
@@ -549,12 +578,13 @@ class WordToPdfMixin:
                 return simpleSplit(text, font_name, font_size, max_w)
 
             def draw_paragraph(para):
-                nonlocal y
+                nonlocal y, page_used
                 text = para.text.strip()
                 if not text:
                     y -= 12
                     return
 
+                page_used = True
                 style_name = para.style.name if para.style else "Normal"
 
                 if "Heading 1" in style_name or "Titre 1" in style_name:
@@ -591,7 +621,7 @@ class WordToPdfMixin:
                 y -= 4
 
             def draw_image_from_blob(blob):
-                nonlocal y
+                nonlocal y, page_used
                 try:
                     import tempfile
 
@@ -620,12 +650,13 @@ class WordToPdfMixin:
                             os.unlink(tmp_path)
 
                     y -= new_h + 20
+                    page_used = True
 
                 except Exception as e:
                     print(f"[Image render error] {e}")
 
             def draw_table(tbl):
-                nonlocal y
+                nonlocal y, page_used
                 try:
                     rows = tbl.rows
                     n_rows = len(rows)
@@ -634,6 +665,7 @@ class WordToPdfMixin:
                     if n_cols == 0:
                         return
 
+                    page_used = True
                     col_width = (width - 144) / n_cols
                     row_height = 20
 
@@ -691,6 +723,8 @@ class WordToPdfMixin:
             if progress_callback:
                 progress_callback(90)
 
+            if not page_used:
+                c.showPage()
             c.save()
             print(f"[Word→PDF] ReportLab fallback success: {pdf_path}")
             return True
@@ -699,130 +733,143 @@ class WordToPdfMixin:
             print(f"[Word→PDF] ReportLab error: {e}")
             return False
 
-    def convert_docx_to_pdf_text_only(self, docx_path, pdf_path):
-        try:
-            from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_RIGHT
+    def _convert_docx_to_pdf_text_only_engine(self, docx_path, pdf_path):
+        from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_RIGHT
 
-            print(f"[DEBUG] Starting text-only conversion: {docx_path}")
+        print(f"[DEBUG] Starting text-only conversion: {docx_path}")
 
-            doc = Document(docx_path)
+        doc = Document(docx_path)
 
-            buffer = io.BytesIO()
+        buffer = io.BytesIO()
 
-            doc_template = SimpleDocTemplate(
-                buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72
-            )
+        doc_template = SimpleDocTemplate(
+            buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72
+        )
 
-            story = []
-            styles = getSampleStyleSheet()
+        story = []
+        styles = getSampleStyleSheet()
 
-            style_title = ParagraphStyle(
-                "TitleStyle",
-                parent=styles["Heading1"],
-                fontSize=18,
-                leading=22,
-                spaceAfter=20,
+        style_title = ParagraphStyle(
+            "TitleStyle",
+            parent=styles["Heading1"],
+            fontSize=18,
+            leading=22,
+            spaceAfter=20,
+            alignment=TA_CENTER,
+            fontName="Helvetica-Bold",
+            textColor="#2c3e50",
+        )
+
+        style_heading = ParagraphStyle(
+            "HeadingStyle",
+            parent=styles["Heading2"],
+            fontSize=14,
+            leading=18,
+            spaceAfter=10,
+            spaceBefore=15,
+            fontName="Helvetica-Bold",
+            textColor="#34495e",
+        )
+
+        style_normal = ParagraphStyle(
+            "CleanNormal",
+            parent=styles["Normal"],
+            fontSize=11,
+            leading=14,
+            spaceAfter=8,
+            alignment=TA_JUSTIFY,
+            wordWrap="LTR",
+        )
+
+        style_bullet = ParagraphStyle(
+            "BulletStyle",
+            parent=styles["Normal"],
+            fontSize=11,
+            leading=14,
+            spaceAfter=6,
+            leftIndent=20,
+            firstLineIndent=-15,
+        )
+
+        for i, paragraph in enumerate(doc.paragraphs):
+            text = paragraph.text.strip()
+            if text:
+                style_name = str(paragraph.style.name) if paragraph.style else "Normal"
+
+                if i == 0 and len(text) < 100:
+                    style = style_title
+                elif "Heading" in style_name or "Titre" in style_name:
+                    style = style_heading
+                elif text.startswith("•") or text.startswith("-") or text.startswith("*"):
+                    style = style_bullet
+                    text = "• " + text.lstrip("•-* ")
+                else:
+                    style = style_normal
+
+                if hasattr(paragraph, "alignment"):
+                    if paragraph.alignment == 1:
+                        style = ParagraphStyle("CenterText", parent=style, alignment=TA_CENTER)
+                    elif paragraph.alignment == 2:
+                        style = ParagraphStyle("RightText", parent=style, alignment=TA_RIGHT)
+
+                p = Paragraph(_sanitize_xml(text), style)
+                story.append(p)
+                story.append(Spacer(1, 6))
+
+        if story:
+            story.append(Spacer(1, 20))
+            note_style = ParagraphStyle(
+                "NoteStyle",
+                parent=styles["Normal"],
+                fontSize=9,
+                leading=12,
                 alignment=TA_CENTER,
-                fontName="Helvetica-Bold",
-                textColor="#2c3e50",
+                textColor="#7f8c8d",
+                fontName="Helvetica-Oblique",
             )
-
-            style_heading = ParagraphStyle(
-                "HeadingStyle",
-                parent=styles["Heading2"],
-                fontSize=14,
-                leading=18,
-                spaceAfter=10,
-                spaceBefore=15,
-                fontName="Helvetica-Bold",
-                textColor="#34495e",
+            note_text = (
+                "Note : Version texte seulement - Les images et tableaux ont été omis pour une meilleure lisibilité"
             )
+            story.append(Paragraph(note_text, note_style))
 
-            style_normal = ParagraphStyle(
-                "CleanNormal",
+        if story:
+            doc_template.build(story)
+        else:
+            empty_style = ParagraphStyle(
+                "EmptyStyle",
                 parent=styles["Normal"],
-                fontSize=11,
-                leading=14,
-                spaceAfter=8,
-                alignment=TA_JUSTIFY,
-                wordWrap="LTR",
+                fontSize=12,
+                leading=16,
+                alignment=TA_CENTER,
+                textColor="#95a5a6",
             )
+            story.append(Paragraph("Document vide", empty_style))
+            doc_template.build(story)
 
-            style_bullet = ParagraphStyle(
-                "BulletStyle",
-                parent=styles["Normal"],
-                fontSize=11,
-                leading=14,
-                spaceAfter=6,
-                leftIndent=20,
-                firstLineIndent=-15,
-            )
+        with open(pdf_path, "wb") as f:
+            f.write(buffer.getvalue())
 
-            for i, paragraph in enumerate(doc.paragraphs):
-                text = paragraph.text.strip()
-                if text:
-                    style_name = str(paragraph.style.name) if paragraph.style else "Normal"
+        buffer.close()
 
-                    if i == 0 and len(text) < 100:
-                        style = style_title
-                    elif "Heading" in style_name or "Titre" in style_name:
-                        style = style_heading
-                    elif text.startswith("•") or text.startswith("-") or text.startswith("*"):
-                        style = style_bullet
-                        text = "• " + text.lstrip("•-* ")
-                    else:
-                        style = style_normal
+        print(f"[DEBUG] Text-only conversion complete: {pdf_path}")
 
-                    if hasattr(paragraph, "alignment"):
-                        if paragraph.alignment == 1:
-                            style = ParagraphStyle("CenterText", parent=style, alignment=TA_CENTER)
-                        elif paragraph.alignment == 2:
-                            style = ParagraphStyle("RightText", parent=style, alignment=TA_RIGHT)
 
-                    p = Paragraph(_sanitize_xml(text), style)
-                    story.append(p)
-                    story.append(Spacer(1, 6))
-
-            if story:
-                story.append(Spacer(1, 20))
-                note_style = ParagraphStyle(
-                    "NoteStyle",
-                    parent=styles["Normal"],
-                    fontSize=9,
-                    leading=12,
-                    alignment=TA_CENTER,
-                    textColor="#7f8c8d",
-                    fontName="Helvetica-Oblique",
-                )
-                note_text = (
-                    "Note : Version texte seulement - Les images et tableaux ont été omis pour une meilleure lisibilité"
-                )
-                story.append(Paragraph(note_text, note_style))
-
-            if story:
-                doc_template.build(story)
-            else:
-                empty_style = ParagraphStyle(
-                    "EmptyStyle",
-                    parent=styles["Normal"],
-                    fontSize=12,
-                    leading=16,
-                    alignment=TA_CENTER,
-                    textColor="#95a5a6",
-                )
-                story.append(Paragraph("Document vide", empty_style))
-                doc_template.build(story)
-
-            with open(pdf_path, "wb") as f:
-                f.write(buffer.getvalue())
-
-            buffer.close()
-
-            print(f"[DEBUG] Text-only conversion complete: {pdf_path}")
-
-        except Exception as e:
-            print(f"[ERROR] Text-only conversion error: {e}")
-            self.convert_docx_to_pdf_simple(docx_path, pdf_path)
+    def convert_docx_to_pdf_text_only(self, docx_path, pdf_path):
+        engines = [
+            ("text", lambda target: self._convert_docx_to_pdf_text_only_engine(docx_path, target)),
+            ("ReportLab", lambda target: self.convert_docx_to_pdf_simple(docx_path, target)),
+        ]
+        result = run_conversion_pipeline(
+            os.path.abspath(pdf_path),
+            engines,
+            validate_pdf_artifact,
+            stage_mode="directory",
+            stage_dir_prefix="~fcp_pdf_stage_",
+            staged_prefix="~fcp_pdf_",
+            staged_suffix=".pdf",
+        )
+        self._last_word_to_pdf_error = result.error
+        return result.success
 
     def convert_docx_to_pdf_simple(self, docx_path, pdf_path):
         try:

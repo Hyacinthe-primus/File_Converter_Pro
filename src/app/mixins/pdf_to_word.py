@@ -39,12 +39,14 @@ except ImportError as _e:
 
 try:
     from docx import Document
-    from docx.shared import Inches
 except ImportError as _e:
-    Document = Inches = None
+    Document = None
     print(f"[IMPORT] python-docx not available: {_e}")
 
+from context_menu.conversion_helpers import _solid_fitz_fallback as _solid_fitz_fallback_impl
 from dialogs import PdfToWordDialog
+from utils.conversion_pipeline import run_conversion_pipeline
+from utils.pdf_artifacts import validate_docx_artifact
 from widgets import AnimatedCheckBox
 
 
@@ -333,6 +335,7 @@ class PdfToWordMixin:
         self.show_progress(True, message)
 
         success_count = 0
+        failed_files = []
         start_time = datetime.now()
 
         for i, file_path in enumerate(pdf_files):
@@ -344,9 +347,13 @@ class PdfToWordMixin:
 
                 current_mode = self.config.get("pdf_to_word_mode", "with_images")
                 if current_mode == "with_images":
-                    self.convert_pdf_to_docx_improved(file_path, output_file)
+                    ok = self.convert_pdf_to_docx_improved(file_path, output_file)
                 else:
-                    self.convert_pdf_to_docx_text_only(file_path, output_file)
+                    ok = self.convert_pdf_to_docx_text_only(file_path, output_file)
+                if ok is False:
+                    raise RuntimeError(
+                        getattr(self, "_last_pdf_to_word_error", "") or "PDF to Word conversion failed"
+                    )
 
                 operation_time = (datetime.now() - operation_start).total_seconds()
                 self.achievement_system.record_conversion("pdf_to_word", file_size, True)
@@ -380,6 +387,7 @@ class PdfToWordMixin:
                     success=False,
                     notes=f"Error: {str(e)}",
                 )
+                failed_files.append(f"{Path(file_path).name}: {e}")
                 QMessageBox.critical(
                     self,
                     self.translate_text("error"),
@@ -400,9 +408,14 @@ class PdfToWordMixin:
 
         formatted_time = f"{total_time:.1f}"
         message = self.translate_text("pdf_to_word_success_sum").format(success_count, len(pdf_files), formatted_time)
+        if failed_files or success_count < len(pdf_files):
+            if failed_files:
+                message += "\n\n" + "\n".join(failed_files)
+            QMessageBox.warning(self, self.translate_text("warning"), message)
+            return
         if self.config.get("enable_system_notifications", True):
             self.system_notifier.send("pdf_to_word")
-        QMessageBox.information(self, self.translate_text("success"), self.translate_text(message))
+        QMessageBox.information(self, self.translate_text("success"), message)
 
     def _get_chart_regions(self, page):
         MIN_PATHS = 8
@@ -652,282 +665,117 @@ class PdfToWordMixin:
             return False
 
     def _solid_fitz_fallback(self, pdf_path, docx_path):
+        _solid_fitz_fallback_impl(pdf_path, docx_path)
+
+    def _convert_pdf_to_docx_pdf2docx_with_charts(self, pdf_path, docx_path):
         import io as _io
 
         import fitz
-        from docx.enum.text import WD_ALIGN_PARAGRAPH
-        from docx.shared import Inches, Pt
 
-        doc = Document()
+        if not self._try_pdf2docx(pdf_path, docx_path):
+            return False
 
-        from docx.shared import Cm
+        try:
+            pdf_doc = fitz.open(pdf_path)
+            docx = Document(docx_path)
 
-        for section in doc.sections:
-            section.top_margin = Cm(2.0)
-            section.bottom_margin = Cm(2.0)
-            section.left_margin = Cm(2.5)
-            section.right_margin = Cm(2.5)
-
-        pdf_doc = fitz.open(pdf_path)
-
-        def _flag_to_style(flags, size, median_size):
-            is_bold = bool(flags & 16)
-            is_italic = bool(flags & 2)
-            ratio = size / median_size if median_size else 1.0
-            if ratio >= 1.6 and is_bold:
-                return "heading1"
-            if ratio >= 1.3 and is_bold:
-                return "heading2"
-            if ratio >= 1.1 and is_bold:
-                return "heading3"
-            return "bold_body" if is_bold else "italic_body" if is_italic else "body"
-
-        def _apply_run_style(run, flags, size):
-            run.bold = bool(flags & 16)
-            run.italic = bool(flags & 2)
-            if size:
-                run.font.size = Pt(round(size, 1))
-
-        def _add_table_to_doc(doc, tab):
-            try:
-                rows_data = tab.extract()
-                if not rows_data or not rows_data[0]:
-                    return
-                n_rows = len(rows_data)
-                n_cols = max(len(r) for r in rows_data)
-                tbl = doc.add_table(rows=n_rows, cols=n_cols)
-                tbl.style = "Table Grid"
-                for r_idx, row_data in enumerate(rows_data):
-                    for c_idx, cell_text in enumerate(row_data):
-                        if c_idx < n_cols:
-                            cell = tbl.cell(r_idx, c_idx)
-                            cell.text = (cell_text or "").strip()
-                doc.add_paragraph()
-            except Exception as te:
-                print(f"[fallback table] {te}")
-
-        for page_num in range(len(pdf_doc)):
-            if page_num > 0:
-                doc.add_page_break()
-
-            page = pdf_doc.load_page(page_num)
-            text_dict = page.get_text("dict", flags=fitz.TEXT_PRESERVE_WHITESPACE)
-
-            all_sizes = []
-            for blk in text_dict.get("blocks", []):
-                if blk["type"] != 0:
+            charts_per_page = {}
+            for page_num in range(len(pdf_doc)):
+                page = pdf_doc.load_page(page_num)
+                rects = self._get_chart_regions(page)
+                if not rects:
                     continue
-                for line in blk.get("lines", []):
-                    for span in line.get("spans", []):
-                        if span.get("size", 0) > 0:
-                            all_sizes.append(span["size"])
-            all_sizes.sort()
-            median_size = all_sizes[len(all_sizes) // 2] if all_sizes else 11.0
+                imgs = []
+                for rect in rects:
+                    png_bytes = self._rasterize_region(page, rect, dpi=150)
+                    imgs.append(_io.BytesIO(png_bytes))
+                charts_per_page[page_num] = imgs
 
-            table_rects = []
-            tables_on_page = []
-            try:
-                finder = page.find_tables()
-                tables_on_page = finder.tables if finder else []
-                for t in tables_on_page:
-                    table_rects.append(fitz.Rect(t.bbox))
-            except Exception:
-                pass
+            pdf_doc.close()
 
-            def _rect_in_table(rect):
-                for tr in table_rects:
-                    inter = fitz.Rect(rect).intersect(tr)
-                    if not inter.is_empty and inter.get_area() > 100:
-                        return True
-                return False
+            if charts_per_page:
+                import copy
 
-            images_on_page = []
-            for img in page.get_images(full=True):
-                xref = img[0]
-                try:
-                    bbox_list = page.get_image_rects(xref)
-                    if not bbox_list:
-                        continue
-                    bbox = bbox_list[0]
-                    if _rect_in_table(bbox):
-                        continue
-                    pix = fitz.Pixmap(pdf_doc, xref)
-                    if pix.colorspace and pix.colorspace.n > 3:
-                        pix = fitz.Pixmap(fitz.csRGB, pix)
-                    if pix.width < 10 or pix.height < 10:
-                        continue
-                    img_bytes = pix.tobytes("png")
-                    images_on_page.append(
-                        {
-                            "y0": bbox.y0,
-                            "y1": bbox.y1,
-                            "bytes": img_bytes,
-                            "width_pt": bbox.width,
-                        }
-                    )
-                    pix = None
-                except Exception as ie:
-                    print(f"[fallback img xref={xref}] {ie}")
+                from docx.shared import Inches as _Inches
 
-            images_on_page.sort(key=lambda x: x["y0"])
+                def _add_picture_paragraph(docx_doc, img_buf, max_width_inches=5.5):
+                    p = docx_doc.add_paragraph()
+                    p.alignment = 1
+                    run = p.add_run()
+                    run.add_picture(img_buf, width=_Inches(max_width_inches))
+                    return p
 
-            stream = []
-            for blk in text_dict.get("blocks", []):
-                y0 = blk.get("bbox", [0, 0])[1]
-                if blk["type"] == 0:
-                    if not _rect_in_table(fitz.Rect(blk["bbox"])):
-                        stream.append(("text", y0, blk))
-            for img in images_on_page:
-                stream.append(("image", img["y0"], img))
-            for tab in tables_on_page:
-                try:
-                    stream.append(("table", tab.bbox[1], tab))
-                except Exception:
-                    pass
+                def _insert_para_after(ref_para, new_para_xml):
+                    ref_para._element.addnext(new_para_xml)
 
-            stream.sort(key=lambda x: x[1])
+                body_paras = docx.paragraphs
+                page_break_indices = []
+                for idx, para in enumerate(body_paras):
+                    for run in para.runs:
+                        if (
+                            run._element.xml.find("w:lastRenderedPageBreak") != -1
+                            or run._element.xml.find("w:br") != -1
+                        ):
+                            page_break_indices.append(idx)
+                            break
 
-            img_inserted_xranges = set()
+                for page_num in sorted(charts_per_page.keys()):
+                    imgs = charts_per_page[page_num]
+                    if page_num == 0 or page_num - 1 >= len(page_break_indices):
+                        for img_buf in imgs:
+                            _add_picture_paragraph(docx, img_buf)
+                    else:
+                        ref_idx = page_break_indices[page_num - 1]
+                        ref_para = body_paras[ref_idx]
+                        for img_buf in reversed(imgs):
+                            tmp_doc = Document()
+                            pic_para = _add_picture_paragraph(tmp_doc, img_buf)
+                            _insert_para_after(ref_para, copy.deepcopy(pic_para._element))
 
-            for item_type, y0, obj in stream:
-                if item_type == "image":
-                    key = round(y0 / 5) * 5
-                    if key in img_inserted_xranges:
-                        continue
-                    img_inserted_xranges.add(key)
-                    try:
-                        buf = _io.BytesIO(obj["bytes"])
-                        w_pt = obj["width_pt"]
-                        max_w = Inches(5.5)
-                        width = min(Pt(w_pt), max_w)
-                        p = doc.add_paragraph()
-                        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                        run = p.add_run()
-                        run.add_picture(buf, width=width)
-                    except Exception as ie:
-                        print(f"[fallback img render] {ie}")
+                docx.save(docx_path)
+        except Exception as e:
+            print(f"[chart injection] {e}")
 
-                elif item_type == "table":
-                    _add_table_to_doc(doc, obj)
-
-                elif item_type == "text":
-                    blk = obj
-                    for line in blk.get("lines", []):
-                        spans = line.get("spans", [])
-                        if not spans:
-                            continue
-
-                        line_text = "".join(s.get("text", "") for s in spans)
-                        if not line_text.strip():
-                            continue
-                        dom = max(spans, key=lambda s: len(s.get("text", "")))
-                        flags = dom.get("flags", 0)
-                        size = dom.get("size", median_size)
-                        style_label = _flag_to_style(flags, size, median_size)
-
-                        if style_label == "heading1":
-                            p = doc.add_heading(line_text.strip(), level=1)
-                        elif style_label == "heading2":
-                            p = doc.add_heading(line_text.strip(), level=2)
-                        elif style_label == "heading3":
-                            p = doc.add_heading(line_text.strip(), level=3)
-                        else:
-                            p = doc.add_paragraph()
-                            for span in spans:
-                                span_text = span.get("text", "")
-                                if not span_text:
-                                    continue
-                                run = p.add_run(span_text)
-                                _apply_run_style(run, span.get("flags", 0), span.get("size", None))
-
-        pdf_doc.close()
-        doc.save(docx_path)
-        print(f"[PDF→DOCX] solid fitz fallback done: {Path(docx_path).name}")
+        return True
 
     def convert_pdf_to_docx_with_charts(self, pdf_path, docx_path):
-        import io as _io
-
-        import fitz
-
-        if self._try_word_com_pdf_to_docx(pdf_path, docx_path):
-            return
-
-        base_ok = self._try_pdf2docx(pdf_path, docx_path)
-
-        if base_ok:
-            try:
-                pdf_doc = fitz.open(pdf_path)
-                docx = Document(docx_path)
-
-                charts_per_page = {}
-                for page_num in range(len(pdf_doc)):
-                    page = pdf_doc.load_page(page_num)
-                    rects = self._get_chart_regions(page)
-                    if not rects:
-                        continue
-                    imgs = []
-                    for rect in rects:
-                        png_bytes = self._rasterize_region(page, rect, dpi=150)
-                        imgs.append(_io.BytesIO(png_bytes))
-                    charts_per_page[page_num] = imgs
-
-                pdf_doc.close()
-
-                if charts_per_page:
-                    import copy
-
-                    from docx.shared import Inches as _Inches
-
-                    def _add_picture_paragraph(docx_doc, img_buf, max_width_inches=5.5):
-                        p = docx_doc.add_paragraph()
-                        p.alignment = 1
-                        run = p.add_run()
-                        run.add_picture(img_buf, width=_Inches(max_width_inches))
-                        return p
-
-                    def _insert_para_after(ref_para, new_para_xml):
-                        ref_para._element.addnext(new_para_xml)
-
-                    body_paras = docx.paragraphs
-                    page_break_indices = []
-                    for idx, para in enumerate(body_paras):
-                        for run in para.runs:
-                            if (
-                                run._element.xml.find("w:lastRenderedPageBreak") != -1
-                                or run._element.xml.find("w:br") != -1
-                            ):
-                                page_break_indices.append(idx)
-                                break
-
-                    for page_num in sorted(charts_per_page.keys()):
-                        imgs = charts_per_page[page_num]
-                        if page_num == 0 or page_num - 1 >= len(page_break_indices):
-                            for img_buf in imgs:
-                                _add_picture_paragraph(docx, img_buf)
-                        else:
-                            ref_idx = page_break_indices[page_num - 1]
-                            ref_para = body_paras[ref_idx]
-                            for img_buf in reversed(imgs):
-                                tmp_doc = Document()
-                                pic_para = _add_picture_paragraph(tmp_doc, img_buf)
-                                _insert_para_after(ref_para, copy.deepcopy(pic_para._element))
-
-                    docx.save(docx_path)
-            except Exception as e:
-                print(f"[chart injection] {e}")
-            return
-
-        print(f"[PDF→DOCX] falling back to solid fitz for {Path(pdf_path).name}")
-        self._solid_fitz_fallback(pdf_path, docx_path)
+        engines = [
+            ("COM", lambda target: self._try_word_com_pdf_to_docx(pdf_path, target)),
+            (
+                "pdf2docx",
+                lambda target: self._convert_pdf_to_docx_pdf2docx_with_charts(pdf_path, target),
+            ),
+            ("fitz fallback", lambda target: self._solid_fitz_fallback(pdf_path, target)),
+        ]
+        result = run_conversion_pipeline(
+            os.path.abspath(docx_path),
+            engines,
+            validate_docx_artifact,
+            stage_mode="file",
+            staged_prefix="~fcp_pdf_word_",
+            staged_suffix=".docx",
+        )
+        self._last_pdf_to_word_error = result.error
+        return result.success
 
     def convert_pdf_to_docx_improved(self, pdf_path, docx_path):
-        self.convert_pdf_to_docx_with_charts(pdf_path, docx_path)
+        return self.convert_pdf_to_docx_with_charts(pdf_path, docx_path)
 
     def convert_pdf_to_docx_text_only(self, pdf_path, docx_path):
-        try:
-            convert_pdf_text_to_docx(pdf_path, docx_path)
-        except Exception:
-            self._solid_fitz_fallback(pdf_path, docx_path)
+        engines = [
+            ("text extraction", lambda target: convert_pdf_text_to_docx(pdf_path, target)),
+            ("fitz fallback", lambda target: self._solid_fitz_fallback(pdf_path, target)),
+        ]
+        result = run_conversion_pipeline(
+            os.path.abspath(docx_path),
+            engines,
+            validate_docx_artifact,
+            stage_mode="file",
+            staged_prefix="~fcp_pdf_word_",
+            staged_suffix=".docx",
+        )
+        self._last_pdf_to_word_error = result.error
+        return result.success
 
     def convert_pdf_to_word(self):
         if not (hasattr(self, "active_templates") and sk.PDF_TO_WORD in self.active_templates):
@@ -1015,10 +863,24 @@ class PdfToWordMixin:
             out = task["output_path"]
             fs = os.path.getsize(fp) if os.path.exists(fp) else 0
             if _mode == "with_images":
-                self.convert_pdf_to_docx_improved(fp, out)
+                ok = self.convert_pdf_to_docx_improved(fp, out)
             else:
-                self.convert_pdf_to_docx_text_only(fp, out)
-            return {"success": True, "error": "", "file_size": fs, "operation_time": _time.perf_counter() - t0}
+                ok = self.convert_pdf_to_docx_text_only(fp, out)
+            if ok is False:
+                return {
+                    "success": False,
+                    "error": getattr(self, "_last_pdf_to_word_error", "")
+                    or "PDF to Word conversion failed",
+                    "file_size": fs,
+                    "operation_time": _time.perf_counter() - t0,
+                }
+            return {
+                "success": True,
+                "error": "",
+                "output_path": out,
+                "file_size": fs,
+                "operation_time": _time.perf_counter() - t0,
+            }
 
         tasks = [
             {
@@ -1039,15 +901,25 @@ class PdfToWordMixin:
             self._set_ui_enabled(True)
             if s["success_count"] > 0:
                 self.record_config_usage(sk.PDF_TO_WORD, {"mode": _mode})
-            if s["success_count"] > 0 and self.config.get("enable_system_notifications", True):
-                self.system_notifier.send("pdf_to_word")
-            QMessageBox.information(
-                self,
-                self.translate_text("success"),
-                self.translate_text("pdf_to_word_success_sum").format(
-                    s["success_count"], s["total"], f"{s['total_time']:.1f}"
-                ),
+            msg = self.translate_text("pdf_to_word_success_sum").format(
+                s["success_count"], s["total"], f"{s['total_time']:.1f}"
             )
+            failed = s.get("failed", [])
+            if failed or s["success_count"] < s["total"]:
+                failure_lines = [
+                    self.translate_text("error_with_file").format(
+                        filename=Path(item.get("name", "?")).name,
+                        error=item.get("error", ""),
+                    )
+                    for item in failed
+                ]
+                if failure_lines:
+                    msg = f"{msg}\n\n" + "\n".join(failure_lines)
+                QMessageBox.warning(self, self.translate_text("warning"), msg)
+                return
+            if self.config.get("enable_system_notifications", True):
+                self.system_notifier.send("pdf_to_word")
+            QMessageBox.information(self, self.translate_text("success"), msg)
 
         self._pdf_to_word_worker.finished.connect(_on_pdf_to_word_finished)
         self._pdf_to_word_worker.error.connect(
@@ -1060,8 +932,31 @@ class PdfToWordMixin:
         self._pdf_to_word_worker.start()
 
     def _on_pdf_to_word_file_done(self, result):
+        fp = result.get("input_path", "?")
+        fs = result.get("file_size", 0)
         if result.get("success"):
-            fs = result.get("file_size", 0)
             self.achievement_system.record_conversion("pdf_to_word", fs, True)
             self.achievement_system.mark_format_as_used("pdf")
             self.achievement_system.mark_format_as_used("docx")
+            self.db_manager.add_conversion_record(
+                source_file=fp,
+                source_format="PDF",
+                target_file=result.get("output_path", ""),
+                target_format="DOCX",
+                operation_type="pdf_to_word",
+                file_size=fs,
+                conversion_time=result.get("operation_time", 0),
+                success=True,
+            )
+        else:
+            self.db_manager.add_conversion_record(
+                source_file=fp,
+                source_format="PDF",
+                target_file="",
+                target_format="DOCX",
+                operation_type="pdf_to_word",
+                file_size=0,
+                conversion_time=0,
+                success=False,
+                notes=f"Error: {result.get('error', '')}",
+            )

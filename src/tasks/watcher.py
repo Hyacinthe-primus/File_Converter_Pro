@@ -281,15 +281,15 @@ def _run_conversion(conversion_type: str, src: str, output_dir: str, ocr: bool =
             logger.info("[OCR] %s → searchable PDF", Path(src).name)
             _ocr_image_to_pdf(src, os.path.join(output_dir, f"{Path(src).stem}.pdf"), orientation)
         else:
-            from context_menu.window import _convert_image_to_pdf
+            from context_menu.conversion_helpers import _convert_image_to_pdf
 
             _convert_image_to_pdf(src, output_dir)
     elif conversion_type == "docx_to_pdf":
-        from context_menu.window import _convert_docx_to_pdf
+        from context_menu.conversion_helpers import _convert_docx_to_pdf
 
         _convert_docx_to_pdf(src, output_dir)
     elif conversion_type == "pdf_to_docx":
-        from context_menu.window import _convert_pdf_to_docx
+        from context_menu.conversion_helpers import _convert_pdf_to_docx
 
         _convert_pdf_to_docx(src, output_dir, mode=_load_pdf_to_word_mode())
     else:
@@ -352,13 +352,13 @@ def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str, ocr
             if not merge_images_with_ocr(file_paths, out, orientation):
                 raise RuntimeError("OCR merge produced no output")
         else:
-            from context_menu.window import _merge_images_to_pdf
+            from context_menu.conversion_helpers import _merge_images_to_pdf
 
             _merge_images_to_pdf(file_paths, output_dir)
         return
 
+    from context_menu.conversion_helpers import _merge_docx, _merge_pdfs
     from context_menu.formats import MERGE_DISPATCH
-    from context_menu.window import _merge_docx, _merge_pdfs
 
     if conversion_type in MERGE_DISPATCH:
         kind, order = MERGE_DISPATCH[conversion_type]
@@ -369,6 +369,27 @@ def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str, ocr
         return
 
     raise RuntimeError(f"Unknown type: {conversion_type}")
+
+
+def _existing_output_is_valid(path: str | Path) -> bool:
+    """Return True when an existing destination is a usable output artifact."""
+    candidate = Path(path)
+    try:
+        if not candidate.is_file() or candidate.stat().st_size <= 0:
+            return False
+    except OSError:
+        return False
+
+    suffix = candidate.suffix.lower()
+    if suffix == ".pdf":
+        from utils.pdf_artifacts import validate_pdf_artifact
+
+        return validate_pdf_artifact(str(candidate))[0]
+    if suffix == ".docx":
+        from utils.pdf_artifacts import validate_docx_artifact
+
+        return validate_docx_artifact(str(candidate))[0]
+    return True
 
 
 def _collect_merge_files(
@@ -390,7 +411,13 @@ def _collect_merge_files(
         return []
 
     iterator = Path(folder).rglob("*") if recursive else Path(folder).iterdir()
-    return [str(f) for f in iterator if f.is_file() and f.suffix.lstrip(".").lower() in valid_exts]
+    return [
+        str(f)
+        for f in iterator
+        if f.is_file()
+        and not _is_temp_file(f)
+        and f.suffix.lstrip(".").lower() in valid_exts
+    ]
 
 
 def _merge_state_path(output_dir: str, action: str) -> Path:
@@ -454,13 +481,13 @@ class _FolderEventHandler(FileSystemEventHandler):
         if event.is_directory:
             return
         src = event.src_path
+        if _is_temp_file(src):
+            return
         with self._lock:
             if src in self._seen:
                 return
             self._seen.add(src)
 
-        if _is_temp_file(src):
-            return
         ext = Path(src).suffix.lstrip(".").lower()
         rules = self.config["rules"]
 
@@ -645,7 +672,7 @@ class WatcherManager:
                 if rule["kind"] == "convert":
                     fmt = rule["fmt"]
                     expected = Path(output_dir) / f"{f.stem}.{fmt}"
-                    if expected.exists():
+                    if _existing_output_is_valid(expected):
                         continue
                     conversion_type = _build_conversion_type(ext, fmt)
                     if conversion_type is None:

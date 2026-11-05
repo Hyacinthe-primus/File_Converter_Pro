@@ -230,10 +230,10 @@ class TestRunConversionRouting:
         assert (out_dir / "img0.pdf").is_file()
 
     def test_without_ocr_uses_context_menu_path(self, monkeypatch, tmp_path):
-        import context_menu.window as cm_window
+        import context_menu.conversion_helpers as conversion_helpers
 
         seen = []
-        monkeypatch.setattr(cm_window, "_convert_image_to_pdf", lambda src, out: seen.append(src))
+        monkeypatch.setattr(conversion_helpers, "_convert_image_to_pdf", lambda src, out: seen.append(src))
         src = _pngs(tmp_path, 1)[0]
 
         watcher._run_conversion("image_to_pdf", src, str(tmp_path / "out"), ocr=False)
@@ -255,10 +255,10 @@ class TestRunMergeRouting:
         assert calls["merge"]
 
     def test_merge_without_ocr_uses_context_menu_path(self, monkeypatch, tmp_path):
-        import context_menu.window as cm_window
+        import context_menu.conversion_helpers as conversion_helpers
 
         seen = []
-        monkeypatch.setattr(cm_window, "_merge_images_to_pdf", lambda files, out: seen.append(list(files)))
+        monkeypatch.setattr(conversion_helpers, "_merge_images_to_pdf", lambda files, out: seen.append(list(files)))
         images = _pngs(tmp_path, 2)
 
         watcher._run_merge("images_to_pdf_merged", images, str(tmp_path / "out"), ocr=False)

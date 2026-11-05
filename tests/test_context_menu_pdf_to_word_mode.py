@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+import context_menu.conversion_helpers as conversion_helpers
 import context_menu.window as cm_window
 
 
@@ -19,6 +20,11 @@ def _fake_pdf2docx(monkeypatch):
 
         def convert(self, path, **kwargs):
             calls.append(("convert", path, kwargs))
+            from docx import Document
+
+            document = Document()
+            document.add_paragraph("fake pdf2docx output")
+            document.save(path)
 
         def close(self):
             calls.append(("close",))
@@ -76,11 +82,16 @@ def test_text_only_skips_com_and_pdf2docx(monkeypatch, tmp_path):
     out_dir = tmp_path / "out"
     out_dir.mkdir()
     text_calls = []
-    monkeypatch.setattr(
-        cm_window,
-        "convert_pdf_text_to_docx",
-        lambda pdf_path, docx_path, **kwargs: text_calls.append((pdf_path, docx_path, kwargs)),
-    )
+
+    def fake_text(pdf_path, docx_path, **kwargs):
+        text_calls.append((pdf_path, docx_path, kwargs))
+        from docx import Document
+
+        document = Document()
+        document.add_paragraph("fake text output")
+        document.save(docx_path)
+
+    monkeypatch.setattr(cm_window, "convert_pdf_text_to_docx", fake_text)
     pdf2docx_calls = _fake_pdf2docx(monkeypatch)
     winreg_calls = _fake_winreg(monkeypatch)
     monkeypatch.setattr(cm_window.sys, "platform", "win32")
@@ -193,7 +204,7 @@ def _assert_legacy_pdf_call(runner, monkeypatch, tmp_path):
     out_dir = tmp_path / "out"
     seen = []
     _fake_config(monkeypatch, {"pdf_to_word_mode": "with_images"})
-    monkeypatch.setattr(cm_window, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
+    monkeypatch.setattr(conversion_helpers, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
 
     runner("pdf_to_docx", str(src), str(out_dir))
 
@@ -212,23 +223,30 @@ def test_scheduler_pdf_route_remains_compatible(monkeypatch, tmp_path):
     _assert_legacy_pdf_call(scheduler._run_conversion, monkeypatch, tmp_path)
 
 
-def test_main_text_only_uses_shared_extractor(monkeypatch):
+def test_main_text_only_uses_shared_extractor(monkeypatch, tmp_path):
     import app.mixins.pdf_to_word as pdf_to_word_module
 
     calls = []
-    monkeypatch.setattr(
-        pdf_to_word_module,
-        "convert_pdf_text_to_docx",
-        lambda pdf_path, docx_path: calls.append((pdf_path, docx_path)),
-    )
+
+    def fake_extractor(pdf_path, docx_path):
+        calls.append((pdf_path, docx_path))
+        from docx import Document
+
+        document = Document()
+        document.add_paragraph("fake text output")
+        document.save(docx_path)
+
+    monkeypatch.setattr(pdf_to_word_module, "convert_pdf_text_to_docx", fake_extractor)
     mixin = pdf_to_word_module.PdfToWordMixin.__new__(pdf_to_word_module.PdfToWordMixin)
+    output = tmp_path / "output.docx"
 
-    mixin.convert_pdf_to_docx_text_only("input.pdf", "output.docx")
+    assert mixin.convert_pdf_to_docx_text_only("input.pdf", str(output)) is True
+    assert calls[0][0] == "input.pdf"
+    assert Path(calls[0][1]).suffix == ".docx"
+    assert output.is_file()
 
-    assert calls == [("input.pdf", "output.docx")]
 
-
-def test_main_text_only_preserves_layout_fallback(monkeypatch):
+def test_main_text_only_preserves_layout_fallback(monkeypatch, tmp_path):
     import app.mixins.pdf_to_word as pdf_to_word_module
 
     def fail_extraction(_pdf_path, _docx_path):
@@ -237,11 +255,21 @@ def test_main_text_only_preserves_layout_fallback(monkeypatch):
     monkeypatch.setattr(pdf_to_word_module, "convert_pdf_text_to_docx", fail_extraction)
     mixin = pdf_to_word_module.PdfToWordMixin.__new__(pdf_to_word_module.PdfToWordMixin)
     fallback = []
-    mixin._solid_fitz_fallback = lambda pdf_path, docx_path: fallback.append((pdf_path, docx_path))
 
-    mixin.convert_pdf_to_docx_text_only("input.pdf", "output.docx")
+    def fake_fallback(_pdf_path, docx_path):
+        fallback.append(docx_path)
+        from docx import Document
 
-    assert fallback == [("input.pdf", "output.docx")]
+        document = Document()
+        document.add_paragraph("fallback output")
+        document.save(docx_path)
+
+    mixin._solid_fitz_fallback = fake_fallback
+    output = tmp_path / "output.docx"
+
+    assert mixin.convert_pdf_to_docx_text_only("input.pdf", str(output)) is True
+    assert len(fallback) == 1
+    assert output.is_file()
 
 
 def test_text_only_success_replaces_existing_destination(monkeypatch, tmp_path):

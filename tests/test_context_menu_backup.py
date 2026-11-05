@@ -193,6 +193,7 @@ def test_engine_does_not_create_a_second_backup(monkeypatch, tmp_path):
 
 @pytest.mark.parametrize("module_name", ["watcher", "scheduler"])
 def test_automation_paths_do_not_use_quick_backup(monkeypatch, tmp_path, module_name):
+    import context_menu.conversion_helpers as conversion_helpers
     from tasks import scheduler, watcher
 
     runner = watcher._run_conversion if module_name == "watcher" else scheduler._run_conversion
@@ -201,7 +202,7 @@ def test_automation_paths_do_not_use_quick_backup(monkeypatch, tmp_path, module_
     quick_backups = []
     converted = []
     monkeypatch.setattr(cm_window, "_create_source_backups", lambda files: quick_backups.append(files))
-    monkeypatch.setattr(cm_window, "_convert_pdf_to_docx", lambda *a, **k: converted.append((a, k)))
+    monkeypatch.setattr(conversion_helpers, "_convert_pdf_to_docx", lambda *a, **k: converted.append((a, k)))
 
     runner("pdf_to_docx", str(src), str(out_dir))
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-import context_menu.window as cm_window
+import context_menu.conversion_helpers as conversion_helpers
 from tasks import scheduler, watcher
 
 
@@ -27,7 +27,7 @@ def _run_and_capture(monkeypatch, tmp_path, runner, config):
     out_dir = tmp_path / "out"
     seen = []
     _patch_config(monkeypatch, config)
-    monkeypatch.setattr(cm_window, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
+    monkeypatch.setattr(conversion_helpers, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
 
     runner("pdf_to_docx", str(src), str(out_dir))
 
@@ -80,7 +80,7 @@ def test_watcher_reads_configuration_for_each_conversion(monkeypatch, tmp_path):
     src = _source(tmp_path)
     out_dir = tmp_path / "out"
     seen = []
-    monkeypatch.setattr(cm_window, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
+    monkeypatch.setattr(conversion_helpers, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
 
     watcher._run_conversion("pdf_to_docx", str(src), str(out_dir))
     watcher._run_conversion("pdf_to_docx", str(src), str(out_dir))
@@ -99,7 +99,7 @@ def test_watcher_configuration_failure_defaults_to_with_images(monkeypatch, tmp_
     src = _source(tmp_path)
     out_dir = tmp_path / "out"
     seen = []
-    monkeypatch.setattr(cm_window, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
+    monkeypatch.setattr(conversion_helpers, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
 
     watcher._run_conversion("pdf_to_docx", str(src), str(out_dir))
 

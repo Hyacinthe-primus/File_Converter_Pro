@@ -25,6 +25,7 @@ except ImportError:
 
 from tasks.watcher import (
     _build_conversion_type,
+    _existing_output_is_valid,
     _is_temp_file,
     _load_all_toml,
     _merge_already_done,
@@ -266,7 +267,7 @@ def _run_task(cfg: dict) -> None:
             if rule["kind"] == "convert":
                 fmt = rule["fmt"]
                 expected = Path(output_dir) / f"{f.stem}.{fmt}"
-                if expected.exists():
+                if _existing_output_is_valid(expected):
                     continue
                 conversion_type = _build_conversion_type(ext, fmt)
                 if conversion_type is None:
