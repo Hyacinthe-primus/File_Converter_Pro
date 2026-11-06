@@ -328,7 +328,15 @@ def _install_libreoffice(monkeypatch, order, succeed, returncode=0):
     monkeypatch.setattr("subprocess.run", run)
 
 
-def test_docx_to_pdf_windows_com_success_short_circuits(monkeypatch, tmp_path):
+@pytest.fixture
+def windows_engine_order(monkeypatch):
+    """Exercise the mocked Windows engine-order branch on every host OS."""
+    from context_menu import conversion_helpers
+
+    monkeypatch.setattr(conversion_helpers.sys, "platform", "win32")
+
+
+def test_docx_to_pdf_windows_com_success_short_circuits(monkeypatch, tmp_path, windows_engine_order):
     order = []
     src = _make_docx(tmp_path / "input.docx", ["input"])
     out_dir = tmp_path / "out"
@@ -362,7 +370,7 @@ def test_docx_to_pdf_macos_docx2pdf_success_short_circuits(monkeypatch, tmp_path
         assert [page.get_text().strip() for page in output] == ["docx2pdf"]
 
 
-def test_docx_to_pdf_invalid_com_output_falls_through_to_libreoffice(monkeypatch, tmp_path):
+def test_docx_to_pdf_invalid_com_output_falls_through_to_libreoffice(monkeypatch, tmp_path, windows_engine_order):
     order = []
     src = _make_docx(tmp_path / "input.docx", ["input"])
     out_dir = tmp_path / "out"
@@ -378,7 +386,7 @@ def test_docx_to_pdf_invalid_com_output_falls_through_to_libreoffice(monkeypatch
         assert [page.get_text().strip() for page in output] == ["libreoffice"]
 
 
-def test_docx_to_pdf_falls_through_to_docx2pdf(monkeypatch, tmp_path):
+def test_docx_to_pdf_falls_through_to_docx2pdf(monkeypatch, tmp_path, windows_engine_order):
     order = []
     src = _make_docx(tmp_path / "input.docx", ["input"])
     out_dir = tmp_path / "out"
@@ -394,7 +402,7 @@ def test_docx_to_pdf_falls_through_to_docx2pdf(monkeypatch, tmp_path):
         assert [page.get_text().strip() for page in output] == ["docx2pdf"]
 
 
-def test_docx_to_pdf_comtypes_binding_failure_falls_through_to_docx2pdf(monkeypatch, tmp_path):
+def test_docx_to_pdf_comtypes_binding_failure_falls_through_to_docx2pdf(monkeypatch, tmp_path, windows_engine_order):
     order = []
     src = _make_docx(tmp_path / "input.docx", ["input"])
     out_dir = tmp_path / "out"
@@ -415,7 +423,7 @@ def test_docx_to_pdf_comtypes_binding_failure_falls_through_to_docx2pdf(monkeypa
         assert [page.get_text().strip() for page in output] == ["docx2pdf"]
 
 
-def test_docx_to_pdf_direct_com_quits_word_after_open_failure(monkeypatch, tmp_path):
+def test_docx_to_pdf_direct_com_quits_word_after_open_failure(monkeypatch, tmp_path, windows_engine_order):
     order = []
     cleanup_calls = []
     src = _make_docx(tmp_path / "input.docx", ["input"])
@@ -464,7 +472,7 @@ def test_docx_to_pdf_skips_docx2pdf_for_legacy_doc(monkeypatch, tmp_path, platfo
         assert [page.get_text().strip() for page in output] == ["libreoffice"]
 
 
-def test_docx_to_pdf_skips_docx2pdf_for_uppercase_docx(monkeypatch, tmp_path):
+def test_docx_to_pdf_skips_docx2pdf_for_uppercase_docx(monkeypatch, tmp_path, windows_engine_order):
     order = []
     src = _make_docx(tmp_path / "input.DOCX", ["input"])
     out_dir = tmp_path / "out"
@@ -480,7 +488,7 @@ def test_docx_to_pdf_skips_docx2pdf_for_uppercase_docx(monkeypatch, tmp_path):
         assert [page.get_text().strip() for page in output] == ["libreoffice"]
 
 
-def test_docx_to_pdf_falls_through_to_libreoffice(monkeypatch, tmp_path):
+def test_docx_to_pdf_falls_through_to_libreoffice(monkeypatch, tmp_path, windows_engine_order):
     order = []
     src = _make_docx(tmp_path / "input.docx", ["input"])
     out_dir = tmp_path / "out"
@@ -496,7 +504,7 @@ def test_docx_to_pdf_falls_through_to_libreoffice(monkeypatch, tmp_path):
         assert [page.get_text().strip() for page in output] == ["libreoffice"]
 
 
-def test_docx_to_pdf_total_failure_raises(monkeypatch, tmp_path):
+def test_docx_to_pdf_total_failure_raises(monkeypatch, tmp_path, windows_engine_order):
     order = []
     src = _make_docx(tmp_path / "input.docx", ["input"])
     out_dir = tmp_path / "out"
