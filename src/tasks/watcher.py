@@ -279,7 +279,9 @@ def _run_conversion(conversion_type: str, src: str, output_dir: str, ocr: bool =
 
             orientation = configure_scanlayer()
             logger.info("[OCR] %s → searchable PDF", Path(src).name)
-            _ocr_image_to_pdf(src, os.path.join(output_dir, f"{Path(src).stem}.pdf"), orientation)
+            ocr_used = _ocr_image_to_pdf(src, os.path.join(output_dir, f"{Path(src).stem}.pdf"), orientation)
+            if not ocr_used:
+                logger.warning("[OCR] %s produced no searchable text; embedded a plain PDF", Path(src).name)
         else:
             from context_menu.conversion_helpers import _convert_image_to_pdf
 
@@ -362,6 +364,11 @@ def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str, ocr
 
     if conversion_type in MERGE_DISPATCH:
         kind, order = MERGE_DISPATCH[conversion_type]
+        if order == "none":
+            file_paths = sorted(
+                file_paths,
+                key=lambda path: (Path(path).name.lower(), str(path).lower()),
+            )
         if kind == "pdf":
             _merge_pdfs(file_paths, output_dir, order)
         else:

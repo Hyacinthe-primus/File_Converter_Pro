@@ -95,7 +95,7 @@ class TestParallelMerge:
         out = str(tmp_path / "out.pdf")
         calls = _install_fake_scanlayer(monkeypatch, lambda paths, o: _make_pdf(o, [True, True, True]))
         app = _App()
-        app._merge_images_with_ocr_to_pdf(images, out, 90.0)
+        assert app._merge_images_with_ocr_to_pdf(images, out, 90.0) == 3
 
         assert len(calls) == 1
         call = calls[0]
@@ -105,12 +105,12 @@ class TestParallelMerge:
         assert call["paths"] == images  # input order preserved
         assert app.sequential_calls == []
 
-    def test_ocr_usage_counts_only_pages_with_text(self, qapp, monkeypatch, images, tmp_path):
+    def test_returns_only_pages_with_text(self, qapp, monkeypatch, images, tmp_path):
         out = str(tmp_path / "out.pdf")
         _install_fake_scanlayer(monkeypatch, lambda paths, o: _make_pdf(o, [True, False, True]))
         app = _App()
-        app._merge_images_with_ocr_to_pdf(images, out, None)
-        assert app.achievement_system.ocr_pages == 2
+        assert app._merge_images_with_ocr_to_pdf(images, out, None) == 2
+        assert app.achievement_system.ocr_pages is None
 
     def test_ui_is_disabled_during_the_merge_and_restored(self, qapp, monkeypatch, images, tmp_path):
         out = str(tmp_path / "out.pdf")

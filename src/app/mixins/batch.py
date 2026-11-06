@@ -10,7 +10,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from utils.conversion_pipeline import run_conversion_pipeline
-from utils.pdf_artifacts import validate_docx_artifact, validate_pdf_artifact
+from utils.pdf_artifacts import validate_docx_artifact, validate_docx_input, validate_pdf_artifact
 
 _BATCH_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".tif", ".webp"}
 _OPENDOCUMENT_EXTS = {".odt", ".ods", ".odp"}
@@ -192,6 +192,11 @@ class BatchMixin:
         """Route a single file to PDF."""
         self._last_batch_error = ""
         if ext in (".docx", ".doc"):
+            valid, reason = validate_docx_input(fp)
+            if not valid:
+                self._last_batch_error = f"Word to PDF conversion failed: {reason}"
+                print(f"[BATCH] Word->PDF input rejected for {Path(fp).name}: {reason}")
+                return False
             engines = [
                 ("COM", lambda target: self.convert_word_to_pdf_com(fp, target)),
                 ("LibreOffice", lambda target: self._convert_docx_to_pdf_libreoffice(fp, target)),

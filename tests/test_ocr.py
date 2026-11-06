@@ -7,6 +7,7 @@ the Settings dialog OCR controls, and the enabled panel checkbox.
 
 import os
 import sys
+from pathlib import Path
 
 from app.mixins.image_to_pdf import ImageToPdfMixin
 
@@ -35,9 +36,15 @@ class _StubMixin(ImageToPdfMixin):
 
 
 def _stub_merge(self, image_files, output_file, orientation):
-    """Stand-in for the per-image merge that records OCR usage."""
-    self.achievement_system.record_ocr_usage(len(image_files))
-    return None
+    """Stand-in for the per-image merge; the caller records OCR usage."""
+    import fitz
+
+    document = fitz.open()
+    for _ in image_files:
+        document.new_page()
+    document.save(output_file)
+    document.close()
+    return len(image_files)
 
 
 class TestOcrActive:
@@ -302,7 +309,14 @@ class TestOcrAchievementWiring:
 
         class _FakeScanlayer:
             @staticmethod
-            def convert(**kwargs):
+            def convert(input_path=None, output_path=None, orientation=None, force=False):
+                import fitz
+
+                document = fitz.open()
+                page = document.new_page()
+                page.insert_text((72, 72), "ocr text")
+                document.save(output_path)
+                document.close()
                 return _FakeResult()
 
             @staticmethod
@@ -312,7 +326,11 @@ class TestOcrAchievementWiring:
         monkeypatch.setitem(sys.modules, "scanlayer", _FakeScanlayer)
         monkeypatch.setattr(image_to_pdf.ImageToPdfMixin, "_configure_scanlayer", lambda self: (None, None))
         monkeypatch.setattr(app, "show_progress", lambda *a, **k: None)
-        monkeypatch.setattr(app, "get_output_directory", lambda *a, **k: str(tmp_path))
+        monkeypatch.setattr(
+            app,
+            "get_output_directory",
+            lambda *a, **k: str(tmp_path / a[0]) if a else str(tmp_path),
+        )
         monkeypatch.setattr(app.db_manager, "add_conversion_record", lambda *a, **k: None)
         monkeypatch.setattr(app, "system_notifier", type("_N", (), {"send": lambda *a, **k: None})())
         monkeypatch.setattr(app.progress_bar, "setValue", lambda *a, **k: None)
@@ -337,3 +355,101 @@ class TestOcrAchievementWiring:
             imgs.append(str(p))
         app.ocr_convert_images_to_merged_pdf(imgs, [])
         assert calls["ocr_pages"] == [3]
+
+    def test_separate_ocr_failure_reports_warning_and_preserves_output(self, app, monkeypatch, tmp_path):
+        from PIL import Image
+
+        from app.mixins import image_to_pdf
+        from tasks import ocr_helpers
+
+        image_path = tmp_path / "scan.png"
+        Image.new("RGB", (32, 32), "white").save(image_path)
+        output = tmp_path / "scan.pdf"
+        output.write_bytes(b"stale")
+        original = output.read_bytes()
+        warnings = []
+        infos = []
+
+        monkeypatch.setattr(app, "get_output_directory", lambda *a, **k: str(tmp_path))
+        monkeypatch.setattr(app, "show_progress", lambda *a, **k: None)
+        monkeypatch.setattr(app.achievement_system, "record_ocr_usage", lambda *_a: None)
+        monkeypatch.setattr(app.db_manager, "add_conversion_record", lambda **_k: None)
+        monkeypatch.setattr(image_to_pdf.ImageToPdfMixin, "_configure_scanlayer", lambda self: (None, None))
+        monkeypatch.setattr(ocr_helpers, "image_to_pdf", lambda *_a: (_ for _ in ()).throw(RuntimeError("ocr failed")))
+        monkeypatch.setattr(image_to_pdf.QMessageBox, "warning", lambda *args: warnings.append(args))
+        monkeypatch.setattr(image_to_pdf.QMessageBox, "information", lambda *args: infos.append(args))
+
+        app.ocr_convert_images_to_separate_pdfs([str(image_path)], [])
+
+        assert len(warnings) == 1
+        assert "ocr failed" in warnings[0][2]
+        assert infos == []
+        assert output.read_bytes() == original
+
+    def test_merged_ocr_failure_reports_error_and_preserves_output(self, app, monkeypatch, tmp_path):
+        from PIL import Image
+
+        from app.mixins import image_to_pdf
+
+        images = []
+        for name in ("a.png", "b.png"):
+            path = tmp_path / name
+            Image.new("RGB", (32, 32), "white").save(path)
+            images.append(str(path))
+        output = tmp_path / "merged.pdf"
+        output.write_bytes(b"stale")
+        original = output.read_bytes()
+        critical = []
+        record_calls = []
+
+        monkeypatch.setattr(app, "get_output_directory", lambda *a, **k: str(output))
+        monkeypatch.setattr(app, "show_progress", lambda *a, **k: None)
+        monkeypatch.setattr(image_to_pdf.ImageToPdfMixin, "_configure_scanlayer", lambda self: (None, None))
+        monkeypatch.setattr(
+            image_to_pdf.ImageToPdfMixin,
+            "_merge_images_with_ocr_to_pdf",
+            lambda self, *_a: (_ for _ in ()).throw(RuntimeError("merge failed")),
+        )
+        monkeypatch.setattr(app.achievement_system, "record_ocr_usage", lambda pages: record_calls.append(pages))
+        monkeypatch.setattr(image_to_pdf.QMessageBox, "critical", lambda *args: critical.append(args))
+
+        app.ocr_convert_images_to_merged_pdf(images, [])
+
+        assert len(critical) == 1
+        assert "merge failed" in critical[0][2]
+        assert record_calls == []
+        assert output.read_bytes() == original
+
+    def test_merged_invalid_pdf_does_not_record_ocr_usage(self, app, monkeypatch, tmp_path):
+        from PIL import Image
+
+        from app.mixins import image_to_pdf
+
+        images = []
+        for name in ("a.png", "b.png"):
+            path = tmp_path / name
+            Image.new("RGB", (32, 32), "white").save(path)
+            images.append(str(path))
+        output = tmp_path / "merged.pdf"
+        output.write_bytes(b"stale")
+        original = output.read_bytes()
+        critical = []
+        record_calls = []
+
+        monkeypatch.setattr(app, "get_output_directory", lambda *a, **k: str(output))
+        monkeypatch.setattr(app, "show_progress", lambda *a, **k: None)
+        monkeypatch.setattr(image_to_pdf.ImageToPdfMixin, "_configure_scanlayer", lambda self: (None, None))
+
+        def write_invalid_pdf(_self, _images, output_file, _orientation):
+            Path(output_file).write_bytes(b"%PDF")
+            return len(images)
+
+        monkeypatch.setattr(image_to_pdf.ImageToPdfMixin, "_merge_images_with_ocr_to_pdf", write_invalid_pdf)
+        monkeypatch.setattr(app.achievement_system, "record_ocr_usage", lambda pages: record_calls.append(pages))
+        monkeypatch.setattr(image_to_pdf.QMessageBox, "critical", lambda *args: critical.append(args))
+
+        app.ocr_convert_images_to_merged_pdf(images, [])
+
+        assert len(critical) == 1
+        assert record_calls == []
+        assert output.read_bytes() == original

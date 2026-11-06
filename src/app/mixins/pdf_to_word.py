@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from pdf_text import convert_pdf_text_to_docx
+from pdf_text import build_text_only_engines, convert_pdf_text_to_docx
 from templates import semantic_keys as sk
 
 try:
@@ -629,7 +629,16 @@ class PdfToWordMixin:
         output_dir = os.path.dirname(docx_path)
         try:
             result = subprocess.run(
-                [soffice, "--headless", "--convert-to", "docx", "--outdir", output_dir, pdf_path],
+                [
+                    soffice,
+                    "--headless",
+                    "--infilter=writer_pdf_import",
+                    "--convert-to",
+                    "docx",
+                    "--outdir",
+                    output_dir,
+                    pdf_path,
+                ],
                 capture_output=True,
                 text=True,
                 timeout=timeout,
@@ -762,10 +771,11 @@ class PdfToWordMixin:
         return self.convert_pdf_to_docx_with_charts(pdf_path, docx_path)
 
     def convert_pdf_to_docx_text_only(self, pdf_path, docx_path):
-        engines = [
-            ("text extraction", lambda target: convert_pdf_text_to_docx(pdf_path, target)),
-            ("fitz fallback", lambda target: self._solid_fitz_fallback(pdf_path, target)),
-        ]
+        engines, no_text_errors = build_text_only_engines(
+            pdf_path,
+            self._solid_fitz_fallback,
+            text_converter=convert_pdf_text_to_docx,
+        )
         result = run_conversion_pipeline(
             os.path.abspath(docx_path),
             engines,
@@ -774,7 +784,10 @@ class PdfToWordMixin:
             staged_prefix="~fcp_pdf_word_",
             staged_suffix=".docx",
         )
-        self._last_pdf_to_word_error = result.error
+        if not result.success and no_text_errors:
+            self._last_pdf_to_word_error = str(no_text_errors[0])
+        else:
+            self._last_pdf_to_word_error = result.error
         return result.success
 
     def convert_pdf_to_word(self):

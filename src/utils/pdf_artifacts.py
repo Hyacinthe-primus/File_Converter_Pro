@@ -135,6 +135,32 @@ def validate_docx_artifact(path: str) -> tuple[bool, str]:
     return True, ""
 
 
+def validate_docx_input(path: str) -> tuple[bool, str]:
+    """Validate a Word input before conversion.
+
+    Legacy ``.doc`` files are not OOXML packages, so only existence and
+    non-empty content are checked for that format. ``.docx`` inputs receive
+    the same structural validation used for generated DOCX artifacts.
+    """
+    try:
+        size = os.path.getsize(path)
+    except FileNotFoundError:
+        return False, "missing input"
+    except OSError as exc:
+        return False, f"unreadable input: {exc}"
+
+    if not os.path.isfile(path):
+        return False, "input is not a file"
+    if size <= 0:
+        return False, "empty input"
+
+    if path.lower().endswith(".docx"):
+        valid, reason = validate_docx_artifact(path)
+        if not valid:
+            return False, reason
+    return True, ""
+
+
 def run_pdf_engine_with_artifact_validation(
     destination: str,
     engine: Callable[[str], object],

@@ -1,9 +1,6 @@
 """PDF merge template order consumption tests."""
 
-from pathlib import Path
-
 import fitz
-import pypdf
 from PySide6.QtWidgets import QDialog, QMessageBox
 
 from app.mixins.pdf_operations import PdfOperationsMixin
@@ -14,8 +11,12 @@ from templates import semantic_keys as sk
 def _files(tmp_path):
     first = tmp_path / "b.pdf"
     second = tmp_path / "a.pdf"
-    first.write_bytes(b"%PDF-1.4\n")
-    second.write_bytes(b"%PDF-1.4\n")
+    for path, label in ((first, "B"), (second, "A")):
+        doc = fitz.open()
+        page = doc.new_page()
+        page.insert_text((72, 72), label)
+        doc.save(str(path))
+        doc.close()
     return first, second
 
 
@@ -25,11 +26,14 @@ class _FakeWidget:
 
 
 class _FakeAchievements:
+    def __init__(self):
+        self.merged_pages = None
+
     def record_conversion(self, *args, **kwargs):
         pass
 
-    def record_pdf_merge(self, *args, **kwargs):
-        pass
+    def record_pdf_merge(self, pages):
+        self.merged_pages = pages
 
 
 class _FakeDb:
@@ -42,31 +46,6 @@ class _FakeNotifier:
         pass
 
 
-class _FakeWriter:
-    instances = []
-
-    def __init__(self):
-        self.files = []
-        self.__class__.instances.append(self)
-
-    def append(self, path):
-        self.files.append(path)
-
-    def write(self, path):
-        Path(path).write_bytes(b"%PDF-1.4\n")
-
-    def close(self):
-        pass
-
-
-class _FakeDoc:
-    def __len__(self):
-        return 2
-
-    def close(self):
-        pass
-
-
 def _fake_self(tmp_path, active_templates):
     obj = PdfOperationsMixin.__new__(PdfOperationsMixin)
     first, second = _files(tmp_path)
@@ -74,6 +53,7 @@ def _fake_self(tmp_path, active_templates):
     obj.files_list = [str(first), str(second)]
     obj.current_language = "en"
     obj.active_templates = active_templates
+    obj.config = {"enable_system_notifications": False}
     obj.translate_text = lambda key: key
     obj.get_output_directory = lambda _name: str(tmp_path / "merged.pdf")
     obj.show_progress = lambda *args, **kwargs: None
@@ -151,7 +131,6 @@ def test_merge_receives_template_preselect_and_uses_dialog_order(monkeypatch, tm
         {sk.PDF_MERGE: {"merge_order_key": sk.ORDER_ALPHA_AZ}},
     )
     captured = {}
-    writer_instances = []
 
     class FakeDialog:
         def __init__(self, files, file_type, parent=None, language="fr", pre_select_key=None):
@@ -167,14 +146,7 @@ def test_merge_receives_template_preselect_and_uses_dialog_order(monkeypatch, tm
         def get_order_key(self):
             return sk.ORDER_ALPHA_ZA
 
-    class FakeWriter(_FakeWriter):
-        def __init__(self):
-            super().__init__()
-            writer_instances.append(self)
-
     monkeypatch.setattr("dialogs.merge_order_dialog.MergeOrderDialog", FakeDialog)
-    monkeypatch.setattr(pypdf, "PdfWriter", FakeWriter)
-    monkeypatch.setattr(fitz, "open", lambda _path: _FakeDoc())
     monkeypatch.setattr(QMessageBox, "information", staticmethod(lambda *a, **k: None))
     monkeypatch.setattr(QMessageBox, "critical", staticmethod(lambda *a, **k: None))
     obj.record_config_usage = lambda *args: captured.setdefault("recorded", args)
@@ -183,7 +155,10 @@ def test_merge_receives_template_preselect_and_uses_dialog_order(monkeypatch, tm
 
     assert captured["pre_select_key"] == sk.ORDER_ALPHA_AZ
     assert captured["recorded"] == (sk.PDF_MERGE, {"merge_order": sk.ORDER_ALPHA_ZA})
-    assert writer_instances[0].files == [str(second), str(first)]
+
+    with fitz.open(tmp_path / "merged.pdf") as merged:
+        assert [page.get_text().strip() for page in merged] == ["A", "B"]
+    assert obj.achievement_system.merged_pages == 2
 
 
 def test_no_active_template_passes_no_preselect(monkeypatch, tmp_path):

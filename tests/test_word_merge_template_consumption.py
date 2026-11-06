@@ -1,9 +1,7 @@
 """Word merge template order consumption tests."""
 
-from pathlib import Path
-
-import docx
-import docxcompose.composer
+from docx import Document
+from docx.oxml.ns import qn
 from PySide6.QtWidgets import QDialog, QMessageBox
 
 from app.mixins.pdf_operations import PdfOperationsMixin
@@ -14,8 +12,10 @@ from templates import semantic_keys as sk
 def _files(tmp_path):
     first = tmp_path / "b.docx"
     second = tmp_path / "a.docx"
-    first.write_bytes(b"docx")
-    second.write_bytes(b"docx")
+    for path, label in ((first, "B"), (second, "A")):
+        doc = Document()
+        doc.add_paragraph(label)
+        doc.save(str(path))
     return first, second
 
 
@@ -107,29 +107,6 @@ def test_word_merge_receives_preselect_and_uses_dialog_order(monkeypatch, tmp_pa
         {sk.WORD_MERGE: {"merge_order_key": sk.ORDER_ALPHA_AZ}},
     )
     captured = {}
-    composers = []
-    documents = []
-
-    class FakeDocument:
-        def __init__(self, path):
-            self.path = path
-            self.page_breaks = 0
-            documents.append(path)
-
-        def add_page_break(self):
-            self.page_breaks += 1
-
-    class FakeComposer:
-        def __init__(self, document):
-            self.doc = document
-            self.appended = []
-            composers.append(self)
-
-        def append(self, document):
-            self.appended.append(document)
-
-        def save(self, path):
-            Path(path).write_bytes(b"docx")
 
     class FakeDialog:
         def __init__(self, files, file_type, parent=None, language="fr", pre_select_key=None):
@@ -146,8 +123,6 @@ def test_word_merge_receives_preselect_and_uses_dialog_order(monkeypatch, tmp_pa
             return sk.ORDER_ALPHA_ZA
 
     monkeypatch.setattr("dialogs.merge_order_dialog.MergeOrderDialog", FakeDialog)
-    monkeypatch.setattr(docx, "Document", FakeDocument)
-    monkeypatch.setattr(docxcompose.composer, "Composer", FakeComposer)
     monkeypatch.setattr(QMessageBox, "information", staticmethod(lambda *a, **k: None))
     monkeypatch.setattr(QMessageBox, "critical", staticmethod(lambda *a, **k: None))
     obj.record_config_usage = lambda *args: captured.setdefault("recorded", args)
@@ -156,8 +131,18 @@ def test_word_merge_receives_preselect_and_uses_dialog_order(monkeypatch, tmp_pa
 
     assert captured["pre_select_key"] == sk.ORDER_ALPHA_AZ
     assert captured["recorded"] == (sk.WORD_MERGE, {"merge_order": sk.ORDER_ALPHA_ZA})
-    assert documents[0] == str(second)
-    assert [doc.path for doc in composers[0].appended] == [str(first)]
+
+    merged = Document(str(tmp_path / "merged.docx"))
+    texts = [paragraph.text for paragraph in merged.paragraphs if paragraph.text]
+    assert texts == ["A", "B"]
+    positions = {paragraph.text: index for index, paragraph in enumerate(merged.paragraphs) if paragraph.text}
+    break_positions = [
+        index
+        for index, paragraph in enumerate(merged.paragraphs)
+        if any(br.get(qn("w:type")) == "page" for br in paragraph._element.iter(qn("w:br")))
+    ]
+    assert len(break_positions) == 1
+    assert positions["A"] < break_positions[0] < positions["B"]
 
 
 def test_word_merge_no_active_template_passes_no_preselect(monkeypatch, tmp_path):

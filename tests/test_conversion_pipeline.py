@@ -249,14 +249,12 @@ def test_automation_docx_and_pdf_routes_use_shared_pipeline(module_name, monkeyp
 
     monkeypatch.setattr(conversion_helpers, "run_conversion_pipeline", fake_pipeline)
     module = watcher if module_name == "watcher" else scheduler
-    src = tmp_path / "input.docx"
-    src.write_bytes(b"docx")
+    src = _make_docx(tmp_path / "input.docx")
     out_dir = tmp_path / "out"
 
     module._run_conversion("docx_to_pdf", str(src), str(out_dir))
 
-    src_pdf = tmp_path / "input.pdf"
-    src_pdf.write_bytes(b"%PDF")
+    src_pdf = _make_pdf(tmp_path / "input.pdf")
     module._run_conversion("pdf_to_docx", str(src_pdf), str(out_dir))
 
     assert len(calls) == 2
@@ -283,10 +281,12 @@ def test_main_and_batch_workflows_use_shared_pipeline(app, monkeypatch, tmp_path
         "compress_images": True,
         "include_metadata": True,
     }
-    assert app.convert_docx_to_pdf_preserve_all("input.docx", str(tmp_path / "out.pdf"), options)
-    assert app.convert_pdf_to_docx_with_charts("input.pdf", str(tmp_path / "out-charts.docx"))
-    assert app.convert_pdf_to_docx_text_only("input.pdf", str(tmp_path / "out.docx"))
-    assert app._batch_to_pdf(str(tmp_path / "input.docx"), str(tmp_path / "batch.pdf"), ".docx")
+    src_docx = _make_docx(tmp_path / "input.docx")
+    src_pdf = _make_pdf(tmp_path / "input.pdf")
+    assert app.convert_docx_to_pdf_preserve_all(str(src_docx), str(tmp_path / "out.pdf"), options)
+    assert app.convert_pdf_to_docx_with_charts(str(src_pdf), str(tmp_path / "out-charts.docx"))
+    assert app.convert_pdf_to_docx_text_only(str(src_pdf), str(tmp_path / "out.docx"))
+    assert app._batch_to_pdf(str(src_docx), str(tmp_path / "batch.pdf"), ".docx")
 
     assert len(calls) == 4
 
@@ -301,9 +301,11 @@ def test_quick_helpers_use_shared_pipeline(monkeypatch, tmp_path):
         return _result()
 
     monkeypatch.setattr(conversion_helpers, "run_conversion_pipeline", fake_pipeline)
+    src_docx = _make_docx(tmp_path / "input.docx")
+    src_pdf = _make_pdf(tmp_path / "input.pdf")
 
-    conversion_helpers._convert_docx_to_pdf("input.docx", str(tmp_path))
-    conversion_helpers._convert_pdf_to_docx("input.pdf", str(tmp_path), mode="text_only")
+    conversion_helpers._convert_docx_to_pdf(str(src_docx), str(tmp_path))
+    conversion_helpers._convert_pdf_to_docx(str(src_pdf), str(tmp_path), mode="text_only")
 
     assert len(calls) == 2
 
@@ -318,9 +320,10 @@ def test_quick_docx_cancellation_propagates_through_helper(monkeypatch, tmp_path
         return _result(False, "conversion cancelled", cancelled=True)
 
     monkeypatch.setattr(conversion_helpers, "run_conversion_pipeline", fake_pipeline)
+    src_docx = _make_docx(tmp_path / "input.docx")
 
     with pytest.raises(conversion_helpers._ConversionCancelled):
-        conversion_helpers._convert_docx_to_pdf("input.docx", str(tmp_path), cancel_event)
+        conversion_helpers._convert_docx_to_pdf(str(src_docx), str(tmp_path), cancel_event)
 
 
 def test_batch_partial_failure_is_reported(app, monkeypatch, tmp_path):

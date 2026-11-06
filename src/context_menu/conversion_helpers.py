@@ -9,9 +9,9 @@ import threading
 import time
 from pathlib import Path
 
-from pdf_text import convert_pdf_text_to_docx
+from pdf_text import build_text_only_engines, convert_pdf_text_to_docx
 from utils.conversion_pipeline import ConversionCancelled, run_conversion_pipeline
-from utils.pdf_artifacts import validate_docx_artifact, validate_pdf_artifact
+from utils.pdf_artifacts import validate_docx_artifact, validate_docx_input, validate_pdf_artifact
 
 _PDF_TO_WORD_MODE_DEFAULT = "with_images"
 _PDF_TO_WORD_MODES = frozenset({"with_images", "text_only"})
@@ -41,30 +41,45 @@ def _temporary_docx_path(dst_path: str) -> str:
 
 
 def _sort_files(files: list, order: str) -> list:
-    if order == "none" or not order:
+    aliases = {
+        "alpha_az": "alphabetical_asc",
+        "alpha_za": "alphabetical_desc",
+        "num_asc": "numerical_asc",
+        "num_desc": "numerical_desc",
+        "manual": "none",
+        "current": "none",
+    }
+    canonical = aliases.get(order, order)
+    if canonical == "none" or not canonical:
         return files
-    if order == "alphabetical_asc":
-        return sorted(files, key=lambda f: Path(f).name.lower())
-    if order == "alphabetical_desc":
-        return sorted(files, key=lambda f: Path(f).name.lower(), reverse=True)
-    if order == "numerical_asc":
+
+    def name_key(path):
+        return (Path(path).name.lower(), str(path).lower())
+
+    def number_key(path):
         import re
 
-        return sorted(
-            files, key=lambda f: [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", Path(f).name)]
+        parts = re.split(r"(\d+)", Path(path).name)
+        return (
+            tuple((0, int(part)) if part.isdigit() else (1, part.lower()) for part in parts),
+            str(path).lower(),
         )
-    if order == "numerical_desc":
-        import re
 
-        return sorted(
-            files,
-            key=lambda f: [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", Path(f).name)],
-            reverse=True,
-        )
-    if order == "date_asc":
-        return sorted(files, key=lambda f: Path(f).stat().st_mtime)
-    if order == "date_desc":
-        return sorted(files, key=lambda f: Path(f).stat().st_mtime, reverse=True)
+    def date_key(path):
+        return (Path(path).stat().st_mtime, str(path).lower())
+
+    if canonical == "alphabetical_asc":
+        return sorted(files, key=name_key)
+    if canonical == "alphabetical_desc":
+        return sorted(files, key=name_key, reverse=True)
+    if canonical == "numerical_asc":
+        return sorted(files, key=number_key)
+    if canonical == "numerical_desc":
+        return sorted(files, key=number_key, reverse=True)
+    if canonical == "date_asc":
+        return sorted(files, key=date_key)
+    if canonical == "date_desc":
+        return sorted(files, key=date_key, reverse=True)
     return files
 
 
@@ -108,49 +123,121 @@ def _merge_images_to_pdf(
         pdf.close()
 
 
-def _merge_pdfs(
-    files: list, dst_dir: str, order: str, cancel_event: threading.Event | None = None
-) -> None:
-    import fitz
+def _merge_output_path(
+    dst_dir: str,
+    dst_path: str | None,
+    prefix: str,
+    suffix: str,
+) -> str:
+    if dst_path:
+        return os.path.abspath(dst_path)
 
-    merged = fitz.open()
-    try:
-        for f in _sort_files(files, order):
+    stem = f"{prefix}{time.strftime('%Y%m%d_%H%M%S')}"
+    candidate = os.path.join(dst_dir, f"{stem}.{suffix}")
+    counter = 1
+    while os.path.exists(candidate):
+        candidate = os.path.join(dst_dir, f"{stem}_{counter}.{suffix}")
+        counter += 1
+    return candidate
+
+
+def _commit_merge(
+    final_path: str,
+    engine,
+    validator,
+    cancel_event: threading.Event | None,
+    label: str,
+) -> None:
+    result = run_conversion_pipeline(
+        final_path,
+        [("merge", engine)],
+        validator,
+        cancel_event=cancel_event,
+        stage_mode="file",
+        staged_prefix="~fcp_merge_",
+        staged_suffix=Path(final_path).suffix or ".tmp",
+        include_engine_labels=False,
+    )
+    if result.cancelled:
+        raise _ConversionCancelled()
+    if not result.success:
+        raise RuntimeError(f"{label} merge failed: {result.error}")
+
+
+def _merge_pdfs(
+    files: list,
+    dst_dir: str,
+    order: str,
+    cancel_event: threading.Event | None = None,
+    *,
+    dst_path: str | None = None,
+) -> None:
+    _raise_if_cancelled(cancel_event)
+    ordered_files = _sort_files(files, order)
+    if not ordered_files:
+        raise RuntimeError("PDF merge requires at least one input file")
+
+    out = _merge_output_path(dst_dir, dst_path, "merged_", "pdf")
+
+    def _engine(target):
+        from pypdf import PdfWriter
+
+        writer = PdfWriter()
+        try:
+            for f in ordered_files:
+                _raise_if_cancelled(cancel_event)
+                writer.append(f)
             _raise_if_cancelled(cancel_event)
-            doc = fitz.open(f)
-            merged.insert_pdf(doc)
-            doc.close()
-        merged.save(os.path.join(dst_dir, f"merged_{time.strftime('%Y%m%d_%H%M%S')}.pdf"))
-    finally:
-        merged.close()
+            with open(target, "wb") as handle:
+                writer.write(handle)
+        finally:
+            writer.close()
+        return True
+
+    _commit_merge(out, _engine, validate_pdf_artifact, cancel_event, "PDF")
 
 
 def _merge_docx(
-    files: list, dst_dir: str, order: str, cancel_event: threading.Event | None = None
+    files: list,
+    dst_dir: str,
+    order: str,
+    cancel_event: threading.Event | None = None,
+    *,
+    dst_path: str | None = None,
 ) -> None:
-    from docx import Document
-    from docx.oxml import OxmlElement
-    from docx.oxml.ns import qn
-    from docxcompose.composer import Composer
-
     _raise_if_cancelled(cancel_event)
-    sorted_files = _sort_files(files, order)
-    merged = Document(sorted_files[0])
-    composer = Composer(merged)
+    ordered_files = _sort_files(files, order)
+    if not ordered_files:
+        raise RuntimeError("Word merge requires at least one input file")
 
-    for f in sorted_files[1:]:
+    out = _merge_output_path(dst_dir, dst_path, "merged_", "docx")
+
+    def _engine(target):
+        from docx import Document
+        from docx.oxml import OxmlElement
+        from docx.oxml.ns import qn
+        from docxcompose.composer import Composer
+
+        merged = Document(ordered_files[0])
+        composer = Composer(merged)
+
+        for f in ordered_files[1:]:
+            _raise_if_cancelled(cancel_event)
+            doc = Document(f)
+            p = OxmlElement("w:p")
+            r = OxmlElement("w:r")
+            br = OxmlElement("w:br")
+            br.set(qn("w:type"), "page")
+            r.append(br)
+            p.append(r)
+            doc.element.body.insert(0, p)
+            composer.append(doc)
+
         _raise_if_cancelled(cancel_event)
-        doc = Document(f)
-        p = OxmlElement("w:p")
-        r = OxmlElement("w:r")
-        br = OxmlElement("w:br")
-        br.set(qn("w:type"), "page")
-        r.append(br)
-        p.append(r)
-        doc.element.body.insert(0, p)
-        composer.append(doc)
+        composer.save(target)
+        return True
 
-    merged.save(os.path.join(dst_dir, f"merged_{time.strftime('%Y%m%d_%H%M%S')}.docx"))
+    _commit_merge(out, _engine, validate_docx_artifact, cancel_event, "Word")
 
 
 def _convert_docx_to_pdf(src: str, dst_dir: str, cancel_event: threading.Event | None = None) -> None:
@@ -158,21 +245,33 @@ def _convert_docx_to_pdf(src: str, dst_dir: str, cancel_event: threading.Event |
     src_abs = os.path.abspath(src)
     out_abs = os.path.abspath(out)
 
+    valid, reason = validate_docx_input(src_abs)
+    if not valid:
+        raise RuntimeError(f"Invalid Word input: {reason}")
+
     def _run_docx2pdf(target):
         from docx2pdf import convert
 
-        convert(src_abs, target)
+        _raise_if_cancelled(cancel_event)
+        try:
+            convert(src_abs, target)
+        except SystemExit as exc:
+            raise RuntimeError(f"docx2pdf exited with status {exc.code}") from exc
+        _raise_if_cancelled(cancel_event)
 
     def _run_com(target):
         import comtypes.client
 
+        _raise_if_cancelled(cancel_event)
         word = None
         document = None
         try:
             word = comtypes.client.CreateObject("Word.Application")
             word.Visible = False
+            word.DisplayAlerts = 0
             document = word.Documents.Open(src_abs)
             document.SaveAs(target, FileFormat=17)
+            _raise_if_cancelled(cancel_event)
             document.Close(False)
             document = None
         finally:
@@ -192,19 +291,30 @@ def _convert_docx_to_pdf(src: str, dst_dir: str, cancel_event: threading.Event |
 
         from external_binaries import resolve_binary
 
+        _raise_if_cancelled(cancel_event)
         exe = resolve_binary("libreoffice")
         if not exe:
             raise RuntimeError("LibreOffice not found")
         output_dir = os.path.dirname(target)
-        subprocess.run(
+        completed = subprocess.run(
             [exe, "--headless", "--convert-to", "pdf", "--outdir", output_dir, src_abs],
-            check=True,
+            check=False,
             capture_output=True,
-            timeout=60,
+            text=True,
+            timeout=120,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
         expected = os.path.join(output_dir, f"{Path(src_abs).stem}.pdf")
-        if os.path.abspath(expected) != os.path.abspath(target) and os.path.exists(expected):
-            os.replace(expected, target)
+        if os.path.exists(expected):
+            _raise_if_cancelled(cancel_event)
+            if os.path.abspath(expected) != os.path.abspath(target):
+                os.replace(expected, target)
+            return
+
+        detail = (completed.stderr or "").strip()
+        if detail:
+            raise RuntimeError(f"LibreOffice failed: {detail}")
+        raise RuntimeError(f"LibreOffice produced no output (exit code {completed.returncode})")
 
     def _run_reportlab(target):
         from docx import Document as DocxDoc
@@ -212,6 +322,7 @@ def _convert_docx_to_pdf(src: str, dst_dir: str, cancel_event: threading.Event |
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
+        _raise_if_cancelled(cancel_event)
         doc = DocxDoc(src_abs)
         styles = getSampleStyleSheet()
         story = []
@@ -222,13 +333,38 @@ def _convert_docx_to_pdf(src: str, dst_dir: str, cancel_event: threading.Event |
         if not story:
             story.append(Spacer(1, 1))
         SimpleDocTemplate(target, pagesize=A4).build(story)
+        _raise_if_cancelled(cancel_event)
 
-    engines = [
-        ("docx2pdf", _run_docx2pdf),
-        ("COM", _run_com),
+    def _run_word(target):
+        try:
+            _run_com(target)
+            return
+        except _ConversionCancelled:
+            raise
+        except Exception as com_exc:
+            com_error = com_exc
+
+        try:
+            _run_docx2pdf(target)
+        except _ConversionCancelled:
+            raise
+        except Exception as docx_exc:
+            raise RuntimeError(f"COM failed: {com_error}; docx2pdf failed: {docx_exc}") from docx_exc
+
+    engines = []
+    docx2pdf_supported = src_abs.endswith(".docx")
+    if sys.platform == "win32":
+        if docx2pdf_supported:
+            engines.append(("Word", _run_word))
+        else:
+            engines.append(("COM", _run_com))
+    elif sys.platform == "darwin" and docx2pdf_supported:
+        engines.append(("docx2pdf", _run_docx2pdf))
+    engines.extend([
         ("LibreOffice", _run_libreoffice),
         ("ReportLab", _run_reportlab),
-    ]
+    ])
+
     result = run_conversion_pipeline(
         out_abs,
         engines,
@@ -432,24 +568,20 @@ def _convert_pdf_to_docx_impl(
     out = os.path.join(dst_dir, f"{Path(src).stem}.docx")
     src_abs = os.path.abspath(src)
     out_abs = os.path.abspath(out)
+    no_text_errors = []
 
     if _normalise_pdf_to_word_mode(mode) == "text_only":
-        def _run_text(target):
-            text_converter(
-                src_abs,
-                target,
-                cancel_check=lambda: _raise_if_cancelled(cancel_event),
-            )
-
-        engines = [
-            ("text extraction", _run_text),
-            ("fitz fallback", lambda target: fallback(src_abs, target)),
-        ]
+        engines, no_text_errors = build_text_only_engines(
+            src_abs,
+            fallback,
+            text_converter=text_converter,
+            cancel_check=lambda: _raise_if_cancelled(cancel_event),
+        )
     else:
         engines = [
             ("COM", lambda target: _pdf_to_docx_word_com(src_abs, target)),
             ("pdf2docx", lambda target: _pdf_to_docx_pdf2docx(src_abs, target)),
-            ("fitz fallback", lambda target: _pdf_to_docx_fitz_text(src_abs, target)),
+            ("fitz fallback", lambda target: fallback(src_abs, target)),
         ]
 
     result = run_conversion_pipeline(
@@ -466,6 +598,8 @@ def _convert_pdf_to_docx_impl(
         raise _ConversionCancelled()
 
     if not result.success:
+        if no_text_errors:
+            raise no_text_errors[0]
         raise RuntimeError(f"All PDF→DOCX methods failed. {result.error}")
 
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import fitz
+from docx import Document
 
 from utils.pdf_artifacts import run_pdf_engine_with_artifact_validation, validate_pdf_artifact
 
@@ -25,7 +26,9 @@ def _word_options() -> dict:
 
 def _word_task(tmp_path: Path) -> tuple[dict, Path, Path]:
     source = tmp_path / "input.docx"
-    source.write_bytes(b"docx")
+    document = Document()
+    document.add_paragraph("input")
+    document.save(str(source))
     output = tmp_path / "input.pdf"
     return (
         {
@@ -292,3 +295,105 @@ def test_main_failure_shows_warning_without_success_notification(app, tmp_path, 
     assert infos == []
     assert notified == []
     assert converted == []
+
+
+def test_main_rejects_invalid_docx_before_engines(app, tmp_path, monkeypatch):
+    source = tmp_path / "invalid.docx"
+    source.write_bytes(b"not a docx")
+    output = _make_pdf(tmp_path / "invalid.pdf", "stale")
+    original = output.read_bytes()
+    calls = []
+    monkeypatch.setattr(app, "convert_word_to_pdf_com", lambda *_args: calls.append("com") or True)
+    monkeypatch.setattr(
+        app,
+        "_convert_docx_to_pdf_libreoffice",
+        lambda *_args: calls.append("libreoffice") or True,
+    )
+    monkeypatch.setattr(
+        app,
+        "_convert_docx_to_pdf_fallback_reportlab",
+        lambda *_args: calls.append("reportlab") or True,
+    )
+
+    ok = app.convert_docx_to_pdf_preserve_all(str(source), str(output), _word_options())
+
+    assert ok is False
+    assert "not a DOCX" in app._last_word_to_pdf_error
+    assert calls == []
+    assert output.read_bytes() == original
+
+
+def test_main_text_only_rejects_invalid_docx_before_engines(app, tmp_path, monkeypatch):
+    source = tmp_path / "invalid.docx"
+    source.write_bytes(b"not a docx")
+    output = _make_pdf(tmp_path / "invalid.pdf", "stale")
+    original = output.read_bytes()
+    calls = []
+    monkeypatch.setattr(app, "_convert_docx_to_pdf_text_only_engine", lambda *_args: calls.append("text"))
+    monkeypatch.setattr(app, "convert_docx_to_pdf_simple", lambda *_args: calls.append("simple") or True)
+
+    ok = app.convert_docx_to_pdf_text_only(str(source), str(output))
+
+    assert ok is False
+    assert "not a DOCX" in app._last_word_to_pdf_error
+    assert calls == []
+    assert output.read_bytes() == original
+
+
+def test_batch_rejects_invalid_docx_before_engines(app, tmp_path, monkeypatch):
+    source = tmp_path / "invalid.docx"
+    source.write_bytes(b"not a docx")
+    output = _make_pdf(tmp_path / "invalid.pdf", "stale")
+    original = output.read_bytes()
+    calls = []
+    monkeypatch.setattr(app, "convert_word_to_pdf_com", lambda *_args: calls.append("com") or True)
+    monkeypatch.setattr(
+        app,
+        "_convert_docx_to_pdf_libreoffice",
+        lambda *_args: calls.append("libreoffice") or True,
+    )
+    monkeypatch.setattr(app, "convert_docx_to_pdf_simple", lambda *_args: calls.append("simple") or True)
+
+    ok = app._batch_to_pdf(str(source), str(output), ".docx")
+
+    assert ok is False
+    assert "not a DOCX" in app._last_batch_error
+    assert calls == []
+    assert output.read_bytes() == original
+
+
+def test_reportlab_preserve_all_renders_real_multipage_docx(app, tmp_path, monkeypatch):
+    from docx.shared import Inches
+    from PIL import Image
+
+    source = tmp_path / "complex.docx"
+    document = Document()
+    document.add_heading("Complex document", level=1)
+    for index in range(30):
+        document.add_paragraph(f"Paragraph {index + 1}: " + "text " * 20)
+    table = document.add_table(rows=2, cols=2)
+    table.cell(0, 0).text = "Table A"
+    table.cell(0, 1).text = "Table B"
+    table.cell(1, 0).text = "Table C"
+    table.cell(1, 1).text = "Table D"
+    image_path = tmp_path / "image.png"
+    Image.new("RGB", (120, 80), (20, 120, 220)).save(image_path)
+    document.add_picture(str(image_path), width=Inches(1.0))
+    document.save(str(source))
+
+    output = tmp_path / "complex.pdf"
+    monkeypatch.setattr(app, "convert_word_to_pdf_com", lambda *_args: False)
+    monkeypatch.setattr(app, "_convert_docx_to_pdf_libreoffice", lambda *_args: False)
+    monkeypatch.setattr(app, "_postprocess_word_pdf", lambda *_args: None)
+
+    ok = app.convert_docx_to_pdf_preserve_all(str(source), str(output), _word_options())
+
+    assert ok is True
+    assert validate_pdf_artifact(str(output)) == (True, "")
+    with fitz.open(str(output)) as pdf:
+        assert pdf.page_count >= 2
+        assert any(page.get_images(full=True) for page in pdf)
+        text = "\n".join(page.get_text() for page in pdf)
+    assert "Complex document" in text
+    assert "Table A" in text
+    assert "Table D" in text

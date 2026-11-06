@@ -32,7 +32,7 @@ except ImportError as _e:
 from conversion_worker import ConversionWorker
 from dialogs import WordToPdfOptionsDialog
 from utils.conversion_pipeline import run_conversion_pipeline
-from utils.pdf_artifacts import validate_pdf_artifact
+from utils.pdf_artifacts import validate_docx_input, validate_pdf_artifact
 
 
 def _sanitize_xml(t: str) -> str:
@@ -311,6 +311,10 @@ class WordToPdfMixin:
 
     def convert_docx_to_pdf_preserve_all(self, docx_path, pdf_path, options, progress_callback=None):
         self._last_word_to_pdf_error = ""
+        valid, reason = validate_docx_input(docx_path)
+        if not valid:
+            self._last_word_to_pdf_error = f"Invalid Word input: {reason}"
+            return False
         engines = [
             (
                 "COM",
@@ -855,6 +859,10 @@ class WordToPdfMixin:
 
 
     def convert_docx_to_pdf_text_only(self, docx_path, pdf_path):
+        valid, reason = validate_docx_input(docx_path)
+        if not valid:
+            self._last_word_to_pdf_error = f"Invalid Word input: {reason}"
+            return False
         engines = [
             ("text", lambda target: self._convert_docx_to_pdf_text_only_engine(docx_path, target)),
             ("ReportLab", lambda target: self.convert_docx_to_pdf_simple(docx_path, target)),

@@ -104,18 +104,12 @@ class ImageToPdfMixin:
         Returns (tesseract_path, orientation) where orientation is None
         (auto), "none", or a float angle in degrees (custom value).
         """
-        import scanlayer
+        from tasks.ocr_helpers import configure_scanlayer
 
-        from external_binaries import resolve_binary
-
-        tesseract = resolve_binary("tesseract")
-        if tesseract:
-            scanlayer.configure(tesseract_cmd=tesseract)
-
-        self._suppress_tesseract_console()
-
-        orientation = self._ocr_orientation_value()
-        return tesseract, orientation
+        return configure_scanlayer(
+            self.config.get("ocr_orientation", "auto"),
+            include_tesseract=True,
+        )
 
     @staticmethod
     def _suppress_tesseract_console():
@@ -130,34 +124,15 @@ class ImageToPdfMixin:
         "auto" -> None (auto-detect), "none"/empty -> "none" (disabled),
         otherwise -> float angle in degrees.
         """
-        raw = self.config.get("ocr_orientation", "auto")
-        if isinstance(raw, bool) or raw is None:
-            return "none" if raw is False or raw is None else None
-        value = str(raw).strip()
-        if not value or value == "auto":
-            return None
-        if value == "none":
-            return "none"
-        try:
-            return float(value)
-        except (TypeError, ValueError):
-            return None
+        from tasks.ocr_helpers import resolve_orientation
+
+        return resolve_orientation(self.config.get("ocr_orientation", "auto"))
 
     def _single_image_to_generic_pdf(self, file_path: str, output_file: str) -> None:
         """Embed a single image into a plain (non-OCR) PDF using PyMuPDF."""
-        import fitz
+        from tasks.ocr_helpers import embed_image_in_pdf
 
-        from utils.image_formats import decodable_image_path
-
-        pdf_document = fitz.open()
-        with decodable_image_path(file_path) as readable:
-            img = fitz.open(readable)
-            rect = img[0].rect
-            page = pdf_document.new_page(width=rect.width, height=rect.height)
-            page.insert_image(rect, filename=readable)
-            img.close()
-        pdf_document.save(output_file)
-        pdf_document.close()
+        embed_image_in_pdf(file_path, output_file)
 
     def _image_ocr_able(self, file_path: str, output_file: str, orientation) -> bool:
         """OCR a single image into *output_file*.
@@ -166,33 +141,18 @@ class ImageToPdfMixin:
         in which case *output_file* may be left empty or missing and the caller
         should regenerate it with the generic embedder.
         """
-        import scanlayer
+        from tasks.ocr_helpers import image_ocr_able
 
-        from utils.image_formats import decodable_image_path
-
-        try:
-            with decodable_image_path(file_path) as readable:
-                result = scanlayer.convert(
-                    input_path=readable,
-                    output_path=output_file,
-                    orientation=orientation,
-                    force=True,
-                )
-            words = getattr(result, "words_count", 0)
-            return bool(words)
-        except Exception as e:
-            print(f"OCR failed for {file_path}, falling back to plain PDF: {e}")
-            return False
+        return image_ocr_able(file_path, output_file, orientation)
 
     def _image_to_pdf_with_ocr_fallback(self, file_path: str, output_file: str, orientation) -> bool:
         """Convert one image to PDF, using OCR when possible else plain embed.
 
         Returns True if OCR produced text, False if a plain embed was used.
         """
-        if self._image_ocr_able(file_path, output_file, orientation):
-            return True
-        self._single_image_to_generic_pdf(file_path, output_file)
-        return False
+        from tasks.ocr_helpers import image_to_pdf
+
+        return image_to_pdf(file_path, output_file, orientation)
 
     def ocr_convert_images_to_separate_pdfs(self, image_files: list[str], selected_items: list) -> None:
         """Convert each image into a separate searchable PDF using OCR.
@@ -209,14 +169,13 @@ class ImageToPdfMixin:
         self.show_progress(True, self.translate_text("conversion_images_to_separate_pdfs").format(num_images))
         success_count = 0
         ocr_pages = 0
+        failures = []
         start_time = datetime.now()
 
         for i, file_path in enumerate(image_files):
             try:
                 output_file = os.path.join(output_dir, f"{Path(file_path).stem}.pdf")
-                if not self._image_ocr_able(file_path, output_file, orientation):
-                    self._single_image_to_generic_pdf(file_path, output_file)
-                else:
+                if self._image_to_pdf_with_ocr_fallback(file_path, output_file, orientation):
                     ocr_pages += 1
                 file_size = os.path.getsize(file_path)
                 self.db_manager.add_conversion_record(
@@ -233,21 +192,30 @@ class ImageToPdfMixin:
                 success_count += 1
                 self.progress_bar.setValue(int((i + 1) / num_images * 100))
             except Exception as e:
+                failures.append((Path(file_path).name, str(e)))
                 print(f"OCR conversion error {file_path}: {e}")
 
         self.achievement_system.record_ocr_usage(ocr_pages)
         self.show_progress(False)
         if success_count > 0:
             self.record_config_usage(sk.IMAGES_TO_PDF, {"separate": True})
-        if self.config.get("enable_system_notifications", True):
-            self.system_notifier.send("image_to_pdf_s")
-        QMessageBox.information(
-            self,
-            self.translate_text("success"),
-            self.translate_text("images_converted_separate").format(
-                success_count=success_count, num_images=num_images, output_dir=output_dir
-            ),
+            if self.config.get("enable_system_notifications", True):
+                self.system_notifier.send("image_to_pdf_s")
+        message = self.translate_text("images_converted_separate").format(
+            success_count=success_count, num_images=num_images, output_dir=output_dir
         )
+        if failures:
+            failure_lines = [
+                self.translate_text("error_with_file").format(filename=name, error=error)
+                for name, error in failures
+            ]
+            QMessageBox.warning(
+                self,
+                self.translate_text("warning"),
+                message + "\n\n" + "\n".join(failure_lines),
+            )
+            return
+        QMessageBox.information(self, self.translate_text("success"), message)
 
     def ocr_convert_images_to_merged_pdf(self, image_files: list[str], selected_items: list) -> None:
         """Merge images into a single searchable PDF using OCR.
@@ -268,7 +236,28 @@ class ImageToPdfMixin:
                     self.show_progress(False)
                     return
 
-                self._merge_images_with_ocr_to_pdf(image_files, output_file, orientation)
+                from utils.conversion_pipeline import run_conversion_pipeline
+                from utils.pdf_artifacts import validate_pdf_artifact
+
+                ocr_pages = 0
+
+                def _run_ocr_merge(target):
+                    nonlocal ocr_pages
+                    ocr_pages = self._merge_images_with_ocr_to_pdf(image_files, target, orientation) or 0
+                    return True
+
+                result = run_conversion_pipeline(
+                    output_file,
+                    [("OCR", _run_ocr_merge)],
+                    validate_pdf_artifact,
+                    stage_mode="file",
+                    staged_prefix="~fcp_ocr_",
+                    staged_suffix=".pdf",
+                    include_engine_labels=False,
+                )
+                if not result.success:
+                    raise RuntimeError(f"OCR merge failed: {result.error}")
+                self.achievement_system.record_ocr_usage(ocr_pages)
 
                 conversion_time = (datetime.now() - start_time).total_seconds()
                 total_size = sum(os.path.getsize(f) for f in image_files if os.path.exists(f))
@@ -324,7 +313,7 @@ class ImageToPdfMixin:
     # scanlayer's maximum for parallel pages in a merge (it also caps by CPU count and page count)
     OCR_MERGE_WORKERS = 4
 
-    def _merge_images_with_ocr_to_pdf(self, image_files: list[str], output_file: str, orientation) -> None:
+    def _merge_images_with_ocr_to_pdf(self, image_files: list[str], output_file: str, orientation) -> int | None:
         """Build a multi-page PDF, OCR-ing each image when possible.
 
         Fast path: scanlayer's own merge, which OCRs up to OCR_MERGE_WORKERS pages
@@ -332,11 +321,15 @@ class ImageToPdfMixin:
         cannot handle the batch, for example one page is in a format scanlayer
         cannot read, fall back to one-page-at-a-time, where such a page is
         embedded as a plain image without OCR.
+
+        Returns the number of pages that received OCR text. The caller records
+        achievement usage only after the final PDF is validated and committed.
         """
         self.show_progress(True, self.translate_text(f"Traitement de {len(image_files)} image(s)..."))
-        if self._merge_images_with_ocr_parallel(image_files, output_file, orientation):
-            return
-        self._merge_images_with_ocr_sequential(image_files, output_file, orientation)
+        ocr_pages = self._merge_images_with_ocr_parallel(image_files, output_file, orientation)
+        if ocr_pages is not None:
+            return ocr_pages
+        return self._merge_images_with_ocr_sequential(image_files, output_file, orientation)
 
     @staticmethod
     def _run_off_ui_thread(fn):
@@ -357,8 +350,8 @@ class ImageToPdfMixin:
             timer.stop()
             return future.result()
 
-    def _merge_images_with_ocr_parallel(self, image_files: list[str], output_file: str, orientation) -> bool:
-        """Merge with scanlayer.convert_merge(workers=...). Returns False if the caller should fall back."""
+    def _merge_images_with_ocr_parallel(self, image_files: list[str], output_file: str, orientation) -> int | None:
+        """Merge with scanlayer.convert_merge(workers=...). Returns page count or None to fall back."""
         import contextlib
 
         import fitz
@@ -392,13 +385,12 @@ class ImageToPdfMixin:
             print(f"Parallel OCR merge failed, falling back to page-by-page: {e}")
             with contextlib.suppress(OSError):
                 os.remove(output_file)
-            return False
+            return None
 
         self.progress_bar.setValue(100)
-        self.achievement_system.record_ocr_usage(ocr_pages)
-        return True
+        return ocr_pages
 
-    def _merge_images_with_ocr_sequential(self, image_files: list[str], output_file: str, orientation) -> None:
+    def _merge_images_with_ocr_sequential(self, image_files: list[str], output_file: str, orientation) -> int:
         """One page at a time; pages OCR cannot handle are embedded as plain images."""
         import shutil
         import tempfile
@@ -419,11 +411,11 @@ class ImageToPdfMixin:
                 merged.insert_pdf(src)
                 src.close()
                 self.progress_bar.setValue(int((i + 1) / len(image_files) * 100))
-            self.achievement_system.record_ocr_usage(ocr_pages)
             merged.save(output_file)
         finally:
             merged.close()
             shutil.rmtree(temp_dir, ignore_errors=True)
+        return ocr_pages
 
     def convert_images_to_separate_pdfs(self, image_files: list[str], selected_items: list) -> None:
         """Convert each image into a separate PDF in chosen directory."""

@@ -128,6 +128,7 @@ class PdfOperationsMixin:
         if dialog.exec() != QDialog.Accepted:
             return
         ordered_files = dialog.get_ordered_files()
+        order_key = dialog.get_order_key()
 
         default_filename = f"fusion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         output_file = self.get_output_directory(default_filename)
@@ -136,15 +137,17 @@ class PdfOperationsMixin:
 
         self.show_progress(True, self.translate_text("pdf_merge"))
         start_time = datetime.now()
-        total_size = sum(os.path.getsize(f) for f in ordered_files)
 
         try:
-            from pypdf import PdfWriter
-            writer = PdfWriter()
-            for file_path in ordered_files:
-                writer.append(file_path)
-            writer.write(output_file)
-            writer.close()
+            total_size = sum(os.path.getsize(f) for f in ordered_files)
+            from context_menu.conversion_helpers import _merge_pdfs
+
+            _merge_pdfs(
+                ordered_files,
+                os.path.dirname(output_file),
+                "none",
+                dst_path=output_file,
+            )
 
             conversion_time = (datetime.now() - start_time).total_seconds()
             self.db_manager.add_conversion_record(
@@ -159,10 +162,9 @@ class PdfOperationsMixin:
             )
             self.achievement_system.record_conversion("merge_pdf", total_size, True)
             import fitz
-            merged_doc = fitz.open(output_file)
-            self.achievement_system.record_pdf_merge(len(merged_doc))
-            merged_doc.close()
-            self.record_config_usage(sk.PDF_MERGE, {"merge_order": dialog.get_order_key()})
+            with fitz.open(output_file) as merged_doc:
+                self.achievement_system.record_pdf_merge(len(merged_doc))
+            self.record_config_usage(sk.PDF_MERGE, {"merge_order": order_key})
             self.show_progress(False)
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("merge_pdf")
@@ -179,8 +181,6 @@ class PdfOperationsMixin:
                                  self.translate_text("error_merge").format(error=str(e)))
 
     def merge_word_docs(self):
-        from docxcompose.composer import Composer
-
         from dialogs.merge_order_dialog import MergeOrderDialog
         selected_items = self.files_list_widget.selectedItems()
         word_files = []
@@ -215,6 +215,7 @@ class PdfOperationsMixin:
         if dialog.exec() != QDialog.Accepted:
             return
         ordered_files = dialog.get_ordered_files()
+        order_key = dialog.get_order_key()
 
         default_filename = f"fusion_word_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
         output_file = self.get_output_directory(default_filename)
@@ -223,15 +224,17 @@ class PdfOperationsMixin:
 
         self.show_progress(True, self.translate_text("word_merge"))
         start_time = datetime.now()
-        total_size = sum(os.path.getsize(f) for f in ordered_files)
 
         try:
-            from docx import Document
-            composer = Composer(Document(ordered_files[0]))
-            for wf in ordered_files[1:]:
-                composer.doc.add_page_break()
-                composer.append(Document(wf))
-            composer.save(output_file)
+            total_size = sum(os.path.getsize(f) for f in ordered_files)
+            from context_menu.conversion_helpers import _merge_docx
+
+            _merge_docx(
+                ordered_files,
+                os.path.dirname(output_file),
+                "none",
+                dst_path=output_file,
+            )
             self.show_progress(False)
             if self.config.get("enable_system_notifications", True):
                 self.system_notifier.send("merge_word")
@@ -247,12 +250,12 @@ class PdfOperationsMixin:
                 success=True,
             )
             self.achievement_system.record_conversion("merge_word", total_size, True)
-            self.record_config_usage(sk.WORD_MERGE, {"merge_order": dialog.get_order_key()})
+            self.record_config_usage(sk.WORD_MERGE, {"merge_order": order_key})
             QMessageBox.information(
                 self,
                 self.translate_text("success"),
                 self.translate_text("word_merge_success").format(
-                    count=len(word_files), time=f"{conversion_time:.1f}"
+                    count=len(ordered_files), time=f"{conversion_time:.1f}"
                 ),
             )
         except Exception as e:

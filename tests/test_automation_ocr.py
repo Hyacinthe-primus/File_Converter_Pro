@@ -240,6 +240,23 @@ class TestRunConversionRouting:
 
         assert seen == [src]
 
+    def test_ocr_flag_does_not_change_pdf_to_word_route(self, monkeypatch, tmp_path):
+        import context_menu.conversion_helpers as conversion_helpers
+
+        seen = []
+        monkeypatch.setattr(
+            conversion_helpers,
+            "_convert_pdf_to_docx",
+            lambda *args, **kwargs: seen.append((args, kwargs)),
+        )
+        monkeypatch.setattr(watcher, "_load_pdf_to_word_mode", lambda: "with_images")
+        src = tmp_path / "input.pdf"
+        src.write_bytes(b"%PDF")
+
+        watcher._run_conversion("pdf_to_docx", str(src), str(tmp_path / "out"), ocr=True)
+
+        assert seen
+
 
 class TestRunMergeRouting:
     def test_merge_with_ocr(self, monkeypatch, tmp_path):

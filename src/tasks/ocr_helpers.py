@@ -18,9 +18,13 @@ import os
 import shutil
 import tempfile
 
+from utils.conversion_pipeline import run_conversion_pipeline
+from utils.pdf_artifacts import validate_pdf_artifact
+
 logger = logging.getLogger(__name__)
 
 OCR_MERGE_WORKERS = 4
+OCR_STAGE_PREFIX = "~fcp_ocr_"
 
 
 def resolve_orientation(raw=None):
@@ -53,7 +57,7 @@ def resolve_orientation(raw=None):
         return None
 
 
-def configure_scanlayer():
+def configure_scanlayer(raw_orientation=None, *, include_tesseract=False):
     """Resolve Tesseract, hide its console, and return the orientation value."""
     import scanlayer
 
@@ -65,7 +69,23 @@ def configure_scanlayer():
         scanlayer.configure(tesseract_cmd=tesseract)
 
     suppress_tesseract_console()
-    return resolve_orientation()
+    orientation = resolve_orientation(raw_orientation)
+    if include_tesseract:
+        return tesseract, orientation
+    return orientation
+
+
+def _run_staged_pdf(destination: str, engine) -> tuple[bool, str]:
+    result = run_conversion_pipeline(
+        destination,
+        [("OCR", engine)],
+        validate_pdf_artifact,
+        stage_mode="file",
+        staged_prefix=OCR_STAGE_PREFIX,
+        staged_suffix=".pdf",
+        include_engine_labels=False,
+    )
+    return result.success, result.error
 
 
 def image_ocr_able(src: str, out_pdf: str, orientation) -> bool:
@@ -82,7 +102,15 @@ def image_ocr_able(src: str, out_pdf: str, orientation) -> bool:
                 orientation=orientation,
                 force=True,
             )
-        return bool(getattr(result, "words_count", 0))
+        if not getattr(result, "words_count", 0):
+            return False
+        valid, reason = validate_pdf_artifact(out_pdf)
+        if not valid:
+            logger.warning("[OCR] %s produced an invalid PDF (%s); falling back to plain PDF", src, reason)
+            with contextlib.suppress(OSError):
+                os.remove(out_pdf)
+            return False
+        return True
     except Exception as e:
         logger.warning("[OCR] %s failed, falling back to plain PDF: %s", src, e)
         return False
@@ -108,12 +136,23 @@ def embed_image_in_pdf(src: str, out_pdf: str) -> None:
 def image_to_pdf(src: str, out_pdf: str, orientation) -> bool:
     """Convert one image to PDF, using OCR when possible else a plain embed.
 
-    Returns True when OCR produced text, False when the plain embed was used.
+    Returns True when OCR produced searchable text, False when the plain
+    embed was used. Existing destinations are replaced only after the staged
+    PDF validates.
     """
-    if image_ocr_able(src, out_pdf, orientation):
+    ocr_used = False
+
+    def engine(target):
+        nonlocal ocr_used
+        ocr_used = image_ocr_able(src, target, orientation)
+        if not ocr_used:
+            embed_image_in_pdf(src, target)
         return True
-    embed_image_in_pdf(src, out_pdf)
-    return False
+
+    success, error = _run_staged_pdf(out_pdf, engine)
+    if not success:
+        raise RuntimeError(f"OCR image conversion failed: {error}")
+    return ocr_used
 
 
 def merge_images_with_ocr(files: list[str], out_pdf: str, orientation) -> bool:
@@ -121,12 +160,19 @@ def merge_images_with_ocr(files: list[str], out_pdf: str, orientation) -> bool:
 
     Fast path: scanlayer's parallel merge. If it cannot handle the batch,
     fall back to one page at a time, where a page OCR cannot read is embedded
-    as a plain image. Returns True when *out_pdf* was written.
+    as a plain image. Existing destinations are replaced only after the staged
+    PDF validates. Returns True when the destination was written.
     """
-    if _merge_parallel(files, out_pdf, orientation):
-        return True
-    _merge_sequential(files, out_pdf, orientation)
-    return os.path.isfile(out_pdf) and os.path.getsize(out_pdf) > 0
+    def engine(target):
+        if _merge_parallel(files, target, orientation):
+            return True
+        return _merge_sequential(files, target, orientation)
+
+    success, error = _run_staged_pdf(out_pdf, engine)
+    if not success:
+        logger.warning("[OCR] Merge failed: %s", error)
+        return False
+    return True
 
 
 def _merge_parallel(files: list[str], out_pdf: str, orientation) -> bool:
@@ -144,6 +190,9 @@ def _merge_parallel(files: list[str], out_pdf: str, orientation) -> bool:
                 force=True,
                 workers=OCR_MERGE_WORKERS,
             )
+        valid, reason = validate_pdf_artifact(out_pdf)
+        if not valid:
+            raise RuntimeError(f"invalid PDF: {reason}")
     except Exception as e:
         logger.warning("[OCR] Parallel merge failed, falling back to page-by-page: %s", e)
         with contextlib.suppress(OSError):
@@ -152,7 +201,7 @@ def _merge_parallel(files: list[str], out_pdf: str, orientation) -> bool:
     return True
 
 
-def _merge_sequential(files: list[str], out_pdf: str, orientation) -> None:
+def _merge_sequential(files: list[str], out_pdf: str, orientation) -> bool:
     import fitz
 
     merged = fitz.open()
@@ -168,3 +217,4 @@ def _merge_sequential(files: list[str], out_pdf: str, orientation) -> None:
     finally:
         merged.close()
         shutil.rmtree(temp_dir, ignore_errors=True)
+    return True
