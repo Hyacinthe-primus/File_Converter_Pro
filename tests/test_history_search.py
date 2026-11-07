@@ -2,7 +2,7 @@
 
 import pytest
 
-from history import matching_operation_types
+from dialogs.history import matching_operation_types
 
 
 def test_matching_operation_types_uses_localized_labels():
