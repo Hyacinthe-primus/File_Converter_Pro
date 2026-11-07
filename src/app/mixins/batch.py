@@ -9,25 +9,98 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox
 
+from context_menu.conversion_helpers import (
+    _release_reserved_path,
+    _reserve_unique_output_path,
+)
+from context_menu.formats import CONVERSION_MAP
+from converter.helpers import BackupError, prepare_operation_backups
+from converter.registry import DISPATCH
 from utils.conversion_pipeline import run_conversion_pipeline
 from utils.pdf_artifacts import validate_docx_artifact, validate_docx_input, validate_pdf_artifact
 
-_BATCH_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tiff", ".tif", ".webp"}
-_OPENDOCUMENT_EXTS = {".odt", ".ods", ".odp"}
-_ENGINE_TO_PDF = {
-    ".txt": "txt_to_pdf",
-    ".rtf": "rtf_to_pdf",
-    ".xlsx": "xlsx_to_pdf",
-    ".pptx": "pptx_to_pdf",
-    ".html": "html_to_pdf",
-    ".htm": "html_to_pdf",
-    ".epub": "epub_to_pdf",
-}
-_ENGINE_TO_DOCX = {".txt": "txt_to_docx", ".rtf": "rtf_to_docx"}
+_BATCH_RECOGNIZED_IMAGE_EXTS = frozenset(
+    f".{ext}"
+    for ext, actions in CONVERSION_MAP.items()
+    if "image_to_pdf" in actions
+)
+_BATCH_UNSUPPORTED_IMAGE_FORMATS = frozenset(
+    {"psd", "dng", "raw", "cr2", "cr3", "nef", "arw", "orf", "rw2", "raf"}
+)
+_BATCH_IMAGE_EXTS = frozenset(
+    ext
+    for ext in _BATCH_RECOGNIZED_IMAGE_EXTS
+    if ext.lstrip(".") not in _BATCH_UNSUPPORTED_IMAGE_FORMATS
+)
+_BATCH_EXTENSION_ALIASES = {"htm": "html"}
+
+
+def _batch_conversion_type(ext: str, target: str) -> str | None:
+    """Resolve a Batch conversion from the shared format/action mapping."""
+    source = ext.lstrip(".").lower()
+    source = _BATCH_EXTENSION_ALIASES.get(source, source)
+    suffix = f"_{target}"
+    for action in CONVERSION_MAP.get(source, ()):
+        if action.endswith(suffix) and action in DISPATCH:
+            return action
+    return None
 
 
 class BatchMixin:
     """Batch conversion and rename for FileConverterApp."""
+
+    def _open_batch_image(self, fp: str):
+        opener = getattr(self, "_open_image_for_pdf", None)
+        if callable(opener):
+            return opener(fp)
+
+        from PIL import Image
+
+        from utils.image_formats import register_heif
+
+        if Path(fp).suffix.lower() == ".svg":
+            import io
+
+            import fitz
+
+            with fitz.open(fp) as document:
+                png = document[0].get_pixmap(alpha=True).tobytes("png")
+            return Image.open(io.BytesIO(png))
+        register_heif()
+        return Image.open(fp)
+
+    def _batch_engine_convert(self, conversion_type: str, fp: str, out: str) -> bool:
+        from converter.converters import AdvancedConverterEngine
+
+        engine = AdvancedConverterEngine()
+        engine.allow_local_html_resources = getattr(self, "config", {}).get(
+            "allow_local_resources_in_html_to_pdf", False
+        )
+        result = engine.convert(conversion_type, fp, str(Path(out).parent), skip_backup=True)
+        if result.success:
+            return True
+        self._last_batch_error = (
+            result.error or f"Batch conversion failed for {Path(fp).name}"
+        )
+        return False
+
+    def _batch_unsupported(self, ext: str, target: str) -> bool:
+        supported_input = f"{ext} input" if ext else "this input"
+        self._last_batch_error = (
+            f"Batch {target.upper()} conversion does not support {supported_input}"
+        )
+        print(f"[BATCH] {self._last_batch_error}")
+        return False
+
+    def _prepare_batch_backup(self, fp: str) -> tuple[bool, str]:
+        config = getattr(self, "config", None)
+        if not isinstance(config, dict):
+            return False, "Batch configuration unavailable"
+        try:
+            prepare_operation_backups([fp], config=config)
+        except BackupError as exc:
+            return False, str(exc)
+        return True, ""
 
     def batch_convert(self) -> None:
         """Show batch conversion dialog and process selected format."""
@@ -72,6 +145,7 @@ class BatchMixin:
         self.show_progress(True, self.translate_text("batch_conversion"))
         success_count = 0
         start_time = datetime.now()
+        backed_up_keys = set()
 
         def _run_batch_file(task):
             import time as _time
@@ -80,10 +154,34 @@ class BatchMixin:
             fp = task["input_path"]
             out = task["output_path"]
             self._last_batch_error = ""
-            ok = self._convert_batch_file(fp, out, target_format)
-            if not ok:
-                error = self._last_batch_error or "Unsupported conversion"
-                return {"success": False, "input_path": fp, "error": error}
+            backup_prepared = False
+            try:
+                try:
+                    backup_key = os.path.normcase(os.path.realpath(fp))
+                except Exception:
+                    backup_key = fp
+                if backup_key in backed_up_keys:
+                    backup_prepared = True
+                else:
+                    backup_ok, backup_error = self._prepare_batch_backup(fp)
+                    if not backup_ok:
+                        _release_reserved_path(out)
+                        return {"success": False, "input_path": fp, "error": backup_error}
+                    backed_up_keys.add(backup_key)
+                    backup_prepared = True
+                ok = self._convert_batch_file(
+                    fp, out, target_format, backup_prepared=backup_prepared
+                )
+                if not ok:
+                    error = (
+                        self._last_batch_error
+                        or "Batch conversion failed without an error reason"
+                    )
+                    _release_reserved_path(out)
+                    return {"success": False, "input_path": fp, "error": error}
+            except Exception as exc:
+                _release_reserved_path(out)
+                return {"success": False, "input_path": fp, "error": str(exc)}
             fs = os.path.getsize(fp) if os.path.exists(fp) else 0
             return {
                 "success": True,
@@ -95,15 +193,18 @@ class BatchMixin:
 
         ext = {"pdf": "pdf", "docx": "docx", "png": "png"}.get(target_format, target_format)
 
-        tasks = [
-            {
-                "index": i,
-                "total": len(files),
-                "input_path": fp,
-                "output_path": os.path.join(output_dir, f"{Path(fp).stem}.{ext}"),
-            }
-            for i, fp in enumerate(files)
-        ]
+        tasks = []
+        for i, fp in enumerate(files):
+            tasks.append(
+                {
+                    "index": i,
+                    "total": len(files),
+                    "input_path": fp,
+                    "output_path": _reserve_unique_output_path(
+                        output_dir, Path(fp).stem, ext
+                    ),
+                }
+            )
 
         def _on_file_done(result):
             if result.get("success"):
@@ -173,24 +274,40 @@ class BatchMixin:
         self._worker.finished.connect(_on_finished)
         self._worker.start()
 
-    def _convert_batch_file(self, fp: str, out: str, target_format: str) -> bool:
+    def _convert_batch_file(
+        self,
+        fp: str,
+        out: str,
+        target_format: str,
+        *,
+        backup_prepared: bool = False,
+    ) -> bool:
         """Convert one file to the requested target ('pdf' | 'docx' | 'png')."""
         ext = Path(fp).suffix.lower()
+        self._last_batch_error = ""
         try:
             if target_format == "pdf":
-                return self._batch_to_pdf(fp, out, ext)
+                return self._batch_to_pdf(fp, out, ext, backup_prepared=backup_prepared)
             if target_format == "docx":
-                return self._batch_to_docx(fp, out, ext)
+                return self._batch_to_docx(fp, out, ext, backup_prepared=backup_prepared)
             if target_format == "png":
-                return self._batch_to_png(fp, out, ext)
+                return self._batch_to_png(fp, out, ext, backup_prepared=backup_prepared)
         except Exception as e:
+            self._last_batch_error = f"Batch {target_format.upper()} conversion failed: {e}"
             print(f"[BATCH] {Path(fp).name} → {target_format}: {e}")
             return False
-        return False
+        return self._batch_unsupported(ext, target_format)
 
-    def _batch_to_pdf(self, fp: str, out: str, ext: str) -> bool:
+    def _batch_to_pdf(self, fp: str, out: str, ext: str, *, backup_prepared: bool = False) -> bool:
         """Route a single file to PDF."""
         self._last_batch_error = ""
+        if not backup_prepared:
+            backup_ok, backup_error = self._prepare_batch_backup(fp)
+            if not backup_ok:
+                self._last_batch_error = backup_error
+                print(f"[BATCH] Backup failed for {Path(fp).name}: {backup_error}")
+                return False
+            backup_prepared = True
         if ext in (".docx", ".doc"):
             valid, reason = validate_docx_input(fp)
             if not valid:
@@ -217,44 +334,77 @@ class BatchMixin:
             print(f"[BATCH] Word->PDF failed for {Path(fp).name}: {result.error}")
             return False
         if ext == ".pdf":
-            return self._batch_copy(fp, out)
+            return self._batch_copy_checked(fp, out)
         if ext in _BATCH_IMAGE_EXTS:
-            self._open_image_for_pdf(fp).save(out, format="PDF", resolution=100.0)
-            return os.path.exists(out)
-        conv = _ENGINE_TO_PDF.get(ext)
-        if conv:
-            from converter.converters import AdvancedConverterEngine
+            def _save_image(target):
+                with self._open_batch_image(fp) as image:
+                    image.save(target, format="PDF", resolution=100.0)
+                return True
 
-            engine = AdvancedConverterEngine()
-            engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
-            engine.allow_local_html_resources = getattr(self, "config", {}).get(
-                "allow_local_resources_in_html_to_pdf", False
+            result = run_conversion_pipeline(
+                out,
+                [("Pillow", _save_image)],
+                validate_pdf_artifact,
+                stage_mode="directory",
+                stage_dir_prefix="~fcp_pdf_stage_",
+                staged_prefix="~fcp_pdf_image_",
+                staged_suffix=".pdf",
             )
-            return engine.convert(conv, fp, str(Path(out).parent)).success
-        return False
+            if result.success:
+                return True
+            self._last_batch_error = "Image to PDF conversion failed: " + result.error
+            print(f"[BATCH] Image->PDF failed for {Path(fp).name}: {result.error}")
+            return False
+        if ext in _BATCH_RECOGNIZED_IMAGE_EXTS:
+            return self._batch_unsupported(ext, "pdf")
+        conv = _batch_conversion_type(ext, "pdf")
+        if conv:
+            return self._batch_engine_convert(conv, fp, out)
+        return self._batch_unsupported(ext, "pdf")
 
-    def _batch_to_docx(self, fp: str, out: str, ext: str) -> bool:
+    def _batch_to_docx(self, fp: str, out: str, ext: str, *, backup_prepared: bool = False) -> bool:
         """Route a single file to DOCX."""
+        self._last_batch_error = ""
+        if not backup_prepared:
+            backup_ok, backup_error = self._prepare_batch_backup(fp)
+            if not backup_ok:
+                self._last_batch_error = backup_error
+                print(f"[BATCH] Backup failed for {Path(fp).name}: {backup_error}")
+                return False
         if ext == ".pdf":
             return self._batch_pdf_to_docx(fp, out)
-        if ext in (".docx", ".doc"):
-            return self._batch_copy(fp, out)
+        if ext == ".docx":
+            return self._batch_copy_checked(fp, out)
+        if ext == ".doc":
+            self._last_batch_error = (
+                "Batch DOCX conversion does not support legacy .doc input"
+            )
+            return False
         if ext in _BATCH_IMAGE_EXTS:
             return self._batch_image_to_docx(fp, out)
-        conv = _ENGINE_TO_DOCX.get(ext)
+        if ext in _BATCH_RECOGNIZED_IMAGE_EXTS:
+            return self._batch_unsupported(ext, "docx")
+        conv = _batch_conversion_type(ext, "docx")
         if conv:
-            from converter.converters import AdvancedConverterEngine
-
-            engine = AdvancedConverterEngine()
-            engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
-            engine.allow_local_html_resources = getattr(self, "config", {}).get(
-                "allow_local_resources_in_html_to_pdf", False
-            )
-            return engine.convert(conv, fp, str(Path(out).parent)).success
-        return False
+            return self._batch_engine_convert(conv, fp, out)
+        return self._batch_unsupported(ext, "docx")
 
     def _batch_pdf_to_docx(self, fp: str, out: str) -> bool:
-        """Convert a PDF to DOCX using COM → LibreOffice → native fallback."""
+        """Convert a PDF to DOCX using the configured PDF-to-Word mode."""
+        self._last_batch_error = ""
+        from context_menu.conversion_helpers import _normalise_pdf_to_word_mode
+
+        config = getattr(self, "config", None)
+        mode = _normalise_pdf_to_word_mode(
+            config.get("pdf_to_word_mode") if isinstance(config, dict) else None
+        )
+        if mode == "text_only":
+            if self.convert_pdf_to_docx_text_only(fp, out):
+                return True
+            detail = getattr(self, "_last_pdf_to_word_error", "") or "text-only conversion failed"
+            self._last_batch_error = "PDF to Word conversion failed: " + detail
+            return False
+
         engines = [
             ("COM", lambda target: self._try_word_com_pdf_to_docx(fp, target)),
             ("LibreOffice", lambda target: self._convert_pdf_to_docx_libreoffice(fp, target)),
@@ -274,67 +424,135 @@ class BatchMixin:
         self._last_batch_error = "PDF to Word conversion failed: " + result.error
         return False
 
-    def _batch_to_png(self, fp: str, out: str, ext: str) -> bool:
+    def _batch_to_png(self, fp: str, out: str, ext: str, *, backup_prepared: bool = False) -> bool:
         """Route a single file to PNG (one PNG per page for PDFs)."""
+        self._last_batch_error = ""
+        if not backup_prepared:
+            backup_ok, backup_error = self._prepare_batch_backup(fp)
+            if not backup_ok:
+                self._last_batch_error = backup_error
+                print(f"[BATCH] Backup failed for {Path(fp).name}: {backup_error}")
+                return False
         if ext in _BATCH_IMAGE_EXTS:
-            try:
-                from PIL import Image
+            from converter.artifact_validators import validator_for_extension
 
-                Image.open(fp).save(out, format="PNG")
-                return os.path.exists(out)
-            except Exception:
-                return self._batch_copy(fp, out)
+            def _save_png(target):
+                with self._open_batch_image(fp) as image:
+                    image.save(target, format="PNG")
+                return True
+
+            result = run_conversion_pipeline(
+                out,
+                [("Pillow", _save_png)],
+                validator_for_extension("png"),
+                stage_mode="file",
+                staged_prefix="~fcp_png_",
+                staged_suffix=".png",
+                include_engine_labels=False,
+            )
+            if result.success:
+                return True
+            self._last_batch_error = "Image to PNG conversion failed: " + result.error
+            print(f"[BATCH] Image->PNG failed for {Path(fp).name}: {result.error}")
+            return False
         if ext == ".pdf":
-            return self._pdf_to_png(fp, out)
+            try:
+                if self._pdf_to_png(fp, out):
+                    return True
+            except Exception as e:
+                self._last_batch_error = f"PDF to PNG conversion failed: {e}"
+                return False
+            self._last_batch_error = "PDF to PNG conversion failed"
+            return False
         if ext in (".docx", ".doc"):
             tmp_pdf = self._batch_temp_file()
             try:
-                if not self._batch_to_pdf(fp, tmp_pdf, ".docx"):
+                if not self._batch_to_pdf(fp, tmp_pdf, ext, backup_prepared=True):
                     return False
-                return self._pdf_to_png(tmp_pdf, out)
+                try:
+                    if self._pdf_to_png(tmp_pdf, out):
+                        return True
+                except Exception as e:
+                    self._last_batch_error = f"PDF to PNG conversion failed: {e}"
+                    return False
+                self._last_batch_error = "PDF to PNG conversion failed"
+                return False
             finally:
                 self._batch_remove_temp(tmp_pdf)
-        conv = _ENGINE_TO_PDF.get(ext)
+        if ext in _BATCH_RECOGNIZED_IMAGE_EXTS:
+            return self._batch_unsupported(ext, "png")
+        conv = _batch_conversion_type(ext, "pdf")
         if conv:
             tmp_dir = tempfile.mkdtemp()
             try:
                 from converter.converters import AdvancedConverterEngine
 
                 engine = AdvancedConverterEngine()
-                engine.backup_enabled = getattr(self, "config", {}).get("backup_before_conversion", False)
                 engine.allow_local_html_resources = getattr(self, "config", {}).get(
                     "allow_local_resources_in_html_to_pdf", False
                 )
-                if not engine.convert(conv, fp, tmp_dir).success:
+                result = engine.convert(conv, fp, tmp_dir, skip_backup=True)
+                if not result.success:
+                    self._last_batch_error = (
+                        result.error or f"Batch conversion failed for {Path(fp).name}"
+                    )
                     return False
                 tmp_pdf = os.path.join(tmp_dir, f"{Path(fp).stem}.pdf")
                 if not os.path.exists(tmp_pdf):
+                    self._last_batch_error = "Intermediate PDF was not produced"
                     return False
-                return self._pdf_to_png(tmp_pdf, out)
+                try:
+                    if self._pdf_to_png(tmp_pdf, out):
+                        return True
+                except Exception as e:
+                    self._last_batch_error = f"PDF to PNG conversion failed: {e}"
+                    return False
+                self._last_batch_error = "PDF to PNG conversion failed"
+                return False
             finally:
                 self._batch_remove_temp(tmp_dir)
-        return False
+        return self._batch_unsupported(ext, "png")
 
     @staticmethod
-    def _batch_copy(src: str, dst: str) -> bool:
+    def _batch_copy_result(src: str, dst: str) -> tuple[bool, str]:
         import shutil
 
         try:
             shutil.copy2(src, dst)
-            return os.path.exists(dst)
-        except Exception:
-            return False
+        except Exception as e:
+            return False, str(e) or type(e).__name__
+        if not os.path.exists(dst):
+            return False, "destination file was not created"
+        return True, ""
+
+    @staticmethod
+    def _batch_copy(src: str, dst: str) -> bool:
+        return BatchMixin._batch_copy_result(src, dst)[0]
+
+    def _batch_copy_checked(self, src: str, dst: str) -> bool:
+        self._last_batch_error = ""
+        copied, error = self._batch_copy_result(src, dst)
+        if copied:
+            return True
+        self._last_batch_error = f"File copy failed for {Path(src).name}: {error}"
+        return False
 
     def _batch_image_to_docx(self, fp: str, out: str) -> bool:
+        self._last_batch_error = ""
         try:
             from docx import Document
             from docx.shared import Inches
 
-            doc = Document()
-            doc.add_picture(fp, width=Inches(6.0))
+            with tempfile.TemporaryDirectory(prefix="~fcp_batch_image_") as temp_dir:
+                normalized = os.path.join(temp_dir, "image.png")
+                with self._open_batch_image(fp) as image:
+                    image.save(normalized, format="PNG")
+                doc = Document()
+                doc.add_picture(normalized, width=Inches(6.0))
             doc.save(out)
             return os.path.exists(out)
         except Exception as e:
+            self._last_batch_error = f"Image to DOCX conversion failed: {e}"
             print(f"[BATCH] image→docx {e}")
             return False
 

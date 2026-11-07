@@ -63,7 +63,9 @@ def test_get_output_directory_default(tmp_path):
 
 
 def _make_batch():
-    return BatchMixin.__new__(BatchMixin)
+    batch = BatchMixin.__new__(BatchMixin)
+    batch.config = {"backup_before_conversion": False}
+    return batch
 
 
 def test_batch_copy_creates_file(tmp_path):
