@@ -138,6 +138,19 @@ class ConfigManager:
             print(f"Error loading config: {e}")
             return self.default_config.copy()
 
+    def load_config_strict(self) -> dict:
+        """Load configuration without silently replacing read failures.
+
+        This is intentionally separate from ``load_config()`` so existing
+        callers that rely on fallback defaults keep their behavior.
+        """
+        if not os.path.exists(self.config_file):
+            return self._first_launch_defaults()
+        saved = self._read_config()
+        if not isinstance(saved, dict):
+            raise ValueError("configuration root is not an object")
+        return {**self.default_config, **saved}
+
     def save_config(self, config: dict) -> bool:
         """Persist *config* to disk (encrypted when possible)."""
         try:

@@ -21,8 +21,10 @@ from __future__ import annotations
 
 import os
 import time
+from pathlib import Path
 
-from converter.helpers import ConversionResult, _build_dst, create_backup
+from converter.artifact_validators import validator_for_extension
+from converter.helpers import BackupError, ConversionResult, _build_dst, prepare_operation_backups
 from converter.mixins import (
     DocumentConverters,
     EpubRenderers,
@@ -36,6 +38,7 @@ from converter.mixins import (
 )
 from converter.registry import CATEGORY_MAP as CATEGORY_MAP
 from converter.registry import DISPATCH
+from utils.conversion_pipeline import run_conversion_pipeline
 
 
 class AdvancedConverterEngine(
@@ -56,44 +59,71 @@ class AdvancedConverterEngine(
     _SIG_WITH_TYPE = ("_image_convert", "_ffmpeg_convert", "_heic_convert", "_raw_convert")
 
     def __init__(self, allow_local_html_resources=False):
-        self.backup_enabled = False
         self.allow_local_html_resources = bool(allow_local_html_resources)
 
-    def convert(self, conversion_type, src, dst_dir):
+    @staticmethod
+    def _source_key(src):
+        try:
+            return os.path.normcase(os.path.realpath(src))
+        except Exception:
+            return ""
+
+    def convert(self, conversion_type, src, dst_dir, *, skip_backup=False):
         if conversion_type not in self._DISPATCH:
             return ConversionResult(False, src, "", error=f"Unknown type: {conversion_type}")
         spec, ext = self._DISPATCH[conversion_type]
         engine_names = spec if isinstance(spec, tuple) else (spec,)
         dst = _build_dst(src, dst_dir, ext)
-        if self.backup_enabled and os.path.isfile(src):
-            create_backup(src)
         file_size = os.path.getsize(src) if os.path.exists(src) else 0
+        if not skip_backup:
+            try:
+                prepare_operation_backups([src])
+            except BackupError as exc:
+                return ConversionResult(False, src, dst, error=str(exc), file_size=file_size)
+        validator = validator_for_extension(ext)
+        staged_name = Path(dst).name
         errors = []
         for index, engine_name in enumerate(engine_names):
             engine = getattr(self, engine_name, None)
             if engine is None:
                 errors.append(f"{engine_name}: engine not available")
                 continue
-            try:
-                if engine_name in self._SIG_WITH_TYPE:
-                    ok, elapsed = self._run_engine(engine, src, dst, conversion_type)
+
+            elapsed = 0.0
+
+            def _attempt(target, _engine=engine, _name=engine_name):
+                nonlocal elapsed
+                if _name in self._SIG_WITH_TYPE:
+                    ok, elapsed = self._run_engine(_engine, src, target, conversion_type)
                 else:
-                    ok, elapsed = self._run_engine(engine, src, dst)
-            except Exception as exc:
-                errors.append(f"{engine_name}: {exc}")
-                continue
-            if ok is False or not self._engine_produced_output(dst):
-                errors.append(f"{engine_name}: produced no output")
-                continue
-            return ConversionResult(
-                True,
-                src,
+                    ok, elapsed = self._run_engine(_engine, src, target)
+                return ok
+
+            result = run_conversion_pipeline(
                 dst,
-                elapsed=elapsed,
-                file_size=file_size,
-                engine_used=engine_name,
-                degraded=index > 0,
+                [(engine_name, _attempt)],
+                validator,
+                stage_mode="directory",
+                stage_dir_prefix="~fcp_adv_stage_",
+                staged_prefix="~fcp_adv_",
+                staged_suffix=f".{ext}",
+                staged_name=staged_name,
             )
+            if result.success:
+                return ConversionResult(
+                    True,
+                    src,
+                    dst,
+                    elapsed=elapsed,
+                    file_size=file_size,
+                    engine_used=engine_name,
+                    degraded=index > 0,
+                )
+
+            detail = result.error or "produced no output"
+            if not detail.startswith(f"{engine_name}:"):
+                detail = f"{engine_name}: {detail}"
+            errors.append(detail)
         detail = "; ".join(errors) if errors else "no engines configured"
         return ConversionResult(False, src, dst, error=f"All engines failed ({detail})", file_size=file_size)
 
@@ -113,10 +143,49 @@ class AdvancedConverterEngine(
         return os.path.isfile(dst) and os.path.getsize(dst) > 0
 
     def convert_batch(self, conversion_type, sources, dst_dir, progress_cb=None):
+        source_list = list(sources)
+        backup_result = None
+        backup_error = ""
+        if conversion_type in self._DISPATCH:
+            try:
+                backup_result = prepare_operation_backups(source_list)
+            except BackupError as exc:
+                backup_result = exc.result
+                backup_error = str(exc)
+
+        backed_keys = set()
+        backup_errors = {}
+        if backup_result is not None:
+            for source in backup_result.backups:
+                key = self._source_key(source)
+                if key:
+                    backed_keys.add(key)
+            for source, reason in backup_result.errors.items():
+                backup_errors[self._source_key(source)] = f"{source}: {reason}"
+
         results = []
-        for i, src in enumerate(sources, 1):
-            result = self.convert(conversion_type, src, dst_dir)
+        for i, src in enumerate(source_list, 1):
+            key = self._source_key(src)
+            if backup_result is None and backup_error:
+                result = ConversionResult(
+                    False,
+                    src,
+                    _build_dst(src, dst_dir, self._DISPATCH[conversion_type][1]),
+                    error=backup_error,
+                    file_size=os.path.getsize(src) if os.path.exists(src) else 0,
+                )
+            elif backup_result is not None and backup_result.enabled and key not in backed_keys:
+                dst = _build_dst(src, dst_dir, self._DISPATCH[conversion_type][1])
+                result = ConversionResult(
+                    False,
+                    src,
+                    dst,
+                    error=f"Source backup failed: {backup_errors.get(key, 'source was not backed up')}",
+                    file_size=os.path.getsize(src) if os.path.exists(src) else 0,
+                )
+            else:
+                result = self.convert(conversion_type, src, dst_dir, skip_backup=True)
             results.append(result)
             if progress_cb:
-                progress_cb(i, len(sources), src)
+                progress_cb(i, len(source_list), src)
         return results

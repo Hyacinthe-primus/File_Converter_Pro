@@ -65,7 +65,7 @@ class TestLocalResourceSetting:
             config={"allow_local_resources_in_html_to_pdf": True},
         )
         assert worker.engine.allow_local_html_resources is True
-        assert worker.engine.backup_enabled is False
+        assert not hasattr(worker.engine, "backup_enabled")
 
     def test_settings_dialog_reads_and_returns_setting(self, qapp):
         from dialogs.settings_dialog import SettingsDialog

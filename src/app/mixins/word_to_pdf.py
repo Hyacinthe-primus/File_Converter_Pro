@@ -30,6 +30,7 @@ except ImportError as _e:
     print(f"[IMPORT] reportlab not available: {_e}")
 
 from conversion_worker import ConversionWorker
+from converter.helpers import BackupError, prepare_operation_backups
 from dialogs import WordToPdfOptionsDialog
 from utils.conversion_pipeline import run_conversion_pipeline
 from utils.pdf_artifacts import validate_docx_input, validate_pdf_artifact
@@ -133,6 +134,12 @@ class WordToPdfMixin:
 
         output_dir = self.get_output_directory()
         if not output_dir:
+            return
+
+        try:
+            prepare_operation_backups(word_files, config=self.config)
+        except BackupError as exc:
+            QMessageBox.critical(self, self.translate_text("error"), str(exc))
             return
 
         message = self.translate_text("conversion_word_to_pdf").format(len(word_files))

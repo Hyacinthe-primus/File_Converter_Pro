@@ -37,6 +37,7 @@ from PySide6.QtWidgets import (
 )
 
 from converter import AdvancedConverterEngine, AdvancedDatabaseManager
+from converter.helpers import BackupError, prepare_operation_backups
 from qss_helpers import _apply_dialog_btn, _load_qss
 from translations import TranslationManager
 from utils.translation_mixin import TranslationMixin
@@ -69,6 +70,7 @@ class _ConversionWorker(QObject):
         achievement_system=None,
         tm=None,
         config=None,
+        backup_prepared=False,
     ) -> None:
         super().__init__()
         self.engine = engine
@@ -80,8 +82,8 @@ class _ConversionWorker(QObject):
         self.achievement_system = achievement_system
         self._tm = tm
         self._config = config or {}
+        self.backup_prepared = bool(backup_prepared)
         if config is not None:
-            self.engine.backup_enabled = self._config.get("backup_before_conversion", False)
             self.engine.allow_local_html_resources = self._config.get(
                 "allow_local_resources_in_html_to_pdf", False
             )
@@ -118,7 +120,12 @@ class _ConversionWorker(QObject):
             self.log.emit(self._t("adv_log_converting", i=i, total=total, filename=filename))
             self.progress.emit(i - 1, total, filename)
 
-            result = self.engine.convert(self.conversion_type, src, self.dst_dir)
+            result = self.engine.convert(
+                self.conversion_type,
+                src,
+                self.dst_dir,
+                skip_backup=self.backup_prepared,
+            )
 
             from converter.converters import CATEGORY_MAP
 
@@ -204,7 +211,6 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         self.adv_db = advanced_db or AdvancedDatabaseManager()
         self.engine = AdvancedConverterEngine()
         _cfg = getattr(parent, "config", {}) if parent else {}
-        self.engine.backup_enabled = _cfg.get("backup_before_conversion", False)
         self.engine.allow_local_html_resources = _cfg.get("allow_local_resources_in_html_to_pdf", False)
 
         self._last_dst_dir: str | None = None
@@ -308,6 +314,12 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
         dst_dir = self._choose_dst_dir()
         if not dst_dir:
             return
+        runtime_config = getattr(self.parent_window, "config", {}) or {}
+        try:
+            prepare_operation_backups(sources, config=runtime_config)
+        except BackupError as exc:
+            QMessageBox.critical(self, self.tr_("error"), str(exc))
+            return
         self._log_area.clear()
         self._progress_bar.setValue(0)
         self._progress_bar.setMaximum(len(sources))
@@ -325,6 +337,7 @@ class AdvancedConversionsDialog(TranslationMixin, QDialog):
             achievement_system=_ach_sys,
             tm=self._tm,
             config=getattr(self.parent_window, "config", None),
+            backup_prepared=True,
         )
         thread = QThread(self)
         worker.moveToThread(thread)

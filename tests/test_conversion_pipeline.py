@@ -396,6 +396,32 @@ def test_watcher_merge_collection_excludes_staging_files(tmp_path):
     assert _collect_merge_files(str(tmp_path), MERGE_PDF_ACTION, recursive=False) == [str(normal)]
 
 
+def test_pipeline_staged_name_preserves_final_basename_and_extension(tmp_path):
+    destination = _make_pdf(tmp_path / "final-name.pdf", ("old",))
+    seen = []
+
+    def valid(target):
+        seen.append(Path(target))
+        _make_pdf(Path(target), ("new",))
+
+    result = run_conversion_pipeline(
+        str(destination),
+        [("valid", valid)],
+        validate_pdf_artifact,
+        stage_dir_prefix="~fcp_named_stage_",
+        staged_prefix="~fcp_named_",
+        staged_name=destination.name,
+    )
+
+    assert result.success is True
+    assert seen[0].name == destination.name
+    assert seen[0].suffix == ".pdf"
+    assert seen[0].parent != tmp_path
+    assert not list(tmp_path.glob("~fcp_named_stage_*"))
+    with fitz.open(str(destination)) as document:
+        assert document.load_page(0).get_text().strip() == "new"
+
+
 def test_existing_output_validation_rejects_corrupt_pdf(tmp_path):
     from tasks.watcher import _existing_output_is_valid
 

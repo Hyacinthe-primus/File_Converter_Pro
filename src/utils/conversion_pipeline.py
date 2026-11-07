@@ -87,6 +87,7 @@ def run_conversion_pipeline(
     stage_dir_prefix: str = "~fcp_stage_",
     staged_prefix: str = "~fcp_stage_",
     staged_suffix: str | None = None,
+    staged_name: str | None = None,
     progress_callback: Callable[[int], None] | None = None,
     attempt_progress: Sequence[int] | None = None,
     postprocess: Callable[[str], None] | None = None,
@@ -98,6 +99,11 @@ def run_conversion_pipeline(
     validates is atomically moved into place. Existing output is untouched
     until that point. Cancellation is checked before each engine, immediately
     after it returns, after post-processing, and immediately before commit.
+
+    When *staged_name* is provided, directory staging uses that exact basename
+    inside each isolated attempt directory. This preserves engines that infer
+    metadata (such as a document title) from the final destination filename
+    while still keeping the temporary output away from the destination.
     """
     final_path = os.path.abspath(destination)
     parent = os.path.dirname(final_path)
@@ -110,6 +116,16 @@ def run_conversion_pipeline(
 
     if stage_mode not in {"file", "directory"}:
         return PipelineResult(False, f"invalid staging mode: {stage_mode}", output_path=final_path)
+
+    if staged_name is not None:
+        if stage_mode != "directory":
+            return PipelineResult(
+                False,
+                "staged filename requires directory staging",
+                output_path=final_path,
+            )
+        if not staged_name or staged_name in {".", ".."} or Path(staged_name).name != staged_name:
+            return PipelineResult(False, "invalid staged filename", output_path=final_path)
 
     suffix = staged_suffix if staged_suffix is not None else (Path(final_path).suffix or ".tmp")
     if not suffix.startswith("."):
@@ -171,8 +187,12 @@ def run_conversion_pipeline(
                 target_parent = attempt_dir
 
             try:
-                target = _new_target(target_parent, staged_prefix, suffix)
-                staged_target = target
+                if staged_name is not None:
+                    target = os.path.join(target_parent, staged_name)
+                    staged_target = target
+                else:
+                    target = _new_target(target_parent, staged_prefix, suffix)
+                    staged_target = target
             except OSError as exc:
                 failures.append((label, f"staging failed: {exc}"))
                 cleanup_attempt()

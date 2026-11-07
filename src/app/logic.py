@@ -61,7 +61,7 @@ class AppLogicMixin(
     def __init__(self, config_manager):
         super().__init__()
         self.config_manager = config_manager
-        self.config = config_manager.load_config()
+        self.config = config_manager.load_config_strict()
         self.current_language = self.config.get("language", "fr")
         self.current_theme = self.config.get("custom_theme", None)
         if self.current_theme and self.current_theme not in ("dark", "light"):

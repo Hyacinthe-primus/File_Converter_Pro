@@ -38,14 +38,15 @@ def test_competing_creation_selects_next_suffix(tmp_path, monkeypatch):
     src = _source(tmp_path)
     candidate = f"{src}.bak"
     competing_content = b"created by another process"
-    real_open = os.open
+    publish_name = "rename" if os.name == "nt" else "link"
+    real_publish = getattr(os, publish_name)
 
-    def racing_open(path, flags, mode=0o777):
-        if os.path.abspath(path) == os.path.abspath(candidate) and not os.path.exists(candidate):
+    def racing_publish(source_path, destination_path):
+        if os.path.abspath(destination_path) == os.path.abspath(candidate):
             Path(candidate).write_bytes(competing_content)
-        return real_open(path, flags, mode)
+        return real_publish(source_path, destination_path)
 
-    monkeypatch.setattr(backup_helpers.os, "open", racing_open)
+    monkeypatch.setattr(backup_helpers.os, publish_name, racing_publish)
 
     backup_path = backup_helpers.create_backup(str(src), overwrite=False)
 

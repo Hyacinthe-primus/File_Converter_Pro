@@ -58,11 +58,15 @@ class TestBackupBeforeConversion:
         with open(backup_path, "rb") as f:
             assert f.read() == content
 
-    def test_engine_backup_enabled(self, tmp_dir):
+    def test_engine_backup_enabled(self, tmp_dir, monkeypatch):
         from converter.converters import AdvancedConverterEngine
 
+        class FakeConfigManager:
+            def load_config(self):
+                return {"backup_before_conversion": True}
+
+        monkeypatch.setattr("config.ConfigManager", FakeConfigManager)
         engine = AdvancedConverterEngine()
-        engine.backup_enabled = True
 
         src = os.path.join(tmp_dir, "test.txt")
         with open(src, "w") as f:
@@ -81,11 +85,15 @@ class TestBackupBeforeConversion:
         with open(backup_path, "r") as f:
             assert f.read() == "test content"
 
-    def test_engine_backup_disabled(self, tmp_dir):
+    def test_engine_backup_disabled(self, tmp_dir, monkeypatch):
         from converter.converters import AdvancedConverterEngine
 
+        class FakeConfigManager:
+            def load_config(self):
+                return {"backup_before_conversion": False}
+
+        monkeypatch.setattr("config.ConfigManager", FakeConfigManager)
         engine = AdvancedConverterEngine()
-        engine.backup_enabled = False
 
         src = os.path.join(tmp_dir, "test.txt")
         with open(src, "w") as f:
@@ -102,11 +110,11 @@ class TestBackupBeforeConversion:
 
         assert not os.path.exists(backup_path)
 
-    def test_engine_backup_default_disabled(self, tmp_dir):
+    def test_engine_has_no_separate_backup_override(self):
         from converter.converters import AdvancedConverterEngine
 
         engine = AdvancedConverterEngine()
-        assert engine.backup_enabled is False
+        assert not hasattr(engine, "backup_enabled")
 
     def test_backup_overwrites_existing(self, tmp_dir):
         from converter.helpers import create_backup
