@@ -138,6 +138,14 @@ class TestOrientation:
         monkeypatch.setattr("config.ConfigManager", _ConfigManager)
         assert ocr_helpers.resolve_orientation() == 45.0
 
+    def test_none_config_value_is_none(self, monkeypatch):
+        class _ConfigManager:
+            def load_config(self):
+                return {"ocr_orientation": None}
+
+        monkeypatch.setattr("config.ConfigManager", _ConfigManager)
+        assert ocr_helpers.resolve_orientation() == "none"
+
     def test_config_read_failure_is_auto(self, monkeypatch):
         class _ConfigManager:
             def load_config(self):
