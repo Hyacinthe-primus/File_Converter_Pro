@@ -2,7 +2,7 @@
 
 import re
 
-from dashboard_theme import (
+from dialogs.dashboard_theme import (
     DashboardPalette,
     accent_variants,
     get_dashboard_palette,
@@ -150,7 +150,7 @@ class TestDashboardPalette:
 
 class TestDashboardThemeRefresh:
     def test_stat_card_accepts_palette(self, qapp):
-        from dashboard import AnimatedStatCard
+        from dialogs.dashboard import AnimatedStatCard
 
         palette = DashboardPalette.fallback(True, "#ff8000", "#ffb347")
         card = AnimatedStatCard("x", "Conversions", palette=palette)
@@ -170,7 +170,7 @@ class TestDashboardThemeRefresh:
         from PySide6.QtCore import Signal
         from PySide6.QtWidgets import QWidget
 
-        from dashboard import StatisticsDashboard
+        from dialogs.dashboard import StatisticsDashboard
 
         class _Parent(QWidget):
             theme_changed = Signal(str)
