@@ -57,13 +57,13 @@ from widgets import AnimatedCheckBox
 
 
 def _get_StatisticsDashboard():
-    from dashboard import StatisticsDashboard
+    from dialogs.dashboard import StatisticsDashboard
 
     return StatisticsDashboard
 
 
 def _get_HistoryDialog():
-    from history import HistoryDialog
+    from dialogs.history import HistoryDialog
 
     return HistoryDialog
 
@@ -1039,7 +1039,7 @@ class AppUIMixin(
 
     def show_advanced_conversions(self):
         """Show the advanced conversions dialog"""
-        from advanced_conversions import AdvancedConversionsDialog
+        from dialogs.advanced_conversions import AdvancedConversionsDialog
 
         if not hasattr(self, "advanced_conversions_dialog") or not self.advanced_conversions_dialog.isVisible():
             self.advanced_conversions_dialog = AdvancedConversionsDialog(self, self.current_language)
@@ -1248,7 +1248,7 @@ class AppUIMixin(
 
     def show_donate(self):
         """Open the donation dialog."""
-        from donate import DonateDialog
+        from dialogs.donate import DonateDialog
 
         config_dir = os.path.dirname(os.path.abspath(self.config_manager.config_file))
         dlg = DonateDialog(parent=self, dark_mode=self.dark_mode, language=self.current_language, config_dir=config_dir)
@@ -1258,10 +1258,10 @@ class AppUIMixin(
         """
         Called once at startup (via QTimer.singleShot).
         If the user clicked Ko-fi in a previous session, a flag file was
-        written by donate.py.  We pop it here and show the Thank You dialog.
+        written by dialogs/donate.py.  We pop it here and show the Thank You dialog.
         """
         try:
-            from donate import ThankYouDialog, pop_donor_flag
+            from dialogs.donate import ThankYouDialog, pop_donor_flag
 
             config_dir = os.path.dirname(os.path.abspath(self.config_manager.config_file))
             data = pop_donor_flag(config_dir)
