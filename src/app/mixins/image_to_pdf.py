@@ -7,7 +7,9 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QMessageBox
 
+from converter.helpers import BackupError, prepare_operation_backups
 from templates import semantic_keys as sk
+from utils.pdf_artifacts import run_pdf_engine_with_artifact_validation
 
 IMAGE_EXTENSIONS = (
     ".png",
@@ -98,6 +100,14 @@ class ImageToPdfMixin:
         """
         return getattr(self, "ocr_checkbox", None) is not None and self.ocr_checkbox.isChecked()
 
+    def _prepare_image_source_backups(self, image_files: list[str]) -> bool:
+        try:
+            prepare_operation_backups(image_files, config=getattr(self, "config", None))
+        except BackupError as exc:
+            QMessageBox.critical(self, self.translate_text("error"), str(exc))
+            return False
+        return True
+
     def _configure_scanlayer(self):
         """Resolve Tesseract and configure scanlayer.
 
@@ -163,6 +173,8 @@ class ImageToPdfMixin:
         output_dir = self.get_output_directory()
         if not output_dir:
             return
+        if not self._prepare_image_source_backups(image_files):
+            return
 
         _, orientation = self._configure_scanlayer()
 
@@ -209,16 +221,18 @@ class ImageToPdfMixin:
                 self.translate_text("error_with_file").format(filename=name, error=error)
                 for name, error in failures
             ]
-            QMessageBox.warning(
-                self,
-                self.translate_text("warning"),
-                message + "\n\n" + "\n".join(failure_lines),
-            )
+            failure_text = message + "\n\n" + "\n".join(failure_lines)
+            if success_count:
+                QMessageBox.warning(self, self.translate_text("warning"), failure_text)
+            else:
+                QMessageBox.critical(self, self.translate_text("error"), failure_text)
             return
         QMessageBox.information(self, self.translate_text("success"), message)
 
     def ocr_convert_images_to_merged_pdf(self, image_files: list[str], selected_items: list) -> None:
         """Merge images into a single searchable PDF using OCR.
+
+        Page order follows ``image_files`` (the user-maintained main-list order).
 
         Images that are not OCR-able are embedded as plain pages in the merged
         PDF instead.
@@ -233,6 +247,9 @@ class ImageToPdfMixin:
                 default_filename = f"fusion_images_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
                 output_file = self.get_output_directory(default_filename)
                 if not output_file:
+                    self.show_progress(False)
+                    return
+                if not self._prepare_image_source_backups(image_files):
                     self.show_progress(False)
                     return
 
@@ -289,6 +306,9 @@ class ImageToPdfMixin:
                 file_path = image_files[0]
                 output_file = self.get_output_directory(f"{Path(file_path).stem}.pdf")
                 if not output_file:
+                    self.show_progress(False)
+                    return
+                if not self._prepare_image_source_backups([file_path]):
                     self.show_progress(False)
                     return
                 ocr_pages = 1 if self._image_to_pdf_with_ocr_fallback(file_path, output_file, orientation) else 0
@@ -423,27 +443,20 @@ class ImageToPdfMixin:
         output_dir = self.get_output_directory()
         if not output_dir:
             return
+        if not self._prepare_image_source_backups(image_files):
+            return
 
         self.show_progress(True, self.translate_text("conversion_images_to_separate_pdfs").format(num_images))
         success_count = 0
+        failures = []
         start_time = datetime.now()
 
-        import fitz
-
-        from utils.image_formats import decodable_image_path
+        from context_menu.conversion_helpers import _convert_image_to_pdf
 
         for i, file_path in enumerate(image_files):
             try:
                 output_file = os.path.join(output_dir, f"{Path(file_path).stem}.pdf")
-                pdf_document = fitz.open()
-                with decodable_image_path(file_path) as readable:
-                    img = fitz.open(readable)
-                    rect = img[0].rect
-                    page = pdf_document.new_page(width=rect.width, height=rect.height)
-                    page.insert_image(rect, filename=readable)
-                    img.close()
-                pdf_document.save(output_file)
-                pdf_document.close()
+                _convert_image_to_pdf(file_path, output_dir)
                 file_size = os.path.getsize(file_path)
                 self.db_manager.add_conversion_record(
                     source_file=file_path,
@@ -459,23 +472,36 @@ class ImageToPdfMixin:
                 success_count += 1
                 self.progress_bar.setValue(int((i + 1) / num_images * 100))
             except Exception as e:
+                failures.append((Path(file_path).name, str(e)))
                 print(f"Image conversion error {file_path}: {e}")
 
         self.show_progress(False)
         if success_count > 0:
             self.record_config_usage(sk.IMAGES_TO_PDF, {"separate": True})
-        if self.config.get("enable_system_notifications", True):
-            self.system_notifier.send("image_to_pdf_s")
-        QMessageBox.information(
-            self,
-            self.translate_text("success"),
-            self.translate_text("images_converted_separate").format(
-                success_count=success_count, num_images=num_images, output_dir=output_dir
-            ),
+            if self.config.get("enable_system_notifications", True):
+                self.system_notifier.send("image_to_pdf_s")
+
+        message = self.translate_text("images_converted_separate").format(
+            success_count=success_count, num_images=num_images, output_dir=output_dir
         )
+        if failures:
+            failure_lines = [
+                self.translate_text("error_with_file").format(filename=name, error=error)
+                for name, error in failures
+            ]
+            failure_text = message + "\n\n" + "\n".join(failure_lines)
+            if success_count:
+                QMessageBox.warning(self, self.translate_text("warning"), failure_text)
+            else:
+                QMessageBox.critical(self, self.translate_text("error"), failure_text)
+            return
+        QMessageBox.information(self, self.translate_text("success"), message)
 
     def convert_images_to_merged_pdf(self, image_files: list[str], selected_items: list) -> None:
-        """Merge images into a single PDF (or single image to PDF)."""
+        """Merge images into a single PDF (or single image to PDF).
+
+        Page order follows ``image_files`` (the user-maintained main-list order).
+        """
         num_images = len(image_files)
         is_merge = num_images >= 2
         start_time = datetime.now()
@@ -489,32 +515,54 @@ class ImageToPdfMixin:
                 if not output_file:
                     self.show_progress(False)
                     return
+                if not self._prepare_image_source_backups(image_files):
+                    self.show_progress(False)
+                    return
 
                 images = []
+                loaded_files = []
+                failures = []
                 for i, file_path in enumerate(image_files):
                     try:
                         img = self._open_image_for_pdf(file_path)
                         images.append(img)
+                        loaded_files.append(file_path)
                         self.progress_bar.setValue(int((i + 1) / num_images * 50))
                     except Exception as e:
+                        failures.append((Path(file_path).name, str(e)))
                         print(f"Image loading error {file_path}: {e}")
 
                 if not images:
-                    self.show_progress(False)
-                    return
-
-                first_image = images[0]
-                if len(images) > 1:
-                    first_image.save(
-                        output_file, format="PDF", save_all=True, append_images=images[1:], resolution=100.0
+                    failure_lines = [
+                        self.translate_text("error_with_file").format(
+                            filename=name, error=error
+                        )
+                        for name, error in failures
+                    ]
+                    raise RuntimeError(
+                        "\n".join(failure_lines) or "No images could be loaded"
                     )
-                else:
-                    first_image.save(output_file, format="PDF", resolution=100.0)
+
+                def _save_merged(target):
+                    first_image = images[0]
+                    if len(images) > 1:
+                        first_image.save(
+                            target, format="PDF", save_all=True, append_images=images[1:], resolution=100.0
+                        )
+                    else:
+                        first_image.save(target, format="PDF", resolution=100.0)
+                    return True
+
+                success, error = run_pdf_engine_with_artifact_validation(output_file, _save_merged)
+                if not success:
+                    raise RuntimeError(f"Image to PDF conversion failed: {error}")
 
                 conversion_time = (datetime.now() - start_time).total_seconds()
-                total_size = sum(os.path.getsize(f) for f in image_files if os.path.exists(f))
+                total_size = sum(
+                    os.path.getsize(f) for f in loaded_files if os.path.exists(f)
+                )
                 self.db_manager.add_conversion_record(
-                    source_file=", ".join([Path(f).name for f in image_files]),
+                    source_file=", ".join([Path(f).name for f in loaded_files]),
                     source_format="Image",
                     target_file=output_file,
                     target_format="PDF",
@@ -528,13 +576,28 @@ class ImageToPdfMixin:
                 self.show_progress(False)
                 if self.config.get("enable_system_notifications", True):
                     self.system_notifier.send("image_to_pdf")
-                QMessageBox.information(
-                    self,
-                    self.translate_text("success"),
-                    self.translate_text("images_merged_success").format(
-                        num_images=num_images, conversion_time=round(conversion_time, 1)
-                    ),
+                success_message = self.translate_text("images_merged_success").format(
+                    num_images=len(images),
+                    conversion_time=round(conversion_time, 1),
                 )
+                if failures:
+                    failure_lines = [
+                        self.translate_text("error_with_file").format(
+                            filename=name, error=error
+                        )
+                        for name, error in failures
+                    ]
+                    QMessageBox.warning(
+                        self,
+                        self.translate_text("warning"),
+                        success_message + "\n\n" + "\n".join(failure_lines),
+                    )
+                else:
+                    QMessageBox.information(
+                        self,
+                        self.translate_text("success"),
+                        success_message,
+                    )
 
             elif num_images == 1:
                 file_path = image_files[0]
@@ -542,8 +605,18 @@ class ImageToPdfMixin:
                 if not output_file:
                     self.show_progress(False)
                     return
+                if not self._prepare_image_source_backups([file_path]):
+                    self.show_progress(False)
+                    return
                 img = self._open_image_for_pdf(file_path)
-                img.save(output_file, format="PDF")
+
+                def _save_single(target):
+                    img.save(target, format="PDF")
+                    return True
+
+                success, error = run_pdf_engine_with_artifact_validation(output_file, _save_single)
+                if not success:
+                    raise RuntimeError(f"Image to PDF conversion failed: {error}")
                 file_size = os.path.getsize(file_path)
                 self.achievement_system.record_conversion("image_to_pdf", file_size, True)
                 self.show_progress(False)

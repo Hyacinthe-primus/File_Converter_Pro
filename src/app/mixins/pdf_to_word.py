@@ -3,7 +3,7 @@
 import os
 import shutil
 import tempfile
-from datetime import datetime
+import threading
 from pathlib import Path
 
 from PySide6.QtCore import Qt
@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from converter.helpers import BackupError, prepare_operation_backups
 from pdf_text import build_text_only_engines, convert_pdf_text_to_docx
 from templates import semantic_keys as sk
 
@@ -45,7 +46,7 @@ except ImportError as _e:
 
 from context_menu.conversion_helpers import _solid_fitz_fallback as _solid_fitz_fallback_impl
 from dialogs import PdfToWordDialog
-from utils.conversion_pipeline import run_conversion_pipeline
+from utils.conversion_pipeline import ConversionCancelled, run_conversion_pipeline
 from utils.pdf_artifacts import validate_docx_artifact
 from widgets import AnimatedCheckBox
 
@@ -330,92 +331,8 @@ class PdfToWordMixin:
         output_dir = self.get_output_directory()
         if not output_dir:
             return
-
-        message = self.translate_text("conversion_pdf_to_word").format(len(pdf_files))
-        self.show_progress(True, message)
-
-        success_count = 0
-        failed_files = []
-        start_time = datetime.now()
-
-        for i, file_path in enumerate(pdf_files):
-            try:
-                output_file = os.path.join(output_dir, f"{Path(file_path).stem}.docx")
-                file_size = os.path.getsize(file_path)
-
-                operation_start = datetime.now()
-
-                current_mode = self.config.get("pdf_to_word_mode", "with_images")
-                if current_mode == "with_images":
-                    ok = self.convert_pdf_to_docx_improved(file_path, output_file)
-                else:
-                    ok = self.convert_pdf_to_docx_text_only(file_path, output_file)
-                if ok is False:
-                    raise RuntimeError(
-                        getattr(self, "_last_pdf_to_word_error", "") or "PDF to Word conversion failed"
-                    )
-
-                operation_time = (datetime.now() - operation_start).total_seconds()
-                self.achievement_system.record_conversion("pdf_to_word", file_size, True)
-                self.achievement_system.mark_format_as_used("pdf")
-                self.achievement_system.mark_format_as_used("docx")
-
-                self.db_manager.add_conversion_record(
-                    source_file=file_path,
-                    source_format="PDF",
-                    target_file=output_file,
-                    target_format="DOCX",
-                    operation_type="pdf_to_word",
-                    file_size=file_size,
-                    conversion_time=operation_time,
-                    success=True,
-                    notes=f"Mode: {current_mode}",
-                )
-
-                success_count += 1
-                self.progress_bar.setValue(int((i + 1) / len(pdf_files) * 100))
-
-            except Exception as e:
-                self.db_manager.add_conversion_record(
-                    source_file=file_path,
-                    source_format="PDF",
-                    target_file="",
-                    target_format="DOCX",
-                    operation_type="pdf_to_word",
-                    file_size=0,
-                    conversion_time=0,
-                    success=False,
-                    notes=f"Error: {str(e)}",
-                )
-                failed_files.append(f"{Path(file_path).name}: {e}")
-                QMessageBox.critical(
-                    self,
-                    self.translate_text("error"),
-                    self.translate_text(f"Erreur avec {Path(file_path).name}: {str(e)}"),
-                )
-
-        total_time = (datetime.now() - start_time).total_seconds()
-        self.show_progress(False)
-
-        if success_count > 0 and 0 <= datetime.now().hour < 6:
-            self.achievement_system.increment_stat("night_conversions", success_count)
-            self.achievement_system.check_achievement("night_owl")
-
-        if success_count >= 50 and total_time <= 300:
-            self.achievement_system.update_stat("recent_batch_files", success_count)
-            self.achievement_system.update_stat("recent_batch_time", total_time)
-            self.achievement_system.check_speed_conversion(success_count, total_time)
-
-        formatted_time = f"{total_time:.1f}"
-        message = self.translate_text("pdf_to_word_success_sum").format(success_count, len(pdf_files), formatted_time)
-        if failed_files or success_count < len(pdf_files):
-            if failed_files:
-                message += "\n\n" + "\n".join(failed_files)
-            QMessageBox.warning(self, self.translate_text("warning"), message)
-            return
-        if self.config.get("enable_system_notifications", True):
-            self.system_notifier.send("pdf_to_word")
-        QMessageBox.information(self, self.translate_text("success"), message)
+        current_mode = self.config.get("pdf_to_word_mode", "with_images")
+        self._start_pdf_to_word_worker(pdf_files, output_dir, current_mode)
 
     def _get_chart_regions(self, page):
         MIN_PATHS = 8
@@ -747,7 +664,7 @@ class PdfToWordMixin:
 
         return True
 
-    def convert_pdf_to_docx_with_charts(self, pdf_path, docx_path):
+    def convert_pdf_to_docx_with_charts(self, pdf_path, docx_path, cancel_event=None):
         engines = [
             ("COM", lambda target: self._try_word_com_pdf_to_docx(pdf_path, target)),
             (
@@ -760,31 +677,44 @@ class PdfToWordMixin:
             os.path.abspath(docx_path),
             engines,
             validate_docx_artifact,
+            cancel_event=cancel_event,
             stage_mode="file",
             staged_prefix="~fcp_pdf_word_",
             staged_suffix=".docx",
         )
-        self._last_pdf_to_word_error = result.error
+        self._last_pdf_to_word_error = (
+            "Conversion cancelled" if result.cancelled else result.error
+        )
         return result.success
 
-    def convert_pdf_to_docx_improved(self, pdf_path, docx_path):
-        return self.convert_pdf_to_docx_with_charts(pdf_path, docx_path)
+    def convert_pdf_to_docx_improved(self, pdf_path, docx_path, cancel_event=None):
+        return self.convert_pdf_to_docx_with_charts(
+            pdf_path, docx_path, cancel_event=cancel_event
+        )
 
-    def convert_pdf_to_docx_text_only(self, pdf_path, docx_path):
+    def convert_pdf_to_docx_text_only(self, pdf_path, docx_path, cancel_event=None):
+        def _check_cancelled():
+            if cancel_event is not None and cancel_event.is_set():
+                raise ConversionCancelled()
+
         engines, no_text_errors = build_text_only_engines(
             pdf_path,
             self._solid_fitz_fallback,
             text_converter=convert_pdf_text_to_docx,
+            cancel_check=_check_cancelled if cancel_event is not None else None,
         )
         result = run_conversion_pipeline(
             os.path.abspath(docx_path),
             engines,
             validate_docx_artifact,
+            cancel_event=cancel_event,
             stage_mode="file",
             staged_prefix="~fcp_pdf_word_",
             staged_suffix=".docx",
         )
-        if not result.success and no_text_errors:
+        if result.cancelled:
+            self._last_pdf_to_word_error = "Conversion cancelled"
+        elif not result.success and no_text_errors:
             self._last_pdf_to_word_error = str(no_text_errors[0])
         else:
             self._last_pdf_to_word_error = result.error
@@ -814,6 +744,12 @@ class PdfToWordMixin:
                 else self.translate_text("the_list_must_contain_at_least_one_pdf_file")
             )
             QMessageBox.warning(self, self.translate_text("warning"), msg)
+            return
+
+        try:
+            prepare_operation_backups(pdf_files, config=self.config)
+        except BackupError as exc:
+            QMessageBox.critical(self, self.translate_text("error"), str(exc))
             return
 
         encrypted_pdfs = []
@@ -860,12 +796,23 @@ class PdfToWordMixin:
         if not output_dir:
             return
 
+        self._start_pdf_to_word_worker(pdf_files, output_dir, conversion_mode)
+
+    def _start_pdf_to_word_worker(self, pdf_files, output_dir, mode):
         message = self.translate_text("conversion_pdf_to_word").format(len(pdf_files))
         self.show_progress(True, message)
         self._set_ui_enabled(False)
+        self._pdf_to_word_cancel_event = threading.Event()
 
-        _mode = conversion_mode
+        _mode = mode
         _outdir = output_dir
+
+        def _worker_cancelled():
+            if self._pdf_to_word_cancel_event.is_set():
+                return True
+            worker = getattr(self, "_pdf_to_word_worker", None)
+            checker = getattr(worker, "isInterruptionRequested", None)
+            return bool(checker and checker())
 
         def _run_pdf_to_word(task):
             import os
@@ -875,10 +822,28 @@ class PdfToWordMixin:
             fp = task["input_path"]
             out = task["output_path"]
             fs = os.path.getsize(fp) if os.path.exists(fp) else 0
+
+            def _cancelled_result():
+                return {
+                    "success": False,
+                    "cancelled": True,
+                    "error": "Conversion cancelled",
+                    "file_size": fs,
+                    "operation_time": _time.perf_counter() - t0,
+                }
+
+            if _worker_cancelled():
+                return _cancelled_result()
             if _mode == "with_images":
-                ok = self.convert_pdf_to_docx_improved(fp, out)
+                ok = self.convert_pdf_to_docx_improved(
+                    fp, out, cancel_event=self._pdf_to_word_cancel_event
+                )
             else:
-                ok = self.convert_pdf_to_docx_text_only(fp, out)
+                ok = self.convert_pdf_to_docx_text_only(
+                    fp, out, cancel_event=self._pdf_to_word_cancel_event
+                )
+            if _worker_cancelled():
+                return _cancelled_result()
             if ok is False:
                 return {
                     "success": False,
@@ -907,18 +872,26 @@ class PdfToWordMixin:
         from conversion_worker import ConversionWorker
 
         self._pdf_to_word_worker = ConversionWorker(tasks, _run_pdf_to_word)
+        self._pdf_to_word_worker.progress.connect(self.progress_bar.setValue)
         self._pdf_to_word_worker.file_done.connect(self._on_pdf_to_word_file_done)
 
-        def _on_pdf_to_word_finished(s):
+        def _on_pdf_to_word_finished(summary):
             self.show_progress(False)
             self._set_ui_enabled(True)
-            if s["success_count"] > 0:
+            if _worker_cancelled():
+                QMessageBox.warning(
+                    self,
+                    self.translate_text("cancel_conversion"),
+                    self.translate_text("adv_log_cancelled"),
+                )
+                return
+            if summary["success_count"] > 0:
                 self.record_config_usage(sk.PDF_TO_WORD, {"mode": _mode})
             msg = self.translate_text("pdf_to_word_success_sum").format(
-                s["success_count"], s["total"], f"{s['total_time']:.1f}"
+                summary["success_count"], summary["total"], f"{summary['total_time']:.1f}"
             )
-            failed = s.get("failed", [])
-            if failed or s["success_count"] < s["total"]:
+            failed = summary.get("failed", [])
+            if failed or summary["success_count"] < summary["total"]:
                 failure_lines = [
                     self.translate_text("error_with_file").format(
                         filename=Path(item.get("name", "?")).name,
@@ -944,7 +917,18 @@ class PdfToWordMixin:
         )
         self._pdf_to_word_worker.start()
 
+    def cancel_pdf_to_word(self):
+        """Request cooperative cancellation of the active PDF-to-Word worker."""
+        event = getattr(self, "_pdf_to_word_cancel_event", None)
+        if event is not None:
+            event.set()
+        worker = getattr(self, "_pdf_to_word_worker", None)
+        if worker is not None:
+            worker.requestInterruption()
+
     def _on_pdf_to_word_file_done(self, result):
+        if result.get("cancelled"):
+            return
         fp = result.get("input_path", "?")
         fs = result.get("file_size", 0)
         if result.get("success"):

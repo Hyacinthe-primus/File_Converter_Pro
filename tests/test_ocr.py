@@ -356,7 +356,7 @@ class TestOcrAchievementWiring:
         app.ocr_convert_images_to_merged_pdf(imgs, [])
         assert calls["ocr_pages"] == [3]
 
-    def test_separate_ocr_failure_reports_warning_and_preserves_output(self, app, monkeypatch, tmp_path):
+    def test_separate_ocr_failure_reports_error_and_preserves_output(self, app, monkeypatch, tmp_path):
         from PIL import Image
 
         from app.mixins import image_to_pdf
@@ -367,7 +367,7 @@ class TestOcrAchievementWiring:
         output = tmp_path / "scan.pdf"
         output.write_bytes(b"stale")
         original = output.read_bytes()
-        warnings = []
+        critical = []
         infos = []
 
         monkeypatch.setattr(app, "get_output_directory", lambda *a, **k: str(tmp_path))
@@ -376,13 +376,13 @@ class TestOcrAchievementWiring:
         monkeypatch.setattr(app.db_manager, "add_conversion_record", lambda **_k: None)
         monkeypatch.setattr(image_to_pdf.ImageToPdfMixin, "_configure_scanlayer", lambda self: (None, None))
         monkeypatch.setattr(ocr_helpers, "image_to_pdf", lambda *_a: (_ for _ in ()).throw(RuntimeError("ocr failed")))
-        monkeypatch.setattr(image_to_pdf.QMessageBox, "warning", lambda *args: warnings.append(args))
+        monkeypatch.setattr(image_to_pdf.QMessageBox, "critical", lambda *args: critical.append(args))
         monkeypatch.setattr(image_to_pdf.QMessageBox, "information", lambda *args: infos.append(args))
 
         app.ocr_convert_images_to_separate_pdfs([str(image_path)], [])
 
-        assert len(warnings) == 1
-        assert "ocr failed" in warnings[0][2]
+        assert len(critical) == 1
+        assert "ocr failed" in critical[0][2]
         assert infos == []
         assert output.read_bytes() == original
 

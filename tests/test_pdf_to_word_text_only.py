@@ -95,9 +95,11 @@ def _staging_artifacts(directory: Path) -> list[Path]:
 def _patch_config(monkeypatch, config):
     import config as config_module
 
+    full_config = {"backup_before_conversion": False, **config}
+
     class FakeConfigManager:
         def load_config(self):
-            return config
+            return full_config
 
     monkeypatch.setattr(config_module, "ConfigManager", FakeConfigManager)
 

@@ -51,9 +51,13 @@ def _fake_winreg(monkeypatch):
 def _fake_config(monkeypatch, config):
     import config as config_module
 
+    full_config = {"backup_before_conversion": False}
+    if isinstance(config, dict):
+        full_config.update(config)
+
     class FakeConfigManager:
         def load_config(self):
-            return config
+            return full_config
 
     monkeypatch.setattr(config_module, "ConfigManager", FakeConfigManager)
 

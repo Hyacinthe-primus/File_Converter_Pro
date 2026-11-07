@@ -329,9 +329,11 @@ def test_cancellation_during_conversion_skips_remaining_fallbacks(monkeypatch, t
 def _patch_config(monkeypatch, config):
     import config as config_module
 
+    full_config = {"backup_before_conversion": False, **config}
+
     class FakeConfigManager:
         def load_config(self):
-            return config
+            return full_config
 
     monkeypatch.setattr(config_module, "ConfigManager", FakeConfigManager)
 
