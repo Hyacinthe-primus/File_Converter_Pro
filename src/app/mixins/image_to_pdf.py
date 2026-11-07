@@ -121,23 +121,6 @@ class ImageToPdfMixin:
             include_tesseract=True,
         )
 
-    @staticmethod
-    def _suppress_tesseract_console():
-        """Force CREATE_NO_WINDOW on every tesseract.exe spawn (see utils)."""
-        from utils.tesseract_console import suppress_tesseract_console
-
-        suppress_tesseract_console()
-
-    def _ocr_orientation_value(self):
-        """Map the ocr_orientation config string to the scanlayer orientation.
-
-        "auto" -> None (auto-detect), "none"/empty -> "none" (disabled),
-        otherwise -> float angle in degrees.
-        """
-        from tasks.ocr_helpers import resolve_orientation
-
-        return resolve_orientation(self.config.get("ocr_orientation", "auto"))
-
     def _single_image_to_generic_pdf(self, file_path: str, output_file: str) -> None:
         """Embed a single image into a plain (non-OCR) PDF using PyMuPDF."""
         from tasks.ocr_helpers import embed_image_in_pdf
