@@ -9,9 +9,9 @@ import threading
 import time
 from pathlib import Path
 
-from pdf_text import build_text_only_engines, convert_pdf_text_to_docx
 from utils.conversion_pipeline import ConversionCancelled, run_conversion_pipeline
 from utils.pdf_artifacts import validate_docx_artifact, validate_docx_input, validate_pdf_artifact
+from utils.pdf_text import build_text_only_engines, convert_pdf_text_to_docx
 
 _PDF_TO_WORD_MODE_DEFAULT = "with_images"
 _PDF_TO_WORD_MODES = frozenset({"with_images", "text_only"})
@@ -617,27 +617,6 @@ def _pdf_to_docx_pdf2docx(src_abs: str, target: str) -> bool:
         converter.convert(target, parse_drawing=True)
     finally:
         converter.close()
-    return True
-
-
-def _pdf_to_docx_fitz_text(src_abs: str, target: str) -> bool:
-    import fitz
-    from docx import Document as DocxDoc
-
-    pdf_doc = fitz.open(src_abs)
-    try:
-        word_doc = DocxDoc()
-        page_count = len(pdf_doc)
-        for page_num in range(page_count):
-            text = pdf_doc.load_page(page_num).get_text("text")
-            for line in text.split("\n"):
-                if line.strip():
-                    word_doc.add_paragraph(line.strip())
-            if page_num < page_count - 1:
-                word_doc.add_page_break()
-        word_doc.save(target)
-    finally:
-        pdf_doc.close()
     return True
 
 
