@@ -45,9 +45,9 @@ from context_menu.conversion_helpers import (
 )
 from context_menu.formats import CONVERSION_MAP, LABELS, MERGE_DISPATCH
 from converter.helpers import prepare_operation_backups
-from pdf_text import convert_pdf_text_to_docx
 from qss_helpers import _load_qss
 from utils import SRC_DIR
+from utils.pdf_text import convert_pdf_text_to_docx
 
 _COLLECT_MIN_SEC = 2.0
 _COLLECT_STABLE_SEC = 0.5
