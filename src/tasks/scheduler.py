@@ -293,7 +293,7 @@ def _run_task(cfg: dict) -> None:
     generated_cache: dict[str, set[str]] = {}
     task_failed = False
 
-    for f in iterator:
+    for f in sorted(iterator, key=lambda p: (str(p).casefold(), str(p))):
         if f.is_dir() or _is_temp_file(f):
             continue
         ext = f.suffix.lstrip(".").lower()
