@@ -41,6 +41,17 @@ def _temporary_docx_path(dst_path: str) -> str:
 
 
 def _sort_files(files: list, order: str) -> list:
+    """Return merge inputs in the requested order.
+
+    ``none``, ``current``, and ``manual`` preserve the caller-provided order;
+    Main uses these for its user-maintained list and manual dialog ordering.
+    Quick Convert and automation have no such user sequence, so they normalize
+    their ``none`` order to ``alphabetical_asc`` before calling merge helpers.
+    Alphabetical orders compare case-insensitive filenames, numeric orders use
+    digit-aware natural name tokens, and date orders use modification time.
+    All non-preserving orders use the full path string as a deterministic
+    tie-breaker.
+    """
     aliases = {
         "alpha_az": "alphabetical_asc",
         "alpha_za": "alphabetical_desc",
@@ -83,25 +94,10 @@ def _sort_files(files: list, order: str) -> list:
     return files
 
 
-def _convert_image_to_pdf(src: str, dst_dir: str) -> None:
-    import fitz
-
-    from utils.image_formats import decodable_image_path
-
-    out = os.path.join(dst_dir, f"{Path(src).stem}.pdf")
-    pdf = fitz.open()
-    with decodable_image_path(src) as readable:
-        img = fitz.open(readable)
-        rect = img[0].rect
-        page = pdf.new_page(width=rect.width, height=rect.height)
-        page.insert_image(rect, filename=readable)
-        img.close()
-    pdf.save(out)
-    pdf.close()
-
-
-def _merge_images_to_pdf(
-    files: list, dst_dir: str, cancel_event: threading.Event | None = None
+def _embed_images_in_pdf(
+    files: list,
+    target: str,
+    cancel_event: threading.Event | None = None,
 ) -> None:
     import fitz
 
@@ -117,10 +113,73 @@ def _merge_images_to_pdf(
                 page = pdf.new_page(width=rect.width, height=rect.height)
                 page.insert_image(rect, filename=readable)
                 img.close()
-        out = os.path.join(dst_dir, f"merged_images_{time.strftime('%Y%m%d_%H%M%S')}.pdf")
-        pdf.save(out)
+        pdf.save(target)
     finally:
         pdf.close()
+
+
+def _convert_image_to_pdf(src: str, dst_dir: str) -> None:
+    out = os.path.join(dst_dir, f"{Path(src).stem}.pdf")
+
+    def _engine(target):
+        _embed_images_in_pdf([src], target)
+        return True
+
+    result = run_conversion_pipeline(
+        out,
+        [("image", _engine)],
+        validate_pdf_artifact,
+        stage_mode="file",
+        staged_prefix="~fcp_image_",
+        staged_suffix=".pdf",
+        include_engine_labels=False,
+    )
+    if not result.success:
+        raise RuntimeError(f"Image to PDF conversion failed: {result.error}")
+
+
+def _merge_images_to_pdf(
+    files: list, dst_dir: str, cancel_event: threading.Event | None = None
+) -> str:
+    out = _merge_output_path(dst_dir, None, "merged_images_", "pdf")
+
+    def _engine(target):
+        _embed_images_in_pdf(files, target, cancel_event)
+        return True
+
+    _commit_merge(
+        out,
+        _engine,
+        validate_pdf_artifact,
+        cancel_event,
+        "Image",
+        reserved=True,
+    )
+    return out
+
+
+def _reserve_unique_output_path(dst_dir: str, base_stem: str, suffix: str) -> str:
+    """Atomically claim a unique output path, preserving existing files."""
+    suffix = suffix.lstrip(".")
+    candidate = os.path.join(dst_dir, f"{base_stem}.{suffix}")
+    counter = 1
+    while True:
+        try:
+            fd = os.open(candidate, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            candidate = os.path.join(dst_dir, f"{base_stem}_{counter}.{suffix}")
+            counter += 1
+            continue
+        os.close(fd)
+        return candidate
+
+
+def _release_reserved_path(path: str) -> None:
+    """Remove a reserved destination that was not successfully published."""
+    try:
+        os.remove(path)
+    except OSError:
+        pass
 
 
 def _merge_output_path(
@@ -133,12 +192,7 @@ def _merge_output_path(
         return os.path.abspath(dst_path)
 
     stem = f"{prefix}{time.strftime('%Y%m%d_%H%M%S')}"
-    candidate = os.path.join(dst_dir, f"{stem}.{suffix}")
-    counter = 1
-    while os.path.exists(candidate):
-        candidate = os.path.join(dst_dir, f"{stem}_{counter}.{suffix}")
-        counter += 1
-    return candidate
+    return _reserve_unique_output_path(dst_dir, stem, suffix)
 
 
 def _commit_merge(
@@ -147,20 +201,29 @@ def _commit_merge(
     validator,
     cancel_event: threading.Event | None,
     label: str,
+    *,
+    reserved: bool = False,
 ) -> None:
-    result = run_conversion_pipeline(
-        final_path,
-        [("merge", engine)],
-        validator,
-        cancel_event=cancel_event,
-        stage_mode="file",
-        staged_prefix="~fcp_merge_",
-        staged_suffix=Path(final_path).suffix or ".tmp",
-        include_engine_labels=False,
-    )
-    if result.cancelled:
-        raise _ConversionCancelled()
+    try:
+        result = run_conversion_pipeline(
+            final_path,
+            [("merge", engine)],
+            validator,
+            cancel_event=cancel_event,
+            stage_mode="file",
+            staged_prefix="~fcp_merge_",
+            staged_suffix=Path(final_path).suffix or ".tmp",
+            include_engine_labels=False,
+        )
+    except Exception:
+        if reserved:
+            _release_reserved_path(final_path)
+        raise
     if not result.success:
+        if reserved:
+            _release_reserved_path(final_path)
+        if result.cancelled:
+            raise _ConversionCancelled()
         raise RuntimeError(f"{label} merge failed: {result.error}")
 
 
@@ -171,7 +234,7 @@ def _merge_pdfs(
     cancel_event: threading.Event | None = None,
     *,
     dst_path: str | None = None,
-) -> None:
+) -> str:
     _raise_if_cancelled(cancel_event)
     ordered_files = _sort_files(files, order)
     if not ordered_files:
@@ -194,7 +257,21 @@ def _merge_pdfs(
             writer.close()
         return True
 
-    _commit_merge(out, _engine, validate_pdf_artifact, cancel_event, "PDF")
+    _commit_merge(
+        out,
+        _engine,
+        validate_pdf_artifact,
+        cancel_event,
+        "PDF",
+        reserved=dst_path is None,
+    )
+    return out
+
+
+LEGACY_DOC_MERGE_ERROR = (
+    "Legacy .doc files are not supported for merging. "
+    "Please save them as .docx and try again."
+)
 
 
 def _merge_docx(
@@ -204,8 +281,10 @@ def _merge_docx(
     cancel_event: threading.Event | None = None,
     *,
     dst_path: str | None = None,
-) -> None:
+) -> str:
     _raise_if_cancelled(cancel_event)
+    if any(Path(f).suffix.lower() == ".doc" for f in files):
+        raise RuntimeError(LEGACY_DOC_MERGE_ERROR)
     ordered_files = _sort_files(files, order)
     if not ordered_files:
         raise RuntimeError("Word merge requires at least one input file")
@@ -237,7 +316,15 @@ def _merge_docx(
         composer.save(target)
         return True
 
-    _commit_merge(out, _engine, validate_docx_artifact, cancel_event, "Word")
+    _commit_merge(
+        out,
+        _engine,
+        validate_docx_artifact,
+        cancel_event,
+        "Word",
+        reserved=dst_path is None,
+    )
+    return out
 
 
 def _convert_docx_to_pdf(src: str, dst_dir: str, cancel_event: threading.Event | None = None) -> None:

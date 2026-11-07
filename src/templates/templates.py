@@ -321,7 +321,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
     @staticmethod
     def _template_icon():
         from utils import SRC_DIR
-        ico_path = SRC_DIR / "icons" / "template.ico"
+        ico_path = SRC_DIR / "Assets" / "icons" / "template.ico"
         if ico_path.exists():
             return QIcon(str(ico_path))
         return None
@@ -835,7 +835,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
                 ".jfif",
             ],
             sk.PDF_MERGE: [".pdf"],
-            sk.WORD_MERGE: [".docx", ".doc", ".odt"],
+            sk.WORD_MERGE: [".docx", ".odt"],
             sk.PDF_SPLIT: [".pdf"],
             sk.PDF_PROTECTION: [".pdf"],
             sk.COMPRESSION: [".*"],
@@ -865,7 +865,7 @@ class EnhancedTemplatesDialog(TranslationMixin, QDialog):
         elif sk.normalize_type(template_type) == sk.PDF_MERGE:
             return "Fichiers PDF (*.pdf)"
         elif sk.normalize_type(template_type) == sk.WORD_MERGE:
-            return "Fichiers Word (*.docx *.doc)"
+            return "Fichiers Word (*.docx)"
         elif sk.normalize_type(template_type) == sk.PDF_SPLIT:
             return "Fichiers PDF (*.pdf)"
         elif sk.normalize_type(template_type) == sk.PDF_PROTECTION:

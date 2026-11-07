@@ -9,6 +9,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QMessageBox
 
+from converter.helpers import BackupError, prepare_operation_backups
 from templates import semantic_keys as sk
 
 
@@ -89,6 +90,14 @@ def _protect_pdf_file(
 class PdfOperationsMixin:
     """Mixin: PDF merge, split, protect for FileConverterApp."""
 
+    def _prepare_merge_source_backups(self, files: list[str]) -> bool:
+        try:
+            prepare_operation_backups(files, config=getattr(self, "config", None))
+        except BackupError as exc:
+            QMessageBox.critical(self, self.translate_text("error"), str(exc))
+            return False
+        return True
+
     def merge_pdfs(self):
         from dialogs.merge_order_dialog import MergeOrderDialog
         selected_items = self.files_list_widget.selectedItems()
@@ -133,6 +142,8 @@ class PdfOperationsMixin:
         default_filename = f"fusion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         output_file = self.get_output_directory(default_filename)
         if not output_file:
+            return
+        if not self._prepare_merge_source_backups(ordered_files):
             return
 
         self.show_progress(True, self.translate_text("pdf_merge"))
@@ -183,16 +194,23 @@ class PdfOperationsMixin:
     def merge_word_docs(self):
         from dialogs.merge_order_dialog import MergeOrderDialog
         selected_items = self.files_list_widget.selectedItems()
-        word_files = []
+        candidate_files = []
         if selected_items:
             for i in range(self.files_list_widget.count()):
                 item = self.files_list_widget.item(i)
                 if item.isSelected():
                     f = item.data(Qt.UserRole)
                     if f and f.lower().endswith(('.docx', '.doc')):
-                        word_files.append(f)
+                        candidate_files.append(f)
         else:
-            word_files = [f for f in self.files_list if f.lower().endswith(('.docx', '.doc'))]
+            candidate_files = [f for f in self.files_list if f.lower().endswith(('.docx', '.doc'))]
+
+        if any(f.lower().endswith(".doc") for f in candidate_files):
+            from context_menu.conversion_helpers import LEGACY_DOC_MERGE_ERROR
+
+            QMessageBox.critical(self, self.translate_text("error"), LEGACY_DOC_MERGE_ERROR)
+            return
+        word_files = [f for f in candidate_files if f.lower().endswith(".docx")]
 
         if len(word_files) < 2:
             QMessageBox.warning(self, self.translate_text("warning"),
@@ -220,6 +238,8 @@ class PdfOperationsMixin:
         default_filename = f"fusion_word_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
         output_file = self.get_output_directory(default_filename)
         if not output_file:
+            return
+        if not self._prepare_merge_source_backups(ordered_files):
             return
 
         self.show_progress(True, self.translate_text("word_merge"))

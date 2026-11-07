@@ -104,6 +104,7 @@ CONVERSION_MAP: dict = {
         "image_to_heic",
         "image_to_psd",
         "image_to_dng",
+        "image_to_tif",
         "image_to_tiff",
         "images_to_pdf_merged",
     ],
@@ -122,6 +123,7 @@ CONVERSION_MAP: dict = {
         "image_to_psd",
         "image_to_dng",
         "image_to_tif",
+        "image_to_tiff",
         "images_to_pdf_merged",
     ],
     "heic": [
@@ -460,13 +462,6 @@ CONVERSION_MAP: dict = {
     ],
     "doc": [
         "docx_to_pdf",
-        "merge_docx_none",
-        "merge_docx_alpha_asc",
-        "merge_docx_alpha_desc",
-        "merge_docx_num_asc",
-        "merge_docx_num_desc",
-        "merge_docx_date_asc",
-        "merge_docx_date_desc",
     ],
     "pdf": [
         "pdf_to_docx",
@@ -582,6 +577,7 @@ LABELS: dict = {
     "image_to_jpeg": "Image → JPEG",
     "image_to_bmp": "Image → BMP",
     "image_to_webp": "Image → WEBP",
+    "image_to_tif": "Image → TIF",
     "image_to_tiff": "Image → TIFF",
     "image_to_heic": "Image → HEIC",
     "image_to_avif": "Image → AVIF",

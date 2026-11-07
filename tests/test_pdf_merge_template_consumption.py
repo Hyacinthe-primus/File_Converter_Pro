@@ -53,7 +53,7 @@ def _fake_self(tmp_path, active_templates):
     obj.files_list = [str(first), str(second)]
     obj.current_language = "en"
     obj.active_templates = active_templates
-    obj.config = {"enable_system_notifications": False}
+    obj.config = {"enable_system_notifications": False, "backup_before_conversion": False}
     obj.translate_text = lambda key: key
     obj.get_output_directory = lambda _name: str(tmp_path / "merged.pdf")
     obj.show_progress = lambda *args, **kwargs: None

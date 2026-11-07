@@ -1,7 +1,5 @@
 """MergeOrderDialog - Dialog for choosing merge order."""
 
-import os
-import re
 from pathlib import Path
 
 from PySide6.QtCore import Qt
@@ -17,6 +15,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from context_menu.conversion_helpers import _sort_files
 from qss_helpers import _apply_dialog_btn
 from utils import make_tm
 from utils.translation_mixin import TranslationMixin
@@ -111,35 +110,14 @@ class MergeOrderDialog(TranslationMixin, QDialog):
         return "current"
 
     def get_ordered_files(self):
-        """Return files in the chosen order."""
-        files = list(self.files)
-
-        if self._radio_map["alpha_az"].isChecked():
-            files.sort(key=lambda f: Path(f).name.lower())
-        elif self._radio_map["alpha_za"].isChecked():
-            files.sort(key=lambda f: Path(f).name.lower(), reverse=True)
-        elif self._radio_map["num_asc"].isChecked():
-
-            def num_key(f):
-                nums = re.findall(r"\d+", Path(f).stem)
-                return [int(n) for n in nums] if nums else [0]
-
-            files.sort(key=num_key)
-        elif self._radio_map["num_desc"].isChecked():
-
-            def num_key_d(f):
-                nums = re.findall(r"\d+", Path(f).stem)
-                return [int(n) for n in nums] if nums else [0]
-
-            files.sort(key=num_key_d, reverse=True)
-        elif self._radio_map["date_asc"].isChecked():
-            files.sort(key=lambda f: os.path.getmtime(f))
-        elif self._radio_map["date_desc"].isChecked():
-            files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
-        elif self._radio_map["manual"].isChecked():
-            files = [self._manual_list.item(i).data(Qt.UserRole) for i in range(self._manual_list.count())]
-
-        return files
+        """Return files in the chosen order using the shared merge ordering rules."""
+        order_key = self.get_order_key()
+        if order_key == "manual":
+            return [
+                self._manual_list.item(i).data(Qt.UserRole)
+                for i in range(self._manual_list.count())
+            ]
+        return _sort_files(list(self.files), order_key)
 
     def apply_theme_style(self):
         """Apply white/light or dark theme styling based on the parent window."""
