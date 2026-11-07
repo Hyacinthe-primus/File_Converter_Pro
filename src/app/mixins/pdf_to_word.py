@@ -21,8 +21,8 @@ from PySide6.QtWidgets import (
 )
 
 from converter.helpers import BackupError, prepare_operation_backups
-from pdf_text import build_text_only_engines, convert_pdf_text_to_docx
 from templates import semantic_keys as sk
+from utils.pdf_text import build_text_only_engines, convert_pdf_text_to_docx
 
 try:
     from pdf2docx import Converter as _Converter
