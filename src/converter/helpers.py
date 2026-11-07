@@ -201,12 +201,6 @@ def _report_backup_outcome(src: str, outcome: _BackupOutcome) -> None:
         print(f"[BACKUP] Could not remove temporary backup file: {outcome.cleanup_error}")
 
 
-def _create_backup_exclusive(src: str, suffix: str) -> str | None:
-    outcome = _create_backup_atomic(src, suffix, overwrite=False)
-    _report_backup_outcome(src, outcome)
-    return outcome.path
-
-
 def create_backup(src: str, suffix: str = ".bak", overwrite: bool = True) -> str | None:
     """
     Create a backup copy of *src* with the given suffix appended.
