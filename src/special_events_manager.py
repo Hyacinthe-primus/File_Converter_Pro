@@ -620,8 +620,8 @@ class SpecialEventPopup(_AnimBase):
 
     def _load_font(self) -> QFont:
         candidates = [
-            _resource_path(os.path.join("fonts", "SF-Pro-Display-Medium.ttf")),
-            os.path.join("fonts", "SF-Pro-Display-Medium.ttf"),
+            _resource_path(os.path.join("Assets", "fonts", "SF-Pro-Display-Medium.ttf")),
+            os.path.join("Assets", "fonts", "SF-Pro-Display-Medium.ttf"),
         ]
         for p in candidates:
             if os.path.exists(p):
@@ -1090,8 +1090,8 @@ def _resource_path(relative: str) -> str:
 def _load_app_font(size: int = 11) -> QFont:
     """Load SF-Pro-Display-Medium (shared across dialogs)."""
     candidates = [
-        _resource_path(os.path.join("fonts", "SF-Pro-Display-Medium.ttf")),
-        os.path.join("fonts", "SF-Pro-Display-Medium.ttf"),
+        _resource_path(os.path.join("Assets", "fonts", "SF-Pro-Display-Medium.ttf")),
+        os.path.join("Assets", "fonts", "SF-Pro-Display-Medium.ttf"),
     ]
     for path in candidates:
         if os.path.exists(path):
