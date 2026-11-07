@@ -12,8 +12,10 @@ def test_sfx_and_icons_live_under_assets():
     assert (assets / "icons" / "template.ico").is_file()
     assert (assets / "SFX" / "notif.mp3").is_file()
     assert (assets / "SFX" / "conversion_done.ogg").is_file()
+    assert (assets / "fonts" / "SF-Pro-Display-Medium.ttf").is_file()
     assert not (SRC_DIR / "icons").exists()
     assert not (SRC_DIR / "SFX").exists()
+    assert not (SRC_DIR / "fonts").exists()
 
 
 def test_file_icons_resolve_from_assets_icons():
@@ -54,7 +56,8 @@ def test_quick_check_expects_nested_asset_directories():
 
     assert ("Assets/SFX/", "_internal/Assets/SFX", "dir") in CHECKS_RESOURCES
     assert ("Assets/icons/", "_internal/Assets/icons", "dir") in CHECKS_RESOURCES
-    assert all(source not in {"SFX/", "icons/"} for source, _target, _kind in CHECKS_RESOURCES)
+    assert ("Assets/fonts/", "_internal/Assets/fonts", "dir") in CHECKS_RESOURCES
+    assert all(source not in {"SFX/", "icons/", "fonts/"} for source, _target, _kind in CHECKS_RESOURCES)
 
 
 def test_packaging_collects_only_the_assets_tree():
@@ -63,3 +66,4 @@ def test_packaging_collects_only_the_assets_tree():
     assert "('../src/Assets', 'Assets')" in spec
     assert "../src/SFX" not in spec
     assert "../src/icons" not in spec
+    assert "../src/fonts" not in spec
