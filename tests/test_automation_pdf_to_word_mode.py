@@ -9,9 +9,11 @@ from tasks import scheduler, watcher
 def _patch_config(monkeypatch, config):
     import config as config_module
 
+    full_config = {"backup_before_conversion": False, **config}
+
     class FakeConfigManager:
         def load_config(self):
-            return config
+            return full_config
 
     monkeypatch.setattr(config_module, "ConfigManager", FakeConfigManager)
 
@@ -74,7 +76,10 @@ def test_watcher_reads_configuration_for_each_conversion(monkeypatch, tmp_path):
 
         def load_config(self):
             type(self).calls += 1
-            return {"pdf_to_word_mode": "text_only" if self.calls == 1 else "with_images"}
+            return {
+                "backup_before_conversion": False,
+                "pdf_to_word_mode": "text_only" if self.calls == 1 else "with_images",
+            }
 
     monkeypatch.setattr(config_module, "ConfigManager", ChangingConfigManager)
     src = _source(tmp_path)
@@ -88,7 +93,7 @@ def test_watcher_reads_configuration_for_each_conversion(monkeypatch, tmp_path):
     assert [call[1]["mode"] for call in seen] == ["text_only", "with_images"]
 
 
-def test_watcher_configuration_failure_defaults_to_with_images(monkeypatch, tmp_path):
+def test_watcher_configuration_failure_blocks_conversion(monkeypatch, tmp_path):
     import config as config_module
 
     class BrokenConfigManager:
@@ -101,9 +106,11 @@ def test_watcher_configuration_failure_defaults_to_with_images(monkeypatch, tmp_
     seen = []
     monkeypatch.setattr(conversion_helpers, "_convert_pdf_to_docx", lambda *a, **k: seen.append((a, k)))
 
-    watcher._run_conversion("pdf_to_docx", str(src), str(out_dir))
+    with pytest.raises(RuntimeError, match="configuration unavailable"):
+        watcher._run_conversion("pdf_to_docx", str(src), str(out_dir))
 
-    assert seen == [((str(src), str(out_dir)), {"mode": "with_images"})]
+    assert seen == []
+    assert not out_dir.exists()
 
 
 @pytest.mark.parametrize("mode", ["text_only", "with_images"])

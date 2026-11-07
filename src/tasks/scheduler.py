@@ -24,13 +24,18 @@ except ImportError:
     APSCHEDULER_AVAILABLE = False
 
 from tasks.watcher import (
+    _all_generated_merge_output_paths,
     _build_conversion_type,
-    _existing_output_is_valid,
+    _conversion_output_is_fresh,
+    _existing_output_is_current,
     _is_temp_file,
     _load_all_toml,
     _merge_already_done,
     _merge_conversion_type,
+    _merge_generated_output_paths,
+    _normalise_merge_path,
     _normalise_rules,
+    _output_snapshot,
     _resolve_output_dir,
     _run_conversion,
     _run_merge,
@@ -234,6 +239,38 @@ def _build_trigger(trigger_cfg: dict):
             return None
 
 
+def _operation_outcome(result) -> tuple[bool, str]:
+    """Interpret scheduler operation results, including explicit failure results."""
+    if result is None:
+        return True, ""
+    if isinstance(result, bool):
+        return result, "" if result else "operation reported failure"
+    if isinstance(result, dict):
+        if "success" in result:
+            success = bool(result["success"])
+            return success, "" if success else str(result.get("error") or "operation reported failure")
+        return True, ""
+
+    success = getattr(result, "success", None)
+    if success is not None:
+        success = bool(success)
+        return success, "" if success else str(getattr(result, "error", "") or "operation reported failure")
+    return True, ""
+
+
+def _operation_output_path(result) -> str | None:
+    if isinstance(result, str):
+        return result
+    output_path = getattr(result, "output_path", None)
+    if isinstance(output_path, str):
+        return output_path
+    if isinstance(result, dict):
+        path = result.get("output_path") or result.get("path")
+        if isinstance(path, str):
+            return path
+    return None
+
+
 def _run_task(cfg: dict) -> None:
     """
     Execute all conversions/merges for a scheduled task.
@@ -253,6 +290,8 @@ def _run_task(cfg: dict) -> None:
     iterator = Path(path).rglob("*") if recursive else Path(path).iterdir()
 
     merge_groups: dict[tuple, list[str]] = defaultdict(list)
+    generated_cache: dict[str, set[str]] = {}
+    task_failed = False
 
     for f in iterator:
         if f.is_dir() or _is_temp_file(f):
@@ -262,21 +301,38 @@ def _run_task(cfg: dict) -> None:
             continue
 
         output_dir = _resolve_output_dir(cfg["output_dir"], str(f), path)
+        generated = generated_cache.get(output_dir)
+        if generated is None:
+            generated = _all_generated_merge_output_paths(output_dir)
+            generated_cache[output_dir] = generated
+        if _normalise_merge_path(f) in generated:
+            continue
 
         for rule in rules[ext]:
             if rule["kind"] == "convert":
                 fmt = rule["fmt"]
                 expected = Path(output_dir) / f"{f.stem}.{fmt}"
-                if _existing_output_is_valid(expected):
+                if _existing_output_is_current(expected, f):
                     continue
                 conversion_type = _build_conversion_type(ext, fmt)
                 if conversion_type is None:
                     logger.warning("[Scheduler] No conversion for %s → %s", ext, fmt)
+                    task_failed = True
                     continue
+                before = _output_snapshot(expected)
                 try:
                     logger.info("[Scheduler] %s → %s (%s)", f.name, fmt, cfg["name"])
-                    _run_conversion(conversion_type, str(f), output_dir, ocr=ocr)
+                    result = _run_conversion(conversion_type, str(f), output_dir, ocr=ocr)
+                    succeeded, detail = _operation_outcome(result)
+                    if not succeeded:
+                        raise RuntimeError(detail)
+                    fresh, reason = _conversion_output_is_fresh(expected, before, f)
+                    if not fresh:
+                        raise RuntimeError(
+                            f"conversion produced no fresh valid output: {reason}"
+                        )
                 except Exception as e:
+                    task_failed = True
                     logger.error("[Scheduler] %s → %s failed: %s", f.name, fmt, e)
 
             else:
@@ -284,6 +340,8 @@ def _run_task(cfg: dict) -> None:
                 merge_groups[key].append(str(f))
 
     for (output_dir, action, sort), files in merge_groups.items():
+        exclude_paths = _merge_generated_output_paths(output_dir, action)
+        files = [f for f in files if _normalise_merge_path(f) not in exclude_paths]
         if not files:
             continue
         if _merge_already_done(output_dir, action, files):
@@ -296,6 +354,7 @@ def _run_task(cfg: dict) -> None:
                 action,
                 sort,
             )
+            task_failed = True
             continue
         try:
             logger.info(
@@ -306,19 +365,34 @@ def _run_task(cfg: dict) -> None:
                 output_dir,
                 cfg["name"],
             )
-            _run_merge(conversion_type, files, output_dir, ocr=ocr)
-            _save_merge_state(output_dir, action, files)
+            result = _run_merge(conversion_type, files, output_dir, ocr=ocr)
+            succeeded, detail = _operation_outcome(result)
+            if not succeeded:
+                raise RuntimeError(detail)
+            _save_merge_state(
+                output_dir,
+                action,
+                files,
+                output_path=_operation_output_path(result),
+            )
         except Exception as e:
+            task_failed = True
             logger.error("[Scheduler] Merge %s failed: %s", action, e)
 
     if cfg.get("trigger", {}).get("type", "").lower() == "date":
+        if task_failed:
+            logger.warning(
+                "[Scheduler] One-time task '%s' failed; keeping it enabled for retry.",
+                cfg["name"],
+            )
+            return
         toml_file = cfg.get("toml_file")
         if toml_file:
             _disable_date_task_in_toml(Path(toml_file), cfg["name"])
         else:
             logger.warning(
                 "[Scheduler] Task '%s' is a date trigger but its TOML source "
-                "could not be located — 'enabled' not updated.",
+                "could not be located - 'enabled' not updated.",
                 cfg["name"],
             )
 

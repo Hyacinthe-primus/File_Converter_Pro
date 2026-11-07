@@ -74,7 +74,7 @@ IMAGE_EXTENSIONS = {
     "raf",
 }
 PDF_EXTENSIONS = {"pdf"}
-DOCX_EXTENSIONS = {"docx", "doc"}
+DOCX_EXTENSIONS = {"docx"}
 _TEMP_PREFIXES = ("~$", "~")
 _TEMP_SUFFIXES = (".tmp", ".~tmp")
 
@@ -255,13 +255,14 @@ def _build_conversion_type(src_ext: str, dst_fmt: str) -> str | None:
     return None
 
 
-def _load_pdf_to_word_mode() -> str:
-    try:
-        from config import ConfigManager
+def _load_pdf_to_word_mode(config: dict | None = None) -> str:
+    if config is None:
+        try:
+            from config import ConfigManager
 
-        config = ConfigManager().load_config()
-    except Exception:
-        return _PDF_TO_WORD_MODE_DEFAULT
+            config = ConfigManager().load_config()
+        except Exception:
+            return _PDF_TO_WORD_MODE_DEFAULT
     if not isinstance(config, dict):
         return _PDF_TO_WORD_MODE_DEFAULT
     mode = config.get("pdf_to_word_mode")
@@ -270,7 +271,31 @@ def _load_pdf_to_word_mode() -> str:
     return _PDF_TO_WORD_MODE_DEFAULT
 
 
+def prepare_operation_backups(sources, *, config=None):
+    from converter.helpers import prepare_operation_backups as _prepare
+
+    return _prepare(sources, config=config)
+
+
+def _load_runtime_config() -> dict:
+    try:
+        from config import ConfigManager
+
+        manager = ConfigManager()
+        loader = getattr(manager, "load_config_strict", None)
+        config = loader() if loader is not None else manager.load_config()
+    except Exception as exc:
+        logger.error("[Watcher] Could not load runtime configuration: %s", exc)
+        raise RuntimeError(f"Runtime configuration unavailable: {exc}") from exc
+    if not isinstance(config, dict):
+        logger.error("[Watcher] Runtime configuration is not a mapping")
+        raise RuntimeError("Runtime configuration is not a mapping")
+    return config
+
+
 def _run_conversion(conversion_type: str, src: str, output_dir: str, ocr: bool = False) -> None:
+    runtime_config = _load_runtime_config()
+    prepare_operation_backups([src], config=runtime_config)
     os.makedirs(output_dir, exist_ok=True)
     if conversion_type == "image_to_pdf":
         if ocr:
@@ -293,20 +318,15 @@ def _run_conversion(conversion_type: str, src: str, output_dir: str, ocr: bool =
     elif conversion_type == "pdf_to_docx":
         from context_menu.conversion_helpers import _convert_pdf_to_docx
 
-        _convert_pdf_to_docx(src, output_dir, mode=_load_pdf_to_word_mode())
+        _convert_pdf_to_docx(src, output_dir, mode=_load_pdf_to_word_mode(runtime_config))
     else:
         from converter.converters import AdvancedConverterEngine
 
         engine = AdvancedConverterEngine()
-        try:
-            from config import ConfigManager
-
-            _cfg = ConfigManager().load_config()
-            engine.backup_enabled = _cfg.get("backup_before_conversion", False)
-            engine.allow_local_html_resources = _cfg.get("allow_local_resources_in_html_to_pdf", False)
-        except Exception:
-            pass
-        result = engine.convert(conversion_type, src, output_dir)
+        engine.allow_local_html_resources = runtime_config.get(
+            "allow_local_resources_in_html_to_pdf", False
+        )
+        result = engine.convert(conversion_type, src, output_dir, skip_backup=True)
         if not result.success:
             raise RuntimeError(result.error)
 
@@ -339,25 +359,44 @@ def _merge_conversion_type(action: str, sort: str) -> str | None:
     return None
 
 
-def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str, ocr: bool = False) -> None:
+def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str, ocr: bool = False) -> str | None:
+    """Run an automation merge.
+
+    Automation has no user-maintained source sequence, so the ``none`` sort
+    uses the same stable case-insensitive name/path order as alphabetical
+    merging. Image merges use that stable order as well because they have no
+    per-image sort option. Explicit configured sorts are delegated to the
+    merge helpers.
+    """
+    from context_menu.conversion_helpers import (
+        _merge_output_path,
+        _release_reserved_path,
+        _sort_files,
+    )
+
+    runtime_config = _load_runtime_config()
+    prepare_operation_backups(file_paths, config=runtime_config)
     os.makedirs(output_dir, exist_ok=True)
 
     if conversion_type == "images_to_pdf_merged":
+        file_paths = _sort_files(file_paths, "alphabetical_asc")
         if ocr:
-            import time as _time
-
             from tasks.ocr_helpers import configure_scanlayer, merge_images_with_ocr
 
             orientation = configure_scanlayer()
-            out = os.path.join(output_dir, f"merged_images_{_time.strftime('%Y%m%d_%H%M%S')}.pdf")
+            out = _merge_output_path(output_dir, None, "merged_images_", "pdf")
             logger.info("[OCR] Merging %d image(s) → searchable PDF", len(file_paths))
-            if not merge_images_with_ocr(file_paths, out, orientation):
-                raise RuntimeError("OCR merge produced no output")
-        else:
-            from context_menu.conversion_helpers import _merge_images_to_pdf
+            try:
+                if not merge_images_with_ocr(file_paths, out, orientation):
+                    raise RuntimeError("OCR merge produced no output")
+            except Exception:
+                _release_reserved_path(out)
+                raise
+            return out
 
-            _merge_images_to_pdf(file_paths, output_dir)
-        return
+        from context_menu.conversion_helpers import _merge_images_to_pdf
+
+        return _merge_images_to_pdf(file_paths, output_dir)
 
     from context_menu.conversion_helpers import _merge_docx, _merge_pdfs
     from context_menu.formats import MERGE_DISPATCH
@@ -365,48 +404,94 @@ def _run_merge(conversion_type: str, file_paths: list[str], output_dir: str, ocr
     if conversion_type in MERGE_DISPATCH:
         kind, order = MERGE_DISPATCH[conversion_type]
         if order == "none":
-            file_paths = sorted(
-                file_paths,
-                key=lambda path: (Path(path).name.lower(), str(path).lower()),
-            )
+            file_paths = _sort_files(file_paths, "alphabetical_asc")
         if kind == "pdf":
-            _merge_pdfs(file_paths, output_dir, order)
-        else:
-            _merge_docx(file_paths, output_dir, order)
-        return
+            return _merge_pdfs(file_paths, output_dir, order)
+        return _merge_docx(file_paths, output_dir, order)
 
     raise RuntimeError(f"Unknown type: {conversion_type}")
 
 
-def _existing_output_is_valid(path: str | Path) -> bool:
-    """Return True when an existing destination is a usable output artifact."""
+def _validate_output_artifact(path: str | Path) -> tuple[bool, str]:
+    """Validate an output using the same structural checks as conversions."""
     candidate = Path(path)
     try:
         if not candidate.is_file() or candidate.stat().st_size <= 0:
-            return False
+            return False, "missing or empty output"
+    except OSError as exc:
+        return False, f"unreadable output: {exc}"
+
+    from converter.artifact_validators import validator_for_extension
+
+    try:
+        return validator_for_extension(candidate.suffix.lower())(str(candidate))
+    except Exception as exc:
+        return False, f"invalid output: {exc}"
+
+
+def _existing_output_is_valid(path: str | Path) -> bool:
+    """Return True when an existing destination is a usable output artifact."""
+    return _validate_output_artifact(path)[0]
+
+
+def _output_snapshot(path: str | Path) -> tuple[int, int] | None:
+    """Return the size and mtime of an existing file, including empty files."""
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return None
+    if not os.path.isfile(path):
+        return None
+    return stat.st_size, stat.st_mtime_ns
+
+
+def _existing_output_is_current(output: str | Path, source: str | Path) -> bool:
+    """Return True for a valid output that is at least as new as its source."""
+    if not _existing_output_is_valid(output):
+        return False
+    try:
+        return os.stat(output).st_mtime_ns >= os.stat(source).st_mtime_ns
     except OSError:
         return False
 
-    suffix = candidate.suffix.lower()
-    if suffix == ".pdf":
-        from utils.pdf_artifacts import validate_pdf_artifact
 
-        return validate_pdf_artifact(str(candidate))[0]
-    if suffix == ".docx":
-        from utils.pdf_artifacts import validate_docx_artifact
+def _conversion_output_is_fresh(
+    output: str | Path,
+    before: tuple[int, int] | None,
+    source: str | Path,
+) -> tuple[bool, str]:
+    """Return whether *output* was produced by the current attempt for *source*."""
+    valid, reason = _validate_output_artifact(output)
+    if not valid:
+        return False, reason
 
-        return validate_docx_artifact(str(candidate))[0]
-    return True
+    after = _output_snapshot(output)
+    if after is None:
+        return False, "missing output"
+    if before is not None and after == before:
+        return False, "output was not updated by the current conversion"
+
+    try:
+        if os.stat(output).st_mtime_ns < os.stat(source).st_mtime_ns:
+            return False, "output is older than the source"
+    except OSError as exc:
+        return False, f"unreadable output or source: {exc}"
+    return True, ""
 
 
 def _collect_merge_files(
     folder: str,
     action: str,
     recursive: bool,
+    exclude_paths: set[str] | None = None,
 ) -> list[str]:
     """
     Collect all files inside *folder* that belong to the merge family
     indicated by *action*.  Returns absolute path strings.
+
+    *exclude_paths* are exact generated-output paths previously recorded in
+    the merge state.  Name patterns are deliberately not used, so a user file
+    that merely resembles a generated output remains a valid input.
     """
     if action == MERGE_IMAGE_ACTION:
         valid_exts = IMAGE_EXTENSIONS
@@ -417,6 +502,7 @@ def _collect_merge_files(
     else:
         return []
 
+    excluded = {_normalise_merge_path(path) for path in (exclude_paths or ())}
     iterator = Path(folder).rglob("*") if recursive else Path(folder).iterdir()
     return [
         str(f)
@@ -424,6 +510,7 @@ def _collect_merge_files(
         if f.is_file()
         and not _is_temp_file(f)
         and f.suffix.lstrip(".").lower() in valid_exts
+        and _normalise_merge_path(f) not in excluded
     ]
 
 
@@ -438,29 +525,141 @@ def _merge_fingerprint(files: list[str]) -> str:
     return hashlib.sha1(raw.encode()).hexdigest()
 
 
-def _merge_already_done(output_dir: str, action: str, files: list[str]) -> bool:
+def _normalise_merge_path(path: str | Path) -> str:
+    return os.path.normcase(os.path.abspath(os.fspath(path)))
+
+
+def _read_merge_state(output_dir: str, action: str) -> dict:
     state_file = _merge_state_path(output_dir, action)
     if not state_file.exists():
-        return False
+        return {}
     try:
         saved = json.loads(state_file.read_text())
-        return saved.get("fingerprint") == _merge_fingerprint(files)
     except Exception:
+        return {}
+    return saved if isinstance(saved, dict) else {}
+
+
+def _file_identity(path: str | Path) -> dict | None:
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return None
+    if not os.path.isfile(path) or stat.st_size <= 0:
+        return None
+    return {
+        "path": os.path.abspath(os.fspath(path)),
+        "size": stat.st_size,
+        "mtime_ns": stat.st_mtime_ns,
+    }
+
+
+def _entry_path(entry: object) -> str | None:
+    if isinstance(entry, dict):
+        path = entry.get("path")
+    elif isinstance(entry, str):
+        path = entry
+    else:
+        return None
+    if isinstance(path, (str, os.PathLike)):
+        return os.fspath(path)
+    return None
+
+
+def _current_output_path(entry: object) -> str | None:
+    path = _entry_path(entry)
+    if path is None:
+        return None
+    identity = _file_identity(path)
+    if identity is None:
+        return None
+    if isinstance(entry, dict):
+        saved_size = entry.get("size")
+        saved_mtime = entry.get("mtime_ns")
+        if saved_size is not None and saved_size != identity["size"]:
+            return None
+        if saved_mtime is not None and saved_mtime != identity["mtime_ns"]:
+            return None
+    return identity["path"]
+
+
+def _merge_generated_output_paths(output_dir: str, action: str) -> set[str]:
+    saved = _read_merge_state(output_dir, action)
+    entries = saved.get("outputs", [])
+    if not isinstance(entries, list):
+        entries = []
+    current = saved.get("output")
+    if current is not None:
+        entries = [*entries, current]
+
+    result = set()
+    for entry in entries:
+        path = _current_output_path(entry)
+        if path is not None:
+            result.add(_normalise_merge_path(path))
+    return result
+
+
+def _all_generated_merge_output_paths(output_dir: str) -> set[str]:
+    result = set()
+    for action in MERGE_ACTIONS:
+        result.update(_merge_generated_output_paths(output_dir, action))
+    return result
+
+
+def _merge_already_done(output_dir: str, action: str, files: list[str]) -> bool:
+    saved = _read_merge_state(output_dir, action)
+    if not saved:
         return False
+    if saved.get("fingerprint") != _merge_fingerprint(files):
+        return False
+    output_path = _current_output_path(saved.get("output"))
+    if output_path is None:
+        return False
+    return _existing_output_is_valid(output_path)
 
 
-def _save_merge_state(output_dir: str, action: str, files: list[str]) -> None:
+def _save_merge_state(output_dir: str, action: str, files: list[str], output_path: str | None = None) -> None:
     state_file = _merge_state_path(output_dir, action)
+    saved = _read_merge_state(output_dir, action)
+
+    outputs: dict[str, dict] = {}
+    entries = saved.get("outputs", [])
+    if isinstance(entries, list):
+        for entry in entries:
+            current = _current_output_path(entry)
+            if current is None:
+                continue
+            identity = _file_identity(current)
+            if identity is not None:
+                outputs[_normalise_merge_path(current)] = identity
+
+    current_output = None
+    if output_path is not None:
+        valid, reason = _validate_output_artifact(output_path)
+        if not valid:
+            logger.warning(
+                "[Watcher] Not registering invalid merge output %s: %s",
+                output_path,
+                reason,
+            )
+        else:
+            identity = _file_identity(output_path)
+            if identity is not None:
+                current_output = identity
+                outputs[_normalise_merge_path(identity["path"])] = identity
+
+    payload = {
+        "fingerprint": _merge_fingerprint(files),
+        "files": sorted(files),
+        "outputs": list(outputs.values()),
+    }
+    if current_output is not None:
+        payload["output"] = current_output
+
     try:
         os.makedirs(output_dir, exist_ok=True)
-        state_file.write_text(
-            json.dumps(
-                {
-                    "fingerprint": _merge_fingerprint(files),
-                    "files": sorted(files),
-                }
-            )
-        )
+        state_file.write_text(json.dumps(payload))
     except Exception as e:
         logger.warning("[Watcher] Could not save merge state: %s", e)
 
@@ -510,6 +709,11 @@ class _FolderEventHandler(FileSystemEventHandler):
             return
 
         output_dir = _resolve_output_dir(self.config["output_dir"], src, self.config["path"])
+        if _normalise_merge_path(src) in _all_generated_merge_output_paths(output_dir):
+            logger.debug("[Watcher] Ignoring generated merge output: %s", src)
+            with self._lock:
+                self._seen.discard(src)
+            return
 
         for rule in rules[ext]:
             if rule["kind"] == "convert":
@@ -525,9 +729,14 @@ class _FolderEventHandler(FileSystemEventHandler):
         if conversion_type is None:
             logger.warning("[Watcher] No conversion found for %s → %s", ext, fmt)
             return
+        expected = Path(output_dir) / f"{Path(src).stem}.{fmt}"
+        before = _output_snapshot(expected)
         try:
             logger.info("[Watcher] %s → %s", Path(src).name, fmt)
             _run_conversion(conversion_type, src, output_dir, ocr=self._ocr)
+            fresh, reason = _conversion_output_is_fresh(expected, before, src)
+            if not fresh:
+                raise RuntimeError(f"conversion produced no fresh valid output: {reason}")
         except Exception as e:
             logger.error("[Watcher] %s → %s failed: %s", Path(src).name, fmt, e)
 
@@ -568,7 +777,13 @@ class _FolderEventHandler(FileSystemEventHandler):
         rel = os.path.relpath(output_dir, out_base)
         src_folder = watch_root if rel == "." else os.path.join(watch_root, rel)
 
-        files = _collect_merge_files(src_folder, action, recursive=recursive)
+        exclude_paths = _all_generated_merge_output_paths(output_dir)
+        files = _collect_merge_files(
+            src_folder,
+            action,
+            recursive=recursive,
+            exclude_paths=exclude_paths,
+        )
         if not files:
             logger.warning("[Watcher] Merge fired but no files found in %s", src_folder)
             return
@@ -590,8 +805,8 @@ class _FolderEventHandler(FileSystemEventHandler):
                 sort,
                 output_dir,
             )
-            _run_merge(conversion_type, files, output_dir, ocr=self._ocr)
-            _save_merge_state(output_dir, action, files)
+            output_path = _run_merge(conversion_type, files, output_dir, ocr=self._ocr)
+            _save_merge_state(output_dir, action, files, output_path=output_path)
         except Exception as e:
             logger.error("[Watcher] Merge %s failed: %s", action, e)
 
@@ -665,6 +880,7 @@ class WatcherManager:
         iterator = Path(path).rglob("*") if recursive else Path(path).iterdir()
 
         merge_groups: dict[tuple, list[str]] = defaultdict(list)
+        generated_cache: dict[str, set[str]] = {}
 
         for f in iterator:
             if f.is_dir() or _is_temp_file(f):
@@ -674,19 +890,31 @@ class WatcherManager:
                 continue
 
             output_dir = _resolve_output_dir(cfg["output_dir"], str(f), path)
+            generated = generated_cache.get(output_dir)
+            if generated is None:
+                generated = _all_generated_merge_output_paths(output_dir)
+                generated_cache[output_dir] = generated
+            if _normalise_merge_path(f) in generated:
+                continue
 
             for rule in rules[ext]:
                 if rule["kind"] == "convert":
                     fmt = rule["fmt"]
                     expected = Path(output_dir) / f"{f.stem}.{fmt}"
-                    if _existing_output_is_valid(expected):
+                    if _existing_output_is_current(expected, f):
                         continue
                     conversion_type = _build_conversion_type(ext, fmt)
                     if conversion_type is None:
                         continue
+                    before = _output_snapshot(expected)
                     try:
                         logger.info("[Watcher] Existing: %s → %s", f.name, fmt)
                         _run_conversion(conversion_type, str(f), output_dir, ocr=ocr)
+                        fresh, reason = _conversion_output_is_fresh(expected, before, f)
+                        if not fresh:
+                            raise RuntimeError(
+                                f"conversion produced no fresh valid output: {reason}"
+                            )
                     except Exception as e:
                         logger.error("[Watcher] Existing: %s → %s failed: %s", f.name, fmt, e)
 
@@ -695,6 +923,8 @@ class WatcherManager:
                     merge_groups[key].append(str(f))
 
         for (output_dir, action, sort), files in merge_groups.items():
+            exclude_paths = _merge_generated_output_paths(output_dir, action)
+            files = [f for f in files if _normalise_merge_path(f) not in exclude_paths]
             if not files:
                 continue
             if _merge_already_done(output_dir, action, files):
@@ -711,7 +941,7 @@ class WatcherManager:
                     sort,
                     output_dir,
                 )
-                _run_merge(conversion_type, files, output_dir, ocr=ocr)
-                _save_merge_state(output_dir, action, files)
+                output_path = _run_merge(conversion_type, files, output_dir, ocr=ocr)
+                _save_merge_state(output_dir, action, files, output_path=output_path)
             except Exception as e:
                 logger.error("[Watcher] Existing merge %s failed: %s", action, e)

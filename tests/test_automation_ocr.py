@@ -249,7 +249,7 @@ class TestRunConversionRouting:
             "_convert_pdf_to_docx",
             lambda *args, **kwargs: seen.append((args, kwargs)),
         )
-        monkeypatch.setattr(watcher, "_load_pdf_to_word_mode", lambda: "with_images")
+        monkeypatch.setattr(watcher, "_load_pdf_to_word_mode", lambda _config=None: "with_images")
         src = tmp_path / "input.pdf"
         src.write_bytes(b"%PDF")
 
