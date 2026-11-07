@@ -11,6 +11,7 @@ import sys
 import tempfile
 import threading
 import time
+from pathlib import Path
 
 from PySide6.QtCore import Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QIcon
@@ -39,10 +40,11 @@ from context_menu.conversion_helpers import (
     _normalise_pdf_to_word_mode,
     _raise_if_cancelled,
     _solid_fitz_fallback,
-    _sort_files,  # noqa: F401
+    _sort_files,
     _temporary_docx_path,  # noqa: F401
 )
 from context_menu.formats import CONVERSION_MAP, LABELS, MERGE_DISPATCH
+from converter.helpers import prepare_operation_backups
 from pdf_text import convert_pdf_text_to_docx
 from qss_helpers import _load_qss
 from utils import SRC_DIR
@@ -54,14 +56,20 @@ _COLLECT_POLL_SEC = 0.05
 _COLLECT_EPOCH_SEC = 15.0
 
 
-def _load_quick_config() -> dict:
+def _load_quick_config() -> dict | None:
     try:
         from config import ConfigManager
 
-        config = ConfigManager().load_config()
-    except Exception:
-        return {}
-    return config if isinstance(config, dict) else {}
+        manager = ConfigManager()
+        loader = getattr(manager, "load_config_strict", None)
+        config = loader() if loader is not None else manager.load_config()
+    except Exception as exc:
+        print(f"[QuickConvert] Could not load configuration: {exc}")
+        return None
+    if not isinstance(config, dict):
+        print("[QuickConvert] Configuration is not a mapping")
+        return None
+    return config
 
 
 def _load_pdf_to_word_mode(config: dict | None = None) -> str:
@@ -71,20 +79,6 @@ def _load_pdf_to_word_mode(config: dict | None = None) -> str:
     if not isinstance(config, dict):
         return _PDF_TO_WORD_MODE_DEFAULT
     return _normalise_pdf_to_word_mode(config.get("pdf_to_word_mode"))
-
-
-def _create_source_backups(files: list[str]) -> None:
-    from converter.helpers import create_backup
-
-    seen = set()
-    for src in files:
-        key = os.path.normcase(os.path.realpath(src))
-        if key in seen:
-            continue
-        seen.add(key)
-        if create_backup(src, overwrite=False) is None:
-            name = os.path.basename(src) or src
-            raise RuntimeError(f"Backup failed for {name}; conversion not started.")
 
 
 def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
@@ -135,6 +129,23 @@ def _collect_staged_files(conversion_type: str, single_file: str) -> list[str]:
 AUTO_CLOSE_DELAY_MS = 1800
 CANCEL_GRACE_MS = 5000
 
+_QUICK_OUTPUT_EXTENSIONS = {
+    "image_to_pdf": ".pdf",
+    "docx_to_pdf": ".pdf",
+    "pdf_to_docx": ".docx",
+}
+
+
+def _publish_staged_output(staged_path: str | None, staging_dir: str, dst_dir: str) -> None:
+    if not staged_path:
+        return
+    staged_abs = os.path.abspath(staged_path)
+    if os.path.dirname(staged_abs) != os.path.abspath(staging_dir):
+        return
+    if not os.path.isfile(staged_abs):
+        return
+    os.replace(staged_abs, os.path.join(dst_dir, os.path.basename(staged_abs)))
+
 
 def _convert_pdf_to_docx(
     src: str,
@@ -180,25 +191,30 @@ class ConversionThread(QThread):
                 sys.path.insert(0, base)
 
             runtime_config = _load_quick_config()
+            if runtime_config is None:
+                raise RuntimeError("Quick Convert configuration unavailable")
+            prepare_operation_backups(self.files, config=runtime_config)
             dst_dir = os.path.dirname(self.files[0])
             pdf_to_word_mode = _PDF_TO_WORD_MODE_DEFAULT
             if self.conversion_type == "pdf_to_docx":
                 pdf_to_word_mode = _load_pdf_to_word_mode(runtime_config)
-            if bool(runtime_config.get("backup_before_conversion", False)):
-                _create_source_backups(self.files)
 
             if self.conversion_type == "images_to_pdf_merged":
-                _merge_images_to_pdf(self.files, dst_dir, self._cancel_event)
+                merge_files = _sort_files(self.files, "alphabetical_asc")
+                _merge_images_to_pdf(merge_files, dst_dir, self._cancel_event)
                 self._check_cancelled()
                 self.done.emit(True, "Images merged into PDF", dst_dir)
                 return
 
             if self.conversion_type in MERGE_DISPATCH:
                 kind, order = MERGE_DISPATCH[self.conversion_type]
+                merge_files = self.files
+                if order == "none":
+                    merge_files = _sort_files(self.files, "alphabetical_asc")
                 if kind == "pdf":
-                    _merge_pdfs(self.files, dst_dir, order, self._cancel_event)
+                    _merge_pdfs(merge_files, dst_dir, order, self._cancel_event)
                 else:
-                    _merge_docx(self.files, dst_dir, order, self._cancel_event)
+                    _merge_docx(merge_files, dst_dir, order, self._cancel_event)
                 self._check_cancelled()
                 self.done.emit(True, "Files merged successfully", dst_dir)
                 return
@@ -209,29 +225,53 @@ class ConversionThread(QThread):
                 self._check_cancelled()
                 f_dst_dir = os.path.dirname(f)
                 try:
-                    if self.conversion_type == "image_to_pdf":
-                        _convert_image_to_pdf(f, f_dst_dir)
-                    elif self.conversion_type == "docx_to_pdf":
-                        _convert_docx_to_pdf(f, f_dst_dir, self._cancel_event)
-                    elif self.conversion_type == "pdf_to_docx":
-                        _convert_pdf_to_docx(
-                            f,
-                            f_dst_dir,
-                            self._cancel_event,
-                            mode=pdf_to_word_mode,
-                        )
-                    else:
-                        from converter.converters import AdvancedConverterEngine
+                    with tempfile.TemporaryDirectory(
+                        prefix="~fcp_quick_", dir=f_dst_dir
+                    ) as staging_dir:
+                        staged_output = None
+                        if self.conversion_type == "image_to_pdf":
+                            _convert_image_to_pdf(f, staging_dir)
+                        elif self.conversion_type == "docx_to_pdf":
+                            _convert_docx_to_pdf(f, staging_dir, self._cancel_event)
+                        elif self.conversion_type == "pdf_to_docx":
+                            _convert_pdf_to_docx(
+                                f,
+                                staging_dir,
+                                self._cancel_event,
+                                mode=pdf_to_word_mode,
+                            )
+                        else:
+                            from converter.converters import AdvancedConverterEngine
 
-                        engine = AdvancedConverterEngine()
-                        engine.backup_enabled = False
-                        engine.allow_local_html_resources = runtime_config.get(
-                            "allow_local_resources_in_html_to_pdf", False
-                        )
-                        result = engine.convert(self.conversion_type, f, f_dst_dir)
-                        if not result.success:
-                            raise Exception(result.error)
-                    self._check_cancelled()
+                            engine = AdvancedConverterEngine()
+                            engine.allow_local_html_resources = runtime_config.get(
+                                "allow_local_resources_in_html_to_pdf", False
+                            )
+                            result = engine.convert(
+                                self.conversion_type,
+                                f,
+                                staging_dir,
+                                skip_backup=True,
+                            )
+                            if not result.success:
+                                raise Exception(result.error)
+                            staged_output = getattr(result, "target", None)
+
+                        extension = _QUICK_OUTPUT_EXTENSIONS.get(self.conversion_type)
+                        if extension:
+                            staged_output = os.path.join(
+                                staging_dir, f"{Path(f).stem}{extension}"
+                            )
+                        if not staged_output:
+                            staged_files = [
+                                entry.path
+                                for entry in os.scandir(staging_dir)
+                                if entry.is_file()
+                            ]
+                            if len(staged_files) == 1:
+                                staged_output = staged_files[0]
+                        self._check_cancelled()
+                        _publish_staged_output(staged_output, staging_dir, f_dst_dir)
                     out_dir = f_dst_dir
                 except _ConversionCancelled:
                     raise

@@ -107,13 +107,18 @@ def test_quick_convert_thread_uses_window_compatibility_helpers(monkeypatch, tmp
     src = tmp_path / "image.png"
     src.write_bytes(b"image")
     calls = []
-    monkeypatch.setattr(window, "_load_quick_config", lambda: {})
+    monkeypatch.setattr(window, "_load_quick_config", lambda: {"backup_before_conversion": False})
     monkeypatch.setattr(window, "_convert_image_to_pdf", lambda *args: calls.append(args))
     thread = window.ConversionThread([str(src)], "image_to_pdf")
 
     thread.run()
 
-    assert calls == [(str(src), str(tmp_path))]
+    assert len(calls) == 1
+    assert calls[0][0] == str(src)
+    staging_dir = Path(calls[0][1])
+    assert staging_dir.parent == tmp_path
+    assert staging_dir.name.startswith("~fcp_quick_")
+    assert not staging_dir.exists()
 
 
 def test_watcher_resolves_conversion_helpers_from_non_ui_module(monkeypatch, tmp_path):
