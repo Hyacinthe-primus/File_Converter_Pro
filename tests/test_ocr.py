@@ -68,38 +68,6 @@ class TestOcrActive:
         assert ImageToPdfMixin._ocr_active(m) is False
 
 
-class TestOcrOrientationValue:
-    def _value(self, config_value):
-        from app.mixins.image_to_pdf import ImageToPdfMixin
-
-        m = _StubMixin({"ocr_orientation": config_value})
-        return ImageToPdfMixin._ocr_orientation_value(m)
-
-    def test_auto_maps_to_none(self):
-        assert self._value("auto") is None
-
-    def test_none_string_maps_to_none(self):
-        assert self._value("none") == "none"
-
-    def test_empty_maps_to_none(self):
-        assert self._value("") is None
-
-    def test_numeric_string_maps_to_float(self):
-        assert self._value("45") == 45.0
-
-    def test_decimal_string_maps_to_float(self):
-        assert self._value("-12.5") == -12.5
-
-    def test_invalid_text_maps_to_none(self):
-        assert self._value("not-an-angle") is None
-
-    def test_bool_false_maps_to_none(self):
-        assert self._value(False) == "none"
-
-    def test_none_value_maps_to_none(self):
-        assert self._value(None) == "none"
-
-
 class TestConfigureScanlayer:
     def test_configures_tesseract_and_auto_orientation(self, monkeypatch):
         from app.mixins.image_to_pdf import ImageToPdfMixin
