@@ -137,11 +137,6 @@ class AdvancedConverterEngine(
             result = engine(src, dst, conversion_type)
         return result, time.perf_counter() - t0
 
-    @staticmethod
-    def _engine_produced_output(dst):
-        """An engine only counts as successful if it wrote a real file."""
-        return os.path.isfile(dst) and os.path.getsize(dst) > 0
-
     def convert_batch(self, conversion_type, sources, dst_dir, progress_cb=None):
         source_list = list(sources)
         backup_result = None
