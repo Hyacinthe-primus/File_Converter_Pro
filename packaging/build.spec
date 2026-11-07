@@ -200,7 +200,7 @@ SHARED_HIDDEN = [
     'dialogs.batch_convert_dialog', 'dialogs.batch_rename_dialog',
     'dialogs.settings_dialog', 'dialogs.conversion_options_dialog',
     'dialogs.pdf_protection_dialog', 'dialogs.merge_order_dialog',
-    'dashboard', 'dashboard_theme', 'history',
+    'dialogs.dashboard', 'dialogs.dashboard_theme', 'dialogs.history',
     'templates', 'templates.templates', 'templates.template_manager', 'templates.frequent_configs',
     'templates.semantic_keys',
     'templates.create_template_dialog', 'templates.template_editor_dialog',
@@ -222,7 +222,7 @@ SHARED_HIDDEN = [
     'converter.mixins.pptx_native', 'converter.mixins.html_renderers',
     'converter.mixins.pdf_renderers', 'converter.mixins.epub_renderers',
     'converter.helpers', 'converter.registry',
-    'advanced_conversions', 'donate',
+    'dialogs.advanced_conversions', 'dialogs.donate',
     'achievements', 'achievements.achievements_system',
     'achievements.achievements_ui', 'achievements.achievements_popup',
     'achievements.rank_popup', 'achievements.achievements_manager',
@@ -237,7 +237,7 @@ SHARED_HIDDEN = [
     'tomli',
     'daemon',
     'qss_helpers',
-    'pdf_text',
+    'utils.pdf_text',
 ]
 
 SHARED_EXCLUDES = [
