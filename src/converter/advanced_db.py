@@ -400,6 +400,7 @@ class AdvancedDatabaseManager:
             "image_to_bmp": "Image→BMP",
             "image_to_heic": "Image→HEIC",
             "image_to_webp": "Image→WEBP",
+            "image_to_tif": "Image→TIF",
             "image_to_tiff": "Image→TIFF",
             "image_to_psd": "Image→PSD",
             "image_to_svg": "Image→SVG",
