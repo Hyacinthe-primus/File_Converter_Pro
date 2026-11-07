@@ -107,7 +107,7 @@ class TestAdvancedConversionsCustomTheme:
     def test_resolve_theme_name_custom(self):
         from types import SimpleNamespace
 
-        from advanced_conversions import resolve_theme_name
+        from dialogs.advanced_conversions import resolve_theme_name
 
         parent = SimpleNamespace(current_theme="CustomTheme", dark_mode=True)
         assert resolve_theme_name(parent) == "CustomTheme"
@@ -115,7 +115,7 @@ class TestAdvancedConversionsCustomTheme:
     def test_resolve_theme_name_builtin_dark(self):
         from types import SimpleNamespace
 
-        from advanced_conversions import resolve_theme_name
+        from dialogs.advanced_conversions import resolve_theme_name
 
         parent = SimpleNamespace(current_theme="dark", dark_mode=True)
         assert resolve_theme_name(parent) == "dark"
@@ -123,13 +123,13 @@ class TestAdvancedConversionsCustomTheme:
     def test_resolve_theme_name_builtin_light(self):
         from types import SimpleNamespace
 
-        from advanced_conversions import resolve_theme_name
+        from dialogs.advanced_conversions import resolve_theme_name
 
         parent = SimpleNamespace(current_theme="light", dark_mode=False)
         assert resolve_theme_name(parent) == "light"
 
     def test_resolve_theme_name_no_parent(self):
-        from advanced_conversions import resolve_theme_name
+        from dialogs.advanced_conversions import resolve_theme_name
 
         assert resolve_theme_name(None) == "light"
 
@@ -144,7 +144,7 @@ class TestAdvancedConversionsCustomTheme:
         from PySide6.QtCore import Signal
         from PySide6.QtWidgets import QTabWidget, QWidget
 
-        from advanced_conversions import AdvancedConversionsDialog
+        from dialogs.advanced_conversions import AdvancedConversionsDialog
 
         class FakeParent(QWidget):
             theme_changed = Signal(str)
@@ -156,7 +156,7 @@ class TestAdvancedConversionsCustomTheme:
             received.append(theme_name)
 
         with (
-            patch("advanced_conversions._load_qss", return_value=""),
+            patch("dialogs.advanced_conversions._load_qss", return_value=""),
             patch.object(AdvancedConversionsDialog, "_setup_ui"),
             patch.object(AdvancedConversionsDialog, "_apply_theme_style"),
         ):
