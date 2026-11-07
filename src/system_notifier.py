@@ -246,7 +246,7 @@ class SystemNotifier:
         self.app_id = "FileConverterPro.SystemNotifier"
 
         self.icon_path = self._get_resource_path(os.path.join("Assets", "icon.png"))
-        self.sound_path = self._get_resource_path(os.path.join("SFX", "notif.mp3"))
+        self.sound_path = self._get_resource_path(os.path.join("Assets", "SFX", "notif.mp3"))
         self.toast_icon_path = self.icon_path if os.path.exists(self.icon_path) else ""
 
         self._qt_notifier = QtNotifier()
@@ -351,6 +351,7 @@ class SystemNotifier:
             "image_to_bmp": "Image → BMP",
             "image_to_heic": "Image → HEIC",
             "image_to_webp": "Image → WEBP",
+            "image_to_tif": "Image → TIF",
             "image_to_tiff": "Image → TIFF",
             "image_to_psd": "Image → PSD",
             "image_to_svg": "Image → SVG",

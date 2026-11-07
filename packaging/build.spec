@@ -9,8 +9,6 @@ shutil.rmtree(os.path.join('dist', 'FCP'), ignore_errors=True)
 def collect_data_files():
     datas = [
         ('../src/Assets', 'Assets'),
-        ('../src/SFX', 'SFX'),
-        ('../src/icons', 'icons'),
         ('../src/fonts', 'fonts'),
         ('../src/legal', 'legal'),
         ('../src/styles', 'styles'),

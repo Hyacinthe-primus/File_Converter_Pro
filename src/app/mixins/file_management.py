@@ -397,7 +397,7 @@ class FileManagementMixin:
 
     def get_file_icon(self, file_path):
         p = Path(file_path)
-        icons_dir = Path(self.get_resource_path("icons"))
+        icons_dir = Path(self.get_resource_path(os.path.join("Assets", "icons")))
 
         if p.is_dir():
             return self._load_icon(icons_dir / "folder.ico", "📁")

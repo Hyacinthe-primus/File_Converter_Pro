@@ -56,8 +56,8 @@ CHECKS_MODULES = [
 
 CHECKS_RESOURCES = [
     ("Assets/", "_internal/Assets", "dir"),
-    ("SFX/", "_internal/SFX", "dir"),
-    ("icons/", "_internal/icons", "dir"),
+    ("Assets/SFX/", "_internal/Assets/SFX", "dir"),
+    ("Assets/icons/", "_internal/Assets/icons", "dir"),
     ("fonts/", "_internal/fonts", "dir"),
     ("legal/", "_internal/legal", "dir"),
 ]

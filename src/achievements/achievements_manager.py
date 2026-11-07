@@ -65,7 +65,7 @@ def get_app_dir():
 
 def get_assets_dir():
     """
-    Returns the directory containing bundled assets (SFX, Assets...).
+    Returns the directory containing the bundled Assets tree.
     - PyInstaller : sys._MEIPASS  (where datas are extracted by PyInstaller)
     - Development : project root (_ROOT_DIR)
     """
@@ -1387,7 +1387,7 @@ class AchievementsManager(QDialog):
                         break
 
             get_app_dir()
-            sound_path = os.path.join(get_assets_dir(), "SFX", sound_file)
+            sound_path = os.path.join(get_assets_dir(), "Assets", "SFX", sound_file)
 
             if not os.path.exists(sound_path):
                 QMessageBox.warning(

@@ -1657,7 +1657,7 @@ class AchievementSystem(QObject):
 
     def get_sound_path(self, sound_name):
         try:
-            path = self.get_resource_path(os.path.join("SFX", sound_name))
+            path = self.get_resource_path(os.path.join("Assets", "SFX", sound_name))
             if os.path.exists(path):
                 return path
 

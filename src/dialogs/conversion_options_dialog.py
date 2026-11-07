@@ -148,7 +148,7 @@ class ConversionOptionsDialog(QDialog):
             }}
         """)
 
-        icon_path = self.parent().get_resource_path(os.path.join("icons", icon_file))
+        icon_path = self.parent().get_resource_path(os.path.join("Assets", "icons", icon_file))
         if os.path.exists(icon_path):
             btn.setIcon(QIcon(icon_path))
             btn.setIconSize(QSize(36, 36))
