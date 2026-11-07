@@ -4,7 +4,7 @@ The gamification layer (achievements/) must stay strictly isolated from the
 conversion engine:
 
   * converter/  and tasks/  never reference achievements.
-  * Conversion workers (advanced_conversions.py, conversion_worker.py) use
+  * Conversion workers (dialogs/advanced_conversions.py, conversion_worker.py) use
     constructor injection and guards, never a direct import.
   * The achievements package never imports converter/, app/ or tasks/.
   * Only the app layer (main.py, app/logic.py, app/ui.py) may import the
@@ -70,7 +70,7 @@ def test_tasks_has_no_achievement_references():
 
 
 def test_conversion_workers_do_not_import_achievements():
-    for rel in ("advanced_conversions.py", "conversion_worker.py"):
+    for rel in (os.path.join("dialogs", "advanced_conversions.py"), "conversion_worker.py"):
         assert _ACH_IMPORT.search(_read(SRC_DIR, rel)) is None, (
             "{} must not import the achievements package (use injection)".format(rel)
         )
