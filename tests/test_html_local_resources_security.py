@@ -52,8 +52,8 @@ class TestLocalResourceSetting:
         assert AdvancedConverterEngine(True).allow_local_html_resources is True
 
     def test_conversion_worker_applies_setting(self, qapp):
-        from advanced_conversions import _ConversionWorker
         from converter.converters import AdvancedConverterEngine
+        from dialogs.advanced_conversions import _ConversionWorker
 
         engine = AdvancedConverterEngine()
         worker = _ConversionWorker(
