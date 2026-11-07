@@ -58,7 +58,7 @@ CHECKS_RESOURCES = [
     ("Assets/", "_internal/Assets", "dir"),
     ("Assets/SFX/", "_internal/Assets/SFX", "dir"),
     ("Assets/icons/", "_internal/Assets/icons", "dir"),
-    ("fonts/", "_internal/fonts", "dir"),
+    ("Assets/fonts/", "_internal/Assets/fonts", "dir"),
     ("legal/", "_internal/legal", "dir"),
 ]
 
