@@ -16,7 +16,7 @@ from docx import Document
 from PIL import Image
 
 import context_menu.conversion_helpers as conversion_helpers
-from pdf_text import NoExtractableTextError, convert_pdf_text_to_docx
+from utils.pdf_text import NoExtractableTextError, convert_pdf_text_to_docx
 
 
 def _write_pages_pdf(path: Path, texts: list[str | None]) -> str:
