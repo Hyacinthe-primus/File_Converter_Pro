@@ -1,160 +1,169 @@
-"""ConversionOptionsDialog - Card-based grid for choosing conversion type."""
+"""Quick Launch dialog for finding and starting a conversion."""
 
 import os
 
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QGridLayout, QLabel, QPushButton, QVBoxLayout
+from PySide6.QtGui import QIcon, QKeyEvent
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QDialog,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QStackedWidget,
+    QVBoxLayout,
+)
+
+from qss_helpers import _load_qss
+
+
+class _QuickLaunchSearch(QLineEdit):
+    """Search field that moves focus to the result list with the arrow keys."""
+
+    navigation_requested = Signal(int)
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.modifiers() == Qt.KeyboardModifier.NoModifier and event.key() in (
+            Qt.Key.Key_Up,
+            Qt.Key.Key_Down,
+        ):
+            self.navigation_requested.emit(-1 if event.key() == Qt.Key.Key_Up else 1)
+            event.accept()
+            return
+        super().keyPressEvent(event)
 
 
 class ConversionOptionsDialog(QDialog):
-    """
-    Dialog box allowing the user to choose the type of conversion
-    to launch via a keyboard shortcut or a generic button.
-    Premium redesign: card-based grid, large icons, dark/light theme-aware.
-    """
+    """Searchable, keyboard-first picker for the available conversion actions."""
 
     conversion_chosen = Signal(str)
 
-    _CARDS = [
-        ("pdf_to_word_2", "launch_pdf_to_word_conversion", "pdf_word.png", "#4dabf7", "#1971c2"),
-        ("word_to_pdf_2", "launch_word_to_pdf_conversion", "word_pdf.png", "#69db7c", "#2f9e44"),
-        ("images_to_pdf_3", "launch_image_to_pdf_conversion", "image_pdf.png", "#ffa94d", "#e67700"),
-        ("merge_pdf", "launch_merge_pdf", "merge_pdf.png", "#f783ac", "#c2255c"),
-        ("merge_word", "launch_merge_word", "merge_word.png", "#da77f2", "#9c36b5"),
-        ("optimize_files", "launch_optimization", "compress_files.png", "#63e6be", "#0ca678"),
+    _ACTIONS = [
+        ("pdf_to_word_2", "launch_pdf_to_word_conversion", "pdf_word.png"),
+        ("word_to_pdf_2", "launch_word_to_pdf_conversion", "word_pdf.png"),
+        ("images_to_pdf_3", "launch_image_to_pdf_conversion", "image_pdf.png"),
+        ("merge_pdf", "launch_merge_pdf", "merge_pdf.png"),
+        ("merge_word", "launch_merge_word", "merge_word.png"),
+        ("optimize_files", "launch_optimization", "compress_files.png"),
     ]
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._dark = getattr(parent, "dark_mode", True)
-        self.setWindowTitle(parent.translate_text("start_conversion_3"))
-        self.setFixedWidth(560)
+        self._theme_name = getattr(parent, "current_theme", None) or ("dark" if self._dark else "light")
+        self.setObjectName("QuickLaunchDialog")
+        self.setWindowTitle(parent.translate_text("quick_launch"))
+        self.setFixedWidth(460)
 
         flags = Qt.Window | Qt.WindowTitleHint | Qt.WindowSystemMenuHint | Qt.WindowCloseButtonHint
         self.setWindowFlags(flags | Qt.CustomizeWindowHint)
 
-        if self._dark:
-            dlg_bg = "#0d1117"
-            dlg_border = "#30363d"
-            title_col = "#e6edf3"
-            sub_col = "#8b949e"
-            cancel_bg = "#21262d"
-            cancel_fg = "#c9d1d9"
-            cancel_brd = "#30363d"
-            cancel_hov = "#30363d"
-        else:
-            dlg_bg = "#f5f5f5"
-            dlg_border = "#d0d7de"
-            title_col = "#1f2328"
-            sub_col = "#656d76"
-            cancel_bg = "#f6f8fa"
-            cancel_fg = "#24292f"
-            cancel_brd = "#d0d7de"
-            cancel_hov = "#e9ecef"
-
-        self.setStyleSheet(f"""
-            QDialog {{
-                background-color: {dlg_bg};
-                border: 1px solid {dlg_border};
-                border-radius: 12px;
-            }}
-        """)
-
         root = QVBoxLayout(self)
-        root.setContentsMargins(24, 20, 24, 20)
-        root.setSpacing(0)
+        root.setContentsMargins(18, 16, 18, 14)
+        root.setSpacing(8)
 
-        title = QLabel(parent.translate_text("start_conversion_3"))
-        title.setStyleSheet(f"font-size: 17px; font-weight: 700; color: {title_col}; background: transparent;")
+        title = QLabel(parent.translate_text("quick_launch"))
+        title.setObjectName("QuickLaunchTitle")
         root.addWidget(title)
 
-        sub = QLabel(parent.translate_text("select_the_conversion_category_to_start"))
-        sub.setStyleSheet(f"font-size: 12px; color: {sub_col}; background: transparent; margin-bottom: 14px;")
-        root.addWidget(sub)
-        root.addSpacing(10)
+        self.search_input = _QuickLaunchSearch()
+        self.search_input.setObjectName("QuickLaunchSearch")
+        self.search_input.setPlaceholderText(parent.translate_text("search_2"))
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.navigation_requested.connect(self._navigate_results)
+        self.search_input.textChanged.connect(self._filter_results)
+        self.search_input.returnPressed.connect(self._activate_current)
+        root.addWidget(self.search_input)
 
-        grid = QGridLayout()
-        grid.setHorizontalSpacing(10)
-        grid.setVerticalSpacing(10)
+        self.results = QListWidget()
+        self.results.setObjectName("QuickLaunchResults")
+        self.results.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.results.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self.results.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.results.setUniformItemSizes(True)
+        self.results.setIconSize(QSize(20, 20))
+        self.results.setMinimumHeight(210)
+        self.results.itemActivated.connect(self._activate_item)
 
-        row, col = 0, 0
-        for label_key, method_name, icon_file, accent_dark, accent_light in self._CARDS:
+        icon_dir = os.path.join("Assets", "icons")
+        for label_key, method_name, icon_file in self._ACTIONS:
             label = parent.translate_text(label_key)
-            accent = accent_dark if self._dark else accent_light
-            grid.addWidget(self._make_card(label, icon_file, method_name, accent), row, col)
-            col += 1
-            if col > 1:
-                col = 0
-                row += 1
+            icon_path = parent.get_resource_path(os.path.join(icon_dir, icon_file))
+            item = QListWidgetItem(QIcon(icon_path) if os.path.exists(icon_path) else QIcon(), label)
+            item.setData(Qt.ItemDataRole.UserRole, method_name)
+            self.results.addItem(item)
 
-        root.addLayout(grid)
-        root.addSpacing(16)
+        self.empty_label = QLabel(parent.translate_text("no_matching_conversions"))
+        self.empty_label.setObjectName("QuickLaunchEmpty")
+        self.empty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        cancel = QPushButton(parent.translate_text("cancel"))
-        cancel.setFixedHeight(36)
-        cancel.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {cancel_bg};
-                color: {cancel_fg};
-                border: 1px solid {cancel_brd};
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: 500;
-            }}
-            QPushButton:hover  {{ background-color: {cancel_hov}; }}
-            QPushButton:pressed {{ opacity: 0.7; }}
-        """)
-        cancel.clicked.connect(self.reject)
-        root.addWidget(cancel)
+        self.result_stack = QStackedWidget()
+        self.result_stack.setObjectName("QuickLaunchResultStack")
+        self.result_stack.addWidget(self.results)
+        self.result_stack.addWidget(self.empty_label)
+        root.addWidget(self.result_stack, 1)
 
-    def _make_card(self, label: str, icon_file: str, method_name: str, accent: str) -> QPushButton:
-        """Build one conversion card button."""
-        if self._dark:
-            card_bg = "#161b22"
-            card_brd = "#30363d"
-            card_fg = "#e6edf3"
-            hov_bg = "#1c2333"
+        hint = QLabel(parent.translate_text("quick_launch_keyboard_hint"))
+        hint.setObjectName("QuickLaunchHint")
+        root.addWidget(hint)
+
+        self._filter_results("")
+        self.search_input.setFocus(Qt.OtherFocusReason)
+        self._apply_theme(self._theme_name)
+
+        theme_changed = getattr(parent, "theme_changed", None)
+        if theme_changed is not None and hasattr(theme_changed, "connect"):
+            theme_changed.connect(self._apply_theme)
+
+    def _apply_theme(self, theme_name: str | None = None) -> None:
+        if theme_name:
+            self._theme_name = theme_name
+        self.setStyleSheet(_load_qss("quick_launch.qss", self._theme_name))
+
+    def _filter_results(self, query: str) -> None:
+        normalized_query = query.strip().casefold()
+        visible_rows = []
+        for row in range(self.results.count()):
+            item = self.results.item(row)
+            matches = normalized_query in item.text().casefold()
+            item.setHidden(not matches)
+            if matches:
+                visible_rows.append(row)
+
+        if visible_rows:
+            self.results.setCurrentRow(visible_rows[0])
+            self.result_stack.setCurrentWidget(self.results)
         else:
-            card_bg = "#ffffff"
-            card_brd = "#d0d7de"
-            card_fg = "#1f2328"
-            hov_bg = "#f0f6fc"
+            self.results.setCurrentRow(-1)
+            self.result_stack.setCurrentWidget(self.empty_label)
 
-        btn = QPushButton()
-        btn.setObjectName(method_name)
-        btn.setCursor(Qt.PointingHandCursor)
-        btn.setFixedHeight(72)
+    def _navigate_results(self, direction: int) -> None:
+        visible_rows = [row for row in range(self.results.count()) if not self.results.item(row).isHidden()]
+        if not visible_rows:
+            return
 
-        btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {card_bg};
-                color: {card_fg};
-                border: 1.5px solid {card_brd};
-                border-radius: 10px;
-                font-size: 13px;
-                font-weight: 600;
-                text-align: left;
-                padding-left: 14px;
-            }}
-            QPushButton:hover {{
-                background-color: {hov_bg};
-                border-color: {accent};
-                color: {accent};
-            }}
-            QPushButton:pressed {{
-                background-color: {hov_bg};
-                border-color: {accent};
-            }}
-        """)
+        current_row = self.results.currentRow()
+        if self.search_input.hasFocus() or current_row not in visible_rows:
+            target_row = visible_rows[0] if direction > 0 else visible_rows[-1]
+        else:
+            position = visible_rows.index(current_row)
+            target_position = max(0, min(position + direction, len(visible_rows) - 1))
+            target_row = visible_rows[target_position]
 
-        icon_path = self.parent().get_resource_path(os.path.join("Assets", "icons", icon_file))
-        if os.path.exists(icon_path):
-            btn.setIcon(QIcon(icon_path))
-            btn.setIconSize(QSize(36, 36))
+        self.results.setCurrentRow(target_row)
+        self.results.setFocus(Qt.FocusReason.ShortcutFocusReason)
 
-        btn.setText(("  " if os.path.exists(icon_path) else "") + label)
+    def _activate_current(self) -> None:
+        self._activate_item(self.results.currentItem())
 
-        btn.clicked.connect(lambda _=False, m=method_name: (self.conversion_chosen.emit(m), self.accept()))
+    def _activate_item(self, item: QListWidgetItem | None = None) -> None:
+        if item is None or item.isHidden():
+            item = self.results.currentItem()
+        if item is None or item.isHidden():
+            return
 
-        return btn
+        method_name = item.data(Qt.ItemDataRole.UserRole)
+        if method_name:
+            self.conversion_chosen.emit(method_name)
+            self.accept()

@@ -487,14 +487,9 @@ class AppUIMixin(
         btn_cancel.setMinimumHeight(38)
         _apply_dialog_btn(btn_cancel, "BtnCancelGlassy")
 
-        btn_ok = QPushButton("✓  " + self.translate_text("optimize"))
+        btn_ok = QPushButton(self.translate_text("optimize"))
         btn_ok.setMinimumHeight(38)
-        btn_ok.setStyleSheet(
-            "QPushButton{background:#28a745;color:white;border:none;"
-            "border-radius:7px;font-weight:bold;padding:0 18px;}"
-            "QPushButton:hover{background:#218838;}"
-            "QPushButton:pressed{background:#1e7e34;}"
-        )
+        _apply_dialog_btn(btn_ok, "BtnOK")
 
         btn_cancel.clicked.connect(d.reject)
         btn_ok.clicked.connect(d.accept)

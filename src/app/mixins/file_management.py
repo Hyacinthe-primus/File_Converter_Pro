@@ -461,32 +461,9 @@ class FileManagementMixin:
 
         yes_button = msg_box.addButton(QMessageBox.Yes)
         no_button = msg_box.addButton(QMessageBox.No)
+        _apply_dialog_btn(yes_button, "BtnOK")
+        _apply_dialog_btn(no_button, "BtnCancel")
         msg_box.setDefaultButton(no_button)
-
-        yes_button.setStyleSheet("""
-            QPushButton {
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #218838; }
-            QPushButton:pressed { background-color: #1e7e34; }
-        """)
-        no_button.setStyleSheet("""
-            QPushButton {
-                background-color: #B55454;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #A04040; }
-            QPushButton:pressed { background-color: #8B3030; }
-        """)
 
         msg_box.exec()
 
@@ -525,32 +502,9 @@ class FileManagementMixin:
 
         yes_button = msg_box.addButton(QMessageBox.Yes)
         no_button = msg_box.addButton(QMessageBox.No)
+        _apply_dialog_btn(yes_button, "BtnOK")
+        _apply_dialog_btn(no_button, "BtnCancel")
         msg_box.setDefaultButton(no_button)
-
-        yes_button.setStyleSheet("""
-            QPushButton {
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #218838; }
-            QPushButton:pressed { background-color: #1e7e34; }
-        """)
-        no_button.setStyleSheet("""
-            QPushButton {
-                background-color: #B55454;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #A04040; }
-            QPushButton:pressed { background-color: #8B3030; }
-        """)
 
         msg_box.exec()
 
