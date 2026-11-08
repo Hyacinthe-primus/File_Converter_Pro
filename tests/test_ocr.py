@@ -192,16 +192,19 @@ class TestSettingsDialogOcr:
         assert not hasattr(dlg, "ocr_enabled_checkbox")
         self._cleanup(qapp, dlg)
 
-    def test_orientation_combo_has_none_and_auto(self, qapp):
+    def test_orientation_combo_has_none_auto_and_custom(self, qapp):
         dlg = self._make_dialog()
         datas = [dlg.ocr_orientation_combo.itemData(i) for i in range(dlg.ocr_orientation_combo.count())]
-        assert "none" in datas
-        assert "auto" in datas
+        assert datas == ["none", "auto", "custom"]
         self._cleanup(qapp, dlg)
 
-    def test_orientation_combo_is_editable_for_custom_values(self, qapp):
+    def test_custom_orientation_field_is_hidden_until_custom_is_selected(self, qapp):
         dlg = self._make_dialog()
-        assert dlg.ocr_orientation_combo.isEditable() is True
+        assert dlg.ocr_orientation_combo.isEditable() is False
+        assert dlg.ocr_orientation_custom_input.isHidden() is True
+
+        dlg.ocr_orientation_combo.setCurrentIndex(dlg.ocr_orientation_combo.findData("custom"))
+        assert dlg.ocr_orientation_custom_input.isHidden() is False
         self._cleanup(qapp, dlg)
 
     def test_get_settings_returns_ocr_keys(self, qapp):
@@ -223,9 +226,42 @@ class TestSettingsDialogOcr:
 
     def test_get_settings_returns_custom_degrees(self, qapp):
         dlg = self._make_dialog()
-        dlg.ocr_orientation_combo.setCurrentIndex(1)
-        dlg.ocr_orientation_combo.setEditText("30")
+        dlg.ocr_orientation_combo.setCurrentIndex(dlg.ocr_orientation_combo.findData("custom"))
+        dlg.ocr_orientation_custom_input.setText("30")
         assert dlg.get_settings()["ocr_orientation"] == "30"
+        self._cleanup(qapp, dlg)
+
+    def test_custom_orientation_requires_valid_degrees(self, qapp, monkeypatch):
+        from PySide6.QtWidgets import QMessageBox
+
+        dlg = self._make_dialog()
+        warnings = []
+        accepted = []
+        monkeypatch.setattr(
+            QMessageBox, "warning", staticmethod(lambda *args, **kwargs: warnings.append(args))
+        )
+        monkeypatch.setattr(dlg, "accept", lambda: accepted.append(True))
+        dlg.ocr_orientation_combo.setCurrentIndex(dlg.ocr_orientation_combo.findData("custom"))
+        dlg.ocr_orientation_custom_input.setText("not-a-degree")
+
+        dlg._accept_settings()
+
+        assert warnings
+        assert accepted == []
+        assert dlg.get_settings()["ocr_orientation"] == "auto"
+        self._cleanup(qapp, dlg)
+
+    def test_valid_custom_orientation_allows_accept(self, qapp, monkeypatch):
+        dlg = self._make_dialog()
+        accepted = []
+        monkeypatch.setattr(dlg, "accept", lambda: accepted.append(True))
+        dlg.ocr_orientation_combo.setCurrentIndex(dlg.ocr_orientation_combo.findData("custom"))
+        dlg.ocr_orientation_custom_input.setText("-12.5")
+
+        dlg._accept_settings()
+
+        assert accepted == [True]
+        assert dlg.get_settings()["ocr_orientation"] == "-12.5"
         self._cleanup(qapp, dlg)
 
     def test_restore_defaults_resets_ocr(self, qapp):
@@ -236,10 +272,16 @@ class TestSettingsDialogOcr:
                 break
         dlg.restore_defaults()
         assert dlg.get_settings()["ocr_orientation"] == "auto"
+        assert dlg.ocr_orientation_combo.currentData() == "auto"
+        assert dlg.ocr_orientation_custom_input.text() == ""
+        assert dlg.ocr_orientation_custom_input.isHidden() is True
         self._cleanup(qapp, dlg)
 
     def test_orientation_combo_reflects_custom_config(self, qapp):
         dlg = self._make_dialog(ocr_orientation="45")
+        assert dlg.ocr_orientation_combo.currentData() == "custom"
+        assert dlg.ocr_orientation_custom_input.text() == "45"
+        assert dlg.ocr_orientation_custom_input.isHidden() is False
         assert dlg.get_settings()["ocr_orientation"] == "45"
         self._cleanup(qapp, dlg)
 

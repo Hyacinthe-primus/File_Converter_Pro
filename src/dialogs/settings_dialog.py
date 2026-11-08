@@ -1,5 +1,6 @@
 """SettingsDialog — Application preferences and configuration (multi-tab)."""
 
+import math
 import re
 import sys
 from datetime import datetime
@@ -224,14 +225,27 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.auto_save_configs_check.setChecked(self.config.get("auto_save_configs", True))
 
         self.ocr_orientation_combo = QComboBox()
-        self.ocr_orientation_combo.setEditable(True)
         self.ocr_orientation_combo.addItem(self.translate_text("none"), "none")
         self.ocr_orientation_combo.addItem(self.translate_text("automatic"), "auto")
+        self.ocr_orientation_combo.addItem(self.translate_text("custom") + "...", "custom")
         self.ocr_orientation_combo.setInsertPolicy(QComboBox.NoInsert)
-        self._set_ocr_orientation_combo(self.config.get("ocr_orientation", "auto"))
         self.ocr_orientation_combo.setToolTip(
             self.translate_text("ocr_orientation_none_automatic_or_manual_angle")
         )
+
+        self.ocr_orientation_custom_input = QLineEdit()
+        self.ocr_orientation_custom_input.setPlaceholderText("45°")
+        self.ocr_orientation_custom_input.setMaxLength(12)
+        self.ocr_orientation_custom_input.setFixedWidth(95)
+        self.ocr_orientation_custom_input.setAlignment(Qt.AlignCenter)
+        self.ocr_orientation_custom_input.setToolTip(
+            self.translate_text("ocr_orientation_custom_degrees_hint")
+        )
+        self.ocr_orientation_custom_input.setVisible(False)
+        self.ocr_orientation_combo.currentIndexChanged.connect(
+            lambda _index: self._update_ocr_orientation_custom_visibility()
+        )
+        self._set_ocr_orientation_combo(self.config.get("ocr_orientation", "auto"))
 
         conversion_layout.addRow(self.translate_text("default_quality"), self.quality_combo)
         conversion_layout.addRow(self.translate_text("compression_level_3"), self.compression_level_combo)
@@ -244,7 +258,12 @@ class SettingsDialog(TranslationMixin, QDialog):
         conversion_layout.addRow(self.translate_text("image_to_ico_layers"), icon_layer_layout)
         conversion_layout.addRow(self.translate_text("default_output_folder"), output_layout)
         conversion_layout.addRow(self.translate_text("keep_history_days"), self.keep_history_days_spin)
-        conversion_layout.addRow(self.translate_text("ocr_orientation"), self.ocr_orientation_combo)
+        ocr_orientation_layout = QHBoxLayout()
+        ocr_orientation_layout.setContentsMargins(0, 0, 0, 0)
+        ocr_orientation_layout.setSpacing(6)
+        ocr_orientation_layout.addWidget(self.ocr_orientation_combo, 1)
+        ocr_orientation_layout.addWidget(self.ocr_orientation_custom_input)
+        conversion_layout.addRow(self.translate_text("ocr_orientation"), ocr_orientation_layout)
         conversion_layout.addRow(self.auto_clean_checkbox)
         conversion_layout.addRow(self.backup_checkbox)
         conversion_layout.addRow(self.allow_local_resources_checkbox)
@@ -948,9 +967,23 @@ class SettingsDialog(TranslationMixin, QDialog):
         self.auto_save_configs_check.setChecked(True)
         self.separate_image_pdfs_checkbox.setChecked(False)
         self.use_system_theme_checkbox.setChecked(True)
+        self.ocr_orientation_custom_input.clear()
         self._set_ocr_orientation_combo("auto")
 
     def _accept_settings(self) -> None:
+        if self.ocr_orientation_combo.currentData() == "custom":
+            normalized_orientation = self._normalized_ocr_orientation()
+            if normalized_orientation is None:
+                QMessageBox.warning(
+                    self,
+                    self.translate_text("warning_2"),
+                    self.translate_text("invalid_ocr_orientation"),
+                )
+                self.ocr_orientation_custom_input.setFocus()
+                self.ocr_orientation_custom_input.selectAll()
+                return
+            self.ocr_orientation_custom_input.setText(normalized_orientation)
+
         if self.icon_layer_combo.currentData() == "custom":
             normalized = self._icon_layer_custom_size()
             if normalized is None:
@@ -1006,13 +1039,33 @@ class SettingsDialog(TranslationMixin, QDialog):
         return f"{size[0]}x{size[1]}"
 
     def _set_ocr_orientation_combo(self, value: str) -> None:
-        """Select the preset matching *value*, or show it as custom text."""
+        """Select the preset matching *value*, or show it in the custom field."""
+        value = str(value or "auto")
+        custom_index = self.ocr_orientation_combo.findData("custom")
         for idx in range(self.ocr_orientation_combo.count()):
             if self.ocr_orientation_combo.itemData(idx) == value:
                 self.ocr_orientation_combo.setCurrentIndex(idx)
-                return
-        self.ocr_orientation_combo.setCurrentIndex(1)
-        self.ocr_orientation_combo.setEditText(str(value))
+                break
+        else:
+            if custom_index >= 0:
+                self.ocr_orientation_combo.setCurrentIndex(custom_index)
+                self.ocr_orientation_custom_input.setText(value)
+            else:
+                self.ocr_orientation_combo.setCurrentIndex(1)
+        self._update_ocr_orientation_custom_visibility()
+
+    def _update_ocr_orientation_custom_visibility(self) -> None:
+        self.ocr_orientation_custom_input.setVisible(self.ocr_orientation_combo.currentData() == "custom")
+
+    def _normalized_ocr_orientation(self) -> str | None:
+        text = self.ocr_orientation_custom_input.text().strip()
+        try:
+            value = float(text)
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(value):
+            return None
+        return f"{value:.12g}"
 
     def _build_automation_tab(self) -> QWidget:
 
@@ -1234,14 +1287,8 @@ class SettingsDialog(TranslationMixin, QDialog):
         }
 
     def _ocr_orientation_combo_value(self) -> str:
-        """Return the selected orientation value.
-
-        If the typed text matches a preset's label its data (none/auto) is
-        returned; otherwise the manually entered angle is returned.
-        """
-        text = self.ocr_orientation_combo.currentText().strip()
-        idx = self.ocr_orientation_combo.currentIndex()
-        if 0 <= idx < self.ocr_orientation_combo.count():
-            if text == self.ocr_orientation_combo.itemText(idx):
-                return str(self.ocr_orientation_combo.itemData(idx))
-        return text or "auto"
+        """Return the selected orientation value."""
+        data = self.ocr_orientation_combo.currentData()
+        if data == "custom":
+            return self._normalized_ocr_orientation() or "auto"
+        return str(data or "auto")

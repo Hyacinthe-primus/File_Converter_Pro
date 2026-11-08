@@ -26,6 +26,8 @@
         "none": "",
         "automatic": "",
         "ocr_orientation_none_automatic_or_manual_angle": "",
+        "ocr_orientation_custom_degrees_hint": "",
+        "invalid_ocr_orientation": "",
         "pdf_to_word": "",
         "word_to_pdf": "",
         "images_to_pdf": "",
