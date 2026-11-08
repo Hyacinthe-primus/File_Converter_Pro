@@ -6,7 +6,7 @@ Checksum/
 src/styles/custom_themes
 Wiki/
 
-# Private security records (never commit)
+# Private security records
 Private_Security_Records/
 
 # Cache files
@@ -48,7 +48,7 @@ env/
 # Social preview files
 social-preview.png
 
-# Local session notes (never commit)
+# Local session notes
 HANDOFF.md
 FCP_Remaining_Architecture_Work
 releases.md
