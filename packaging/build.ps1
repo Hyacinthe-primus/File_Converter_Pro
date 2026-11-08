@@ -38,8 +38,8 @@ function Resolve-UpxPath {
 # Colors for output
 function Write-Success { param($msg) Write-Host "✓ $msg" -ForegroundColor Green }
 function Write-Error   { param($msg) Write-Host "✗ $msg" -ForegroundColor Red }
-function Write-Info    { param($msg) Write-Host "ℹ $msg" -ForegroundColor Cyan }
-function Write-Warning { param($msg) Write-Host "⚠ $msg" -ForegroundColor Yellow }
+function Write-Info    { param($msg) Write-Host "󰙎 $msg" -ForegroundColor Cyan }
+function Write-Warning { param($msg) Write-Host " $msg" -ForegroundColor Yellow }
 
 Write-Info "Checking environment..."
 
