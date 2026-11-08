@@ -2,7 +2,7 @@
 
 - **Affected components:** Windows notifications and imported translation packs.
 - **Affected versions:** Releases predating the 1.0.8 development line,
-  including the latest tagged v1.0.7.
+  including v1.0.7.
 - **Root cause:** Notification text from translation packs was interpolated into
   generated PowerShell source.
 - **Remediation:** Notifications no longer use the unsafe winotify template.

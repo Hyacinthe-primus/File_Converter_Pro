@@ -3,7 +3,7 @@
 - **Affected component:** HTML-to-PDF conversion, including local images,
   stylesheets, CSS resources, and fallback renderers.
 - **Affected versions:** Releases predating the 1.0.8 development line,
-  including the latest tagged v1.0.7.
+  including v1.0.7.
 - **Root cause:** Local resource references were not sufficiently contained, and
   renderers were allowed to access local files and active content.
 - **Remediation:** Local resources are now disabled by default and require an
