@@ -1,7 +1,39 @@
 # Build Script for File Converter Pro (onedir + UPX)
 
-# UPX configuration
-$UPX_PATH = "C:\....\.....\Your_path\....\upx.exe" # <-- SET THIS TO YOUR UPX PATH
+# Optional explicit fallback if UPX is not available on PATH.
+$UPX_FALLBACK_PATH = ""
+
+function Resolve-UpxPath {
+    $command = Get-Command upx -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($command) {
+        return $command.Source
+    }
+
+    if ($UPX_FALLBACK_PATH -and (Test-Path -LiteralPath $UPX_FALLBACK_PATH -PathType Leaf)) {
+        return $UPX_FALLBACK_PATH
+    }
+
+    $wingetRoot = Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Packages"
+    if (Test-Path -LiteralPath $wingetRoot) {
+        $candidate = Get-ChildItem -LiteralPath $wingetRoot -Filter "upx.exe" -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -match "\\UPX\.UPX_" } |
+            Select-Object -First 1
+        if ($candidate) {
+            return $candidate.FullName
+        }
+    }
+
+    foreach ($candidate in @(
+        (Join-Path $env:ProgramFiles "upx\upx.exe"),
+        (Join-Path ${env:ProgramFiles(x86)} "upx\upx.exe")
+    )) {
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+            return $candidate
+        }
+    }
+
+    return $null
+}
 
 # Colors for output
 function Write-Success { param($msg) Write-Host "✓ $msg" -ForegroundColor Green }
@@ -11,8 +43,9 @@ function Write-Warning { param($msg) Write-Host "⚠ $msg" -ForegroundColor Yell
 
 Write-Info "Checking environment..."
 
-if (-not (Test-Path $UPX_PATH)) {
-    Write-Error "UPX not found at: $UPX_PATH"
+$UPX_PATH = Resolve-UpxPath
+if (-not $UPX_PATH) {
+    Write-Error "UPX not found on PATH. Add it to PATH or set `$UPX_FALLBACK_PATH in this script."
     exit 1
 }
 Write-Success "UPX found: $UPX_PATH"
@@ -37,7 +70,7 @@ Write-Info "Configuring UPX for PyInstaller..."
 $env:Path = "$([System.IO.Path]::GetDirectoryName($UPX_PATH));$env:Path"
 
 try {
-    $upxVersion = & upx --version 2>&1 | Select-Object -First 1
+    $upxVersion = & $UPX_PATH --version 2>&1 | Select-Object -First 1
     Write-Success "UPX accessible: $upxVersion"
 } catch {
     Write-Error "Unable to run UPX"
