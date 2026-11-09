@@ -6,13 +6,12 @@ Only the latest release of File Converter Pro is supported with security updates
 
 | Version | Supported |
 |---------|-----------|
-| 1.0.7+  | Yes       |
-| < 1.0.7 | No        |
+| 1.0.8+  | Yes       |
+| < 1.0.8 | No        |
 
-At the time of writing, **v1.0.7 is the latest tagged release**. The security
-fixes linked below are present in the **1.0.8 development line** on `main`
-and are expected in the next release; they are not included in the tagged
-v1.0.7 build.
+At the time of writing, **v1.0.8 is the upcoming release**. The security
+fixes linked below are included in the 1.0.8 release and later; they are not
+included in the tagged v1.0.7 build.
 
 ## Recent Security Fixes
 
