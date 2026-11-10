@@ -24,6 +24,11 @@ def _write_file(path, content=b"file-content"):
     return path
 
 
+def _weasyprint_or_skip():
+    """Import WeasyPrint, skipping when its native Pango/GTK libraries are unavailable."""
+    return pytest.importorskip("weasyprint", exc_type=OSError)
+
+
 class TestLocalResourceSetting:
     def test_default_setting_is_disabled(self):
         from config import DEFAULT_CONFIG
@@ -165,6 +170,7 @@ class TestDisabledLocalResources:
         assert 'src=""' in output
 
     def test_weasyprint_fetcher_denies_file_urls(self):
+        _weasyprint_or_skip()
         fetcher = HtmlRenderers._safe_weasyprint_fetcher()
         with pytest.raises(ValueError):
             fetcher.fetch("file:///C:/secret.txt")
@@ -543,7 +549,7 @@ class TestReportLabImageHardening:
 class TestWeasyPrintCompatibility:
     @staticmethod
     def _render_with_weasyprint(html, root, output):
-        weasyprint = pytest.importorskip("weasyprint")
+        weasyprint = _weasyprint_or_skip()
         renderer = _renderer(True)
         sanitized = renderer._inline_all_resources(html, root)
         weasyprint.HTML(
@@ -559,7 +565,7 @@ class TestWeasyPrintCompatibility:
             return "\n".join(page.get_text() for page in doc)
 
     def test_safe_fetcher_uses_weasyprint_70_api(self):
-        weasyprint = pytest.importorskip("weasyprint")
+        weasyprint = _weasyprint_or_skip()
         fetcher = HtmlRenderers._safe_weasyprint_fetcher()
         assert isinstance(fetcher, weasyprint.urls.URLFetcher)
         assert fetcher._allowed_protocols == ("http", "https", "data")
