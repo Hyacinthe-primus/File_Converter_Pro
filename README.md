@@ -5,6 +5,9 @@
 <p><em>A free, offline, all-in-one file converter for Windows built to feel premium.</em></p>
 
 [![Version](https://img.shields.io/badge/version-1.0.8-4dabf7?style=for-the-badge)](#)
+[![CI](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File_Converter_Pro/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/Hyacinthe-primus/File_Converter_Pro/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File_Converter_Pro/codeql.yml?branch=main&style=for-the-badge&label=CodeQL)](https://github.com/Hyacinthe-primus/File_Converter_Pro/actions/workflows/codeql.yml)
+[![Windows Release](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File_Converter_Pro/release-windows.yml?style=for-the-badge&label=Windows%20Release)](https://github.com/Hyacinthe-primus/File_Converter_Pro/actions/workflows/release-windows.yml)
 [![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=for-the-badge&logo=windows&logoColor=white)](#)
 [![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=for-the-badge&logo=qt&logoColor=white)](#)
 [![License](https://img.shields.io/badge/license-GPLv3-blue?style=for-the-badge)](#license)
