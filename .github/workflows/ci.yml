@@ -53,7 +53,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-          python -m pip install pytest ruff
+          python -m pip install pytest pytest-timeout ruff
 
       - name: Lint
         run: python -m ruff check src tests
@@ -62,4 +62,4 @@ jobs:
         run: python -m compileall -q src tests
 
       - name: Run test suite
-        run: python -m pytest -q
+        run: python -m pytest -q --timeout=120 --timeout-method=thread -o faulthandler_timeout=60
