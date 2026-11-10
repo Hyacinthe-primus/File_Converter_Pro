@@ -51,6 +51,11 @@ def _make_tm(language: str) -> TranslationManager:
     return make_tm(language)
 
 
+def _prompts_disabled() -> bool:
+    """Return True when special-event prompts must stay silent (tests, headless CI)."""
+    return os.environ.get("FCP_DISABLE_SPECIAL_EVENTS", "").strip().lower() in ("1", "true", "yes")
+
+
 class PerlinNoise:
     """
     True 3D Perlin noise with Fractional Brownian Motion (FBM).
@@ -1114,7 +1119,8 @@ class SpecialEventsManager:
         self.db_path = self._get_db_path()
         self.birthdate: Optional[date] = None
         self._init_db()
-        QTimer.singleShot(5000, self._check_and_prompt)
+        if not _prompts_disabled():
+            QTimer.singleShot(5000, self._check_and_prompt)
 
     def _get_db_path(self) -> str:
         from utils import SRC_DIR

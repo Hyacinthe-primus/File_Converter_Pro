@@ -10,6 +10,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 # Run all widget tests offscreen so they never open a real window.
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
+# Never let the app's delayed first-run birthday popup block a headless test run.
+os.environ.setdefault("FCP_DISABLE_SPECIAL_EVENTS", "1")
+
 import pytest
 
 

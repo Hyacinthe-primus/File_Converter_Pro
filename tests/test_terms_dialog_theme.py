@@ -3,8 +3,46 @@
 import pytest
 from PySide6.QtWidgets import QDialog, QMessageBox, QWidget
 
+import qss_helpers
+import theme_manager
 from dialogs.terms_dialog import TermsAndPrivacyDialog
 from qss_helpers import _dialog_buttons_qss
+
+# Custom themes live in a gitignored folder, so tests must install their own
+# deterministic copies instead of relying on themes present on a developer machine.
+_THEME_ASSETS = {
+    "Kintsugi": {
+        "kind": "dark",
+        "terms.qss": "QDialog { background-color: #14100d; }",
+        "terms_html.css": "body { background-color: #1b1612; }",
+        "contact_links.css": ".warning { color: #d6452d; }",
+        "buttons.qss": "QPushButton { background-color: #d6452d; }",
+    },
+    "Riso_Press_Night": {
+        "kind": "dark",
+        "terms.qss": "QDialog { background-color: #ff5c8a; }",
+        "terms_html.css": "body { background-color: #0d0f18; }",
+        "contact_links.css": ".warning { color: #8aa2ff; }",
+        "buttons.qss": "QPushButton { background-color: #8aa2ff; }",
+    },
+}
+
+
+@pytest.fixture(autouse=True)
+def _deterministic_custom_themes(tmp_path, monkeypatch):
+    root = tmp_path / "custom_themes"
+    for name, assets in _THEME_ASSETS.items():
+        theme_dir = root / name
+        theme_dir.mkdir(parents=True)
+        (theme_dir / "metadata.ini").write_text(
+            f"[theme]\nname = {name}\nkind = {assets['kind']}\n", encoding="utf-8"
+        )
+        for filename, content in assets.items():
+            if filename == "kind":
+                continue
+            (theme_dir / filename).write_text(content, encoding="utf-8")
+    monkeypatch.setattr(qss_helpers, "_CUSTOM_THEMES_DIR", str(root))
+    monkeypatch.setattr(theme_manager, "CUSTOM_THEMES_DIR", root)
 
 
 class _ThemeParent(QWidget):
