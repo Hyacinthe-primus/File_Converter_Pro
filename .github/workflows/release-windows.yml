@@ -1,0 +1,93 @@
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Windows release
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
+
+      - name: Install build tools
+        shell: pwsh
+        run: choco install innosetup 7zip upx -y --no-progress
+
+      - name: Build application, installer, portable ZIP, and checksums
+        shell: pwsh
+        working-directory: packaging
+        run: .\build_all.ps1
+
+      - name: Determine release version
+        id: version
+        shell: pwsh
+        run: |
+          $iss = Get-Content "packaging/setup.iss" -Raw
+          if ($iss -notmatch '#define MyAppVersion "([^"]+)"') {
+            throw "Could not read MyAppVersion from packaging/setup.iss"
+          }
+          "version=$($matches[1])" >> $env:GITHUB_OUTPUT
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: FileConverterPro-v${{ steps.version.outputs.version }}-windows
+          path: |
+            Output/FileConverterPro_Setup_v${{ steps.version.outputs.version }}.exe
+            Output/File_Converter_Pro_v${{ steps.version.outputs.version }}.zip
+            Output/checksums.txt
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          $version = "${{ steps.version.outputs.version }}"
+          $files = @(
+            "Output/FileConverterPro_Setup_v$version.exe",
+            "Output/File_Converter_Pro_v$version.zip",
+            "Output/checksums.txt"
+          )
+
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag $files `
+              --repo $env:GITHUB_REPOSITORY `
+              --title "File Converter Pro $tag" `
+              --generate-notes
+          } else {
+            gh release upload $tag $files `
+              --repo $env:GITHUB_REPOSITORY `
+              --clobber
+          }
