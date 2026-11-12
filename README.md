@@ -5,16 +5,16 @@
 <p><em>A free, offline, all-in-one file converter for Windows built to feel premium.</em></p>
 
 [![Version](https://img.shields.io/badge/version-1.0.8-4dabf7?style=for-the-badge)](#)
-[![CI](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File_Converter_Pro/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/Hyacinthe-primus/File_Converter_Pro/actions/workflows/ci.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File_Converter_Pro/codeql.yml?branch=main&style=for-the-badge&label=CodeQL)](https://github.com/Hyacinthe-primus/File_Converter_Pro/actions/workflows/codeql.yml)
-[![Windows Release](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File_Converter_Pro/release-windows.yml?style=for-the-badge&label=Windows%20Release)](https://github.com/Hyacinthe-primus/File_Converter_Pro/actions/workflows/release-windows.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File-Converter-Pro/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/Hyacinthe-primus/File-Converter-Pro/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File-Converter-Pro/codeql.yml?branch=main&style=for-the-badge&label=CodeQL)](https://github.com/Hyacinthe-primus/File-Converter-Pro/actions/workflows/codeql.yml)
+[![Windows Release](https://img.shields.io/github/actions/workflow/status/Hyacinthe-primus/File-Converter-Pro/release-windows.yml?style=for-the-badge&label=Windows%20Release)](https://github.com/Hyacinthe-primus/File-Converter-Pro/actions/workflows/release-windows.yml)
 [![Platform](https://img.shields.io/badge/Windows%2010%2F11-0078D4?style=for-the-badge&logo=windows&logoColor=white)](#)
 [![PySide6](https://img.shields.io/badge/PySide6-41CD52?style=for-the-badge&logo=qt&logoColor=white)](#)
 [![License](https://img.shields.io/badge/license-GPLv3-blue?style=for-the-badge)](#license)
 [![Status](https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge)](#)
 [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](#)
-[![Downloads](https://img.shields.io/github/downloads/Hyacinthe-primus/File_Converter_Pro/total.svg?style=for-the-badge)](https://github.com/Hyacinthe-primus/File_Converter_Pro/releases)
-[![Last Commit](https://img.shields.io/github/last-commit/Hyacinthe-primus/File_Converter_Pro?style=for-the-badge)](https://github.com/Hyacinthe-primus/File_Converter_Pro)
+[![Downloads](https://img.shields.io/github/downloads/Hyacinthe-primus/File-Converter-Pro/total.svg?style=for-the-badge)](https://github.com/Hyacinthe-primus/File-Converter-Pro/releases)
+[![Last Commit](https://img.shields.io/github/last-commit/Hyacinthe-primus/File-Converter-Pro?style=for-the-badge)](https://github.com/Hyacinthe-primus/File-Converter-Pro)
 
 <br/>
 
@@ -22,7 +22,7 @@
 
 <br/>
 
-**[Download](#-download)** · **[Wiki](https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki)** · **[Contributing](CONTRIBUTING.md)** · **[Support](#-support-the-project)**
+**[Download](#-download)** · **[Wiki](https://github.com/Hyacinthe-primus/File-Converter-Pro/wiki)** · **[Contributing](CONTRIBUTING.md)** · **[Support](#-support-the-project)**
 
 </div>
 
@@ -47,7 +47,7 @@ Core philosophy: **ship nothing until it runs perfectly on a clean machine, with
 - **Windows context menu**: right-click any supported file → Convert with FCP
 - **Community i18n**: drop a `.lang` JSON file to add a language, no code needed
 
-> Full feature list and detailed guides in the **[Wiki](https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki)**.
+> Full feature list and detailed guides in the **[Wiki](https://github.com/Hyacinthe-primus/File-Converter-Pro/wiki)**.
 
 ---
 
@@ -62,21 +62,21 @@ Core philosophy: **ship nothing until it runs perfectly on a clean machine, with
 
 Windows 10 / 11 (64-bit). No Python, no dependencies. Just run the installer.
 
-> System requirements, antivirus notes, and PowerShell one-liners are in the **[Wiki](https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki)**.
+> System requirements, antivirus notes, and PowerShell one-liners are in the **[Wiki](https://github.com/Hyacinthe-primus/File-Converter-Pro/wiki)**.
 
 ---
 
 ## Quick Start (Developers)
 
 ```bash
-git clone https://github.com/Hyacinthe-primus/File_Converter_Pro.git
-cd File_Converter_Pro
+git clone https://github.com/Hyacinthe-primus/File-Converter-Pro.git
+cd File-Converter-Pro
 pip install -r requirements.txt
 pip install -r requirements-dev.txt             # Dev/Build dependencies
 python src/main.py
 ```
 
-> Full developer docs in the **[For Developers](https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/For-Developers)** wiki page.
+> Full developer docs in the **[For Developers](https://github.com/Hyacinthe-primus/File-Converter-Pro/wiki/For-Developers)** wiki page.
 
 ---
 
@@ -99,7 +99,7 @@ The donation dialog is also accessible anytime from **Left Tab → Support the p
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)** for translations, bug reports, code fixes, and feature proposals.
 
-[![FCP Contributors](https://contrib.rocks/image?repo=Hyacinthe-primus/File_Converter_Pro)](https://github.com/Hyacinthe-primus/File_Converter_Pro/graphs/contributors)
+[![FCP Contributors](https://contrib.rocks/image?repo=Hyacinthe-primus/File-Converter-Pro)](https://github.com/Hyacinthe-primus/File-Converter-Pro/graphs/contributors)
 
 ---
 

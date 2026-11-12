@@ -447,7 +447,7 @@ class SystemNotifier:
             import requests
 
             resp = requests.get(
-                "https://api.github.com/repos/Hyacinthe-primus/File_Converter_Pro/releases/latest",
+                "https://api.github.com/repos/Hyacinthe-primus/File-Converter-Pro/releases/latest",
                 timeout=5,
             )
             latest = resp.json()["tag_name"].lstrip("v")
@@ -464,7 +464,7 @@ class SystemNotifier:
 
             print(f"[NOTIFIER] Update available: {current} → {latest}")
 
-            release_url = "https://github.com/Hyacinthe-primus/File_Converter_Pro/releases/latest"
+            release_url = "https://github.com/Hyacinthe-primus/File-Converter-Pro/releases/latest"
             title = "File Converter Pro - Update Available"
             message = f"Version {latest} is available. You're on {current}"
             self._bridge.update_available.emit(title, message, release_url)

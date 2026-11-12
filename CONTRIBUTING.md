@@ -95,13 +95,13 @@ For these, **open an issue describing what you want to build and how** before wr
 ## Running from source
 
 ```bash
-git clone https://github.com/Hyacinthe-primus/File_Converter_Pro.git
-cd File_Converter_Pro
+git clone https://github.com/Hyacinthe-primus/File-Converter-Pro.git
+cd File-Converter-Pro
 pip install -r requirements.txt
 python src/main.py
 ```
 
-See the [Developer section in the Wiki](https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/For-Developers) for build instructions and all CLI flags.
+See the [Developer section in the Wiki](https://github.com/Hyacinthe-primus/File-Converter-Pro/wiki/For-Developers) for build instructions and all CLI flags.
 
 ---
 

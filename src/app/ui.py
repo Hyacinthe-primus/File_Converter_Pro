@@ -695,7 +695,7 @@ class AppUIMixin(
         <li><b>F1</b> : {t("shortcuts_help")}</li>
         </ul>
         <h3>{t("online_support")}</h3>
-        <p><a href="https://github.com/Hyacinthe-primus/File_Converter_Pro/wiki/How-To-Use">{t("full_user_guide")}</a></p>
+        <p><a href="https://github.com/Hyacinthe-primus/File-Converter-Pro/wiki/How-To-Use">{t("full_user_guide")}</a></p>
         """
 
         msg_box = QMessageBox(self)
