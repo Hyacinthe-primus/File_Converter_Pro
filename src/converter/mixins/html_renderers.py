@@ -418,7 +418,7 @@ class HtmlRenderers:
         def _style_block(m):
             return "<style>" + self._inline_css_urls(m.group(1), base_dir, allow_local_resources) + "</style>"
 
-        html = re.sub(rf"<style\b{tag_body}>(.*?)</style\s*>", _style_block, html, flags=re.I | re.S)
+        html = re.sub(rf"<style\b{tag_body}>(.*?)</style\b[^>]*>", _style_block, html, flags=re.I | re.S)
 
         def _img_src(m):
             tag = m.group(0)
@@ -493,7 +493,7 @@ class HtmlRenderers:
         base = getSampleStyleSheet()
 
         class_rules = {}
-        for sb in re.finditer(r"<style\b[^>]*>(.*?)</style\s*>", html, re.I | re.S):
+        for sb in re.finditer(r"<style\b[^>]*>(.*?)</style\b[^>]*>", html, re.I | re.S):
             css = sb.group(1)
             for rule in re.finditer(r"\.([\w-]+)\s*\{([^}]*)\}", css):
                 cls = rule.group(1)
@@ -616,9 +616,9 @@ class HtmlRenderers:
         def _parse_tbl(tbl_html):
             return build_table_flowable(tbl_html, _inline, TD_S, TH_S)
 
-        h2 = re.sub(r"<head\b[^>]*>.*?</head\s*>", "", html, flags=re.I | re.S)
-        h2 = re.sub(r"<script\b[^>]*>.*?</script\s*>", "", h2, flags=re.I | re.S)
-        bm = re.search(r"<body\b[^>]*>(.*?)</body\s*>", h2, re.I | re.S)
+        h2 = re.sub(r"<head\b[^>]*>.*?</head\b[^>]*>", "", html, flags=re.I | re.S)
+        h2 = re.sub(r"<script\b[^>]*>.*?</script\b[^>]*>", "", h2, flags=re.I | re.S)
+        bm = re.search(r"<body\b[^>]*>(.*?)</body\b[^>]*>", h2, re.I | re.S)
         body = bm.group(1) if bm else h2
 
         story = []

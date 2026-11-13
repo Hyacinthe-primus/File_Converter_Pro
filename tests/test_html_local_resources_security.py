@@ -551,7 +551,11 @@ class TestReportLabHtmlFallback:
         renderer = _renderer(False)
         output = tmp_path / "fallback.pdf"
         renderer._reportlab_html_to_pdf(
-            '<html><body><SCRIPT>alert("x")</SCRIPT ><p>VISIBLE</p></body></html>',
+            '<html><body>'
+            '<SCRIPT>alert("x")</SCRIPT >'
+            '<script>bad()</script\t\n bar>'
+            "<p>VISIBLE</p>"
+            "</body></html>",
             str(output),
         )
         fitz = pytest.importorskip("fitz")
@@ -559,6 +563,7 @@ class TestReportLabHtmlFallback:
             text = "\n".join(page.get_text() for page in doc)
         assert "VISIBLE" in text
         assert "alert" not in text
+        assert "bad()" not in text
 
 
 class TestWeasyPrintCompatibility:

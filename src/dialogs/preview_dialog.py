@@ -848,8 +848,8 @@ class PreviewDialog(TranslationMixin, QDialog):
                     return text[:pos].count("\n")
 
                 for open_pat, close_pat, target in [
-                    (r"<style[^>]*>", r"</style\s*>", self._style_ranges),
-                    (r"<script[^>]*>", r"</script\s*>", self._script_ranges),
+                    (r"<style[^>]*>", r"</style\b[^>]*>", self._style_ranges),
+                    (r"<script[^>]*>", r"</script\b[^>]*>", self._script_ranges),
                 ]:
                     for mo in re.finditer(open_pat, text, re.IGNORECASE):
                         inner_start = mo.end()

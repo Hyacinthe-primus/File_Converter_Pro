@@ -247,11 +247,11 @@ class EpubRenderers:
 
         def _parse_chapter(html_raw, chap_dir, img_data):
             html = re.sub(r'\s+xmlns(?::\w+)?=["\'][^"\']*["\']', "", html_raw)
-            bm = re.search(r"<body\b[^>]*>(.*?)</body\s*>", html, re.I | re.S)
+            bm = re.search(r"<body\b[^>]*>(.*?)</body\b[^>]*>", html, re.I | re.S)
             body = bm.group(1) if bm else html
-            body = re.sub(r"<head\b[^>]*>.*?</head\s*>", "", body, flags=re.I | re.S)
-            body = re.sub(r"<script\b[^>]*>.*?</script\s*>", "", body, flags=re.I | re.S)
-            body = re.sub(r"<style\b[^>]*>.*?</style\s*>", "", body, flags=re.I | re.S)
+            body = re.sub(r"<head\b[^>]*>.*?</head\b[^>]*>", "", body, flags=re.I | re.S)
+            body = re.sub(r"<script\b[^>]*>.*?</script\b[^>]*>", "", body, flags=re.I | re.S)
+            body = re.sub(r"<style\b[^>]*>.*?</style\b[^>]*>", "", body, flags=re.I | re.S)
 
             TAG_RE = re.compile(r"<(/?)(\w+)((?:\s[^>]*)?)/?>", re.I)
             pos = 0
