@@ -546,6 +546,21 @@ class TestReportLabImageHardening:
                 Path(path).unlink(missing_ok=True)
 
 
+class TestReportLabHtmlFallback:
+    def test_script_with_spaced_end_tag_is_removed(self, tmp_path):
+        renderer = _renderer(False)
+        output = tmp_path / "fallback.pdf"
+        renderer._reportlab_html_to_pdf(
+            '<html><body><SCRIPT>alert("x")</SCRIPT ><p>VISIBLE</p></body></html>',
+            str(output),
+        )
+        fitz = pytest.importorskip("fitz")
+        with fitz.open(output) as doc:
+            text = "\n".join(page.get_text() for page in doc)
+        assert "VISIBLE" in text
+        assert "alert" not in text
+
+
 class TestWeasyPrintCompatibility:
     @staticmethod
     def _render_with_weasyprint(html, root, output):

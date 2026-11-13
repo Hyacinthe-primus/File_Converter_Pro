@@ -1841,9 +1841,7 @@ class AchievementSystem(QObject):
         Records archive protection (Impenetrable Fortress achievement).
         Only works on ZIP/7Z with a complex password.
         """
-        print(
-            f"[ACHIEVEMENTS] Recording archive protection: {count}, Pwd len: {password_length}, Format: {archive_format}"  # noqa: E501
-        )
+        print(f"[ACHIEVEMENTS] Recording archive protection: {count}, Format: {archive_format}")
 
         # Only process ZIP and 7Z for "Impenetrable Fortress"
         if archive_format.lower() in ["zip", "7z"]:

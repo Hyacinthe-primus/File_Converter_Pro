@@ -493,7 +493,7 @@ class HtmlRenderers:
         base = getSampleStyleSheet()
 
         class_rules = {}
-        for sb in re.finditer(r"<style[^>]*>(.*?)</style>", html, re.I | re.S):
+        for sb in re.finditer(r"<style\b[^>]*>(.*?)</style\s*>", html, re.I | re.S):
             css = sb.group(1)
             for rule in re.finditer(r"\.([\w-]+)\s*\{([^}]*)\}", css):
                 cls = rule.group(1)
@@ -616,9 +616,9 @@ class HtmlRenderers:
         def _parse_tbl(tbl_html):
             return build_table_flowable(tbl_html, _inline, TD_S, TH_S)
 
-        h2 = re.sub(r"<head[^>]*>.*?</head>", "", html, flags=re.I | re.S)
-        h2 = re.sub(r"<script[^>]*>.*?</script>", "", h2, flags=re.I | re.S)
-        bm = re.search(r"<body[^>]*>(.*?)</body>", h2, re.I | re.S)
+        h2 = re.sub(r"<head\b[^>]*>.*?</head\s*>", "", html, flags=re.I | re.S)
+        h2 = re.sub(r"<script\b[^>]*>.*?</script\s*>", "", h2, flags=re.I | re.S)
+        bm = re.search(r"<body\b[^>]*>(.*?)</body\s*>", h2, re.I | re.S)
         body = bm.group(1) if bm else h2
 
         story = []

@@ -313,7 +313,7 @@ class ArchiveEnginesMixin:
                 cmd.append(base_archive_path)
                 cmd.append(f"@{list_file}")
 
-                print(f"[DEBUG] 7-Zip command for split ZIP: {' '.join(cmd)}")
+                print(f"[DEBUG] 7-Zip split ZIP command prepared ({len(cmd)} arguments)")
 
                 result_returncode, stdout_text = self._run_sevenzip_with_progress(cmd)
 
@@ -606,7 +606,7 @@ class ArchiveEnginesMixin:
                 cmd.append(archive_path)
                 cmd.append(f"@{list_file}")
 
-                print(f"[DEBUG] 7-Zip command: {' '.join(cmd)}")
+                print(f"[DEBUG] 7-Zip command prepared ({len(cmd)} arguments)")
 
                 result_returncode, stdout_text = self._run_sevenzip_with_progress(cmd)
 
@@ -717,7 +717,7 @@ class ArchiveEnginesMixin:
                 cmd.append(archive_path)
                 cmd.append(f"@{list_file}")
 
-                print(f"[DEBUG] 7-Zip command for structured archive: {' '.join(cmd)}")
+                print(f"[DEBUG] 7-Zip structured archive command prepared ({len(cmd)} arguments)")
 
                 result_returncode, stdout_text = self._run_sevenzip_with_progress(cmd)
 

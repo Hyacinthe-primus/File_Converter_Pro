@@ -878,13 +878,14 @@ class PreviewDialog(TranslationMixin, QDialog):
 
             # HTML
             def _highlight_html(self, text):
-                self._apply(text, r"<!--.*?-->", self._html_comment)
+                self._apply(text, r"<!--[\s\S]*?-->", self._html_comment)
                 self._apply(text, r"<!DOCTYPE[^>]*>", self._html_doctype, re.IGNORECASE)
                 self._apply(text, r"</?[\w\-:.]+", self._html_tag)
                 self._apply(text, r"\b[\w\-:]+=", self._html_attr)
                 for m in re.finditer(r"\b([\w\-:]+)=", text):
                     self.setFormat(m.start(1), len(m.group(1)), self._html_attr)
-                self._apply(text, r'(["\'])(?:(?!\1).)*\1', self._html_val)
+                self._apply(text, r'"[^"]*"', self._html_val)
+                self._apply(text, r"'[^']*'", self._html_val)
                 self._apply(text, r"&(?:#\d+|#x[\da-fA-F]+|[a-zA-Z]\w*);", self._html_entity)
 
             # CSS
@@ -893,7 +894,8 @@ class PreviewDialog(TranslationMixin, QDialog):
                 self._apply(text, r"@[\w-]+", self._css_atrule)
                 self._apply(text, r"[\w-]+(?=\s*:)", self._css_prop)
                 self._apply(text, r"-?\d+\.?\d*(?:%|px|em|rem|vh|vw|vmin|vmax|pt|cm|mm|s|ms)?", self._css_number)
-                self._apply(text, r'(["\'])(?:(?!\1).)*\1', self._css_val)
+                self._apply(text, r'"(?:[^"\\]|\\.)*"', self._css_val)
+                self._apply(text, r"'(?:[^'\\]|\\.)*'", self._css_val)
                 self._apply(text, r"#[0-9a-fA-F]{3,8}\b", self._css_val)
                 if re.search(r"\{", text) or (not re.search(r":", text)):
                     self._apply(text, r"[.#]?[\w][\w-]*(?=[^:]*\{)", self._css_selector)
@@ -903,7 +905,8 @@ class PreviewDialog(TranslationMixin, QDialog):
                 self._apply(text, r"//.*", self._js_comment)
                 self._apply(text, r"/\*.*?\*/", self._js_comment)
                 self._apply(text, r"`(?:[^`\\]|\\.)*`", self._js_template)
-                self._apply(text, r'(["\'])(?:(?!\1|\\).|\\.)*\1', self._js_string)
+                self._apply(text, r'"(?:[^"\\]|\\.)*"', self._js_string)
+                self._apply(text, r"'(?:[^'\\]|\\.)*'", self._js_string)
                 self._apply(text, r"\b0[xX][\da-fA-F]+\b|\b\d+\.?\d*(?:[eE][+-]?\d+)?\b", self._js_number)
                 for m in re.finditer(r"\b([a-zA-Z_$][\w$]*)\b", text):
                     word = m.group(1)
